@@ -8,7 +8,7 @@ import (
 )
 
 type Osoba struct {
-	ID   uint   `gorm:"primary_key" json:"id"`
+	ID   uint   `gorm:"primary_key" json:"id"` //uuid4 zamiast int
 	Imie string `json:"imie"`
 }
 
