@@ -15,7 +15,6 @@ type Osoba struct {
 func main() {
 	dsn := "user=postgres dbname=participate port=5432"
 
-	//something to delete
 	// Open a connection to the database
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
