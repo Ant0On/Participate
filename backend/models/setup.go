@@ -8,14 +8,12 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
 func ConnectDataBase() {
-
 	err := godotenv.Load("../.env")
 
 	if err != nil {
