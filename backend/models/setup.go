@@ -2,10 +2,11 @@ package models
 
 import (
 	"fmt"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm/schema"
 	"log"
 	"os"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm/schema"
 
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
@@ -28,7 +29,7 @@ func ConnectDataBase() {
 
 	DBURL := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", DbHost, DbUser, DbPassword, DbName, DbPort)
 
-	DB, err := gorm.Open(postgres.Open(DBURL), &gorm.Config{
+	DB, err = gorm.Open(postgres.Open(DBURL), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
@@ -41,7 +42,7 @@ func ConnectDataBase() {
 		fmt.Println("We are connected to the database")
 	}
 
-	err = DB.AutoMigrate(&User{})
+	err = DB.AutoMigrate(&Customer{})
 	if err != nil {
 		log.Fatal("Migration error:", err)
 		return

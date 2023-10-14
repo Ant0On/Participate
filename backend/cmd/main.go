@@ -3,13 +3,9 @@ package main
 import (
 	"Participate/controllers"
 	"Participate/models"
+
 	"github.com/gin-gonic/gin"
 )
-
-type Osoba struct {
-	ID   uint   `gorm:"primary_key" json:"id"` //uuid4 zamiast int
-	Imie string `json:"imie"`
-}
 
 func main() {
 	models.ConnectDataBase()
@@ -19,8 +15,9 @@ func main() {
 	public := r.Group("/api")
 
 	public.POST("/register", controllers.Register)
+	public.POST("/login", controllers.Login)
 
-	// To be deleted, left as an example
+	// TODO To be deleted, left as an example
 	//r.GET("/users/:id", func(c *gin.Context) {
 	//	var user Osoba
 	//
