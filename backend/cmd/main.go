@@ -2,6 +2,7 @@ package main
 
 import (
 	"Participate/controllers"
+	"Participate/middlewares"
 	"Participate/models"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,10 @@ func main() {
 
 	public.POST("/register", controllers.Register)
 	public.POST("/login", controllers.Login)
+
+	protected := r.Group("/api/admin")
+	protected.Use(middlewares.JwtAuthMiddleware())
+	protected.GET("/customer", controllers.CurrentCustomer)
 
 	// TODO To be deleted, left as an example
 	//r.GET("/users/:id", func(c *gin.Context) {

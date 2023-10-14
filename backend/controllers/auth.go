@@ -4,9 +4,29 @@ import (
 	"net/http"
 
 	"Participate/models"
+	"Participate/utils/token"
 
 	"github.com/gin-gonic/gin"
 )
+
+func CurrentCustomer(c *gin.Context) {
+
+	customerId, err := token.ExtractTokenID(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	u, err := models.GetCustomerByID(customerId)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
+}
 
 type LoginInput struct {
 	Email    string `json:"email" binding:"required"`

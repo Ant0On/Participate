@@ -16,6 +16,24 @@ type Customer struct {
 	Password string `gorm:"size:100;not null;" json:"password"`
 }
 
+func GetCustomerByID(uid uint) (Customer, error) {
+
+	var c Customer
+
+	if err := DB.First(&c, uid).Error; err != nil {
+		return c, errors.New("user not found")
+	}
+
+	c.PrepareGive()
+
+	return c, nil
+
+}
+
+func (c *Customer) PrepareGive() {
+	c.Password = ""
+}
+
 func VerifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
