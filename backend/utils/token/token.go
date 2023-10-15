@@ -12,11 +12,10 @@ import (
 )
 
 func GenerateToken(userId uint) (string, error) {
-
 	tokenLifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("strconv.Atoi: %w", err)
 	}
 
 	claims := jwt.MapClaims{}
@@ -26,11 +25,10 @@ func GenerateToken(userId uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
-
 }
 
 func IsTokenValid(c *gin.Context) error {
-	tokenString := ExtractToken(c)
+	tokenString := extractToken(c)
 	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -38,12 +36,12 @@ func IsTokenValid(c *gin.Context) error {
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("jwt.Parse: %w", err)
 	}
 	return nil
 }
 
-func ExtractToken(c *gin.Context) string {
+func extractToken(c *gin.Context) string {
 	token := c.Query("token")
 	if token != "" {
 		return token
@@ -56,8 +54,7 @@ func ExtractToken(c *gin.Context) string {
 }
 
 func ExtractTokenID(c *gin.Context) (uint, error) {
-
-	tokenString := ExtractToken(c)
+	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -65,13 +62,13 @@ func ExtractTokenID(c *gin.Context) (uint, error) {
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("jwt.Parse: %w", err)
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 32)
 		if err != nil {
-			return 0, err
+			return 0, fmt.Errorf("strconv.ParseUint: %w", err)
 		}
 		return uint(uid), nil
 	}

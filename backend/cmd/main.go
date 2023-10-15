@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"Participate/controllers"
 	"Participate/middlewares"
 	"Participate/models"
@@ -35,9 +37,7 @@ func main() {
 	//	c.JSON(200, user)
 	//})
 
-	err := r.Run(":8080")
-	if err != nil {
-		err.Error()
-		return
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal(err)
 	} // listen and serve on 0.0.0.0:8080
 }

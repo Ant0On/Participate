@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"Participate/models"
@@ -14,31 +15,31 @@ func CurrentCustomer(c *gin.Context) {
 	customerId, err := token.ExtractTokenID(c)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("token.ExtractTokenID: %w", err)})
 		return
 	}
 
 	u, err := models.GetCustomerByID(customerId)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("models.GetCustomerByID: %w", err)})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
 }
 
-type LoginInput struct {
+type loginInput struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
 func Login(c *gin.Context) {
 
-	var input LoginInput
+	var input loginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("error with loginInput: %w", err)})
 		return
 	}
 
@@ -47,20 +48,19 @@ func Login(c *gin.Context) {
 	customer.Email = input.Email
 	customer.Password = input.Password
 
-	token, err := models.LoginCheck(customer.Email, customer.Password)
+	t, err := models.LoginCheck(customer.Email, customer.Password)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("models.LoginCheck: %w \nusername or password is incorrect", err)})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
-
+	c.JSON(http.StatusOK, gin.H{"token": t})
 }
 
 // TODO differentiate between Customer and Host register
 
-type RegisterInput struct {
+type registerInput struct {
 	FirstName string `json:"first_name" binding:"required"`
 	LastName  string `json:"last_name" binding:"required"`
 	Email     string `json:"email" binding:"required"`
@@ -68,10 +68,10 @@ type RegisterInput struct {
 }
 
 func Register(c *gin.Context) {
-	var input RegisterInput
+	var input registerInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("error with registerInput: %w", err)})
 		return
 	}
 
@@ -83,7 +83,7 @@ func Register(c *gin.Context) {
 	_, err := customer.SaveCustomer()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("customer.SaveCustomer: %w", err)})
 		return
 	}
 
