@@ -11,7 +11,6 @@ import (
 )
 
 func CurrentCustomer(c *gin.Context) {
-
 	customerId, err := token.ExtractTokenID(c)
 
 	if err != nil {
@@ -35,7 +34,6 @@ type loginInput struct {
 }
 
 func Login(c *gin.Context) {
-
 	var input loginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {

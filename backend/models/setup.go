@@ -15,9 +15,9 @@ import (
 var DB *gorm.DB
 
 func ConnectDataBase() {
-	err := godotenv.Load("../.env")
+	var err error
 
-	if err != nil {
+	if err := godotenv.Load("../.env"); err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
@@ -38,14 +38,11 @@ func ConnectDataBase() {
 	if err != nil {
 		fmt.Println("Cannot connect to database")
 		log.Fatal("Connection error:", err)
-	} else {
-		fmt.Println("We are connected to the database")
 	}
+	fmt.Println("We are connected to the database")
 
-	err = DB.AutoMigrate(&Customer{})
-	if err != nil {
+	if err := DB.AutoMigrate(&Customer{}); err != nil {
 		log.Fatal("Migration error:", err)
 		return
 	}
-
 }
