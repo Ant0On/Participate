@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"Participate/utils/token"
+	"Participate/backend/utils/token"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"

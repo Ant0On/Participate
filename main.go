@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"Participate/controllers"
-	"Participate/middlewares"
-	"Participate/models"
+	"Participate/backend/controllers"
+	"Participate/backend/middlewares"
+	"Participate/backend/models"
 
 	"github.com/gin-gonic/gin"
 )

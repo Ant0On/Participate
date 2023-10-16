@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"Participate/models"
-	"Participate/utils/token"
+	"Participate/backend/models"
+	"Participate/backend/utils/token"
 
 	"github.com/gin-gonic/gin"
 )
