@@ -12,18 +12,19 @@ const appData = {
 };
 export default {
   data() {
-    return appData;
+    return {
+      message: ""
+    };
   },
   methods: {
-    showMessage: showMessage
+    showMessage: function () {
+      axios.get("/api/v1/hello").then((res) => {
+        console.log(res);
+        this.message = res.data.message;
+      });
+    }
   }
 };
-function showMessage() {
-  axios.get("/api/v1/hello").then(res => {
-    console.log(res);
-    appData.message = res.data.message;
-  });
-}
 </script>
 <style>
 </style>

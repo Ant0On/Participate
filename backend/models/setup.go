@@ -13,10 +13,10 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDataBase() {
+func ConnectDatabase() {
 	var err error
 
-	if err := godotenv.Load(".env"); err != nil {
+	if err = godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
@@ -40,7 +40,7 @@ func ConnectDataBase() {
 	}
 	fmt.Println("We are connected to the database")
 
-	if err := DB.AutoMigrate(&Customer{}); err != nil {
+	if err = DB.AutoMigrate(&Customer{}); err != nil {
 		log.Fatal("Migration error:", err)
 		return
 	}

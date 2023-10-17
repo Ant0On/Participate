@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 
+	"Participate/backend/models"
+	"Participate/backend/utils"
+
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -25,6 +28,8 @@ type arguments struct {
 	StaticContents string
 }
 
+var r *gin.Engine
+
 func runServer(args arguments) error {
 	level, ok := logLevelMap[args.LogLevel]
 	if !ok {
@@ -37,9 +42,15 @@ func runServer(args arguments) error {
 		"args": args,
 	}).Info("Given options")
 
-	r := gin.Default()
+	r = gin.Default()
 
 	r.Use(static.Serve("/", static.LocalFile(args.StaticContents, false)))
+
+	r.GET("/api/v1/hello", func(c *gin.Context) {
+		c.String(200, `{"message":"hello, hello, hello"}`)
+	})
+
+	utils.RegisterRoutes(r)
 
 	if err := r.Run(fmt.Sprintf("%s:%d", args.BindAddress, args.BindPort)); err != nil {
 		return err
@@ -49,6 +60,8 @@ func runServer(args arguments) error {
 }
 
 func main() {
+	models.ConnectDatabase()
+
 	args := arguments{
 		LogLevel:       "info",
 		BindAddress:    "0.0.0.0",
@@ -59,18 +72,6 @@ func main() {
 	if err := runServer(args); err != nil {
 		logger.WithError(err).Fatal("Server exits with error")
 	}
-	//models.ConnectDataBase()
-	//
-	//r := gin.Default()
-	//
-	//public := r.Group("/api")
-	//
-	//public.POST("/register", controllers.Register)
-	//public.POST("/login", controllers.Login)
-	//
-	//protected := r.Group("/api/admin")
-	//protected.Use(middlewares.JwtAuthMiddleware())
-	//protected.GET("/customer", controllers.CurrentCustomer)
 
 	// TODO To be deleted, left as an example
 	//r.GET("/users/:id", func(c *gin.Context) {
@@ -84,8 +85,4 @@ func main() {
 	//
 	//	c.JSON(200, user)
 	//})
-
-	//if err := r.Run(":8080"); err != nil {
-	//	log.Fatal(err)
-	//} // listen and serve on 0.0.0.0:8080
 }
