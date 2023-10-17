@@ -37,7 +37,7 @@ func main() {
 	//	c.JSON(200, user)
 	//})
 
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(); err != nil {
 		log.Fatal(err)
 	} // listen and serve on 0.0.0.0:8080
 }

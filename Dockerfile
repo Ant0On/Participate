@@ -1,4 +1,9 @@
-FROM ubuntu:latest
-LABEL authors="Dynia"
+FROM golang:1.18
 
-ENTRYPOINT ["top", "-b"]
+WORKDIR /participate
+
+COPY . .
+
+RUN go build -o main main.go
+
+CMD ["./main"]
