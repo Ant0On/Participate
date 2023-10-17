@@ -14,9 +14,7 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	var err error
-
-	if err = godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
@@ -28,7 +26,7 @@ func ConnectDatabase() {
 
 	DBURL := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", DbHost, DbUser, DbPassword, DbName, DbPort)
 
-	DB, err = gorm.Open(postgres.Open(DBURL), &gorm.Config{
+	DB, err := gorm.Open(postgres.Open(DBURL), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
