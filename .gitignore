@@ -21,3 +21,6 @@
 go.work
 
 **/.idea
+tmp/*
+node_modules
+frontend/static/js/bundle.js
