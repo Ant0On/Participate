@@ -1,9 +1,11 @@
-FROM golang:1.18
+FROM golang:1.19
 
-WORKDIR /participate
+WORKDIR /app
 
 COPY . .
 
-RUN go build -o main main.go
+RUN go mod download
 
-CMD ["./main"]
+RUN go build -o /main
+
+CMD ["/main"]
