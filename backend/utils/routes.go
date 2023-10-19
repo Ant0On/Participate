@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"Participate/backend/controllers"
-	"Participate/backend/middlewares"
+	"backend/controllers"
+	"backend/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
