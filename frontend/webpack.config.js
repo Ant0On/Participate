@@ -43,6 +43,8 @@ module.exports = {
     },
     devServer: {
         static: './',
+        compress: false,
+        host: "0.0.0.0",
         proxy: {
             "/api": "http://localhost:8080"
         }
