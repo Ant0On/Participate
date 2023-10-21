@@ -1,5 +1,4 @@
 FROM node:16
-RUN npm install -g http-server
 
 WORKDIR /app
 
