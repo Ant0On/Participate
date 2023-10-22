@@ -20,7 +20,7 @@
 # Go workspace file
 go.work
 
-database
+database/
 .idea
 frontend/node_modules
 backend/tmp/*

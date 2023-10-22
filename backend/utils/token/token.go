@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(userId uint) (string, error) {
+func GenerateToken(email string) (string, error) {
 	tokenLifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
 
 	if err != nil {
@@ -20,7 +20,7 @@ func GenerateToken(userId uint) (string, error) {
 
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
-	claims["user_id"] = userId
+	claims["email"] = email
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(tokenLifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -53,7 +53,7 @@ func extractToken(c *gin.Context) string {
 	return ""
 }
 
-func ExtractTokenID(c *gin.Context) (uint, error) {
+func ExtractTokenEmail(c *gin.Context) (string, error) {
 	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -62,15 +62,15 @@ func ExtractTokenID(c *gin.Context) (uint, error) {
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
-		return 0, fmt.Errorf("jwt.Parse: %w", err)
+		return "", fmt.Errorf("jwt.Parse: %w", err)
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 32)
+		uEmail := fmt.Sprintf("%s", claims["email"])
 		if err != nil {
-			return 0, fmt.Errorf("strconv.ParseUint: %w", err)
+			return "", fmt.Errorf("strconv.ParseUint: %w", err)
 		}
-		return uint(uid), nil
+		return uEmail, nil
 	}
-	return 0, nil
+	return "", nil
 }
