@@ -7,9 +7,6 @@
 </template>
 <script>
 import axios from "axios";
-const instance = axios.create({
-  baseURL: 'http://localhost:3000/api/v1/',
-});
 const appData = {
   message: ""
 };
@@ -21,7 +18,7 @@ export default {
   },
   methods: {
     showMessage: function () {
-      instance.get("hello").then((res) => {
+      axios.get("/api/v1/hello").then((res) => {
         console.log(res);
         this.message = res.data.message;
       });

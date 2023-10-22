@@ -46,7 +46,7 @@ module.exports = {
         compress: false,
         host: "0.0.0.0",
         proxy: {
-            "/api": "http://localhost:8080"
+            "/api": "http://backend:3000"
         }
     },
     plugins: [new VueLoaderPlugin()]
