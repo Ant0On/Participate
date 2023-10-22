@@ -7,15 +7,6 @@
 ## To run project
 Run `setup_project.sh` script in `scripts` directory
 
-## To run without docker
-1. Start main with `air -c .air.conf` (air will need to be installed) command to have it automatically refreshed (make sure you have correctly setup postgres database in .env file)
-2. Run `npm run build` from root directory
-3. Run `npm run start` from root directory
-
-## To run with docker
-1. Run `docker-compose build` from root directory
-2. Run `docker-compose up` from root directory
-
 ## Plan
 1.	Struktura i organizacja projektu (Grzegorz, Antek)
 2.	Postawienie Dockera (Grzegorz, Antek)
