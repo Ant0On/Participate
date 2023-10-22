@@ -15,7 +15,7 @@ var DB *gorm.DB
 func ConnectDatabase() {
 
 	DbHost := os.Getenv("DATABASE_HOST")
-	DbUser := os.Getenv("PGUSER")
+	DbUser := os.Getenv("POSTGRES_USER")
 	DbPassword := os.Getenv("POSTGRES_PASSWORD")
 	DbName := os.Getenv("POSTGRES_DB")
 	DbPort := os.Getenv("DATABASE_PORT")

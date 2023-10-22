@@ -19,7 +19,7 @@ services:
       build: ./backend
       container_name: backend
       environment:
-        - PGUSER=${DB_USER}
+        - POSTGRES_USER=${DB_USER}
         - POSTGRES_PASSWORD=${DB_PASSWORD}
         - POSTGRES_DB=${DB_NAME}
         - DATABASE_HOST=${DB_HOST}
