@@ -3,32 +3,31 @@ package models
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
+	"backend/services"
 	"backend/utils/token"
 
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type Customer struct {
 	gorm.Model
-	FirstName string `gorm:"size:30;not null" json:"first_name"`
-	LastName  string `gorm:"size:100;not null" json:"last_name"`
-	Email     string `gorm:"size:100;not null;unique" json:"email"`
-	Password  string `gorm:"size:100;not null;" json:"password"`
+	FirstName    string `gorm:"size:30;not null" json:"first_name"`
+	LastName     string `gorm:"size:100;not null" json:"last_name"`
+	Email        string `gorm:"size:100;not null;unique" json:"email"`
+	Password     string `gorm:"size:100;not null;" json:"password"`
+	Reservations []Reservation
 }
 
 func GetCustomerByID(uid uint) (Customer, error) {
-	var c Customer
-
-	if err := DB.First(&c, uid).Error; err != nil {
-		return c, errors.New("user not found")
-	}
+	c, _ := services.GetCustomerByID(uid)
 
 	c.prepareGive()
 
-	return c, nil
-
+	return *c, nil
 }
 
 func (c *Customer) prepareGive() {
@@ -39,11 +38,10 @@ func verifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func LoginCheck(email string, password string) (string, error) {
-	c := Customer{}
+func (c *Customer) LoginCheck(email, password string) (string, error) {
 
-	if err := DB.Model(Customer{}).Where("email = ?", email).Take(&c).Error; err != nil {
-		return "", fmt.Errorf("DB.Model.Where.Take: %w", err)
+	if err := services.CheckCustomerEmailExists(email, c); err != nil {
+		return "", fmt.Errorf("customer with given email doesn't exist")
 	}
 
 	if err := verifyPassword(password, c.Password); err != nil && errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
@@ -57,15 +55,14 @@ func LoginCheck(email string, password string) (string, error) {
 	}
 
 	return t, nil
-
 }
 
-func (c *Customer) SaveCustomer() (*Customer, error) {
-	if err := DB.Create(&c).Error; err != nil {
-		return &Customer{}, fmt.Errorf("DB.Create: %w", err)
+func (c *Customer) Save() error {
+	if _, err := services.SaveCustomer(c); err != nil {
+		return fmt.Errorf("error with saving customer")
 	}
 
-	return c, nil
+	return nil
 }
 
 func (c *Customer) BeforeSave(*gorm.DB) error {
@@ -78,4 +75,14 @@ func (c *Customer) BeforeSave(*gorm.DB) error {
 
 	return nil
 
+}
+func (c *Customer) AccountType(ctx *gin.Context) (string, error) {
+	t, err := c.LoginCheck(c.Email, c.Password)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("models.LoginCheck: %w \nusername or password is incorrect", err)})
+		return "", err
+	}
+
+	return t, nil
 }
