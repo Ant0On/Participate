@@ -20,6 +20,7 @@
 # Go workspace file
 go.work
 
+database
 .idea
 frontend/node_modules
 frontend/static/js/bundle.js
