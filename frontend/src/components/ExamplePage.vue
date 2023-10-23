@@ -7,9 +7,6 @@
 </template>
 <script>
 import axios from "axios";
-const appData = {
-  message: ""
-};
 export default {
   data() {
     return {
@@ -18,7 +15,7 @@ export default {
   },
   methods: {
     showMessage: function () {
-      axios.get("/api/v1/hello").then((res) => {
+      axios.get("http://localhost:3000/api/v1/hello").then((res) => { // TODO ogarnąć adres
         console.log(res);
         this.message = res.data.message;
       });

@@ -1,37 +1,44 @@
 {
-  "name": "Participate",
-  "version": "1.0.0",
-  "description": "blablabla",
-  "main": "index.js",
-  "repository": "https://github.com/Ant0On/Participate.git",
-  "author": "Dynia <piotr.dynia@gmail.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@babel/cli": "^7.23.0",
-    "@babel/core": "^7.23.2",
-    "@babel/preset-env": "^7.23.2",
-    "babel-loader": "^9.1.3",
-    "css-loader": "^6.8.1",
-    "file-loader": "^6.2.0",
-    "mini-css-extract-plugin": "^2.7.6",
-    "url-loader": "^4.1.1",
-    "html-webpack-plugin": "^5.5.3",
-    "sass-loader": "^13.3.2",
-    "vue-loader": "^17.3.0",
-    "vue-style-loader": "^4.1.3",
-    "@vue/compiler-sfc": "^3.3.4",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1"
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "axios": "^1.5.1",
-    "babel-polyfill": "^6.26.0",
-    "node-sass": "^9.0.0",
-    "vue": "^3.3.4"
+    "core-js": "^3.8.3",
+    "vue": "^3.2.13"
   },
-  "scripts": {
-    "start": "webpack-dev-server",
-    "build": "webpack"
-  }
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }
