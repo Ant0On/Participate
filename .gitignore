@@ -20,7 +20,7 @@
 # Go workspace file
 go.work
 
+database
 .idea
-tmp/*
-node_modules
-frontend/static/js/bundle.js
+frontend/node_modules
+backend/tmp/*

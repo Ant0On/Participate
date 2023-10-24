@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"Participate/backend/utils/token"
+	"backend/utils/token"
 
 	"github.com/gin-gonic/gin"
 )

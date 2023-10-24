@@ -7,9 +7,6 @@
 </template>
 <script>
 import axios from "axios";
-const appData = {
-  message: ""
-};
 export default {
   data() {
     return {

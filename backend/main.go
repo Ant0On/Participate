@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"Participate/backend/models"
-	"Participate/backend/utils"
+	"backend/models"
+	"backend/utils"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -43,7 +43,6 @@ func runServer(args arguments) error {
 	}).Info("Given options")
 
 	r = gin.Default()
-
 	r.Use(static.Serve("/", static.LocalFile(args.StaticContents, false)))
 
 	r.GET("/api/v1/hello", func(c *gin.Context) {
@@ -65,7 +64,7 @@ func main() {
 	args := arguments{
 		LogLevel:       "info",
 		BindAddress:    "0.0.0.0",
-		BindPort:       9080,
+		BindPort:       3000,
 		StaticContents: "./frontend/static",
 	}
 
