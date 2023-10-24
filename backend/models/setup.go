@@ -22,7 +22,9 @@ func ConnectDatabase() {
 
 	DBURL := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", DbHost, DbUser, DbPassword, DbName, DbPort)
 
-	DB, err := gorm.Open(postgres.Open(DBURL), &gorm.Config{
+	var err error
+
+	DB, err = gorm.Open(postgres.Open(DBURL), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
