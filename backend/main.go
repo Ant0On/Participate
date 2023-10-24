@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-contrib/cors"
 
 	"backend/models"
 	"backend/utils"
@@ -44,7 +43,6 @@ func runServer(args arguments) error {
 	}).Info("Given options")
 
 	r = gin.Default()
-	r.Use(cors.Default())
 	r.Use(static.Serve("/", static.LocalFile(args.StaticContents, false)))
 
 	r.GET("/api/v1/hello", func(c *gin.Context) {
