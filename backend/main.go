@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"backend/services"
+	"backend/models"
 	"backend/utils"
 
 	"github.com/gin-contrib/static"
@@ -58,8 +58,11 @@ func runServer(args arguments) error {
 	return nil
 }
 
+func init() {
+	models.ConnectDatabase()
+}
+
 func main() {
-	services.ConnectDatabase()
 
 	args := arguments{
 		LogLevel:       "info",

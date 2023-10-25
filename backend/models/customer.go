@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"backend/services"
 	"backend/utils/token"
 
 	"github.com/gin-gonic/gin"
@@ -22,25 +21,36 @@ type Customer struct {
 	Reservations []Reservation
 }
 
-func GetCustomerByID(uid uint) (Customer, error) {
-	c, _ := services.GetCustomerByID(uid)
+func GetCustomerById(uid uint) (any, error) {
+	var c Customer
+
+	if err := DB.First(c, uid).Error; err != nil {
+		return &c, errors.New("user not found")
+	}
 
 	c.prepareGive()
 
-	return *c, nil
+	return &c, nil
 }
 
 func (c *Customer) prepareGive() {
 	c.Password = ""
 }
 
+func (c *Customer) CheckCustomerEmailExists(email string) error {
+	if err := DB.Model(Customer{}).Where("email = ?", email).Take(&c).Error; err != nil {
+		return fmt.Errorf("DB.Model.Where.Take: %w", err)
+	}
+	return nil
+}
+
 func verifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func (c *Customer) LoginCheck(email, password string) (string, error) {
+func (c *Customer) loginCheck(email, password string) (string, error) {
 
-	if err := services.CheckCustomerEmailExists(email, c); err != nil {
+	if err := c.CheckCustomerEmailExists(email); err != nil {
 		return "", fmt.Errorf("customer with given email doesn't exist")
 	}
 
@@ -58,8 +68,8 @@ func (c *Customer) LoginCheck(email, password string) (string, error) {
 }
 
 func (c *Customer) Save() error {
-	if _, err := services.SaveCustomer(c); err != nil {
-		return fmt.Errorf("error with saving customer")
+	if err := DB.Create(&c).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
 	}
 
 	return nil
@@ -74,13 +84,13 @@ func (c *Customer) BeforeSave(*gorm.DB) error {
 	c.Password = string(hashedPassword)
 
 	return nil
-
 }
+
 func (c *Customer) AccountType(ctx *gin.Context) (string, error) {
-	t, err := c.LoginCheck(c.Email, c.Password)
+	t, err := c.loginCheck(c.Email, c.Password)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("models.LoginCheck: %w \nusername or password is incorrect", err)})
+		ctx.JSON(http.StatusBadRequest, gin.H{"customer.loginCheck: username or password is incorrect": err.Error()})
 		return "", err
 	}
 

@@ -16,4 +16,5 @@ func RegisterRoutes(r *gin.Engine) {
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware())
 	protected.GET("/customer", controllers.CurrentCustomer)
+	protected.GET("/host", controllers.CurrentHost)
 }

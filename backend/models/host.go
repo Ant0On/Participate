@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"backend/services"
 	"backend/utils/token"
 
 	"github.com/gin-gonic/gin"
@@ -24,9 +23,32 @@ type Host struct {
 	Offers      []Offer
 }
 
+func GetHostById(uid uint) (any, error) {
+	var h Host
+
+	if err := DB.First(h, uid).Error; err != nil {
+		return &h, errors.New("user not found")
+	}
+
+	h.prepareGive()
+
+	return &h, nil
+}
+
+func (h *Host) prepareGive() {
+	h.Password = ""
+}
+
+func (h *Host) CheckHostEmailExists(email string) error {
+	if err := DB.Model(Host{}).Where("email = ?", email).Take(h).Error; err != nil {
+		return fmt.Errorf("DB.Model.Where.Take: %w", err)
+	}
+	return nil
+}
+
 func (h *Host) LoginCheck(email, password string) (string, error) {
 
-	if err := services.CheckHostEmailExists(email, h); err != nil {
+	if err := h.CheckHostEmailExists(email); err != nil {
 		return "", fmt.Errorf("customer with given email doesn't exist")
 	}
 
@@ -43,10 +65,22 @@ func (h *Host) LoginCheck(email, password string) (string, error) {
 	return t, nil
 }
 
-func (h *Host) Safe() error {
-	if _, err := services.SaveHost(h); err != nil {
-		return fmt.Errorf("error with saving customer")
+func (h *Host) Save() error {
+	if err := DB.Create(&h).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
 	}
+
+	return nil
+}
+
+func (h *Host) BeforeSave(*gorm.DB) error {
+	//turn password into hash
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(h.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
+	}
+	h.Password = string(hashedPassword)
+
 	return nil
 }
 
@@ -54,7 +88,7 @@ func (h *Host) AccountType(ctx *gin.Context) (string, error) {
 	t, err := h.LoginCheck(h.Email, h.Password)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("models.LoginCheck: %w \nusername or password is incorrect", err)})
+		ctx.JSON(http.StatusBadRequest, gin.H{"models.LoginCheck: username or password is incorrect": err.Error()})
 		return "", err
 	}
 
