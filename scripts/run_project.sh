@@ -2,6 +2,6 @@
 
 docker-compose down --volumes
 
-docker-compose --env-file ./config/env.dev up -d
+docker-compose --env-file ./config/env.dev -f docker-compose-dev.yml up --build -d
 
 chmod +x "$0"

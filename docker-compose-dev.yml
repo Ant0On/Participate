@@ -18,7 +18,9 @@ services:
     networks:
       - backend
   backend:
-      build: ./backend
+      build:
+        context: ./backend
+        dockerfile: ./dockerfiles/dev/Dockerfile
       container_name: backend
       environment:
         - POSTGRES_USER=${DB_USER}
@@ -30,7 +32,6 @@ services:
         - ./backend:/app
       ports:
         - "3000:3000"
-        - "40000:40000"
       depends_on:
         - postgresdb
       networks:
