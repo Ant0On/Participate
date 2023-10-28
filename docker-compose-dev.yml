@@ -18,7 +18,9 @@ services:
     networks:
       - backend
   backend:
-      build: ./backend
+      build:
+        context: ./backend
+        dockerfile: ./dockerfiles/dev/Dockerfile
       container_name: backend
       environment:
         - POSTGRES_USER=${DB_USER}
