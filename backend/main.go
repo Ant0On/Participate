@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
+	"backend/controllers"
 	"backend/models"
-	"backend/utils"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -49,7 +49,7 @@ func runServer(args arguments) error {
 		c.String(200, `{"message":"hello, hello, hello"}`)
 	})
 
-	utils.RegisterRoutes(r)
+	controllers.RegisterRoutes(r)
 
 	if err := r.Run(fmt.Sprintf("%s:%d", args.BindAddress, args.BindPort)); err != nil {
 		return err
@@ -58,8 +58,11 @@ func runServer(args arguments) error {
 	return nil
 }
 
-func main() {
+func init() {
 	models.ConnectDatabase()
+}
+
+func main() {
 
 	args := arguments{
 		LogLevel:       "info",
@@ -71,17 +74,4 @@ func main() {
 	if err := runServer(args); err != nil {
 		logger.WithError(err).Fatal("Server exits with error")
 	}
-
-	// TODO To be deleted, left as an example
-	//r.GET("/users/:id", func(c *gin.Context) {
-	//	var user Osoba
-	//
-	//	if err := db.Find(&user).Error; err != nil {
-	//		err.Error()
-	//		c.JSON(500, gin.H{"error": "Failed to fetch users"})
-	//		return
-	//	}
-	//
-	//	c.JSON(200, user)
-	//})
 }

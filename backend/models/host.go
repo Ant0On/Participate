@@ -1,13 +1,29 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Host struct {
 	gorm.Model
-	FirstName   string `gorm:"size:30;not null" json:"first_name"`
-	LastName    string `gorm:"size:100;not null" json:"last_name"`
-	Email       string `gorm:"size:100;not null;unique" json:"email"`
+	*Customer
 	PhoneNumber string `gorm:"size:12;not null;unique" json:"phone_number"`
 	BankAccount string `gorm:"size:31;not null;unique" json:"bank_account"`
-	Password    string `gorm:"size:100;not null" json:"password"`
+	Offers      []Offer
+}
+
+func NewHost() *Host {
+	return &Host{
+		Customer: &Customer{},
+	}
+}
+
+func (h *Host) Save() error {
+	if err := DB.Create(&h).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
+	}
+
+	return nil
 }
