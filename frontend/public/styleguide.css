@@ -1,0 +1,31 @@
+:root {
+  --paragraph-IBM-plex-sans-medium-font-family: "IBMPlex Sans-Medium", Helvetica;
+  --paragraph-IBM-plex-sans-medium-font-size: 16px;
+  --paragraph-IBM-plex-sans-medium-font-style: normal;
+  --paragraph-IBM-plex-sans-medium-font-weight: 500;
+  --paragraph-IBM-plex-sans-medium-letter-spacing: 0px;
+  --paragraph-IBM-plex-sans-medium-line-height: 150%;
+  --paragraph-IBM-plex-sans-regular-font-family: "IBMPlex Sans-Regular", Helvetica;
+  --paragraph-IBM-plex-sans-regular-font-size: 16px;
+  --paragraph-IBM-plex-sans-regular-font-style: normal;
+  --paragraph-IBM-plex-sans-regular-font-weight: 400;
+  --paragraph-IBM-plex-sans-regular-letter-spacing: 0.16px;
+  --paragraph-IBM-plex-sans-regular-line-height: 150%;
+  --smallest-descriptor-font-family: "IBMPlex Sans-Regular", Helvetica;
+  --smallest-descriptor-font-size: 12px;
+  --smallest-descriptor-font-style: normal;
+  --smallest-descriptor-font-weight: 400;
+  --smallest-descriptor-letter-spacing: 0px;
+  --smallest-descriptor-line-height: normal;
+  --star: rgba(254, 14, 43, 1);
+  --surfacelight: rgba(248, 250, 252, 1);
+  --systemred: rgba(237, 1, 49, 1);
+  --systemwhite: rgba(255, 255, 255, 1);
+  --text-link: rgba(0, 72, 217, 1);
+  --text-primary-basic: rgba(59, 66, 86, 1);
+  --text-primary-white: rgba(255, 255, 255, 1);
+  --text-secondary-grey2: rgba(111, 116, 130, 1);
+  --text-secondary-grey3: rgba(184, 188, 202, 1);
+  --text-status-success: rgba(14, 98, 69, 1);
+  --uicolorprimary: rgba(103, 80, 163, 1);
+}
