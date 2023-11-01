@@ -1,5 +1,5 @@
 <template>
-  <button :class="['button', className]">
+  <button :class="['button', className]" @click="handleOnClick">
     <label_component class="label-instance" :label-class-name="labelLabelClassName" :text="labelText" />
   </button>
 </template>
@@ -26,6 +26,11 @@ export default {
       default: "",
     },
   },
+  methods:
+      {
+        handleOnClick(){
+        }
+      }
 };
 </script>
 

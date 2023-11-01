@@ -7,7 +7,7 @@
 
       <template v-if="state === 'required'">
         <p class="span-wrapper">
-          <span class="text-wrapper">Label </span>
+          <input class="text-block-2" placeholder="Label">
         </p>
         <p class="span-wrapper">
           <span class="span">*</span>
@@ -35,7 +35,9 @@
       <div class="text-block-2">
         <template v-if="['active', 'default', 'filled', 'read', 'required'].includes(state)">
           <div class="text-2">
-            <template v-if="['default', 'required'].includes(state)">{{ text1 }}</template>
+            <template v-if="['default', 'required'].includes(state)">
+              <input class="text-block-2" :placeholder="text1"/>
+            </template>
 
             <template v-if="['filled', 'read'].includes(state)">
               <p class="text-wrapper-4">
@@ -49,8 +51,10 @@
         </template>
 
         <template v-if="['password'].includes(state)">
-          <div class="text-3">{{ text1 }}</div>
-          <i class="fa-solid fa-eye" id="eye"></i>
+          <div class="text-3">
+            <input class="text-block-2" :type="passwordFieldType" id="password" v-model="password" placeholder="**********">
+            <i class="fas" :class="[passwordFieldIcon]" @click="hidePassword = !hidePassword"></i>
+          </div>
         </template>
       </div>
     </template>
@@ -58,6 +62,9 @@
 </template>
 
 <script>
+import {computed, ref} from "vue";
+
+
 export default {
   name: "text_input_component",
   props: {
@@ -91,6 +98,14 @@ export default {
       type: String,
       default: "Text",
     }
+  },
+  setup(props, context) {
+    const hidePassword = ref(true);
+    const password = ref("");
+
+    const passwordFieldIcon = computed(() => hidePassword.value ? "fa-eye" : "fa-eye-slash");
+    const passwordFieldType = computed(() => hidePassword.value ? "password" : "text");
+    return {hidePassword, password, passwordFieldType, passwordFieldIcon}
   },
 };
 </script>
@@ -208,7 +223,14 @@ export default {
   width: 400px;
 }
 
-.fa-eye{
+.fa-eye {
+  height: 24px;
+  left: 424px;
+  position: absolute;
+  top: 12px;
+  width: 24px;
+}
+.fa-eye-slash{
   height: 24px;
   left: 424px;
   position: absolute;

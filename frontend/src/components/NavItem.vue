@@ -43,7 +43,7 @@ export default {
 .nav-item .home {
   color: #000000;
   font-family: "Poppins", Helvetica;
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: normal;
