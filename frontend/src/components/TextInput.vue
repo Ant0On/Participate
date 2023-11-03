@@ -198,6 +198,7 @@ export default {
 
 .text-input .text-2 {
   align-self: stretch;
+  color: var(--text-secondary-grey3);
   font-family: var(--paragraph-IBM-plex-sans-regular-font-family);
   font-size: var(--paragraph-IBM-plex-sans-regular-font-size);
   font-style: var(--paragraph-IBM-plex-sans-regular-font-style);
@@ -209,17 +210,16 @@ export default {
 }
 
 .text-input .text-3 {
+  align-self: stretch;
   color: var(--text-secondary-grey3);
   font-family: var(--paragraph-IBM-plex-sans-regular-font-family);
   font-size: var(--paragraph-IBM-plex-sans-regular-font-size);
   font-style: var(--paragraph-IBM-plex-sans-regular-font-style);
   font-weight: var(--paragraph-IBM-plex-sans-regular-font-weight);
-  height: 24px;
-  left: 12px;
   letter-spacing: var(--paragraph-IBM-plex-sans-regular-letter-spacing);
   line-height: var(--paragraph-IBM-plex-sans-regular-line-height);
-  position: absolute;
-  top: 11px;
+  position: relative;
+  margin-top: -1px;
   width: 400px;
 }
 
@@ -399,13 +399,8 @@ export default {
 }
 
 .text-input.default .text-block-2 {
-  align-items: flex-start;
   background-color: var(--surfacelight);
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  height: 48px;
 }
 
 .text-input.read .text-block-2 {
