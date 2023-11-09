@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func JwtAuthMiddleware() gin.HandlerFunc {
+func JwtAuthMiddleware(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err := token.IsTokenValid(c)
+		err := token.IsTokenValid(c, role)
 		if err != nil {
 			c.String(http.StatusUnauthorized, "Unauthorized")
 			c.Abort()

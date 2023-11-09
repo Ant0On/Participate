@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(email string) (string, error) {
+func GenerateToken(email, table string) (string, error) {
 	tokenLifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
 
 	if err != nil {
@@ -21,24 +21,41 @@ func GenerateToken(email string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["email"] = email
+	if email == "admin@participate.com" {
+		claims["role"] = "admin"
+	} else {
+		claims["role"] = table
+	}
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(tokenLifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
 }
 
-func IsTokenValid(c *gin.Context) error {
+func IsTokenValid(c *gin.Context, role string) error {
+	token, err := getToken(c)
+	extractedRole, err := extractRole(token)
+	if extractedRole != role {
+		return fmt.Errorf("unauthorized role - expected: %s, got: %s", role, extractedRole)
+	}
+	if err != nil {
+		return fmt.Errorf("IsTokenValid: %w", err)
+	}
+	return nil
+}
+
+func getToken(c *gin.Context) (*jwt.Token, error) {
 	tokenString := extractToken(c)
-	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
-		return fmt.Errorf("jwt.Parse: %w", err)
+		return nil, fmt.Errorf("jwt.Parse: %w", err)
 	}
-	return nil
+	return token, err
 }
 
 func extractToken(c *gin.Context) string {
@@ -53,17 +70,17 @@ func extractToken(c *gin.Context) string {
 	return ""
 }
 
-func ExtractTokenEmail(c *gin.Context) (string, error) {
-	tokenString := extractToken(c)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(os.Getenv("API_SECRET")), nil
-	})
-	if err != nil {
-		return "", fmt.Errorf("jwt.Parse: %w", err)
+func extractRole(token *jwt.Token) (string, error) {
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		uRole := fmt.Sprintf("%s", claims["role"])
+		return uRole, nil
 	}
+	return "", nil
+}
+
+func ExtractTokenEmail(c *gin.Context) (string, error) {
+	token, err := getToken(c)
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		uEmail := fmt.Sprintf("%s", claims["email"])
