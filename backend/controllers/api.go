@@ -18,6 +18,8 @@ func RegisterRoutes(r *gin.Engine) {
 	host := r.Group("api/host")
 	host.Use(middlewares.JwtAuthMiddleware("host"))
 	host.POST("/create", CreateOffer)
+	host.DELETE("/delete/:id", DeleteOffer)
+	host.PUT("/update/:id", UpdateOffer)
 
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))

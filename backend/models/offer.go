@@ -36,3 +36,25 @@ func (o *Offer) Save() error {
 
 	return nil
 }
+
+func (o *Offer) Delete() error {
+	if err := DB.Delete(&o).Error; err != nil {
+		return fmt.Errorf("DB.Delete: %w", err)
+	}
+	return nil
+}
+
+func GetOfferByID(id string) (*Offer, error) {
+	var o *Offer
+	if err := DB.First(&o, id).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return o, nil
+}
+
+func (o *Offer) Update() error {
+	if err := DB.Save(&o).Error; err != nil {
+		return err
+	}
+	return nil
+}
