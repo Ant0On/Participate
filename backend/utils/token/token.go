@@ -55,7 +55,7 @@ func getToken(c *gin.Context) (*jwt.Token, error) {
 	if err != nil {
 		return nil, fmt.Errorf("jwt.Parse: %w", err)
 	}
-	return token, err
+	return token, nil
 }
 
 func extractToken(c *gin.Context) string {
