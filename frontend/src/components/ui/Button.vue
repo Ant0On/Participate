@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import label_component from "./Label.vue";
+import label_component from "../common/Label.vue";
 
 export default {
   name: "button_component",

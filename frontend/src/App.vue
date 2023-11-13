@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Logging from './screens/Logging.vue'
+import Logging from '@/views/Logging.vue'
 
 export default {
   name: 'App',
