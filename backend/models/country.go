@@ -8,7 +8,7 @@ import (
 
 type Country struct {
 	gorm.Model
-	Name  string `gorm:"size:40;not null;unique" json:"name"`
+	Name  string `json:"name"`
 	Towns []Town
 }
 
@@ -115,10 +115,17 @@ var CountryList = []Country{
 	{Name: "Palestine"},
 }
 
+func (c *Country) save() error {
+	if err := DB.Create(&c).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
+	}
+	return nil
+}
+
 func AddCountries() error {
 	for _, country := range CountryList {
-		if err := DB.Create(&country).Error; err != nil {
-			return fmt.Errorf("DbCreate(country): %w", err)
+		if err := country.save(); err != nil {
+			return fmt.Errorf("country.Save: %w", err)
 		}
 	}
 	return nil

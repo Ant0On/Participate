@@ -36,12 +36,13 @@ func ConnectDatabase() {
 	}
 	fmt.Println("We are connected to the database")
 
-	if err = DB.AutoMigrate(&Customer{}, &Host{}, &Offer{}, &Country{}); err != nil {
+	if err := DB.Migrator().DropTable(&Country{}); err != nil {
+		log.Fatal("Migration error:", err)
+	}
+
+	if err = DB.AutoMigrate(&Customer{}, &Host{}, &Town{}, &Offer{}, &Country{}); err != nil {
 		log.Fatal("Migration error:", err)
 		return
 	}
 
-	if err := AddCountries(); err != nil {
-		log.Fatal("AddCountries error:", err)
-	}
 }
