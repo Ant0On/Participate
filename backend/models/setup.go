@@ -36,7 +36,7 @@ func ConnectDatabase() {
 	}
 	fmt.Println("We are connected to the database")
 
-	if err := DB.Migrator().DropTable(&Country{}); err != nil {
+	if err = DB.Migrator().DropTable(&Country{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}
 

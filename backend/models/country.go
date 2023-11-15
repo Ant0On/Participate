@@ -8,7 +8,7 @@ import (
 
 type Country struct {
 	gorm.Model
-	Name  string `json:"name"`
+	Name  string
 	Towns []Town
 }
 
@@ -131,10 +131,10 @@ func AddCountries() error {
 	return nil
 }
 
-func GetCountryByName(name string) (*Country, error) {
-	var c Country
+func GetAllCountry() (*[]Country, error) {
+	var c []Country
 
-	if err := DB.Model(&Country{}).Where("name = ?", name).Scan(&c).Error; err != nil {
+	if err := DB.Model(&[]Country{}).Scan(&c).Error; err != nil {
 		return &c, fmt.Errorf("country not found: %w", err)
 	}
 	return &c, nil
