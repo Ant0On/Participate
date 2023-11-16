@@ -26,5 +26,5 @@ func RegisterRoutes(r *gin.Engine) {
 	protected.GET("/user", CurrentUser)
 
 	country := r.Group("/api/country")
-	country.GET("/get/all", GetAllCountry)
+	country.GET("/get/all", GetAllCountries)
 }

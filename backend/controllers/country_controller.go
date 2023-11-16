@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllCountry(c *gin.Context) {
-	country, err := models.GetAllCountry()
+func GetAllCountries(c *gin.Context) {
+	country, err := models.GetAllCountries()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"GetAllCountry error:": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"GetAllCountries error:": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": country})
