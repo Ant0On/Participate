@@ -44,5 +44,4 @@ func ConnectDatabase() {
 		log.Fatal("Migration error:", err)
 		return
 	}
-
 }
