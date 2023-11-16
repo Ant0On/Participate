@@ -24,4 +24,7 @@ func RegisterRoutes(r *gin.Engine) {
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
+
+	country := r.Group("/api/country")
+	country.GET("/get/all", GetAllCountries)
 }
