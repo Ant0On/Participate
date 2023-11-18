@@ -1,54 +1,53 @@
+<script setup>
+import { defineProps } from 'vue'
+
+const props = defineProps({
+  text: String,
+  navigateTo: String,
+  isActive: Boolean
+})
+
+function handleMouseOut(element) {
+  element.style.backgroundColor = "#efefef";
+}
+function handleMouseOver(element) {
+  element.style.backgroundColor = "#3fc1c9";
+}
+
+</script>
+
 <template>
-  <div :class="['nav-item', className]" @mouseover="handleMouseOver" @mouseout="handleMouseOut">
-    <div class="home">{{ text }}</div>
+  <div @mouseover="handleMouseOver($el)" @mouseout="handleMouseOut($el)">
+      <a :href="navigateTo" :text="text"/>
+      <img v-if="isActive" class="vector" alt="Vector" src="../../assets/img/vector-1.svg"/>
   </div>
 </template>
 
-<script>
-export default {
-  name: "nav_item_component",
-  props: {
-    className: {
-      type: String,
-      default: "",
-    },
-    text: {
-      type: String,
-      default: "Home",
-    },
-  },
-  methods: {
-    handleMouseOver() {
-      this.$el.style.backgroundColor = "#3fc1c9";
-    },
-    handleMouseOut() {
-      this.$el.style.backgroundColor = "#efefef";
-    },
-  },
-};
-</script>
-
-<style>
-.nav-item {
-  align-items: center;
+<style scoped>
+div {
   background-color: #efefef;
-  border-radius: 5px;
-  display: inline-flex;
-  gap: 10px;
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
   padding: 12px 26px;
-  position: relative;
 }
 
-.nav-item .home {
+a{
+  background-color: inherit;
   color: #000000;
   font-family: "Poppins", Helvetica;
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 400;
-  letter-spacing: 0;
-  line-height: normal;
-  margin-top: -1px;
-  position: relative;
-  width: fit-content;
+  margin-bottom: 5px;
+}
+img {
+  align-self: flex-end;
+}
+@media (max-width: 800px) {
+  img{
+    align-self: center;
+  }
+
 }
 </style>

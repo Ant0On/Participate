@@ -29,3 +29,7 @@
   --text-status-success: rgba(14, 98, 69, 1);
   --uicolorprimary: rgba(103, 80, 163, 1);
 }
+body{
+  background-color: #efefef;
+  width: 100%;
+}

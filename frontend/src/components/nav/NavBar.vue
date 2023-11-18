@@ -1,11 +1,61 @@
 <script setup>
+import {defineProps} from 'vue';
+import NavItem from "./NavItem.vue";
 
+const props = defineProps({
+  currentPage: String
+})
+
+function isActive(text, currentPage) {
+  return text === currentPage
+}
 </script>
 
 <template>
-
+  <nav>
+    <img alt="Image" src="../../assets/img/image-2.png"/>
+    <div class="navigation">
+      <NavItem text="Home" :isActive="isActive('home', currentPage)" navigateTo=""/>
+      <NavItem text="Accommodations" :isActive="isActive('accommodations', currentPage)" navigateTo="/accommodations"/>
+      <NavItem text="Activities" :isActive="isActive('activities', currentPage)" navigateTo="/activities"/>
+      <NavItem text="Events" :isActive="isActive('events', currentPage)" navigateTo="/events"/>
+      <NavItem text="Log in" :isActive="isActive('login', currentPage)" navigateTo="/login"/>
+    </div>
+  </nav>
 </template>
 
 <style scoped>
+img {
+  object-fit: fill;
+  max-height: 100%;
+  max-width: 100%;
+  height: 100px;
+  width: 300px;
+}
+nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 0.3rem;
+  padding: 0.3rem;
+}
 
+div {
+  display: flex;
+  justify-content: flex-end;
+  max-height: 3rem;
+}
+
+@media(max-width: 800px){
+  nav{
+    flex-direction: column;
+    margin: auto;
+  }
+  div{
+    display: flex;
+    flex-direction: column;
+    max-height: fit-content;
+  }
+
+}
 </style>
