@@ -14,7 +14,7 @@ function isActive(text, currentPage) {
 <template>
   <nav>
     <img alt="Image" src="../../assets/img/image-2.png"/>
-    <div class="navigation">
+    <div>
       <NavItem text="Home" :isActive="isActive('home', currentPage)" navigateTo=""/>
       <NavItem text="Accommodations" :isActive="isActive('accommodations', currentPage)" navigateTo="/accommodations"/>
       <NavItem text="Activities" :isActive="isActive('activities', currentPage)" navigateTo="/activities"/>
@@ -44,9 +44,10 @@ div {
   display: flex;
   justify-content: flex-end;
   max-height: 3rem;
+  column-gap: 10px;
 }
 
-@media(max-width: 800px){
+@media(max-width: 900px){
   nav{
     flex-direction: column;
     margin: auto;

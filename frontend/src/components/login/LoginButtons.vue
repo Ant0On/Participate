@@ -6,7 +6,7 @@ import LoginButton from './LoginButton.vue'
 <div>
   <LoginButton class="lgn-button" text="Sign up"/>
   <LoginButton class="lgn-button" text="Log in"/>
-  <div class="text-wrapper-3">Forgot password?</div>
+  <a href="" text="Forgot password?"/>
 </div>
 </template>
 
@@ -14,9 +14,13 @@ import LoginButton from './LoginButton.vue'
 div {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
 }
-.lgn-button {
-  height: 100px;
-  width: 200px;
+a {
+  color: #0048d9;
+  font-family: "IBM Plex Sans", Helvetica;
+  font-weight: 400;
+  line-height: normal;
+  align-self: flex-end;
 }
 </style>

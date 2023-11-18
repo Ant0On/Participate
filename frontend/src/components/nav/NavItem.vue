@@ -3,7 +3,10 @@ import { defineProps } from 'vue'
 
 const props = defineProps({
   text: String,
-  navigateTo: String,
+  navigateTo: {
+    type: String,
+    validator: (prop) => ['home', 'accommodation', 'activities', 'events', 'login'].indexOf(prop) !== -1
+  },
   isActive: Boolean
 })
 
@@ -35,7 +38,7 @@ div {
 
 a{
   background-color: inherit;
-  color: #000000;
+  color: black;
   font-family: "Poppins", Helvetica;
   font-size: 1rem;
   font-weight: 400;
@@ -44,7 +47,7 @@ a{
 img {
   align-self: flex-end;
 }
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   img{
     align-self: center;
   }

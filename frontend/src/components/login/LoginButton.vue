@@ -13,7 +13,7 @@ const props = defineProps({
 
 <template>
   <button class="button" @click="handleOnClick">
-    {{ text }}
+    <span>{{ text }}</span>
   </button>
 </template>
 
@@ -30,6 +30,12 @@ const props = defineProps({
   border: 1px solid;
   border-color: var(--text-link);
   border-radius: 6px;
+
+  width: 200px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 </style>
