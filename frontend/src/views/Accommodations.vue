@@ -4,7 +4,7 @@ import NavBar from "@/components/nav/NavBar.vue";
 
 <template>
   <div>
-    <NavBar currentPage="home"/>
+    <NavBar currentPage="accommodations"/>
   </div>
 </template>
 

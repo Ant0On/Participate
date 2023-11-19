@@ -1,5 +1,8 @@
 <script setup>
-import {computed, ref} from "vue";
+import {computed, ref, defineProps, defineEmits} from "vue";
+
+const prop = defineProps(['modelValue'])
+const emits = defineEmits(['update:modelValue'])
 
 const hidePassword = ref(true);
 const password = ref("");
@@ -13,7 +16,8 @@ const passwordPlaceholder = computed(() => hidePassword.value ? "**********" : "
   <div class="password_input">
     <label for="password">Your password<span>*</span></label>
     <div class="password_input_field">
-      <input :type="passwordFieldType" id="password" v-model="password" :placeholder="passwordPlaceholder">
+      <input :type="passwordFieldType" id="password" v-model="password" :placeholder="passwordPlaceholder"
+             @input="$emit('update:modelValue', $event.target.value)">
       <i class="fas" :class="[passwordFieldIcon]" @click="hidePassword = !hidePassword"></i>
     </div>
   </div>
@@ -26,9 +30,11 @@ const passwordPlaceholder = computed(() => hidePassword.value ? "**********" : "
   flex-direction: column;
   row-gap: 10px;
 }
+
 i {
   align-self: center;
 }
+
 input {
   width: 440px;
   height: 40px;

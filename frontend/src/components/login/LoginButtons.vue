@@ -1,15 +1,28 @@
 <script setup>
+import {defineProps, defineEmits} from 'vue'
+
 import LoginButton from './LoginButton.vue'
+
+const emits = defineEmits(['logInClicked'])
+
+function signUpHandler() {
+
+}
+
+function logInHandler() {
+  emits('logInClicked')
+}
+
 </script>
 
 <template>
-<div class="login_button_container">
-  <div class="button_container">
-    <LoginButton class="lgn-button" text="Sign up"/>
-    <LoginButton class="lgn-button" text="Log in"/>
+  <div class="login_button_container">
+    <div class="button_container">
+      <LoginButton class="lgn-button" text="Sign up" @button-clicked="signUpHandler"/>
+      <LoginButton class="lgn-button" text="Log in" @button-clicked="logInHandler"/>
+    </div>
+    <a href="" text="Forgot password?"/>
   </div>
-  <a href="" text="Forgot password?"/>
-</div>
 </template>
 
 <style scoped>
@@ -21,12 +34,14 @@ div.login_button_container {
   margin-top: 20px;
 
 }
-div.button_container{
+
+div.button_container {
   display: flex;
   justify-content: space-between;
   flex-direction: row;
   column-gap: 20px;
 }
+
 a {
   color: #0048d9;
   font-family: "IBM Plex Sans", Helvetica;

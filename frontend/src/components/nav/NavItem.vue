@@ -3,10 +3,7 @@ import { defineProps } from 'vue'
 
 const props = defineProps({
   text: String,
-  navigateTo: {
-    type: String,
-    validator: (prop) => ['home', 'accommodation', 'activities', 'events', 'login'].indexOf(prop) !== -1
-  },
+  navigateTo: String,
   isActive: Boolean
 })
 
@@ -21,7 +18,7 @@ function handleMouseOver(element) {
 
 <template>
   <div @mouseover="handleMouseOver($el)" @mouseout="handleMouseOut($el)">
-      <a :href="navigateTo" :text="text"/>
+      <router-link :to="navigateTo">{{ text }}</router-link>
       <img v-if="isActive" class="vector" alt="Vector" src="../../assets/img/vector-1.svg"/>
   </div>
 </template>

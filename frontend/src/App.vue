@@ -1,14 +1,9 @@
-<template>
-  <Login/>
-</template>
+<script setup>
 
-<script>
-import Login from '@/views/Login.vue'
-
-export default {
-  name: 'App',
-  components: {
-    Login
-  }
-}
 </script>
+
+<template>
+  <div id="app">
+    <router-view/>
+  </div>
+</template>

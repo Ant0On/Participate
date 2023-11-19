@@ -15,7 +15,7 @@ function isActive(text, currentPage) {
   <nav>
     <img alt="Image" src="../../assets/img/image-2.png"/>
     <div>
-      <NavItem text="Home" :isActive="isActive('home', currentPage)" navigateTo=""/>
+      <NavItem text="Home" :isActive="isActive('home', currentPage)" navigateTo="/"/>
       <NavItem text="Accommodations" :isActive="isActive('accommodations', currentPage)" navigateTo="/accommodations"/>
       <NavItem text="Activities" :isActive="isActive('activities', currentPage)" navigateTo="/activities"/>
       <NavItem text="Events" :isActive="isActive('events', currentPage)" navigateTo="/events"/>

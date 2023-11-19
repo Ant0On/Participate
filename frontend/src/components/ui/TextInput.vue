@@ -1,22 +1,25 @@
 <script setup>
-import {defineProps} from 'vue'
-import { v4 as uuidv4 } from 'uuid';
+import {defineEmits, defineProps} from 'vue'
+import {v4 as uuidv4} from 'uuid';
 
 let inputUUID = uuidv4();
 
 const props = defineProps({
   labelText: String,
   placeholder: String,
-  isRequired: Boolean
+  isRequired: Boolean,
+  modelValue: String,
 })
 
+const emits = defineEmits(['update:modelValue'])
 
 </script>
 
 <template>
   <div class="text_input">
     <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input  :id="inputUUID" :placeholder="placeholder"/>
+    <input :id="inputUUID" :placeholder="placeholder" v-model="modelValue"
+           @input="$emit('update:modelValue', $event.target.value)"/>
   </div>
 </template>
 
@@ -28,31 +31,36 @@ const props = defineProps({
   flex-direction: column;
   position: relative;
 }
-input{
+
+input {
   width: 440px;
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;
 }
-label{
+
+label {
   font-family: "IBMPlex Sans-Regular", Helvetica;
   font-style: normal;
   font-weight: 500;
   color: var(--text-secondary-grey2);
   line-height: 150%;
 }
-span{
+
+span {
   font-family: "IBMPlex Sans-Regular", Helvetica;
   font-style: normal;
   color: var(--systemred);
 }
+
 .invalid_data {
   border: 2px solid;
   border-radius: 4px;
   color: var(--systemred);
 }
+
 input:focus {
-  border: 1px ;
+  border: 1px;
   color: var(--text-link)
 }
 </style>

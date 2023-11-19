@@ -1,8 +1,10 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import {defineEmits, defineProps} from 'vue'
 
-function handleOnClick(){
+const emit = defineEmits(['buttonClicked'])
 
+function buttonClicked() {
+  emit('buttonClicked')
 }
 
 const props = defineProps({
@@ -12,7 +14,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <button class="button" @click="handleOnClick">
+  <button class="button" @click="buttonClicked()">
     <span>{{ text }}</span>
   </button>
 </template>
@@ -37,7 +39,8 @@ const props = defineProps({
   justify-content: center;
   align-items: center;
 }
-.button:active{
+
+.button:active {
   background-color: rgba(22, 89, 224, 0.5);
   color: var(--systemwhite)
 }
