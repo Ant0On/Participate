@@ -26,7 +26,9 @@ const passwordPlaceholder = computed(() => hidePassword.value ? "**********" : "
   flex-direction: column;
   row-gap: 10px;
 }
-
+i {
+  align-self: center;
+}
 input {
   width: 440px;
   height: 40px;

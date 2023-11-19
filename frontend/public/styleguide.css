@@ -28,6 +28,7 @@
   --text-secondary-grey3: rgba(184, 188, 202, 1);
   --text-status-success: rgba(14, 98, 69, 1);
   --uicolorprimary: rgba(103, 80, 163, 1);
+  --button-acctive: rgba(22, 89, 224, 0.5);
 }
 body{
   background-color: #efefef;

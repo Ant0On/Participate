@@ -31,11 +31,15 @@ const props = defineProps({
   border-color: var(--text-link);
   border-radius: 6px;
 
-  width: 200px;
+  width: 220px;
   height: 35px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.button:active{
+  background-color: rgba(22, 89, 224, 0.5);
+  color: var(--systemwhite)
 }
 
 </style>

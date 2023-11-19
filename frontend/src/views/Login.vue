@@ -8,7 +8,7 @@ import LoginSection from "@/components/login/LoginSection.vue";
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <div class="logging">
     <NavBar currentPage="login"/>
-    <div class="login_section">
+    <div class="login_container">
       <LoginSection/>
       <img alt="Image" src="../assets/img/image-3.png"/>
     </div>
@@ -20,17 +20,25 @@ import LoginSection from "@/components/login/LoginSection.vue";
 .logging {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
 }
 
-
-.login_section {
+.login_container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin: 30px 9% 10px;
+  margin: 30px 9% 10px 9%;
   background: white;
   max-width: 1200px;
+}
+@media(max-width: 900px){
+  img{
+    display: none;
+  }
+  .login_container{
+    margin-right: 30px;
+    margin-left: 30px;
+  }
 }
 
 </style>

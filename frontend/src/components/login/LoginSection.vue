@@ -18,12 +18,23 @@ div.login_section {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  row-gap: 40px;
+  margin-left: 50px;
+  margin-top: 50px;
 }
+
 p {
   color: black;
   font-family: "Sarabun", Helvetica;
   font-size: 1.5rem;
   font-weight: 100;
   line-height: normal;
+  margin-bottom: 20px;
+  margin-top: 80px;
+}
+@media(max-width: 900px){
+  div.login_section{
+    margin-left: 5%;
+  }
 }
 </style>
