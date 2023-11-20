@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"backend/controllers"
 	"backend/models"
@@ -60,6 +61,9 @@ func runServer(args arguments) error {
 
 func init() {
 	models.ConnectDatabase()
+	if err := models.AddCountries(); err != nil {
+		log.Fatal("AddCountries:", err)
+	}
 }
 
 func main() {

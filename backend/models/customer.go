@@ -13,10 +13,10 @@ import (
 
 type Customer struct {
 	gorm.Model
-	FirstName    string `gorm:"size:30;not null" json:"first_name"`
-	LastName     string `gorm:"size:100;not null" json:"last_name"`
-	Email        string `gorm:"size:100;not null;unique" json:"email"`
-	Password     string `gorm:"size:100;not null;" json:"password"`
+	FirstName    string `gorm:"size:30;not null" json:"first_name" binding:"required"`
+	LastName     string `gorm:"size:100;not null" json:"last_name" binding:"required"`
+	Email        string `gorm:"size:100;not null;unique" json:"email" binding:"required"`
+	Password     string `gorm:"size:100;not null;" json:"password" binding:"required"`
 	Reservations []Reservation
 }
 
@@ -56,7 +56,7 @@ func (c *Customer) LoginCheck(email, password, table string) (string, error) {
 		return "", fmt.Errorf("VerifyPassword: %w", err)
 	}
 
-	t, err := token.GenerateToken(c.Email)
+	t, err := token.GenerateToken(c.Email, table)
 
 	if err != nil {
 		return "", fmt.Errorf("token.GenerateToken: %w", err)
