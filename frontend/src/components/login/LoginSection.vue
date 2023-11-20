@@ -1,6 +1,7 @@
 <script setup>
 import {ref} from 'vue';
-
+import { Form, Field } from 'vee-validate';
+import * as Yup from 'yup';
 
 import TextInput from "@/components/ui/TextInput.vue";
 import LoginButtons from "@/components/login/LoginButtons.vue";
@@ -38,15 +39,19 @@ function createRequestOptions(loginData) {
     body: JSON.stringify({email: loginData.login.trim(), password: loginData.password.trim(), table: 'customer'})
   }
 }
+function hashPassword(password){
 
+}
 </script>
 
 <template>
   <div class="login_section">
     <p>Welcome back. Please log in to your account</p>
-    <TextInput labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.login"/>
-    <PasswordInput v-model="loginData.password"/>
-    <LoginButtons @log-in-clicked="handleLogIn"/>
+    <form class="login_form">
+      <TextInput labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.login"/>
+      <PasswordInput v-model="loginData.password"/>
+      <LoginButtons @log-in-clicked="handleLogIn"/>
+    </form>
   </div>
 </template>
 
@@ -59,7 +64,11 @@ div.login_section {
   margin-left: 50px;
   margin-top: 50px;
 }
-
+.login_form{
+  display: flex;
+  flex-direction: column;
+  row-gap: 40px;
+}
 p {
   color: black;
   font-family: "Sarabun", Helvetica;

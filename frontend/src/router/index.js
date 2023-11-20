@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store';
 
-import Login from '@/views/Login.vue'
-import Home from '@/views/Home.vue'
-import Accommodations from "@/views/Accommodations.vue";
-import Events from "@/views/Events.vue";
-import Activities from "@/views/Activities.vue";
+import Login from '@/views/LoginPage.vue'
+import Home from '@/views/HomePage.vue'
+import Accommodations from "@/views/AccommodationsPage.vue";
+import Events from "@/views/EventsPage.vue";
+import Activities from "@/views/ActivitiesPage.vue";
 
 const routes = [
     {
@@ -40,3 +41,13 @@ export const router = createRouter({
     routes
 })
 
+router.beforeEach(async (to) => {
+    const privatePages = [];
+    const authRequired = privatePages.includes(to.path);
+    const auth = useAuthStore();
+
+    if (authRequired && !auth.user) {
+        auth.returnUrl = to.fullPath;
+        return '/';
+    }
+});

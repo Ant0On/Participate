@@ -18,7 +18,7 @@ const emits = defineEmits(['update:modelValue'])
 <template>
   <div class="text_input">
     <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input :id="inputUUID" :placeholder="placeholder" v-model="modelValue"
+    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue"
            @input="$emit('update:modelValue', $event.target.value)"/>
   </div>
 </template>

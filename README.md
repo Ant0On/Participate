@@ -8,8 +8,11 @@ Run `./scripts/run_project.sh` from root
 - Connect Go remote debugger to 40000 port 
 
 ## TODO
-1. Ogarniecie pakietów z vue js (https://stackoverflow.com/questions/64868632/vuejs-3-webpack-problem-with-vue-template-compiler)
-2. Dodanie proda bez wyrzuconych portów i innych tego typu rzeczy
-3. Ogarniecie zmiennych srodowiskowych uzywanych do polaczenia sie z baza
-4. Setup bazy danych w modelach? Chyba powinno to byc w innym miejscu
-5. cos sie jeszcze znajdzie...
+Frontend:
+- Logowanie:
+    - Hashowanie hasła
+    - Sesja (używając 'vue-session' lub 'vue-cookie')
+    - Zmiana sing-in oraz sing-up na form
+    - Dodanie wylogowania
+    - Dodanie informacji o byciu zalogowanym wraz z informacja o koncie ( na koncowce login z aliasem account)
+    - 
