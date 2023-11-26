@@ -9,14 +9,16 @@ import (
 type Host struct {
 	gorm.Model
 	*Customer
-	PhoneNumber string `gorm:"size:12;not null;unique" json:"phone_number"`
-	BankAccount string `gorm:"size:31;not null;unique" json:"bank_account"`
+	PhoneNumber string `gorm:"size:12;not null;unique" json:"phone_number" binding:"required"`
+	BankAccount string `gorm:"size:31;not null;unique" json:"bank_account" binding:"required"`
 	Offers      []Offer
 }
 
 func NewHost() *Host {
 	return &Host{
-		Customer: &Customer{},
+		Customer: &Customer{
+			Role: "Host",
+		},
 	}
 }
 

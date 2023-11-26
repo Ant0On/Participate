@@ -61,7 +61,6 @@ func RegisterHost(c *gin.Context) {
 type loginInput struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Table    string `json:"table" binding:"required"`
 }
 
 func Login(c *gin.Context) {
@@ -75,7 +74,7 @@ func Login(c *gin.Context) {
 
 	user.Email = input.Email
 	user.Password = input.Password
-	t, err := user.LoginCheck(user.Email, user.Password, input.Table)
+	t, err := user.LoginCheck(user.Email, user.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"loginCheck: username or password is incorrect": err.Error()})
