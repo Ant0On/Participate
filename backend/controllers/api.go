@@ -21,10 +21,19 @@ func RegisterRoutes(r *gin.Engine) {
 	host.DELETE("/delete/:id", DeleteOffer)
 	host.PUT("/update/:id", UpdateOffer)
 
+	country := r.Group("/api/country")
+	country.GET("/get/all", GetAllCountries)
+
+	town := r.Group("/api/town")
+	town.POST("/add", AddTown)
+
+	townType := r.Group("/api/town_type")
+	townType.GET("/get", GetAllTownTypes)
+
+	grade := r.Group("/api/grade")
+	grade.GET("/get", GetAllGrades)
+
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
-
-	country := r.Group("/api/country")
-	country.GET("/get/all", GetAllCountries)
 }

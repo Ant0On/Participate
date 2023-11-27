@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Town struct {
 	gorm.Model
@@ -8,4 +12,12 @@ type Town struct {
 	Offers     []Offer
 	CountryID  uint `gorm:"not null"`
 	TownTypeID uint `gorm:"not null"`
+}
+
+func (t *Town) Save() error {
+	if err := DB.Create(&t).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
+	}
+
+	return nil
 }

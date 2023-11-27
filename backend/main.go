@@ -64,6 +64,12 @@ func init() {
 	if err := models.AddCountries(); err != nil {
 		log.Fatal("AddCountries:", err)
 	}
+	if err := models.AddTownTypes(); err != nil {
+		log.Fatal("AddTownTypes:", err)
+	}
+	if err := models.AddGrades(); err != nil {
+		log.Fatal("AddGrades:", err)
+	}
 }
 
 func main() {
