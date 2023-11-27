@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"fmt"
 
 	"backend/pkg/passHelper"
@@ -55,7 +54,7 @@ func (c *Customer) LoginCheck(email, password string) (string, error) {
 		return "", fmt.Errorf("user with given email doesn't exist: %w", err)
 	}
 
-	if err = passHelper.VerifyPassword(password, c.Password); err != nil && errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+	if err = passHelper.VerifyPassword(password, c.Password); err != nil {
 		return "", fmt.Errorf("VerifyPassword: %w", err)
 	}
 

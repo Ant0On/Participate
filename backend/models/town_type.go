@@ -38,11 +38,11 @@ func AddTownTypes() error {
 	return nil
 }
 
-func GetAllTownTypes() (*[]TownType, error) {
+func GetAllTownTypes() ([]TownType, error) {
 	var tt []TownType
 
 	if err := DB.Model(&[]TownType{}).Scan(&tt).Error; err != nil {
-		return &tt, fmt.Errorf("DB.Model(&[]TownType{}).Scan: %w", err)
+		return tt, fmt.Errorf("DB.Model(&[]TownType{}).Scan: %w", err)
 	}
-	return &tt, nil
+	return tt, nil
 }
