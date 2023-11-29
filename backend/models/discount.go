@@ -1,10 +1,21 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Discount struct {
 	gorm.Model
-	Type         string  `gorm:"size:50;not null" json:"type"`
 	Amount       float64 `gorm:"not null" json:"amount"`
 	Reservations []Reservation
+}
+
+func (d *Discount) Save() error {
+	if err := DB.Create(&d).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
+	}
+
+	return nil
 }
