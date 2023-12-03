@@ -29,7 +29,6 @@ import LoginSection from "@/components/login/LoginSection.vue";
   justify-content: space-between;
   margin: 30px 9% 10px 9%;
   background: white;
-  max-width: 1200px;
 }
 @media(max-width: 900px){
   img{

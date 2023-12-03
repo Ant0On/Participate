@@ -1,56 +1,54 @@
 <script setup>
-import {ref} from 'vue';
-import { Form, Field } from 'vee-validate';
+import {reactive, ref } from 'vue';
 import * as Yup from 'yup';
 
 import TextInput from "@/components/ui/TextInput.vue";
 import LoginButtons from "@/components/login/LoginButtons.vue";
 import PasswordInput from "@/components/ui/PasswordInput.vue";
+import {useAuthStore} from "@/stores/auth.store";
 
 
 const loginData = ref({
-  login: '',
-  password: ''
+  Login: '',
+  Password: ''
+})
+const errors = reactive({
+  apiError: ""
 })
 
-async function handleLogIn() {
-  if (!validateLoginData(loginData.value)) {
-    alert('Please fill all fields!')
-    return
+async function onSubmit() {
+  const authStore = useAuthStore();
+  await schema.validate(loginData.value).then(() => {
+    return authStore.login(loginData.value.Login, loginData.value.Password)
+  }).catch(error =>{
+      if(error === "Bad Request")
+      {
+        errors.apiError = "Incorrect login data!"
+      }
+      else{
+        errors.apiError = error.message
+      }
   }
-  const response = await fetch('/api/login', createRequestOptions(loginData.value))
-  if (response.status === 200) {
-    response.json().then(data => console.log(data))
-  }
-
+  )
 }
 
-function validateLoginData(loginData) {
-  if (typeof loginData.login !== 'undefined' && typeof loginData.password !== 'undefined')
-    if (loginData.login !== '' && loginData.password !== '')
-      return true
-  return false
-}
+const schema = Yup.object().shape({
+  Login: Yup.string().required('Login is required'),
+  Password: Yup.string().required('Password is required')
+});
 
-function createRequestOptions(loginData) {
-  return {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({email: loginData.login.trim(), password: loginData.password.trim(), table: 'customer'})
-  }
-}
-function hashPassword(password){
 
-}
+
 </script>
 
 <template>
   <div class="login_section">
     <p>Welcome back. Please log in to your account</p>
-    <form class="login_form">
-      <TextInput labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.login"/>
-      <PasswordInput v-model="loginData.password"/>
-      <LoginButtons @log-in-clicked="handleLogIn"/>
+    <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+    <form class="login_form" @submit.prevent>
+      <TextInput labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.Login"/>
+      <PasswordInput v-model="loginData.Password" @keyup.enter="onSubmit"/>
+      <LoginButtons @log-in-clicked="onSubmit"/>
     </form>
   </div>
 </template>
@@ -64,11 +62,17 @@ div.login_section {
   margin-left: 50px;
   margin-top: 50px;
 }
-.login_form{
+div.errors{
+  font-family: "Sarabun", Helvetica;
+
+}
+
+.login_form {
   display: flex;
   flex-direction: column;
   row-gap: 40px;
 }
+
 p {
   color: black;
   font-family: "Sarabun", Helvetica;
