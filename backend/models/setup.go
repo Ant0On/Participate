@@ -44,6 +44,5 @@ func ConnectDatabase() {
 		&TownType{}, &Town{}, &Discount{}, &Payment{},
 		&Animal{}, &Offer{}, &Country{}); err != nil {
 		log.Fatal("Migration error:", err)
-		return
 	}
 }
