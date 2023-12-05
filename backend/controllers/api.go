@@ -24,6 +24,15 @@ func RegisterRoutes(r *gin.Engine) {
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)
 
+	animal := r.Group("/api/animal")
+	animal.POST("/add", AddAnimal)
+
+	discount := r.Group("/api/discount")
+	discount.POST("/add", AddDiscount)
+
+	payment := r.Group("/api/payment")
+	payment.POST("/get", GetAllPayments)
+
 	town := r.Group("/api/town")
 	town.POST("/add", AddTown)
 

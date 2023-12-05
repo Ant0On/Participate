@@ -70,10 +70,12 @@ func init() {
 	if err := models.AddGrades(); err != nil {
 		log.Fatal("AddGrades:", err)
 	}
+	if err := models.AddPayments(); err != nil {
+		log.Fatal("AddPayments:", err)
+	}
 }
 
 func main() {
-
 	args := arguments{
 		LogLevel:       "info",
 		BindAddress:    "0.0.0.0",

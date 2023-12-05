@@ -81,5 +81,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": t})
+	// hide sensitive data
+	user.Password = ""
+
+	c.JSON(http.StatusOK, gin.H{"token": t, "user": user})
 }

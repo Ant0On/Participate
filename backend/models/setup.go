@@ -41,8 +41,8 @@ func ConnectDatabase() {
 	}
 
 	if err = DB.AutoMigrate(&Customer{}, &Host{}, &Grade{},
-		&TownType{}, &Town{}, &Offer{}, &Country{}); err != nil {
+		&TownType{}, &Town{}, &Discount{}, &Payment{},
+		&Animal{}, &Offer{}, &Country{}); err != nil {
 		log.Fatal("Migration error:", err)
-		return
 	}
 }
