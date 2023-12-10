@@ -12,31 +12,28 @@ const props = defineProps({
 })
 
 const emits = defineEmits(['update:modelValue'])
-
 </script>
 
 <template>
   <div class="text_input">
     <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue"
+    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue" type="number" min="1"
            @input="$emit('update:modelValue', $event.target.value)"/>
   </div>
 </template>
 
-
 <style scoped>
+input[type=number]{
+  width: 250px;
+  height: 40px;
+  background-color: var(--surfacelight);
+  border: 1px;
+}
 .text_input {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
   position: relative;
-}
-
-input {
-  width: 440px;
-  height: 40px;
-  background-color: var(--surfacelight);
-  border: 1px;
 }
 
 label {
