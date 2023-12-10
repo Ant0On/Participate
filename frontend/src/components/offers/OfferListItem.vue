@@ -1,11 +1,30 @@
 <script setup>
+import {defineEmits, defineProps} from 'vue'
 
+const props = defineProps({
+  location: String,
+  image: Image,
+  title: String,
+  description: String,
+})
 </script>
 
 <template>
-
+  <div class="offer_item">
+    <img :src="image">
+    <div class="location">{{ location }}</div>
+    <div class="title">{{ title }}</div>
+    <div class="description"> {{ description }}</div>
+  </div>
 </template>
 
 <style scoped>
+div.offer_item{
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  position: relative;
+  row-gap: 10px;
+}
 
 </style>
