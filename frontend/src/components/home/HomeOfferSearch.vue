@@ -29,11 +29,11 @@ function searchOffers(){
 <template>
   <div class="home_offer_search">
     <p>What are you looking for?</p>
-    <SelectionInput v-model="searchOffer.offer_type" label-text="Offer type" placeholder="Type" is-required="true" :items="offer_types"/>
-    <TextInput v-model="searchOffer.location" width="300px" label-text="Location" placeholder="Location" is-required="true" />
-    <DateInput v-model="searchOffer.date_from" label-text="Date from" is-required="true"/>
-    <DateInput v-model="searchOffer.date_to" label-text="Date to" is-required="false"/>
-    <NumberInput v-model="searchOffer.number_of_people" label-text="Number of people" placeholder="People" is-required="true"/>
+    <SelectionInput v-model="searchOffer.offer_type" label-text="Offer type" placeholder="Type" :is-required="true" :items="offer_types"/>
+    <TextInput v-model="searchOffer.location" width="300px" label-text="Location" placeholder="Location" :is-required="true" />
+    <DateInput v-model="searchOffer.date_from" label-text="Date from" :is-required="true"/>
+    <DateInput v-model="searchOffer.date_to" label-text="Date to" :is-required="false"/>
+    <NumberInput v-model="searchOffer.number_of_people" label-text="Number of people" placeholder="People" :is-required="true"/>
     <SearchButton text="Search" width="100px" height="35px" @button-clicked="searchOffers" style="align-self: center"/>
   </div>
 </template>

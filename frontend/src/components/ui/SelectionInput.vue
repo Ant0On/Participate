@@ -9,7 +9,11 @@ const props = defineProps({
   placeholder: String,
   isRequired: Boolean,
   modelValue: String,
-  items: [],
+  items: Array,
+  width: {
+    type: String,
+    default: "300px"
+  }
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -27,7 +31,7 @@ const emits = defineEmits(['update:modelValue'])
 
 <style scoped>
 select, option{
-  width: 300px;
+  width: v-bind(width);
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;

@@ -9,6 +9,10 @@ const props = defineProps({
   placeholder: String,
   isRequired: Boolean,
   modelValue: String,
+  width: {
+    type: String,
+    default: "300px"
+  }
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -24,7 +28,7 @@ const emits = defineEmits(['update:modelValue'])
 
 <style scoped>
 input[type=number]{
-  width: 300px;
+  width: v-bind(width);
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;

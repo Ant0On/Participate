@@ -7,10 +7,16 @@ const props = defineProps({
   title: String,
   description: String,
 })
+
+const emit = defineEmits(['itemClicked'])
+
+function onItemClicked() {
+  emit('itemClicked')
+}
 </script>
 
 <template>
-  <div class="offer_item">
+  <div class="offer_item" @click="onItemClicked">
     <img :src="image">
     <div class="location">{{ location }}</div>
     <div class="title">{{ title }}</div>
@@ -19,7 +25,7 @@ const props = defineProps({
 </template>
 
 <style scoped>
-div.offer_item{
+div.offer_item {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
