@@ -22,8 +22,6 @@ function searchOffers(){
   console.log(searchOffer.value)
 }
 
-
-
 </script>
 
 <template>
