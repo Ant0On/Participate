@@ -18,7 +18,7 @@
 .label {
   display: flex;
   flex-direction: column;
-  margin: 90px 13% 10px 13%;
+  margin: 90px 5% 10px 8%;
 }
 
 .label .text-wrapper {

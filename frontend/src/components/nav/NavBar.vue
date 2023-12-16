@@ -34,7 +34,7 @@ img {
 }
 nav {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   margin: 0.3rem;
   padding: 0.3rem;

@@ -36,6 +36,8 @@ function searchOffers(){
   </div>
 </template>
 
+<link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
+
 <style scoped>
 div.home_offer_search {
   display: flex;
@@ -48,8 +50,9 @@ div.home_offer_search {
   background-color: #E6E6E6;
   padding: 10px 15px;
 }
+
 p{
-  font-family: "Playfair Display-Bold", Helvetica !important;
+  font-family: "Playfair Display-Bold", serif;
   font-weight: 700;
   font-size: 1rem;
 }

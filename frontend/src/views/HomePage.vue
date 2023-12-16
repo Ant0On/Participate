@@ -12,7 +12,15 @@ import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
     <div class="welcome">
       <HomeWelcomeText/>
       <div class="image">
-        <HomeOfferImage/>
+        <router-link :to="{ path: '/accommodations' }">
+          <HomeOfferImage v-bind:src="require('../assets/img/accomodation_home_page.jpg')"/>
+        </router-link>
+        <router-link :to="{ path: '/activities' }">
+          <HomeOfferImage v-bind:src="require('../assets/img/activity_home_page.jpg')"/>
+        </router-link>
+        <router-link :to="{ path: '/events' }">
+          <HomeOfferImage v-bind:src="require('../assets/img/event_home_page.jpg')"/>
+        </router-link>
       </div>
     </div>
     <div class="offer_search">
@@ -32,18 +40,24 @@ import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  margin-left: 7%;
 }
 .welcome {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
   width: 50%;
+}
 
+.image {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: 7%;
+  margin-top: 2%;
 }
 
 .offer_search {
-  //display: flex;
-  //flex-direction: row-reverse;
-  margin: 30px 8% 10px 16%;
+  margin: 30px 5% 10px 5%;
+  width: 30%;
 }
 </style>
