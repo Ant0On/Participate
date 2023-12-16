@@ -9,9 +9,11 @@ const props = defineProps({
   placeholder: String,
   isRequired: Boolean,
   modelValue: String,
+  width: String,
 })
 
 const emits = defineEmits(['update:modelValue'])
+
 
 </script>
 
@@ -33,7 +35,7 @@ const emits = defineEmits(['update:modelValue'])
 }
 
 input {
-  width: 440px;
+  width: v-bind(width);
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;

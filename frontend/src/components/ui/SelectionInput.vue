@@ -27,7 +27,7 @@ const emits = defineEmits(['update:modelValue'])
 
 <style scoped>
 select, option{
-  width: 250px;
+  width: 300px;
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;

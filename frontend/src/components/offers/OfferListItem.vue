@@ -3,7 +3,7 @@ import {defineEmits, defineProps} from 'vue'
 
 const props = defineProps({
   location: String,
-  image: Image,
+  image: String,
   title: String,
   description: String,
 })
