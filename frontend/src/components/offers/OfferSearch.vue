@@ -28,13 +28,13 @@ window.addEventListener("resize", () => {
 
 <template>
   <div class="offer_search">
-    <TextInput :value="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth.inputWidth+'px'"
+    <TextInput v-model="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth.inputWidth+'px'"
                label-text="Location" placeholder="Location" :is-required="true"/>
-    <DateInput :value="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
+    <DateInput v-model="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
                :is-required="true" :width="inputWidth.inputWidth+'px'"/>
-    <DateInput :value="dateTo" @input="$emit('update:dateTo', $event.target.value)" label-text="Date to"
+    <DateInput v-model="dateTo" @input="$emit('update:dateTo', $event.target.value)" label-text="Date to"
                :is-required="false" :width="inputWidth.inputWidth+'px'"/>
-    <NumberInput :value="numberOfPeople" @input="$emit('update:numberOfPeople', $event.target.value)"
+    <NumberInput v-model="numberOfPeople" @input="$emit('update:numberOfPeople', $event.target.value)"
                  label-text="Number of people" placeholder="People" :is-required="true" :width="inputWidth.inputWidth+'px'"/>
   </div>
 </template>
