@@ -54,6 +54,7 @@ import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
   justify-content: space-between;
   margin-left: 7%;
   margin-top: 2%;
+  column-gap: 2%;
 }
 
 .offer_search {

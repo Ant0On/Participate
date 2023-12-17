@@ -32,6 +32,7 @@ const emits = defineEmits(['update:modelValue'])
   align-items: flex-start;
   flex-direction: column;
   position: relative;
+  width: 100%;
 }
 
 input {
@@ -39,6 +40,7 @@ input {
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;
+  resize: vertical;
 }
 
 label {
