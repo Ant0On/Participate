@@ -16,8 +16,8 @@ const props = defineProps({
 .image {
   height: auto;
   width: 100%;
-  max-width: 300px;
-  max-height: 300px;
+  max-width: 450px;
+  max-height: 450px;
   margin: 0 13% 120px 13%;
 }
 

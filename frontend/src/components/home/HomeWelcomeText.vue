@@ -18,13 +18,14 @@
 .label {
   display: flex;
   flex-direction: column;
+  width: 100%;
   margin: 90px 5% 10px 8%;
 }
 
 .label .text-wrapper {
   color: #000000;
   font-family: "Playfair Display-Bold", serif;
-  font-size: 36px;
+  font-size: 45px;
   font-weight: 700;
   line-height: normal;
   margin-bottom: 8px;
@@ -33,7 +34,7 @@
 .label .subtext1 {
   color: #000000;
   font-family: "Playfair Display-Medium", serif;
-  font-size: 24px;
+  font-size: 40px;
   font-weight: 500;
   line-height: normal;
   margin-bottom: 8px;
@@ -42,7 +43,7 @@
 .label .subtext2 {
   color: #262626;
   font-family: "Playfair Display-Regular", serif;
-  font-size: 22px;
+  font-size: 35px;
   font-weight: 400;
   line-height: normal;
   margin-bottom: 8px;
