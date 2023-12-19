@@ -18,7 +18,7 @@ const props = defineProps({
   width: 100%;
   max-width: 450px;
   max-height: 450px;
-  margin: 0 13% 120px 13%;
+  margin: 0 13% 5% 13%;
 }
 
 </style>

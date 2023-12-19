@@ -14,11 +14,6 @@ const searchOffer = ref({
   numberOfPeople: '',
 })
 
-// watch(searchOffer.value, (newOffer) => {
-//     searchOffer.value = newOffer
-//       console.log("Value has changed")
-//     }
-// )
 </script>
 
 <template>
