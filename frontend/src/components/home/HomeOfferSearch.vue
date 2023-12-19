@@ -19,7 +19,6 @@ const searchOffer= ref({
 })
 
 function searchOffers(){
-  console.log(searchOffer.value)
 }
 
 </script>
