@@ -46,7 +46,7 @@ const schema = Yup.object().shape({
     <p>Welcome back. Please log in to your account</p>
     <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <form class="login_form" @submit.prevent>
-      <TextInput labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.Login"/>
+      <TextInput width="440px" labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.Login"/>
       <PasswordInput v-model="loginData.Password" @keyup.enter="onSubmit"/>
       <LoginButtons @log-in-clicked="onSubmit"/>
     </form>

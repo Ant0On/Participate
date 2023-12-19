@@ -10,7 +10,7 @@ import LoginSection from "@/components/login/LoginSection.vue";
     <NavBar currentPage="login"/>
     <div class="login_container">
       <LoginSection/>
-      <img alt="Image" src="../assets/img/image-3.png"/>
+      <img alt="Image" src="../assets/img/login_image.png"/>
     </div>
     <Footer/>
   </div>

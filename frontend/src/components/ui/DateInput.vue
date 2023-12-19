@@ -6,10 +6,12 @@ let inputUUID = uuidv4();
 
 const props = defineProps({
   labelText: String,
-  placeholder: String,
   isRequired: Boolean,
   modelValue: String,
-  width: String,
+  width: {
+    type: String,
+    default: "100%"
+  }
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -20,27 +22,25 @@ const emits = defineEmits(['update:modelValue'])
 <template>
   <div class="text_input">
     <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue"
+    <input :id="inputUUID" :value="modelValue" type="date" value=""
            @input="$emit('update:modelValue', $event.target.value)"/>
   </div>
 </template>
 
-
 <style scoped>
+input[type=date]{
+  width: v-bind(width);
+  height: 40px;
+  background-color: var(--surfacelight);
+  border: 1px;
+  resize: vertical;
+}
 .text_input {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
   position: relative;
   width: 100%;
-}
-
-input {
-  width: v-bind(width);
-  height: 40px;
-  background-color: var(--surfacelight);
-  border: 1px;
-  resize: vertical;
 }
 
 label {
