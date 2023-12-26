@@ -4,19 +4,21 @@ import {ref, watch} from 'vue';
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
+import {useSearchStore} from "@/stores/search.store";
+
+const searchStore = useSearchStore();
 
 const accommodations = []
 const searchOffer = ref({
   offer_type: 'Accommodation',
-  location: '',
-  dateFrom: '',
-  dateTo: '',
-  numberOfPeople: '',
+  location: searchStore.location || '',
+  dateFrom: searchStore.dateFrom || '',
+  dateTo: searchStore.dateTo || '',
+  numberOfPeople: searchStore.numberOfPeople || '',
 })
 
 watch(searchOffer.value, (newOffer) => {
-      searchOffer.value = newOffer
-      console.log("Value has changed")
+  searchStore.setSearchValues(newOffer)
     }
 )
 </script>
