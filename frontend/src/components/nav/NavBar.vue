@@ -1,6 +1,7 @@
 <script setup>
 import {defineProps} from 'vue';
 import NavItem from "./NavItem.vue";
+import {useAuthStore} from "@/stores/auth.store";
 
 const props = defineProps({
   currentPage: String
@@ -9,6 +10,11 @@ const props = defineProps({
 function isActive(text, currentPage) {
   return text === currentPage
 }
+const auth = useAuthStore();
+const user = auth.user;
+
+const navigateTo = (auth.user === null)? '/login' : '/account'
+const text = (auth.user === null)? 'Log in': auth.user.first_name + ' ' + auth.user.last_name;
 </script>
 
 <template>
@@ -19,7 +25,7 @@ function isActive(text, currentPage) {
       <NavItem text="Accommodations" :isActive="isActive('accommodations', currentPage)" navigateTo="/accommodations"/>
       <NavItem text="Activities" :isActive="isActive('activities', currentPage)" navigateTo="/activities"/>
       <NavItem text="Events" :isActive="isActive('events', currentPage)" navigateTo="/events"/>
-      <NavItem text="Log in" :isActive="isActive('login', currentPage)" navigateTo="/login"/>
+      <NavItem :text="text" :isActive="isActive('login', currentPage)" :navigateTo="navigateTo"/>
     </div>
   </nav>
 </template>

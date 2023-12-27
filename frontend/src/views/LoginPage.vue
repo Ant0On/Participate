@@ -4,8 +4,13 @@ import Footer from "@/components/layout/FooterBar.vue";
 import NavBar from "@/components/nav/NavBar.vue";
 import LoginSection from "@/components/login/LoginSection.vue";
 import SignUpSection from "@/components/login/SignUpSection.vue";
+import {useAuthStore} from "@/stores/auth.store";
+import AccountNav from "@/components/account/AccountNav.vue";
 
 const loginPage = ref(true)
+
+const authStore = useAuthStore()
+const user = authStore.user;
 
 
 
@@ -15,23 +20,42 @@ const loginPage = ref(true)
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <div class="logging">
     <NavBar currentPage="login"/>
-    <div class="login_container">
+    <div class="login_container" v-if="user === null">
       <Transition name="slide-fade">
         <div class="login" v-if="loginPage">
           <LoginSection @sign-up-clicked="loginPage = !loginPage"/>
-          <img alt="Image" src="../assets/img/image-3.png"/>
+          <img alt="Image" src="../assets/img/login_image.png"/>
         </div>
         <div class="signup" v-else>
-          <img alt="Image" src="../assets/img/image-3.png"/>
+          <img alt="Image" src="../assets/img/login_image.png"/>
           <SignUpSection/>
         </div>
       </Transition>
+    </div>
+    <div class="account_container" v-else>
+      <p> Welcome again {{ user.first_name }}!</p>
+      <div class="account_data">
+        <AccountNav/>
+      </div>
     </div>
     <Footer/>
   </div>
 </template>
 
 <style scoped>
+div.account_container{
+  display: flex;
+  flex-direction: column;
+
+}
+
+p{
+  color: #000000;
+  font-family: "Poppins", Helvetica;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: normal;
+}
 .logging {
   display: flex;
   flex-direction: column;
