@@ -1,5 +1,5 @@
 <script setup>
-import { defineEmits, ref, computed } from 'vue';
+import { defineEmits, ref} from 'vue';
 import AccountNavItem from "@/components/account/AccountNavItem.vue";
 
 const emits = defineEmits(['pageChanged'])
@@ -7,7 +7,6 @@ const activeItem = ref('Account Information');
 
 function onItemClicked(navItem){
   activeItem.value = navItem
-  console.log("changed prop", activeItem.value)
   emits('pageChanged', navItem)
 }
 

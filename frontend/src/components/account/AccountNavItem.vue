@@ -8,6 +8,20 @@ const props = defineProps({
 
 const emits = defineEmits(['itemClicked'])
 
+function handleMouseOut(element) {
+  if (!props.isActive)
+  {
+    element.classList.remove('active')
+    element.classList.add('not_active')
+  }
+
+}
+
+function handleMouseOver(element) {
+  element.classList.remove('not_active')
+  element.classList.add('active')
+}
+
 function onClick() {
   emits('itemClicked', props.text)
 }
@@ -15,7 +29,8 @@ function onClick() {
 </script>
 
 <template>
-  <div :class="{'active':isActive, 'not_active':!isActive}" @click="onClick">
+  <div @mouseover="handleMouseOver($el)" @mouseout="handleMouseOut($el)"
+       :class="{'active':isActive, 'not_active':!isActive}" @click="onClick">
     <p>{{ text }}</p>
   </div>
 </template>
