@@ -10,6 +10,10 @@ const props = defineProps({
   isRequired: Boolean,
   modelValue: String,
   width: String,
+  isActive: {
+    type: Boolean,
+    default: true
+  }
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -21,7 +25,7 @@ const emits = defineEmits(['update:modelValue'])
   <div class="text_input">
     <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
     <input :id="inputUUID" :placeholder="placeholder" :value="modelValue"
-           @input="$emit('update:modelValue', $event.target.value)"/>
+           @input="$emit('update:modelValue', $event.target.value)" :disabled="!isActive" :class="{'disabled': !isActive}"/>
   </div>
 </template>
 
@@ -34,7 +38,10 @@ const emits = defineEmits(['update:modelValue'])
   position: relative;
   width: 100%;
 }
-
+.disabled{
+  color: black;
+  background-color: #efefef;
+}
 input {
   width: v-bind(width);
   height: 40px;
