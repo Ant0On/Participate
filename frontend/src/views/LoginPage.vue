@@ -14,7 +14,11 @@ const loginPage = ref(true)
 const authStore = useAuthStore()
 const user = authStore.user;
 
+const currentPage = ref('Account Information')
 
+function onPageChange(page){
+  currentPage.value = page;
+}
 
 </script>
 
@@ -37,9 +41,9 @@ const user = authStore.user;
     <div class="account_container" v-else>
       <p> Welcome again {{ user.first_name }}!</p>
       <div class="account_data">
-        <AccountNav/>
+        <AccountNav @page-changed="onPageChange"/>
         <div class="data">
-          <AccountData v-if="true"/>
+          <AccountData v-if="currentPage === 'Account Information'"/>
           <AccountHistory v-else/>
         </div>
       </div>
