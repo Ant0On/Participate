@@ -7,21 +7,28 @@ const activeItem = ref('Account Information');
 
 function onItemClicked(navItem){
   activeItem.value = navItem
+  console.log("changed prop", activeItem.value)
   emits('pageChanged', navItem)
 }
-const accountInfo = computed(()=> activeItem.value === 'Account Information')
-const history = computed(()=> activeItem.value === 'History')
+
+
 </script>
 
 <template>
 <div class="account_nav">
-  <AccountNavItem text="Account Information" :is-active="accountInfo" @item-clicked="onItemClicked"/>
-  <AccountNavItem text="History" :is-active="history" @item-clicked="onItemClicked"/>
+  <AccountNavItem text="Account Information" :is-active="activeItem === 'Account Information'" @item-clicked="onItemClicked" style="margin-top: 20px"/>
+  <AccountNavItem text="History" :is-active="activeItem === 'History'" @item-clicked="onItemClicked"/>
 </div>
 </template>
 
 <style scoped>
 div.account_nav{
-  margin-left:;
+  display: flex;
+  flex-direction: column;
+  margin-left: 5%;
+  margin-top: 2%;
+  padding-right: 20px;
+  border-right: 1px solid;
+  height: max(70%, 400px);
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, ref, watch } from 'vue'
+import {defineEmits, defineProps} from 'vue'
 
 const props = defineProps({
   text: String,
@@ -7,43 +7,42 @@ const props = defineProps({
 })
 
 const emits = defineEmits(['itemClicked'])
-function handleMouseOut(element) {
-  if(!props.isActive)
-  element.style.backgroundColor = "#efefef";
-}
-function handleMouseOver(element) {
-  element.style.backgroundColor = "#c8c8c8";
-}
 
-const color = ref((props.isActive)? "#c8c8c8":"#efefef")
-
-function onClick(){
+function onClick() {
   emits('itemClicked', props.text)
 }
 
-watch(props, (newValue, oldValue) =>{
-  color.value = (newValue) ? "#c8c8c8":"#efefef"
-})
 </script>
 
 <template>
-  <div @mouseover="handleMouseOver($el)" @mouseout="handleMouseOut($el)" @click="onClick" :style="{'background-color': color}">
-    {{ text }}
+  <div :class="{'active':isActive, 'not_active':!isActive}" @click="onClick">
+    <p>{{ text }}</p>
   </div>
 </template>
 
 <style scoped>
 div {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   align-items: center;
-  padding: 12px 26px;
+  flex-direction: column;
+  justify-content: center;
+  height: max(10%, 50px);
+  padding: 10px;
+}
+
+.active {
+  background-color: #c8c8c8;
+}
+
+.not_active {
+  background-color: #efefef;
+}
+
+p {
   color: black;
   font-family: "Poppins", Helvetica;
   font-size: 1rem;
   font-weight: 400;
-  margin-bottom: 5px;
 }
 
 

@@ -6,6 +6,8 @@ import LoginSection from "@/components/login/LoginSection.vue";
 import SignUpSection from "@/components/login/SignUpSection.vue";
 import {useAuthStore} from "@/stores/auth.store";
 import AccountNav from "@/components/account/AccountNav.vue";
+import AccountData from "@/components/account/AccountData.vue";
+import AccountHistory from "@/components/account/AccountHistory.vue";
 
 const loginPage = ref(true)
 
@@ -36,6 +38,10 @@ const user = authStore.user;
       <p> Welcome again {{ user.first_name }}!</p>
       <div class="account_data">
         <AccountNav/>
+        <div class="data">
+          <AccountData v-if="true"/>
+          <AccountHistory v-else/>
+        </div>
       </div>
     </div>
     <Footer/>
@@ -46,15 +52,25 @@ const user = authStore.user;
 div.account_container{
   display: flex;
   flex-direction: column;
-
+  margin-top: 3%;
+  row-gap: 30px;
+  height: 450px;
 }
-
+div.account_data{
+  display: flex;
+  flex-direction: row;
+}
+div.data{
+  margin: 2%;
+}
 p{
   color: #000000;
   font-family: "Poppins", Helvetica;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 700;
   line-height: normal;
+  align-self: center;
+
 }
 .logging {
   display: flex;

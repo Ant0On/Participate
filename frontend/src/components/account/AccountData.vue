@@ -8,7 +8,7 @@ const user = auth.user;
 </script>
 
 <template>
-
+<p>ALA</p>
 </template>
 
 <style scoped>
