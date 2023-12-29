@@ -8,6 +8,8 @@ import {useAuthStore} from "@/stores/auth.store";
 import AccountNav from "@/components/account/AccountNav.vue";
 import AccountData from "@/components/account/AccountData.vue";
 import AccountHistory from "@/components/account/AccountHistory.vue";
+import AccountNewOffer from "@/components/account/AccountNewOffer.vue";
+import AccountCurrentOffer from "@/components/account/AccountCurrentOffer.vue";
 
 const loginPage = ref(true)
 
@@ -44,7 +46,9 @@ function onPageChange(page){
         <AccountNav @page-changed="onPageChange"/>
         <div class="data">
           <AccountData v-if="currentPage === 'Account Information'"/>
-          <AccountHistory v-else/>
+          <AccountHistory v-else-if="currentPage === 'History'"/>
+          <AccountNewOffer v-else-if="currentPage === 'New Offer'"/>
+          <AccountCurrentOffer v-else/>
         </div>
       </div>
     </div>

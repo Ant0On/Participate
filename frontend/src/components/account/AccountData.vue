@@ -1,7 +1,6 @@
 <script setup>
 
 import {useAuthStore} from "@/stores/auth.store";
-import PasswordInput from "@/components/ui/PasswordInput.vue";
 import TextInput from "@/components/ui/TextInput.vue";
 
 const auth = useAuthStore();
