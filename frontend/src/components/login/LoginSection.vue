@@ -34,7 +34,10 @@ async function onSubmit() {
 
 const schema = Yup.object().shape({
   Login: Yup.string().required('Login is required'),
-  Password: Yup.string().required('Password is required')
+  Password: Yup.string().when('Login', {
+    is: (value) => value !== '' || typeof value !== 'undefined',
+    then: schema => schema.required('Password is required')
+  } )
 });
 
 
