@@ -25,7 +25,7 @@ watch(searchOffer.value, (newOffer) => {
 <template>
   <div class="event_page">
     <NavBar currentPage="events"/>
-    <p>Events</p>
+    <p>Unforgettable events</p>
     <OfferSearch offer_type="Events" v-model:location="searchOffer.location"
                  v-model:date-from="searchOffer.dateFrom" v-model:date-to="searchOffer.dateTo"
                  v-model:number-of-people="searchOffer.numberOfPeople"/>

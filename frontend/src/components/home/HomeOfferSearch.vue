@@ -74,6 +74,7 @@ const schema = Yup.object().shape({
   border: 1px solid;
   background-color: #E6E6E6;
   padding: 10px 15px;
+  border-radius: 25px;
 }
 
 p{

@@ -50,6 +50,7 @@ div.offer_search {
   padding: 10px 30px;
   margin-left: 5%;
   margin-right: 5%;
+  border-radius: 25px;
 }
 
 
