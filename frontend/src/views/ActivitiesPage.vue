@@ -5,7 +5,8 @@ import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 
-const activities = []
+const activities = ref([
+])
 const searchOffer = ref({
   offer_type: 'Activities',
   location: '',
@@ -15,8 +16,7 @@ const searchOffer = ref({
 })
 
 watch(searchOffer.value, (newOffer) => {
-    searchOffer.value = newOffer
-      console.log("Value has changed")
+      searchOffer.value = newOffer
     }
 )
 </script>
@@ -28,11 +28,32 @@ watch(searchOffer.value, (newOffer) => {
     <OfferSearch offer_type="Activities" v-model:location="searchOffer.location"
                  v-model:date-from="searchOffer.dateFrom" v-model:date-to="searchOffer.dateTo"
                  v-model:number-of-people="searchOffer.numberOfPeople"/>
-    <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                   :image="activity.image" :title="activity.title"/>
+    <div class="offer_items">
+      <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
+                     :image="activity.image" :title="activity.title" :price="activity.price"
+                     :number-of-people="activity.numberOfPeople"/>
+    </div>
   </div>
 </template>
 
 <style scoped>
+div.activities_page {
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+}
 
+p {
+  color: #000000;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: normal;
+  align-self: center;
+  margin: 1% 1% 1% 1%;
+}
+
+.offer_items {
+  margin: 3% 5% 0 5%;
+}
 </style>

@@ -5,9 +5,9 @@ import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 
-const events = []
+const events = ref([
+])
 
-const accommodations = []
 const searchOffer = ref({
   offer_type: 'Events',
   location: '',
@@ -18,7 +18,6 @@ const searchOffer = ref({
 
 watch(searchOffer.value, (newOffer) => {
       searchOffer.value = newOffer
-      console.log("Value has changed")
     }
 )
 </script>
@@ -30,11 +29,32 @@ watch(searchOffer.value, (newOffer) => {
     <OfferSearch offer_type="Events" v-model:location="searchOffer.location"
                  v-model:date-from="searchOffer.dateFrom" v-model:date-to="searchOffer.dateTo"
                  v-model:number-of-people="searchOffer.numberOfPeople"/>
+    <div class="offer_items">
     <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
-                   :image="event.image" :title="event.title"/>
+                   :image="event.image" :title="event.title" :price="event.price"
+                   :number-of-people="event.numberOfPeople"/>
+    </div>
   </div>
 </template>
 
 <style scoped>
+div.event_page {
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+}
 
+p {
+  color: #000000;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: normal;
+  align-self: center;
+  margin: 1% 1% 1% 1%;
+}
+
+.offer_items {
+  margin: 3% 5% 0 5%;
+}
 </style>
