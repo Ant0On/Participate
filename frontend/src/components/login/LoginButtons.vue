@@ -6,7 +6,6 @@ import LoginButton from './LoginButton.vue'
 const emits = defineEmits(['logInClicked'])
 
 function signUpHandler() {
-
 }
 
 function logInHandler() {

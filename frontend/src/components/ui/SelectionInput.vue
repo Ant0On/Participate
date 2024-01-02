@@ -12,7 +12,7 @@ const props = defineProps({
   items: Array,
   width: {
     type: String,
-    default: "300px"
+    default: "100%"
   }
 })
 
@@ -35,12 +35,14 @@ select, option{
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;
+  resize: vertical;
 }
 .text_input {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
   position: relative;
+  width: 100%;
 }
 
 label {

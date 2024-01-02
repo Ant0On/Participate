@@ -11,7 +11,7 @@ const props = defineProps({
   modelValue: String,
   width: {
     type: String,
-    default: "300px"
+    default: "100%"
   }
 })
 
@@ -32,12 +32,14 @@ input[type=number]{
   height: 40px;
   background-color: var(--surfacelight);
   border: 1px;
+  resize: vertical;
 }
 .text_input {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
   position: relative;
+  width: 100%;
 }
 
 label {

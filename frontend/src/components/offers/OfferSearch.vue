@@ -1,5 +1,5 @@
 <script setup>
-import {defineEmits, defineProps, reactive} from 'vue';
+import {defineEmits, defineProps} from 'vue';
 
 import TextInput from "@/components/ui/TextInput.vue";
 import DateInput from "@/components/ui/DateInput.vue";
@@ -14,12 +14,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:location', 'update:dateFrom', 'update:dateTo', 'update:numberOfPeople'])
 
-let inputWidth = reactive({
-  inputWidth: window.innerWidth / 5
-})
+let inputWidth = window.innerWidth / 5;
+
 
 window.addEventListener("resize", () => {
-    inputWidth.inputWidth = window.innerWidth / 5;
+    inputWidth = window.innerWidth / 5;
 });
 
 
@@ -28,14 +27,14 @@ window.addEventListener("resize", () => {
 
 <template>
   <div class="offer_search">
-    <TextInput v-model="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth.inputWidth+'px'"
+    <TextInput :value="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth+'px'"
                label-text="Location" placeholder="Location" :is-required="true"/>
-    <DateInput v-model="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
-               :is-required="true" :width="inputWidth.inputWidth+'px'"/>
-    <DateInput v-model="dateTo" @input="$emit('update:dateTo', $event.target.value)" label-text="Date to"
-               :is-required="false" :width="inputWidth.inputWidth+'px'"/>
-    <NumberInput v-model="numberOfPeople" @input="$emit('update:numberOfPeople', $event.target.value)"
-                 label-text="Number of people" placeholder="People" :is-required="true" :width="inputWidth.inputWidth+'px'"/>
+    <DateInput :value="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
+               :is-required="true" :width="inputWidth+'px'"/>
+    <DateInput :value="dateTo" @input="$emit('update:dateTo', $event.target.value)" label-text="Date to"
+               :is-required="false" :width="inputWidth+'px'"/>
+    <NumberInput :value="numberOfPeople" @input="$emit('update:numberOfPeople', $event.target.value)"
+                 label-text="Number of people" placeholder="People" :is-required="true" :width="inputWidth+'px'"/>
   </div>
 </template>
 

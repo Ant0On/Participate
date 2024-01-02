@@ -13,7 +13,7 @@ function isActive(text, currentPage) {
 
 <template>
   <nav>
-    <img alt="Image" src="../../assets/img/image-2.png"/>
+    <img alt="Image" src="../../assets/img/logo.png"/>
     <div>
       <NavItem text="Home" :isActive="isActive('home', currentPage)" navigateTo="/"/>
       <NavItem text="Accommodations" :isActive="isActive('accommodations', currentPage)" navigateTo="/accommodations"/>
@@ -34,7 +34,7 @@ img {
 }
 nav {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   margin: 0.3rem;
   padding: 0.3rem;
