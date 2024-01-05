@@ -67,7 +67,7 @@ func (c *Customer) LoginCheck(email, password string) (string, error) {
 	return t, nil
 }
 func (c *Customer) checkIfEmailExist(email string) (string, error) {
-	var h Host
+	h := NewHost()
 
 	if err := DB.Model(&Customer{}).Where("email = ?", email).Scan(&c).Error; err != nil {
 		if err = DB.Model(&Host{}).Where("email = ?", email).Scan(&h).Error; err != nil {
