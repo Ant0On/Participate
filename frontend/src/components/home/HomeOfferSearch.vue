@@ -3,6 +3,7 @@
 import {ref} from 'vue';
 import * as Yup from 'yup';
 import { router } from "@/router";
+import { storeToRefs } from 'pinia';
 
 import {useSearchStore} from "@/stores/search.store";
 import SelectionInput from "@/components/ui/SelectionInput.vue";
@@ -19,6 +20,7 @@ const offerRoutes = {
 }
 
 const searchStore = useSearchStore();
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
 const searchOffer = ref({
   offerType: '',
   location: '',
@@ -29,8 +31,13 @@ const searchOffer = ref({
 
 function searchOffers() {
   schema.validate(searchOffer.value).then((value) => {
-    searchStore.setSearchValues(value)
+    location.value = value.location
+    dateFrom.value = value.dateFrom.toISOString().split('T')[0]
+    dateTo.value = value.dateTo.toISOString().split('T')[0]
+    numberOfPeople.value = value.numberOfPeople
     router.push(offerRoutes[searchOffer.value.offerType])
+
+
   }).catch((err) => {
     console.log('not validated', err)
   })

@@ -1,33 +1,44 @@
 <script setup>
 import {ref, watch} from 'vue';
+import {storeToRefs} from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
+import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import {useSearchStore} from "@/stores/search.store";
 
-const activities = ref([
-])
-const searchOffer = ref({
-  offer_type: 'Activities',
-  location: '',
-  dateFrom: '',
-  dateTo: '',
-  numberOfPeople: '',
+const searchStore = useSearchStore();
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
+
+const activities = ref(getCurrentActivities(location, dateFrom, dateTo, numberOfPeople))
+
+
+function getCurrentActivities(location, dateFrom, dateTo, numberOfPeople){
+  return fetchWrapper.get('/api/offers')
+}
+
+watch(location, (newLocation) => {
+  activities.value = getCurrentActivities(newLocation, dateFrom, dateTo, numberOfPeople)
 })
-
-watch(searchOffer.value, (newOffer) => {
-      searchOffer.value = newOffer
-    }
-)
+watch(dateFrom, (newDateFrom) => {
+  activities.value = getCurrentActivities(location, newDateFrom, dateTo, numberOfPeople)
+})
+watch(dateTo, (newDateTo) => {
+  activities.value = getCurrentActivities(location, dateFrom, newDateTo, numberOfPeople)
+})
+watch(numberOfPeople, (newNumberOfPeople) => {
+  activities.value = getCurrentActivities(location, dateFrom, dateTo, newNumberOfPeople)
+})
 </script>
 
 <template>
   <div class="activities_page">
     <NavBar currentPage="activities"/>
     <p>Inspiring activities</p>
-    <OfferSearch offer_type="Activities" v-model:location="searchOffer.location"
-                 v-model:date-from="searchOffer.dateFrom" v-model:date-to="searchOffer.dateTo"
-                 v-model:number-of-people="searchOffer.numberOfPeople"/>
+    <OfferSearch offer_type="Activities" v-model:location="location"
+                 v-model:date-from="dateFrom" v-model:date-to="dateTo"
+                 v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
                      :image="activity.image" :title="activity.title" :price="activity.price"
