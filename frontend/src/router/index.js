@@ -6,6 +6,7 @@ import Home from '@/views/HomePage.vue'
 import Accommodations from "@/views/AccommodationsPage.vue";
 import Events from "@/views/EventsPage.vue";
 import Activities from "@/views/ActivitiesPage.vue";
+import Offer from "@/views/OfferPage.vue";
 
 const routes = [
     {
@@ -33,6 +34,12 @@ const routes = [
         name: "Events",
         component: Events
     },
+    {
+        path: '/offers/:type/:id',
+        name: 'Offers',
+        component: Offer,
+        props: true
+    }
 
 ]
 

@@ -12,8 +12,16 @@ import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 const searchStore = useSearchStore();
 const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
 
-const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
-
+//const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
+const accommodations = ref([{
+  id: 1,
+  location: "Polska",
+  image: "@/assets/img/test.jpg",
+  title: "Domek w polsce",
+  description: "Duzy domek wygodny w polsce tanio!!",
+  price: "200 zlotych polskich",
+  numberOfPeople: 3,
+}])
 
 function getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople){
   return fetchWrapper.get('/api/offers')
@@ -41,7 +49,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-      <OfferListItem v-for="accommodation in accommodations" :location="accommodation.location"
+      <OfferListItem v-for="accommodation in accommodations" type="accommodations" :location="accommodation.location" :id="accommodation.id"
                      :description="accommodation.description" :image="accommodation.image" :title="accommodation.title"
                      :price="accommodation.price" :number-of-people="accommodation.numberOfPeople"/>
     </div>

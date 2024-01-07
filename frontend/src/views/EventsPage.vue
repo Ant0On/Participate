@@ -41,7 +41,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-    <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
+    <OfferListItem v-for="event in events" type="events" :id="event.id" :location="event.location" :description="event.description"
                    :image="event.image" :title="event.title" :price="event.price"
                    :number-of-people="event.numberOfPeople"/>
     </div>
