@@ -26,6 +26,7 @@ type Offer struct {
 	OfferCategoryID  uint      `gorm:"not null"`
 	HostID           uint      `gorm:"not null"`
 	TownID           uint      `gorm:"not null"`
+	ImageID          uint      `gorm:"not null"`
 	Reservations     []Reservation
 }
 
