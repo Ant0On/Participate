@@ -9,7 +9,7 @@ const props = defineProps({
   location: String,
   dateFrom: String,
   dateTo: String,
-  numberOfPeople: String,
+  numberOfPeople: Number | String,
 })
 
 const emit = defineEmits(['update:location', 'update:dateFrom', 'update:dateTo', 'update:numberOfPeople'])
@@ -27,13 +27,13 @@ window.addEventListener("resize", () => {
 
 <template>
   <div class="offer_search">
-    <TextInput :value="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth+'px'"
+    <TextInput :model-value="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth+'px'"
                label-text="Location" placeholder="Location" :is-required="true"/>
-    <DateInput :value="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
+    <DateInput :model-value="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
                :is-required="true" :width="inputWidth+'px'"/>
-    <DateInput :value="dateTo" @input="$emit('update:dateTo', $event.target.value)" label-text="Date to"
+    <DateInput :model-value="dateTo" @input="$emit('update:dateTo', $event.target.value)" label-text="Date to"
                :is-required="false" :width="inputWidth+'px'"/>
-    <NumberInput :value="numberOfPeople" @input="$emit('update:numberOfPeople', $event.target.value)"
+    <NumberInput :model-value="numberOfPeople" @input="$emit('update:numberOfPeople', $event.target.value)"
                  label-text="Number of people" placeholder="People" :is-required="true" :width="inputWidth+'px'"/>
   </div>
 </template>
@@ -50,6 +50,7 @@ div.offer_search {
   padding: 10px 30px;
   margin-left: 5%;
   margin-right: 5%;
+  border-radius: 25px;
 }
 
 
