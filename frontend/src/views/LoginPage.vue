@@ -19,10 +19,10 @@ const loginPage = ref(true)
       <Transition name="slide-fade">
         <div class="login" v-if="loginPage">
           <LoginSection @sign-up-clicked="loginPage = !loginPage"/>
-          <img alt="Image" src="../assets/img/image-3.png"/>
+          <img alt="Image" src="../assets/img/login_image.png"/>
         </div>
         <div class="signup" v-else>
-          <img alt="Image" src="../assets/img/image-3.png"/>
+          <img alt="Image" src="../assets/img/login_image.png"/>
           <SignUpSection/>
         </div>
       </Transition>
