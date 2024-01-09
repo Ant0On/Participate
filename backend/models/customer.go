@@ -47,27 +47,31 @@ func (c *Customer) Save() error {
 	return nil
 }
 
-func LoginCheck(email, password string) (string, error) {
+func LoginCheck(email, password string) (string, any, error) {
 	var role string
 	var uPassword string
+	var user any
+	var t string
 	var err error
 	c := Customer{}
 
 	if role, uPassword, err = c.checkIfEmailExist(email); err != nil {
-		return "", fmt.Errorf("user with given email doesn't exist: %w", err)
+		return "", nil, fmt.Errorf("user with given email doesn't exist: %w", err)
 	}
 
 	if err = passHelper.VerifyPassword(password, uPassword); err != nil {
-		return "", fmt.Errorf("VerifyPassword: %s", role)
+		return "", nil, fmt.Errorf("VerifyPassword: %s", role)
 	}
 
-	t, err := token.GenerateToken(c.Email, role)
-
-	if err != nil {
-		return "", fmt.Errorf("token.GenerateToken: %w", err)
+	if t, err = token.GenerateToken(c.Email, role); err != nil {
+		return "", nil, fmt.Errorf("token.GenerateToken: %w", err)
 	}
 
-	return t, nil
+	if user, err = GetUser(email); err != nil {
+		return "", nil, fmt.Errorf("GetUser: %w", err)
+	}
+
+	return t, user, nil
 }
 func (c *Customer) checkIfEmailExist(email string) (string, string, error) {
 	h := NewHost()
@@ -79,6 +83,23 @@ func (c *Customer) checkIfEmailExist(email string) (string, string, error) {
 		return h.Role, h.Password, nil
 	}
 	return c.Role, c.Password, nil
+}
+
+func GetUser(email string) (any, error) {
+	var c *Customer
+	h := NewHost()
+
+	if err := DB.Where("email = ?", email).First(&c).Error; err != nil {
+		if err = DB.Where("email = ?", email).First(&h).Error; err != nil {
+			return "", fmt.Errorf("user not found: %w", err)
+		}
+		// hide sensitive data
+		h.Password = ""
+		return h, nil
+	}
+	// hide sensitive data
+	c.Password = ""
+	return c, nil
 }
 
 func (c *Customer) BeforeSave(*gorm.DB) error {

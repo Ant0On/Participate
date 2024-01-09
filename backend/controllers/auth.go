@@ -65,24 +65,18 @@ type loginInput struct {
 
 func Login(c *gin.Context) {
 	var input loginInput
-	var user models.Customer
+	var user any
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with loginInput": err.Error()})
 		return
 	}
 
-	t, err := models.LoginCheck(input.Email, input.Password)
-	user.Email = input.Email
-	user.Password = input.Password
+	t, user, err := models.LoginCheck(input.Email, input.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"loginCheck: username or password is incorrect": err.Error()})
 		return
 	}
-
-	// hide sensitive data
-	user.Password = ""
-
 	c.JSON(http.StatusOK, gin.H{"token": t, "user": user})
 }
