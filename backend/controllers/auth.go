@@ -43,7 +43,7 @@ func RegisterCustomer(c *gin.Context) {
 }
 
 func RegisterHost(c *gin.Context) {
-	host := models.NewHost()
+	var host *models.Host
 
 	if err := c.ShouldBindJSON(&host); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
@@ -72,9 +72,9 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	t, err := models.LoginCheck(input.Email, input.Password)
 	user.Email = input.Email
 	user.Password = input.Password
+	t, err := user.LoginCheck(user.Email, user.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"loginCheck: username or password is incorrect": err.Error()})
