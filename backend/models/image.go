@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -15,6 +17,14 @@ func Save(name string, data []byte) error {
 	DB.Create(&Image{Name: name, Data: data})
 
 	return nil
+}
+
+func GetAllImages() ([]Image, error) {
+	var images []Image
+	if err := DB.Model([]Image{}).Scan(&images).Error; err != nil {
+		return nil, fmt.Errorf("DB.Model([]Image).Scan: %w", err)
+	}
+	return images, nil
 }
 
 func GetImage() (*Image, error) {

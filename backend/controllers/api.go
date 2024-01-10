@@ -27,6 +27,7 @@ func RegisterRoutes(r *gin.Engine) {
 	image := r.Group("/api/image")
 	image.POST("/upload", UploadImage)
 	image.GET("/get", GetImage)
+	image.GET("/get/all", GetAllImages)
 
 	animal := r.Group("/api/animal")
 	animal.POST("/add", AddAnimal)

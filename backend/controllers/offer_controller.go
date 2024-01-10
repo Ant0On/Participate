@@ -20,12 +20,14 @@ func GetOffers(c *gin.Context) {
 		result = models.DB.Find(&offers)
 	}
 
-	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetOffers error": result.Error})
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": result})
+	result.Scan(&offers)
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offers})
 }
 
 func CreateOffer(c *gin.Context) {
@@ -40,7 +42,7 @@ func CreateOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "registration success!"})
+	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!"})
 }
 
 func DeleteOffer(c *gin.Context) {

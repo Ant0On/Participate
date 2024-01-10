@@ -15,7 +15,7 @@ const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
 const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
 
 function getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople){
-  return fetchWrapper.get('/api/offers')
+  return fetchWrapper.get('/api/image/get/all')
 }
 
 watch(location, (newLocation) => {

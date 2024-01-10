@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -58,4 +59,24 @@ func GetImage(c *gin.Context) {
 	}
 
 	c.Data(http.StatusOK, "image/jpeg", image.Data)
+}
+
+func GetAllImages(c *gin.Context) {
+	images, err := models.GetAllImages()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create a slice to store image data as base64 strings
+	var imageData []string
+
+	// Assuming images is a slice of byte slices ([]byte)
+	for _, image := range images {
+		// Convert each image to base64
+		imageData = append(imageData, base64.StdEncoding.EncodeToString(image.Data))
+	}
+
+	// Return the JSON response with the image data
+	c.JSON(http.StatusOK, gin.H{"images": imageData})
 }
