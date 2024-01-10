@@ -43,7 +43,7 @@ func RegisterCustomer(c *gin.Context) {
 }
 
 func RegisterHost(c *gin.Context) {
-	host := models.NewHost()
+	var host *models.Host
 
 	if err := c.ShouldBindJSON(&host); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})

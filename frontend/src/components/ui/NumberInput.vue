@@ -8,7 +8,7 @@ const props = defineProps({
   labelText: String,
   placeholder: String,
   isRequired: Boolean,
-  modelValue: String,
+  modelValue: String | Number,
   width: {
     type: String,
     default: "100%"
