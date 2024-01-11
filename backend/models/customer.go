@@ -16,7 +16,7 @@ type Customer struct {
 	LastName     string `gorm:"size:100;not null" json:"last_name" binding:"required"`
 	Email        string `gorm:"size:100;not null;unique" json:"email" binding:"required"`
 	Password     string `gorm:"size:100;not null;" json:"password" binding:"required"`
-	Role         string `gorm:"size:100;not null;default:Customer"`
+	Role         string `gorm:"size:100;not null;default:customer"`
 	Reservations []Reservation
 }
 

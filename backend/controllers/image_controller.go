@@ -29,7 +29,7 @@ func UploadImage(c *gin.Context) {
 	// Save image to the database
 	err = models.Save(name, data)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to read image"})
+		c.JSON(500, gin.H{"error": "Failed to save image"})
 		return
 	}
 	c.JSON(200, gin.H{"message": "Image uploaded successfully"})

@@ -15,7 +15,7 @@ const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
 const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
 
 function getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople){
-  return fetchWrapper.get('/api/image/get/all')
+  return fetchWrapper.get('/api/offers')
 }
 
 watch(location, (newLocation) => {
@@ -41,8 +41,8 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
       <OfferListItem v-for="accommodation in accommodations" :location="accommodation.location"
-                     :description="accommodation.description" :image="accommodation.image" :title="accommodation.title"
-                     :price="accommodation.price" :number-of-people="accommodation.numberOfPeople"/>
+                     :description="accommodation.description" :image="accommodation.image" :name="accommodation.name"
+                     :price="accommodation.price" :max_people="accommodation.max_people"/>
     </div>
   </div>
 </template>
