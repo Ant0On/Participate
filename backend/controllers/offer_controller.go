@@ -33,7 +33,7 @@ func GetOffers(c *gin.Context) {
 func CreateOffer(c *gin.Context) {
 	var offer models.Offer
 
-	if err := c.ShouldBind(&offer); err != nil {
+	if err := c.ShouldBindJSON(&offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with createOffer": err.Error()})
 		return
 	}
