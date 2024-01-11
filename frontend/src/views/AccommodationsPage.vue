@@ -1,36 +1,45 @@
 <script setup>
-import {ref, watch} from 'vue';
-import {storeToRefs} from 'pinia';
-
+import { ref, watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {useSearchStore} from "@/stores/search.store";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import { useSearchStore } from "@/stores/search.store";
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
-const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
+const accommodations = ref([]);
 
-function getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople){
-  return fetchWrapper.get('/api/offers')
-}
+const getCurrentAccommodations = () => {
+  fetchWrapper.get('/api/offers')
+      .then(response => {
+        const data = response.data;
 
-watch(location, (newLocation) => {
-  accommodations.value = getCurrentAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
-})
-watch(dateFrom, (newDateFrom) => {
-  accommodations.value = getCurrentAccommodations(location, newDateFrom, dateTo, numberOfPeople)
-})
-watch(dateTo, (newDateTo) => {
-  accommodations.value = getCurrentAccommodations(location, dateFrom, newDateTo, numberOfPeople)
-})
-watch(numberOfPeople, (newNumberOfPeople) => {
-  accommodations.value = getCurrentAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
-})
+        if (data && Array.isArray(data)) {
+          accommodations.value = data;
+        } else {
+          console.error('Invalid response format:', response);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching accommodations:', error);
+      });
+};
+
+onMounted(() => {
+  getCurrentAccommodations();
+});
+
+watch(location, getCurrentAccommodations);
+watch(dateFrom, getCurrentAccommodations);
+watch(dateTo, getCurrentAccommodations);
+watch(numberOfPeople, getCurrentAccommodations);
+
 </script>
+
 
 <template>
   <div class="accommodation_page">
