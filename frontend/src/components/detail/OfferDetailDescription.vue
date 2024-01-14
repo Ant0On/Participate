@@ -9,7 +9,6 @@ const props = defineProps({
   price: 0,
   location: '',
   numberOfPeople: 0,
-  rooms: 0,
   hostId: 0,
   type: '',
 })
@@ -18,7 +17,7 @@ const emits = defineEmits(['moveToSummary'])
 
 <template>
   <div class="offer_detail_description">
-    <OfferDetailHeader :name="name" :location="location" :type="type" :numberOfPeople="numberOfPeople" :rooms="rooms"/>
+    <OfferDetailHeader :name="name" :location="location" :type="type" :numberOfPeople="numberOfPeople"/>
     <div class="line"/>
     <OfferDetailReserve @move-to-summary="$emit('moveToSummary')"/>
     <div class="line"/>

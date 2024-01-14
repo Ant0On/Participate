@@ -11,7 +11,7 @@ const props = defineProps({
 const hostData = ref(fetchHostData())
 
 function fetchHostData(){
-  const response = fetchWrapper.get('/api/host/' + props.hostId)
+  const response = fetchWrapper.get(`/api/host/${props.hostId}`)
 
   return {
     'firstName': response["firsName"],

@@ -17,7 +17,6 @@ const offer = ref({
   price: 0,
   location: '',
   numberOfPeople: 0,
-  rooms: 0,
   hostId: 0,
 })
 
@@ -25,7 +24,7 @@ const isDescription = ref(true)
 
 
 function getOfferDetails() {
-  offer.value = fetchWrapper.get('/offer/detail/' + props.type + '/' + props.id)
+  offer.value = fetchWrapper.get(`/offer/detail/${props.type}/${props.id}`)
 
 }
 </script>
@@ -35,7 +34,7 @@ function getOfferDetails() {
     <NavBar :currentPage="type"/>
     <div class="item_detail">
       <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
-                              :numberOfPeople="offer.numberOfPeople" :rooms="offer.rooms" :hostId="offer.hostId"
+                              :numberOfPeople="offer.numberOfPeople" :hostId="offer.hostId"
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
       <OfferDetailSummary :price="offer.price" :image="offer.image" v-else/>
     </div>
