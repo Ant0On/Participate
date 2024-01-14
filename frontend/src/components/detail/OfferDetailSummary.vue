@@ -52,7 +52,7 @@ function submitOffer(){
       </div>
     </div>
     <div class="offer_detail_summary_image">
-      <img class="offer_detail_summary_image" src="@/assets/img/test.jpg" alt="Offer image">
+      <img class="offer_detail_summary_image" :src="image" alt="Offer image">
     </div>
   </div>
 </div>
