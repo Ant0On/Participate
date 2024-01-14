@@ -9,6 +9,7 @@ const props = defineProps({
   rooms: '',
 })
 const roomsText = computed(()=> (props.rooms > 1)? "rooms": "room")
+const numberOfPeopleText = computed(()=> (props.numberOfPeople > 1)? "people": "person")
 </script>
 
 <template>
@@ -22,7 +23,7 @@ const roomsText = computed(()=> (props.rooms > 1)? "rooms": "room")
   <div class="offer_detail_brief_info">
     <span class="offer_detail_type">{{type.charAt(0).toUpperCase() + type.slice(1)}}</span>
     <div class="delimiter"/>
-    <span class="offer_detail_people">Max {{numberOfPeople}} people</span>
+    <span class="offer_detail_people">Max {{numberOfPeople}} {{ numberOfPeopleText}}</span>
     <div class="delimiter"/>
     <span v-if="rooms" class="offer_detail_rooms">{{rooms}} {{roomsText}}</span>
   </div>

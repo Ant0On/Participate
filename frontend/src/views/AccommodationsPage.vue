@@ -12,16 +12,8 @@ import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 const searchStore = useSearchStore();
 const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
 
-//const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
-const accommodations = ref([{
-  id: 1,
-  location: "Polska",
-  image: "@/assets/img/test.jpg",
-  title: "Domek w polsce",
-  description: "Duzy domek wygodny w polsce tanio!!",
-  price: "200 zlotych polskich",
-  numberOfPeople: 3,
-}])
+const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
+
 
 function getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople){
   return fetchWrapper.get('/api/offers')

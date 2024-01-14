@@ -18,8 +18,10 @@ const emits = defineEmits(['moveToSummary'])
 
 <template>
   <div class="offer_detail_description">
-    <OfferDetailHeader :name="name" location="location" :type="type" :numberOfPeople="numberOfPeople" :rooms="rooms"/>
+    <OfferDetailHeader :name="name" :location="location" :type="type" :numberOfPeople="numberOfPeople" :rooms="rooms"/>
+    <div class="line"/>
     <OfferDetailReserve @move-to-summary="$emit('moveToSummary')"/>
+    <div class="line"/>
     <OfferDetailHost />
   </div>
 </template>
@@ -27,5 +29,15 @@ const emits = defineEmits(['moveToSummary'])
 <style scoped>
 div.offer_detail_description {
   display: flex;
+  flex-direction: column;
 }
+div.line{
+  display: flex;
+  flex-direction: row;
+  color: black;
+  border-bottom: 1px solid;
+  margin: 1%;
+}
+
+
 </style>

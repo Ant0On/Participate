@@ -37,11 +37,14 @@ function getOfferDetails() {
       <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
                               :numberOfPeople="offer.numberOfPeople" :rooms="offer.rooms" :hostId="offer.hostId"
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
-      <OfferDetailSummary :price="offer.price" v-else/>
+      <OfferDetailSummary :price="offer.price" :image="offer.image" v-else/>
     </div>
   </div>
 </template>
 
 <style scoped>
-
+div.item_detail{
+  margin: 5% 5% 1% 5%;
+  background-color: white;
+}
 </style>
