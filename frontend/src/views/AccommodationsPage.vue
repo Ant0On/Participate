@@ -13,49 +13,69 @@ const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const accommodations = ref([]);
 
-const getCurrentAccommodations = () => {
-  fetchWrapper.get('/api/offers')
-      .then(response => {
-        const data = response.data;
+async function getCurrentAccommodations(){
+  await fetchWrapper.get('/api/offers').then(response => {
+    console.log('pierwszy resposne', response)
+    if(response.message === "success") {
+      const townId = response.data[0].town_id
+      return Promise.all([response.data[0], fetchWrapper.get(`/api/town/get/${townId}`)])
+    }
 
-        if (data && Array.isArray(data)) {
-          // Fetch town information for each offer
-          const promises = data.map(offer => {
-            const townId = offer.town_id;
+  }).then(response =>{
+   accommodations.values = {
+      'location': response[1].name,
+      'numberOfPeople': response[0].max_people,
+      'name': response[0].name,
+      'price': response[0].price,
+      'description':response[0].description,
+      'image': '',
+    }
+  })
 
-            if (!townId) {
-              console.error('Town ID is missing for offer:', offer);
-              return Promise.resolve(null);
-            }
 
-            return fetchWrapper.get(`/api/town/get/${townId}`)
-                .then(townResponse => {
-                  console.log('Town Response:', townResponse.data);
-                  return townResponse.data;
-                })
-                .then(town => ({ ...offer, town }));
-          });
 
-          Promise.all(promises)
-              .then(accommodationsWithTown => {
-                console.log('Accommodations with Town:', accommodationsWithTown);
-                accommodations.value = accommodationsWithTown.filter(item => item !== null);
-              })
-              .catch(error => {
-                console.error('Error fetching town information:', error);
-              });
-        } else {
-          console.error('Invalid response format:', response);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching accommodations:', error);
-      });
+  // fetchWrapper.get('/api/offers')
+  //     .then(response => {
+  //       const data = response.data;
+  //
+  //       if (data && Array.isArray(data)) {
+  //         // Fetch town information for each offer
+  //         const promises = data.map(offer => {
+  //           const townId = offer.town_id;
+  //
+  //           if (!townId) {
+  //             console.error('Town ID is missing for offer:', offer);
+  //             return Promise.resolve(null);
+  //           }
+  //
+  //           return fetchWrapper.get(`/api/town/get/${townId}`)
+  //               .then(townResponse => {
+  //                 console.log('Town Response:', townResponse.data);
+  //                 return townResponse.data;
+  //               })
+  //               .then(town => ({ ...offer, town }));
+  //         });
+  //
+  //         Promise.all(promises)
+  //             .then(accommodationsWithTown => {
+  //               console.log('Accommodations with Town:', accommodationsWithTown);
+  //               accommodations.value = accommodationsWithTown.filter(item => item !== null);
+  //             })
+  //             .catch(error => {
+  //               console.error('Error fetching town information:', error);
+  //             });
+  //       } else {
+  //         console.error('Invalid response format:', response);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching accommodations:', error);
+  //     });
 };
 
-
-onMounted(() => {
-  getCurrentAccommodations();
+console.log(getCurrentAccommodations())
+onMounted(async () => {
+  await getCurrentAccommodations();
 });
 
 watch(location, getCurrentAccommodations);
