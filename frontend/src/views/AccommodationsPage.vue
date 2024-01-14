@@ -13,75 +13,48 @@ const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const accommodations = ref([]);
 
-async function getCurrentAccommodations(){
-  await fetchWrapper.get('/api/offers').then(response => {
-    console.log('pierwszy resposne', response)
-    if(response.message === "success") {
-      const townId = response.data[0].town_id
-      return Promise.all([response.data[0], fetchWrapper.get(`/api/town/get/${townId}`)])
-    }
+const allAccommodations = ref([]);
 
-  }).then(response =>{
-   accommodations.values = {
-      'location': response[1].name,
-      'numberOfPeople': response[0].max_people,
-      'name': response[0].name,
-      'price': response[0].price,
-      'description':response[0].description,
-      'image': '',
+async function getCurrentAccommodations() {
+  const response = await fetchWrapper.get(`/api/offers`)
+
+  const responseData = response.data
+
+  allAccommodations.value = responseData.map((data) => {
+    return {
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'name': data["name"],
+      'price': data["price"],
+      'numberOfPeople': data["max_people"]
     }
   })
+}
 
+function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople){
+  return allAccommodations.value.filter((data)=>{
 
-
-  // fetchWrapper.get('/api/offers')
-  //     .then(response => {
-  //       const data = response.data;
-  //
-  //       if (data && Array.isArray(data)) {
-  //         // Fetch town information for each offer
-  //         const promises = data.map(offer => {
-  //           const townId = offer.town_id;
-  //
-  //           if (!townId) {
-  //             console.error('Town ID is missing for offer:', offer);
-  //             return Promise.resolve(null);
-  //           }
-  //
-  //           return fetchWrapper.get(`/api/town/get/${townId}`)
-  //               .then(townResponse => {
-  //                 console.log('Town Response:', townResponse.data);
-  //                 return townResponse.data;
-  //               })
-  //               .then(town => ({ ...offer, town }));
-  //         });
-  //
-  //         Promise.all(promises)
-  //             .then(accommodationsWithTown => {
-  //               console.log('Accommodations with Town:', accommodationsWithTown);
-  //               accommodations.value = accommodationsWithTown.filter(item => item !== null);
-  //             })
-  //             .catch(error => {
-  //               console.error('Error fetching town information:', error);
-  //             });
-  //       } else {
-  //         console.error('Invalid response format:', response);
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching accommodations:', error);
-  //     });
-};
-
-console.log(getCurrentAccommodations())
+    return data.location.startsWith(location) // W tym miejscu trzeba dobry warunek
+  })
+}
 onMounted(async () => {
   await getCurrentAccommodations();
+  accommodations.value = allAccommodations.value
 });
 
-watch(location, getCurrentAccommodations);
-watch(dateFrom, getCurrentAccommodations);
-watch(dateTo, getCurrentAccommodations);
-watch(numberOfPeople, getCurrentAccommodations);
+watch(location, (newLocation) => {
+  accommodations.value =  getNewAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
+})
+watch(dateFrom,  (newDateFrom) => {
+  accommodations.value =  getNewAccommodations(location, newDateFrom, dateTo, numberOfPeople)
+})
+watch(dateTo, (newDateTo) => {
+  accommodations.value =  getNewAccommodations(location, dateFrom, newDateTo, numberOfPeople)
+})
+
+watch(numberOfPeople, (newNumberOfPeople) => {
+  accommodations.value =  getNewAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
+})
 
 </script>
 
@@ -94,9 +67,9 @@ watch(numberOfPeople, getCurrentAccommodations);
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
       <OfferListItem v-for="accommodation in accommodations"
-                     :location="accommodation.town.name"
+                     :location="accommodation.location"
                      :description="accommodation.description" :image="accommodation.image" :name="accommodation.name"
-                     :price="accommodation.price" :max_people="accommodation.max_people"/>
+                     :price="accommodation.price" :max_people="accommodation.numberOfPeople"/>
     </div>
   </div>
 </template>

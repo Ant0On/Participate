@@ -31,7 +31,7 @@ func GetOffers(c *gin.Context) {
 	query := models.DB.Model(&models.Offer{})
 
 	if offerType != "" {
-		query = query.Where("type = ?", offerType)
+		query = query.Where("offer_type = ?", offerType)
 	}
 
 	result = query.
@@ -46,10 +46,7 @@ func GetOffers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": query.
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Select("offer.id")})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offersWithLocation})
 }
 
 func GetOfferByID(c *gin.Context) {
