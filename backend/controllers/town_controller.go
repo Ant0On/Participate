@@ -23,7 +23,7 @@ func AddTown(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "town added successfully!", "town": town})
 }
 
-func GetTown(c *gin.Context) {
+func GetTownByID(c *gin.Context) {
 	townID := c.Param("id")
 
 	if townID == "" {

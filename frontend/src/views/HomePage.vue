@@ -4,7 +4,6 @@ import HomeOfferSearch from "@/components/home/HomeOfferSearch.vue";
 import HomeWelcomeText from "@/components/home/HomeWelcomeText.vue";
 import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
 
-const getApiImageUrl = () => `http://localhost:8080/api/image/get`;
 </script>
 
 <template>
@@ -23,7 +22,7 @@ const getApiImageUrl = () => `http://localhost:8080/api/image/get`;
         <HomeOfferImage v-bind:src="require('../assets/img/activity_home_page.jpg')"/>
       </router-link>
       <router-link :to="{ path: '/events' }">
-        <HomeOfferImage v-bind:src="getApiImageUrl()"/>
+        <HomeOfferImage v-bind:src="require('../assets/img/event_home_page.jpg')"/>
       </router-link>
     </div>
   </div>

@@ -16,7 +16,7 @@ const accommodations = ref([]);
 const allAccommodations = ref([]);
 
 async function getCurrentAccommodations() {
-  const response = await fetchWrapper.get(`/api/offers`)
+  const response = await fetchWrapper.get(`/api/offers?type=accommodation`)
 
   const responseData = response.data
 

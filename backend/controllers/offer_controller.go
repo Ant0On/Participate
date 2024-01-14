@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"backend/models"
@@ -46,7 +45,7 @@ func GetOffers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offersWithLocation})
+	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": offersWithLocation})
 }
 
 func GetOfferByID(c *gin.Context) {
@@ -60,7 +59,7 @@ func GetOfferByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": offer})
 }
 
 func CreateOffer(c *gin.Context) {
@@ -93,7 +92,7 @@ func DeleteOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.DeleteOffer.Delete error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("offer deleted: %v", offer)})
+	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
 }
 
 func UpdateOffer(c *gin.Context) {
