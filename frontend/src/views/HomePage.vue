@@ -2,7 +2,6 @@
 import NavBar from "@/components/nav/NavBar.vue";
 import HomeOfferSearch from "@/components/home/HomeOfferSearch.vue";
 import HomeWelcomeText from "@/components/home/HomeWelcomeText.vue";
-import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
 
 </script>
 
@@ -14,15 +13,15 @@ import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
       <HomeWelcomeText/>
       <HomeOfferSearch/>
     </div>
-    <div class="image">
+    <div class="image_container">
       <router-link :to="{ path: '/accommodations' }">
-        <HomeOfferImage v-bind:src="require('../assets/img/accomodation_home_page.jpg')"/>
+        <img class="image" src="../assets/img/accomodation_home_page.jpg" alt="Accommodation Image"/>
       </router-link>
       <router-link :to="{ path: '/activities' }">
-        <HomeOfferImage v-bind:src="require('../assets/img/activity_home_page.jpg')"/>
+        <img class="image" src="../assets/img/activity_home_page.jpg" alt="Activity Image"/>
       </router-link>
       <router-link :to="{ path: '/events' }">
-        <HomeOfferImage v-bind:src="require('../assets/img/event_home_page.jpg')"/>
+        <img class="image" src="../assets/img/event_home_page.jpg" alt="Event Image"/>
       </router-link>
     </div>
   </div>
@@ -47,13 +46,21 @@ import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
   width: 95%;
 }
 
-.image {
+.image_container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   margin-top: 3%;
   column-gap: 2%;
   width: 95%;
+}
+
+.image {
+  height: auto;
+  width: 100%;
+  max-width: 450px;
+  max-height: 450px;
+  margin: 0 13% 5% 13%;
 }
 
 </style>
