@@ -12,6 +12,7 @@ func RegisterRoutes(r *gin.Engine) {
 	public.GET("/offers", GetOffers)
 	public.GET("/offers/:id", GetOfferByID)
 	public.GET("/host/:id", GetHostByID)
+	public.GET("/offers/recommended", GetRecommendedOffers)
 
 	register := r.Group("api/register")
 	register.POST("/customer", RegisterCustomer)
