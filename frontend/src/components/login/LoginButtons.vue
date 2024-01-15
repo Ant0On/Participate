@@ -3,9 +3,10 @@ import {defineProps, defineEmits} from 'vue'
 
 import LoginButton from './LoginButton.vue'
 
-const emits = defineEmits(['logInClicked'])
+const emits = defineEmits(['logInClicked', 'signUpClicked'])
 
 function signUpHandler() {
+  emits('signUpClicked')
 }
 
 function logInHandler() {

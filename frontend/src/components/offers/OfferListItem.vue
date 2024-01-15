@@ -7,10 +7,10 @@ const props = defineProps({
   id: String,
   location: String,
   image: String,
-  title: String,
+  name: String,
   description: String,
   price: String,
-  numberOfPeople: String,
+  max_people: String,
 })
 
 
@@ -23,10 +23,10 @@ function onItemClicked() {
   <div class="offer_item" @click="onItemClicked">
     <img :src="image" alt="Image">
     <div class="item_details">
-      <div class="title">{{ title }}</div>
+      <div class="title">{{ name }}</div>
       <div class="description"> {{ description }}</div>
       <div class="price">Price: {{ price }}</div>
-      <div class="number_of_people">Number of people: {{ numberOfPeople }}</div>
+      <div class="number_of_people">Number of people: {{ max_people }}</div>
       <div class="location">Location: {{ location }}</div>
     </div>
 

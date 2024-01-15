@@ -3,6 +3,7 @@ import NavBar from "@/components/nav/NavBar.vue";
 import HomeOfferSearch from "@/components/home/HomeOfferSearch.vue";
 import HomeWelcomeText from "@/components/home/HomeWelcomeText.vue";
 import HomeOfferImage from "@/components/home/HomeOfferImage.vue";
+
 </script>
 
 <template>

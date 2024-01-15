@@ -134,8 +134,8 @@ func AddCountries() error {
 func GetAllCountries() ([]Country, error) {
 	var c []Country
 
-	if err := DB.Model(&[]Country{}).Scan(&c).Error; err != nil {
-		return c, fmt.Errorf("DB.Model(&[]Country{}).Scan: %w", err)
+	if err := DB.Model([]Country{}).Scan(&c).Error; err != nil {
+		return nil, fmt.Errorf("DB.Model([]Country{}).Scan: %w", err)
 	}
 	return c, nil
 }

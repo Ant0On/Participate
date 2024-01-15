@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 
-import { fetchWrapper } from '@/_helpers/fetch-wrapper';
-import { router} from "@/router";
+import {fetchWrapper} from '@/_helpers/fetch-wrapper';
+import {router} from "@/router";
 
 export const useAuthStore = defineStore({
     id: 'auth',
@@ -10,7 +10,7 @@ export const useAuthStore = defineStore({
     }),
     actions: {
         async login(email, password) {
-            const user = await fetchWrapper.post('/api/login', { email, password });
+            const user = await fetchWrapper.post('/api/login', {email, password});
 
             this.user = user;
 
@@ -22,7 +22,13 @@ export const useAuthStore = defineStore({
             this.user = null;
             localStorage.removeItem('user');
             router.push('/login');
+        },
+        async signUp(name, email, password) {
+            const user = await fetchWrapper.post('/api/register', {name, email, password})
+            this.user = user;
+            localStorage.setItem('user', JSON.stringify(user));
+
+            router.push('/')
         }
     }
 });
-

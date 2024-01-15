@@ -1,36 +1,61 @@
 <script setup>
-import {ref, watch} from 'vue';
-import {storeToRefs} from 'pinia';
-
+import { ref, watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {useSearchStore} from "@/stores/search.store";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import { useSearchStore } from "@/stores/search.store";
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
-const accommodations = ref(getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople))
+const accommodations = ref([]);
 
+const allAccommodations = ref([]);
 
-function getCurrentAccommodations(location, dateFrom, dateTo, numberOfPeople){
-  return fetchWrapper.get('/api/offers')
+async function getCurrentAccommodations() {
+  const response = await fetchWrapper.get(`/api/offers?type=accommodation`)
+
+  const responseData = response.data
+
+  allAccommodations.value = responseData.map((data) => {
+    return {
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'name': data["name"],
+      'price': data["price"],
+      'numberOfPeople': data["max_people"]
+    }
+  })
 }
 
+function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople){
+  return allAccommodations.value.filter((data)=>{
+
+    return data.location.startsWith(location) // W tym miejscu trzeba dobry warunek
+  })
+}
+onMounted(async () => {
+  await getCurrentAccommodations();
+  accommodations.value = allAccommodations.value
+});
+
 watch(location, (newLocation) => {
-  accommodations.value = getCurrentAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
+  accommodations.value =  getNewAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
 })
-watch(dateFrom, (newDateFrom) => {
-  accommodations.value = getCurrentAccommodations(location, newDateFrom, dateTo, numberOfPeople)
+watch(dateFrom,  (newDateFrom) => {
+  accommodations.value =  getNewAccommodations(location, newDateFrom, dateTo, numberOfPeople)
 })
 watch(dateTo, (newDateTo) => {
-  accommodations.value = getCurrentAccommodations(location, dateFrom, newDateTo, numberOfPeople)
+  accommodations.value =  getNewAccommodations(location, dateFrom, newDateTo, numberOfPeople)
 })
+
 watch(numberOfPeople, (newNumberOfPeople) => {
-  accommodations.value = getCurrentAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
+  accommodations.value =  getNewAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
 })
+
 </script>
 
 <template>
@@ -41,9 +66,10 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-      <OfferListItem v-for="accommodation in accommodations" type="accommodations" :location="accommodation.location" :id="accommodation.id"
-                     :description="accommodation.description" :image="accommodation.image" :title="accommodation.title"
-                     :price="accommodation.price" :number-of-people="accommodation.numberOfPeople"/>
+      <OfferListItem v-for="accommodation in accommodations"
+                     :location="accommodation.location"
+                     :description="accommodation.description" :image="accommodation.image" :name="accommodation.name"
+                     :price="accommodation.price" :max_people="accommodation.numberOfPeople"/>
     </div>
   </div>
 </template>

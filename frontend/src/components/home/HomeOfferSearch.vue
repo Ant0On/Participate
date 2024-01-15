@@ -67,9 +67,9 @@ const schema = Yup.object().shape({
   </div>
 </template>
 
-<link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
-
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&display=swap');
+
 .home_offer_search {
   display: flex;
   flex-direction: column;

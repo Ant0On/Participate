@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"backend/controllers"
 	"backend/models"
@@ -59,22 +58,6 @@ func runServer(args arguments) error {
 	return nil
 }
 
-func init() {
-	models.ConnectDatabase()
-	if err := models.AddCountries(); err != nil {
-		log.Fatal("AddCountries:", err)
-	}
-	if err := models.AddTownTypes(); err != nil {
-		log.Fatal("AddTownTypes:", err)
-	}
-	if err := models.AddGrades(); err != nil {
-		log.Fatal("AddGrades:", err)
-	}
-	if err := models.AddPayments(); err != nil {
-		log.Fatal("AddPayments:", err)
-	}
-}
-
 func main() {
 	args := arguments{
 		LogLevel:       "info",
@@ -82,6 +65,8 @@ func main() {
 		BindPort:       3000,
 		StaticContents: "./frontend/static",
 	}
+
+	models.ConnectDatabase()
 
 	if err := runServer(args); err != nil {
 		logger.WithError(err).Fatal("Server exits with error")

@@ -1,34 +1,58 @@
 <script setup>
-import {ref, watch} from 'vue';
-import {storeToRefs} from 'pinia';
+import { ref, watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
-import {useSearchStore} from "@/stores/search.store";
+import { useSearchStore } from "@/stores/search.store";
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore)
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
-const activities = ref(getCurrentActivities(location, dateFrom, dateTo, numberOfPeople))
+const activities = ref([]);
 
+const allActivities = ref([]);
 
-function getCurrentActivities(location, dateFrom, dateTo, numberOfPeople){
-  return fetchWrapper.get('/api/offers')
+async function getCurrentActivities() {
+  const response = await fetchWrapper.get(`/api/offers?type=activity`)
+
+  const responseData = response.data
+
+  allActivities.value = responseData.map((data) => {
+    return {
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'name': data["name"],
+      'price': data["price"],
+      'numberOfPeople': data["max_people"]
+    }
+  })
 }
 
+function getNewActivities(location, dateFrom, dateTo, numberOfPeople){
+  return allActivities.value.filter((data)=>{
+
+    return data.location.startsWith(location)
+  })
+}
+onMounted(async () => {
+  await getCurrentActivities();
+  activities.value = allActivities.value
+});
+
 watch(location, (newLocation) => {
-  activities.value = getCurrentActivities(newLocation, dateFrom, dateTo, numberOfPeople)
+  activities.value = getNewActivities(newLocation, dateFrom, dateTo, numberOfPeople)
 })
 watch(dateFrom, (newDateFrom) => {
-  activities.value = getCurrentActivities(location, newDateFrom, dateTo, numberOfPeople)
+  activities.value = getNewActivities(location, newDateFrom, dateTo, numberOfPeople)
 })
 watch(dateTo, (newDateTo) => {
-  activities.value = getCurrentActivities(location, dateFrom, newDateTo, numberOfPeople)
+  activities.value = getNewActivities(location, dateFrom, newDateTo, numberOfPeople)
 })
 watch(numberOfPeople, (newNumberOfPeople) => {
-  activities.value = getCurrentActivities(location, dateFrom, dateTo, newNumberOfPeople)
+  activities.value = getNewActivities(location, dateFrom, dateTo, newNumberOfPeople)
 })
 </script>
 
@@ -40,7 +64,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-      <OfferListItem v-for="activity in activities" type="activities" :id="activity.id" :location="activity.location" :description="activity.description"
+      <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
                      :image="activity.image" :title="activity.title" :price="activity.price"
                      :number-of-people="activity.numberOfPeople"/>
     </div>
