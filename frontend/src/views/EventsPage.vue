@@ -22,11 +22,12 @@ async function getCurrentEvents() {
 
   allEvents.value = responseData.map((data) => {
     return {
+      'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
-      'numberOfPeople': data["max_people"]
+      'max_people': data["max_people"]
     }
   })
 }
@@ -66,7 +67,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
     <div class="offer_items">
     <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
                    :image="event.image" :title="event.title" :price="event.price"
-                   :number-of-people="event.numberOfPeople"/>
+                   :max_people="event.max_people" type="events" :id="event.offerId"/>
     </div>
   </div>
 </template>

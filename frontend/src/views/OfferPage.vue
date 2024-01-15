@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps, ref} from 'vue';
+import {defineProps, ref, onMounted} from 'vue';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
@@ -22,11 +22,25 @@ const offer = ref({
 
 const isDescription = ref(true)
 
+async function getOfferDetails() {
+  const response = await fetchWrapper.get(`/api/offers/${props.id}`)
 
-function getOfferDetails() {
-  offer.value = fetchWrapper.get(`/offer/detail/${props.type}/${props.id}`)
+  const responseData = response.data
+  offer.value = {
+      'hostId': responseData["hostId"],
+      'location': responseData["country_name"] + ', ' + responseData["town_name"],
+      'description': responseData["description"],
+      'name': responseData["name"],
+      'price': responseData["price"],
+      'numberOfPeople': responseData["max_people"]
+    }
 
 }
+
+onMounted(async () => {
+  await getOfferDetails();
+});
+
 </script>
 
 <template>

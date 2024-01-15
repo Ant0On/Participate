@@ -22,11 +22,12 @@ async function getCurrentActivities() {
 
   allActivities.value = responseData.map((data) => {
     return {
+      'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
-      'numberOfPeople': data["max_people"]
+      'max_people': data["max_people"]
     }
   })
 }
@@ -66,7 +67,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
     <div class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
                      :image="activity.image" :title="activity.title" :price="activity.price"
-                     :number-of-people="activity.numberOfPeople"/>
+                     :max_people="activity.max_people" type="activities" :id="activity.offerId"/>
     </div>
   </div>
 </template>

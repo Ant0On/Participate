@@ -22,11 +22,12 @@ async function getCurrentAccommodations() {
 
   allAccommodations.value = responseData.map((data) => {
     return {
+      'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
-      'numberOfPeople': data["max_people"]
+      'max_people': data["max_people"]
     }
   })
 }
@@ -69,7 +70,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
       <OfferListItem v-for="accommodation in accommodations"
                      :location="accommodation.location"
                      :description="accommodation.description" :image="accommodation.image" :name="accommodation.name"
-                     :price="accommodation.price" :max_people="accommodation.numberOfPeople"/>
+                     :price="accommodation.price" :max_people="accommodation.max_people" type="accommodations" :id="accommodation.offerId"/>
     </div>
   </div>
 </template>
