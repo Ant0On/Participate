@@ -1,15 +1,15 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
+import {ref, watch, onMounted} from 'vue';
+import {storeToRefs} from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import { useSearchStore } from "@/stores/search.store";
-import { fetchWrapper } from "@/_helpers/fetch-wrapper";
+import {useSearchStore} from "@/stores/search.store";
+import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
+const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
 
 const activities = ref([]);
 
@@ -26,17 +26,18 @@ async function getCurrentActivities() {
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
-      'numberOfPeople': data["max_people"]
+      'maxPeople': data["max_people"]
     }
   })
 }
 
-function getNewActivities(location, dateFrom, dateTo, numberOfPeople){
-  return allActivities.value.filter((data)=>{
+function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
+  return allActivities.value.filter((data) => {
 
     return data.location.startsWith(location)
   })
 }
+
 onMounted(async () => {
   await getCurrentActivities();
   activities.value = allActivities.value
@@ -65,8 +66,8 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                     :image="activity.image" :title="activity.title" :price="activity.price"
-                     :number-of-people="activity.numberOfPeople"/>
+                     :image="activity.image" :name="activity.name" :price="activity.price"
+                     :max_people="activity.maxPeople"/>
     </div>
   </div>
 </template>

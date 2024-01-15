@@ -1,15 +1,15 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
+import {ref, watch, onMounted} from 'vue';
+import {storeToRefs} from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import { useSearchStore } from "@/stores/search.store";
-import { fetchWrapper } from "@/_helpers/fetch-wrapper";
+import {useSearchStore} from "@/stores/search.store";
+import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
+const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
 
 const events = ref([]);
 
@@ -26,17 +26,18 @@ async function getCurrentEvents() {
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
-      'numberOfPeople': data["max_people"]
+      'maxPeople': data["max_people"]
     }
   })
 }
 
-function getNewActivities(location, dateFrom, dateTo, numberOfPeople){
-  return allEvents.value.filter((data)=>{
+function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
+  return allEvents.value.filter((data) => {
 
     return data.location.startsWith(location)
   })
 }
+
 onMounted(async () => {
   await getCurrentEvents();
   events.value = allEvents.value
@@ -64,9 +65,9 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-    <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
-                   :image="event.image" :title="event.title" :price="event.price"
-                   :number-of-people="event.numberOfPeople"/>
+      <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
+                     :image="event.image" :name="event.name" :price="event.price"
+                     :max_people="event.maxPeople"/>
     </div>
   </div>
 </template>
