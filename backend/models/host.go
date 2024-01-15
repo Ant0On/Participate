@@ -17,7 +17,7 @@ type Host struct {
 func NewHost() *Host {
 	return &Host{
 		Customer: &Customer{
-			Role: "Host",
+			Role: "host",
 		},
 	}
 }

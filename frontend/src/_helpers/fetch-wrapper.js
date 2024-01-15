@@ -17,6 +17,10 @@ function request(method) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
+
+        console.log('Request URL:', url);
+        console.log('Request Options:', requestOptions);
+
         return fetch(url, requestOptions).then(handleResponse);
     }
 }
