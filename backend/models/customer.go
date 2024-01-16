@@ -13,10 +13,10 @@ import (
 type Customer struct {
 	gorm.Model
 	FirstName    string `gorm:"size:30;not null" json:"first_name" binding:"required"`
-	LastName     string `gorm:"size:100;not null" json:"last_name" binding:"required"`
+	LastName     string `gorm:"size:100" json:"last_name"`
 	Email        string `gorm:"size:100;not null;unique" json:"email" binding:"required"`
 	Password     string `gorm:"size:100;not null;" json:"password" binding:"required"`
-	Role         string `gorm:"size:100;not null;default:customer"`
+	Role         string `gorm:"size:100;default:customer"`
 	Reservations []Reservation
 }
 
@@ -39,6 +39,14 @@ func GetUserByEmail(email string) (any, error) {
 	return &c, nil
 }
 
+func GetCustomer(id string) (*Customer, error) {
+	var c Customer
+	if err := DB.Model(&Customer{}).Where("id = ?", id).Scan(&c).Error; err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
+	}
+	return &c, nil
+}
+
 func (c *Customer) Save() error {
 	if err := DB.Create(&c).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
@@ -47,11 +55,16 @@ func (c *Customer) Save() error {
 	return nil
 }
 
+func (c *Customer) Update() error {
+	if err := DB.Save(&c).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func LoginCheck(email, password string) (string, any, error) {
-	var role string
-	var uPassword string
+	var role, uPassword, t string
 	var user any
-	var t string
 	var err error
 	c := Customer{}
 
