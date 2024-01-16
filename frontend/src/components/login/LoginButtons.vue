@@ -21,7 +21,6 @@ function logInHandler() {
       <LoginButton class="lgn-button" text="Sign up" @button-clicked="signUpHandler"/>
       <LoginButton class="lgn-button" text="Log in" @button-clicked="logInHandler"/>
     </div>
-    <a href="" text="Forgot password?"/>
   </div>
 </template>
 
