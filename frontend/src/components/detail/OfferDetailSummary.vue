@@ -5,13 +5,16 @@ import {storeToRefs} from 'pinia';
 import * as Yup from 'yup';
 
 
-
 import DateInput from "@/components/ui/DateInput.vue";
 import NumberInput from "@/components/ui/NumberInput.vue";
 import {useSearchStore} from "@/stores/search.store";
+import {useAuthStore} from '@/stores/auth.store';
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import {router} from "@/router";
+
 
 const searchStore = useSearchStore();
+const { user } = useAuthStore();
 
 const {numberOfPeople, dateFrom, dateTo} = storeToRefs(searchStore)
 
@@ -20,6 +23,7 @@ const errors = reactive({
 })
 
 const props = defineProps({
+  id: '',
   price: '',
   image: '',
 })
@@ -36,8 +40,19 @@ function submitOffer(){
     'dateTo': dateTo.value,
     'numberOfPeople': numberOfPeople.value,
   })
-      .then(()=>{
-        fetchWrapper.post()
+      .then((data)=>{
+        fetchWrapper.post('/api/reservation/add ', {
+          'dateFrom': data['dateFrom'],
+          'dateTo': data['dateTo'],
+          'numberOfPeople': data['numberOfPeople'],
+          'reservation_state': 'pending',
+          'CustomerId': user.ID,
+          'OfferId': props.id.value
+        }).then(() =>{
+          router.push('/');
+        }).catch(error =>{
+          errors.apiError = "Could not book the offer! Please try again later."
+        })
       })
       .catch(error =>{
         errors.apiError = "Invalid data!"
