@@ -27,13 +27,13 @@ async function getCurrentActivities() {
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
-      'max_people': data["max_people"]
+      'maxPeople': data["max_people"]
     }
   })
 }
 
-function getNewActivities(location, dateFrom, dateTo, numberOfPeople){
-  return allActivities.value.filter((data)=>{
+function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
+  return allActivities.value.filter((data) => {
 
     return data.location.startsWith(location)
   })
@@ -67,7 +67,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
     <div class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
                      :image="activity.image" :name="activity.name" :price="activity.price"
-                     :max_people="activity.max_people" type="activities" :id="activity.offerId"/>
+                     :max_people="activity.maxPeople" type="activities" :id="activity.offerId"/>
     </div>
   </div>
 </template>

@@ -7,6 +7,7 @@ import Accommodations from "@/views/AccommodationsPage.vue";
 import Events from "@/views/EventsPage.vue";
 import Activities from "@/views/ActivitiesPage.vue";
 import Offer from "@/views/OfferPage.vue";
+import Recommended from "@/views/RecommendedPage.vue"
 
 const routes = [
     {
@@ -39,7 +40,12 @@ const routes = [
         name: 'Offers',
         component: Offer,
         props: true
-    }
+    },
+    {
+        path: '/recommended',
+        name: "Recommended",
+        component: Recommended
+    },
 
 ]
 

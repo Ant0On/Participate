@@ -1,0 +1,29 @@
+package controllers
+
+import (
+	"net/http"
+
+	"backend/models"
+
+	"github.com/gin-gonic/gin"
+)
+
+func GetHostByID(c *gin.Context) {
+	hostID := c.Param("id")
+
+	if hostID == "" {
+		c.JSON(400, gin.H{"error": "Host ID is required"})
+		return
+	}
+
+	var host models.Host
+
+	_, err := models.GetHost(&host, hostID)
+
+	if err != nil {
+		c.JSON(404, gin.H{"error": "Host not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, host)
+}

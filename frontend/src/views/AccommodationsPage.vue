@@ -27,34 +27,35 @@ async function getCurrentAccommodations() {
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
-      'max_people': data["max_people"]
+      'maxPeople': data["max_people"]
     }
   })
 }
 
-function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople){
-  return allAccommodations.value.filter((data)=>{
+function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople) {
+  return allAccommodations.value.filter((data) => {
 
     return data.location.startsWith(location) // W tym miejscu trzeba dobry warunek
   })
 }
+
 onMounted(async () => {
   await getCurrentAccommodations();
   accommodations.value = allAccommodations.value
 });
 
 watch(location, (newLocation) => {
-  accommodations.value =  getNewAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
+  accommodations.value = getNewAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
 })
-watch(dateFrom,  (newDateFrom) => {
-  accommodations.value =  getNewAccommodations(location, newDateFrom, dateTo, numberOfPeople)
+watch(dateFrom, (newDateFrom) => {
+  accommodations.value = getNewAccommodations(location, newDateFrom, dateTo, numberOfPeople)
 })
 watch(dateTo, (newDateTo) => {
-  accommodations.value =  getNewAccommodations(location, dateFrom, newDateTo, numberOfPeople)
+  accommodations.value = getNewAccommodations(location, dateFrom, newDateTo, numberOfPeople)
 })
 
 watch(numberOfPeople, (newNumberOfPeople) => {
-  accommodations.value =  getNewAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
+  accommodations.value = getNewAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
 })
 
 </script>
@@ -70,7 +71,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
       <OfferListItem v-for="accommodation in accommodations"
                      :location="accommodation.location"
                      :description="accommodation.description" :image="accommodation.image" :name="accommodation.name"
-                     :price="accommodation.price" :max_people="accommodation.max_people" type="accommodations" :id="accommodation.offerId"/>
+                     :price="accommodation.price" :max_people="accommodation.maxPeople" type="accommodations" :id="accommodation.offerId"/>
     </div>
   </div>
 </template>
