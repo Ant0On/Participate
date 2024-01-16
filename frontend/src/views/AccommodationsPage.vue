@@ -34,9 +34,22 @@ async function getCurrentAccommodations() {
 
 function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople) {
   return allAccommodations.value.filter((data) => {
-
-    return data.location.startsWith(location) // W tym miejscu trzeba dobry warunek
+    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople)
   })
+}
+function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople){
+  let isMatchingSearch = true;
+  if (typeof location !== "undefined" && location !== "")
+  {
+    isMatchingSearch = data.location.includes(location)
+  }
+
+  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0)
+  {
+    isMatchingSearch = numberOfPeople <= data.maxPeople
+  }
+
+  return isMatchingSearch
 }
 
 onMounted(async () => {
