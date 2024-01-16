@@ -35,6 +35,12 @@ const schema = Yup.object().shape({
 
 function submitOffer(){
 
+  if(typeof user === "undefined")
+  {
+    alert("You have to be logged in to book an offer!")
+    router.push('/login');
+  }
+
   schema.validate({
     'dateFrom': dateFrom.value,
     'dateTo': dateTo.value,
