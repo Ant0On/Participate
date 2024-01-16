@@ -1,23 +1,47 @@
 <script setup>
 
-import {storeToRefs, defineProps} from 'pinia';
+import {defineProps, reactive} from 'vue';
+import {storeToRefs} from 'pinia';
+import * as Yup from 'yup';
+
 
 
 import DateInput from "@/components/ui/DateInput.vue";
 import NumberInput from "@/components/ui/NumberInput.vue";
 import {useSearchStore} from "@/stores/search.store";
+import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
 
 const {numberOfPeople, dateFrom, dateTo} = storeToRefs(searchStore)
 
+const errors = reactive({
+  apiError: ""
+})
+
 const props = defineProps({
   price: '',
   image: '',
 })
+const schema = Yup.object().shape({
+  dateFrom: Yup.date().required('Starting date is required'),
+  dateTo: Yup.date().min(Yup.ref('dateFrom')),
+  numberOfPeople: Yup.number().required('Number of people is required'),
+});
 
 function submitOffer(){
 
+  schema.validate({
+    'dateFrom': dateFrom.value,
+    'dateTo': dateTo.value,
+    'numberOfPeople': numberOfPeople.value,
+  })
+      .then(()=>{
+        fetchWrapper.post()
+      })
+      .catch(error =>{
+        errors.apiError = "Invalid data!"
+      })
 }
 </script>
 
@@ -39,6 +63,7 @@ function submitOffer(){
         <NumberInput v-model="numberOfPeople" label-text="Number of people"/>
         <DateInput v-model="dateFrom" label-text="Arrival date"/>
         <DateInput v-model="dateTo" label-text="Departure date"/>
+        <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
       </div>
       <div class="offer_detail_payment">
         <div class="offer_detail_price">
@@ -59,6 +84,10 @@ function submitOffer(){
 </template>
 
 <style scoped>
+div.errors{
+  font-family: "Sarabun", Helvetica;
+
+}
 div.offer_detail_summary{
   display: flex;
   flex-direction: column;

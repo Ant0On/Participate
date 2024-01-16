@@ -66,7 +66,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                     :image="activity.image" :title="activity.title" :price="activity.price"
+                     :image="activity.image" :name="activity.name" :price="activity.price"
                      :max_people="activity.max_people" type="activities" :id="activity.offerId"/>
     </div>
   </div>

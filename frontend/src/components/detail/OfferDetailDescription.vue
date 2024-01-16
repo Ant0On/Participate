@@ -13,6 +13,7 @@ const props = defineProps({
   type: '',
 })
 const emits = defineEmits(['moveToSummary'])
+
 </script>
 
 <template>
