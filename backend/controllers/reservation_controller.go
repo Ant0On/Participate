@@ -25,7 +25,7 @@ func AddReservation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"reservation.Save error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "reservation added successfully!"})
+	c.JSON(http.StatusOK, gin.H{"message": "reservation added successfully!", "reservation": reservation})
 }
 
 func GetReservationById(c *gin.Context) {
@@ -75,7 +75,7 @@ func ChangeReservationState(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "reservation": reservation})
 }
 
 func checkState(state string) bool {

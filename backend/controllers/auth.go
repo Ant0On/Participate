@@ -24,7 +24,7 @@ func CurrentUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "user": u})
 }
 
 func RegisterCustomer(c *gin.Context) {
@@ -39,7 +39,7 @@ func RegisterCustomer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"customer.SaveCustomer error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "registration success!"})
+	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "customer": customer})
 }
 
 func RegisterHost(c *gin.Context) {
@@ -55,7 +55,7 @@ func RegisterHost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "registration success!"})
+	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "host": host})
 }
 
 type loginInput struct {

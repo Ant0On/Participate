@@ -74,7 +74,7 @@ func CreateOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!"})
+	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
 func DeleteOffer(c *gin.Context) {
@@ -116,7 +116,7 @@ func UpdateOffer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
 }
 
 func GetRecommendedOffers(c *gin.Context) {

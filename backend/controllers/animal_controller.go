@@ -20,5 +20,5 @@ func AddAnimal(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"animal.Save error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "animal added successfully!"})
+	c.JSON(http.StatusOK, gin.H{"message": "animal added successfully!", "animal": animal})
 }

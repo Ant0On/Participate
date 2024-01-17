@@ -45,7 +45,7 @@ func ChangeFirstName(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeLastName(c *gin.Context) {
 	var lastNameReq lastNameRequest
@@ -74,7 +74,7 @@ func ChangeLastName(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeEmail(c *gin.Context) {
 	var emailReq emailRequest
@@ -103,5 +103,5 @@ func ChangeEmail(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
