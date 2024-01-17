@@ -9,7 +9,7 @@ import AccountNav from "@/components/account/AccountNav.vue";
 import AccountData from "@/components/account/data/AccountData.vue";
 import AccountHistory from "@/components/account/history/AccountHistory.vue";
 import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
-import AccountCurrentOffer from "@/components/account/current_offer/AccountCurrentOffer.vue";
+import AccountCurrentOffer from "@/components/account/current_offer/CurrentOffer.vue";
 import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
 
 const loginPage = ref(true)

@@ -31,7 +31,6 @@ async function getHistoryItems() {
   historyItems.value = allHistoryItems.value.slice(0, pageSize);
 }
 
-historyItems.value = allHistoryItems.value.slice(0, pageSize);
 let currentPage = 1;
 
 let maxPage = Math.floor(allHistoryItems.value.length / pageSize) + 1
@@ -63,7 +62,7 @@ function pageFroward() {
                      :with-animals="historyItem.withAnimals"/>
       </div>
       <div class="navigation">
-        <SwitchListPage v-if="maxPage != 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
+        <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
                         @page-forward="pageFroward"/>
       </div>
     </div>
