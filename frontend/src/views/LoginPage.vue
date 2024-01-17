@@ -6,10 +6,11 @@ import LoginSection from "@/components/login/LoginSection.vue";
 import SignUpSection from "@/components/login/SignUpSection.vue";
 import {useAuthStore} from "@/stores/auth.store";
 import AccountNav from "@/components/account/AccountNav.vue";
-import AccountData from "@/components/account/AccountData.vue";
-import AccountHistory from "@/components/account/AccountHistory.vue";
-import AccountNewOffer from "@/components/account/AccountNewOffer.vue";
-import AccountCurrentOffer from "@/components/account/AccountCurrentOffer.vue";
+import AccountData from "@/components/account/data/AccountData.vue";
+import AccountHistory from "@/components/account/history/AccountHistory.vue";
+import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
+import AccountCurrentOffer from "@/components/account/current_offer/AccountCurrentOffer.vue";
+import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
 
 const loginPage = ref(true)
 
@@ -48,6 +49,7 @@ function onPageChange(page){
           <AccountData v-if="currentPage === 'Account Information'"/>
           <AccountHistory v-else-if="currentPage === 'History'"/>
           <AccountNewOffer v-else-if="currentPage === 'New Offer'"/>
+          <AccountBecomeHost v-else-if="currentPage === 'Become a host'"/>
           <AccountCurrentOffer v-else/>
         </div>
       </div>
