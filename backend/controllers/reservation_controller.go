@@ -16,6 +16,11 @@ func AddReservation(c *gin.Context) {
 		return
 	}
 
+	if err := reservation.ValidateDates(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error with date validation": err.Error()})
+		return
+	}
+
 	if err := reservation.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"reservation.Save error": err.Error()})
 		return
