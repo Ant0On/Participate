@@ -41,7 +41,7 @@ div {
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  height: max(10%, 50px);
+  height: 50px;
   padding: 10px;
 }
 

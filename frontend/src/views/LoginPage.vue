@@ -69,9 +69,12 @@ div.account_container{
 div.account_data{
   display: flex;
   flex-direction: row;
+  flex-grow: 1;
 }
 div.data{
   margin: 2%;
+  display: flex;
+  flex-grow: 1;
 }
 p{
   color: #000000;
