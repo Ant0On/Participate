@@ -37,11 +37,11 @@ func AddGrades() error {
 	return nil
 }
 
-func GetGrades() (*[]Grade, error) {
+func GetGrades() ([]Grade, error) {
 	var grade []Grade
 
 	if err := DB.Model(&[]Grade{}).Scan(&grade).Error; err != nil {
-		return &grade, fmt.Errorf("DB.Model(&[]Grade{}).Scan: %w", err)
+		return grade, fmt.Errorf("DB.Model(&[]Grade{}).Scan: %w", err)
 	}
-	return &grade, nil
+	return grade, nil
 }

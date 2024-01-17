@@ -36,13 +36,49 @@ func ConnectDatabase() {
 	}
 	fmt.Println("We are connected to the database")
 
-	if err = DB.Migrator().DropTable(&Country{}); err != nil {
-		log.Fatal("Migration error:", err)
+	allCountries, err := GetAllCountries()
+	if err != nil {
+		log.Fatal("GetAllCountries", err)
+	}
+	if len(allCountries) == 0 {
+		if err := AddCountries(); err != nil {
+			log.Fatal("AddCountries:", err)
+		}
 	}
 
-	if err = DB.AutoMigrate(&Customer{}, &Host{}, &Grade{},
-		&TownType{}, &Town{}, &Discount{}, &Payment{},
-		&Animal{}, &Offer{}, &Country{}); err != nil {
+	allTownTypes, err := GetAllTownTypes()
+	if err != nil {
+		log.Fatal("GetAllTownTypes", err)
+	}
+	if len(allTownTypes) == 0 {
+		if err := AddTownTypes(); err != nil {
+			log.Fatal("AddTownTypes:", err)
+		}
+	}
+
+	allGrades, err := GetGrades()
+	if err != nil {
+		log.Fatal("GetGrades", err)
+	}
+	if len(allGrades) == 0 {
+		if err := AddGrades(); err != nil {
+			log.Fatal("AddGrades:", err)
+		}
+	}
+
+	allPaymentsMethod, err := GetAllPayments()
+	if err != nil {
+		log.Fatal("GetAllPayments", err)
+	}
+	if len(allPaymentsMethod) == 0 {
+		if err := AddPayments(); err != nil {
+			log.Fatal("AddPayments:", err)
+		}
+	}
+
+	if err = DB.AutoMigrate(&Country{}, &TownType{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
+		&Town{}, &Discount{},
+		&Animal{}, &Offer{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}
 }

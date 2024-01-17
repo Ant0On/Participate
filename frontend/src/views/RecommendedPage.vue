@@ -11,16 +11,16 @@ import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 const searchStore = useSearchStore();
 const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
 
-const accommodations = ref([]);
+const offers = ref([]);
 
-const allAccommodations = ref([]);
+const allOffers = ref([]);
 
-async function getCurrentAccommodations() {
-  const response = await fetchWrapper.get(`/api/offers?type=accommodation`)
+async function getCurrentRecommendedOffers() {
+  const response = await fetchWrapper.get(`/api/offers/recommended`)
 
   const responseData = response.data
 
-  allAccommodations.value = responseData.map((data) => {
+  allOffers.value = responseData.map((data) => {
     return {
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
@@ -31,52 +31,52 @@ async function getCurrentAccommodations() {
   })
 }
 
-function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople) {
-  return allAccommodations.value.filter((data) => {
+function getNewRecommendedOffers(location, dateFrom, dateTo, numberOfPeople) {
+  return allOffers.value.filter((data) => {
 
-    return data.location.startsWith(location) // W tym miejscu trzeba dobry warunek
+    return data.location.startsWith(location)
   })
 }
 
 onMounted(async () => {
-  await getCurrentAccommodations();
-  accommodations.value = allAccommodations.value
+  await getCurrentRecommendedOffers();
+  offers.value = allOffers.value
 });
 
 watch(location, (newLocation) => {
-  accommodations.value = getNewAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
+  offers.value = getNewRecommendedOffers(newLocation, dateFrom, dateTo, numberOfPeople)
 })
 watch(dateFrom, (newDateFrom) => {
-  accommodations.value = getNewAccommodations(location, newDateFrom, dateTo, numberOfPeople)
+  offers.value = getNewRecommendedOffers(location, newDateFrom, dateTo, numberOfPeople)
 })
 watch(dateTo, (newDateTo) => {
-  accommodations.value = getNewAccommodations(location, dateFrom, newDateTo, numberOfPeople)
+  offers.value = getNewRecommendedOffers(location, dateFrom, newDateTo, numberOfPeople)
 })
 
 watch(numberOfPeople, (newNumberOfPeople) => {
-  accommodations.value = getNewAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
+  offers.value = getNewRecommendedOffers(location, dateFrom, dateTo, newNumberOfPeople)
 })
 
 </script>
 
 <template>
-  <div class="accommodation_page">
-    <NavBar currentPage="accommodations"/>
-    <p>Climatic places</p>
-    <OfferSearch offer_type="Accommodation" v-model:location="location"
+  <div class="recommended_page">
+    <NavBar currentPage="recommended"/>
+    <p>Recommended offers</p>
+    <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-      <OfferListItem v-for="accommodation in accommodations" :location="accommodation.location"
-                     :description="accommodation.description"
-                     :image="accommodation.image" :name="accommodation.name" :price="accommodation.price"
-                     :max_people="accommodation.maxPeople"/>
+      <OfferListItem v-for="offer in offers" :location="offer.location"
+                     :description="offer.description"
+                     :image="offer.image" :name="offer.name" :price="offer.price"
+                     :max_people="offer.maxPeople"/>
     </div>
   </div>
 </template>
 
 <style scoped>
-div.accommodation_page {
+div.recommended_page {
   display: flex;
   flex-direction: column;
   overflow: scroll;

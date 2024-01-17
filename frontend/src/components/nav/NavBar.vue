@@ -22,6 +22,7 @@ const text = (auth.user === null)? 'Log in': auth.user.first_name + ' ' + auth.u
     <img alt="Image" src="../../assets/img/logo.png"/>
     <div>
       <NavItem text="Home" :isActive="isActive('home', currentPage)" navigateTo="/"/>
+      <NavItem text="Recommended" :isActive="isActive('recommended', currentPage)" navigateTo="/recommended"/>
       <NavItem text="Accommodations" :isActive="isActive('accommodations', currentPage)" navigateTo="/accommodations"/>
       <NavItem text="Activities" :isActive="isActive('activities', currentPage)" navigateTo="/activities"/>
       <NavItem text="Events" :isActive="isActive('events', currentPage)" navigateTo="/events"/>

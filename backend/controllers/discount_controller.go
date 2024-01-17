@@ -20,5 +20,5 @@ func AddDiscount(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"discount.Save error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "discount added successfully!"})
+	c.JSON(http.StatusOK, gin.H{"message": "discount added successfully!", "data": discount})
 }

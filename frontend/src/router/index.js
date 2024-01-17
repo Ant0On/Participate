@@ -6,6 +6,7 @@ import Home from '@/views/HomePage.vue'
 import Accommodations from "@/views/AccommodationsPage.vue";
 import Events from "@/views/EventsPage.vue";
 import Activities from "@/views/ActivitiesPage.vue";
+import Recommended from "@/views/RecommendedPage.vue"
 
 const routes = [
     {
@@ -33,6 +34,11 @@ const routes = [
         path: '/events',
         name: "Events",
         component: Events
+    },
+    {
+        path: '/recommended',
+        name: "Recommended",
+        component: Recommended
     },
 
 ]
