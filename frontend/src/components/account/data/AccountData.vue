@@ -13,6 +13,9 @@ const user = auth.user;
   <TextInput label-text="Name" :is-active="false" :model-value="user.first_name"/>
   <TextInput label-text="Last Name" :is-active="false" :model-value="user.last_name"/>
   <TextInput label-text="Email" :is-active="false" :model-value="user.email"/>
+  <button class="logout" @click="auth.logout()">
+    Log out
+  </button>
 </div>
 </template>
 

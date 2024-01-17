@@ -20,8 +20,10 @@ export const useAuthStore = defineStore({
         },
         logout() {
             this.user = null;
+            this.token = null;
             localStorage.removeItem('user');
-            router.push('/login');
+            localStorage.removeItem('token');
+            router.push('/');
         },
         async signUp(name, email, password) {
             const user = await fetchWrapper.post('/api/register', {name, email, password})
