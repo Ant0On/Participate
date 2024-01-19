@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
+	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
@@ -70,11 +73,44 @@ func CreateOffer(c *gin.Context) {
 		return
 	}
 
+	// Handle image uploads
+	images, err := handleImageUploads(c, offer.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
+	}
+
+	// Save the offer
+	offer.ImageFilenames = images
 	if err := offer.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
+}
+
+func handleImageUploads(c *gin.Context, offerID uint) ([]string, error) {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return nil, err
+	}
+
+	var filenames []string
+
+	files := form.File["images"]
+	for _, file := range files {
+		filename := fmt.Sprintf("%d_%s", offerID, filepath.Base(file.Filename))
+		dst := filepath.Join("images/offers", strconv.Itoa(int(offerID)), filename)
+
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			return nil, err
+		}
+
+		filenames = append(filenames, filename)
+	}
+
+	return filenames, nil
 }
 
 func DeleteOffer(c *gin.Context) {

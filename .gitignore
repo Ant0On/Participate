@@ -24,3 +24,5 @@ database/
 .idea
 frontend/node_modules
 backend/tmp/*
+images/hosts/
+images/offers/
