@@ -14,6 +14,7 @@ type Customer struct {
 	gorm.Model
 	FirstName    string `gorm:"size:30;not null" json:"first_name" binding:"required"`
 	LastName     string `gorm:"size:100" json:"last_name"`
+	ImagePath    string `gorm:"default:images/customers/default_image.png" json:"image_path"`
 	Email        string `gorm:"size:100;not null;unique" json:"email" binding:"required"`
 	Password     string `gorm:"size:100;not null;" json:"password" binding:"required"`
 	Role         string `gorm:"size:100;default:customer"`

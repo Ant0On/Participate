@@ -7,6 +7,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
       - DATABASE_HOST=${DB_HOST}
+      - PGDATA=/var/lib/postgresql/data/some_name/
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
       interval: 30s
@@ -30,6 +31,7 @@ services:
       - DATABASE_PORT=${DB_PORT}
     volumes:
       - ./backend:/app
+      - ./images:/app/images
     ports:
       - "3000:3000"
       - "40000:40000"
@@ -46,6 +48,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - ./images:/app/images
     ports:
       - "8080:8080"
     depends_on:

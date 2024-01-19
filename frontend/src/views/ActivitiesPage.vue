@@ -24,6 +24,7 @@ async function getCurrentActivities() {
     return {
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
+      'images_path': data["images_path"],
       'name': data["name"],
       'price': data["price"],
       'maxPeople': data["max_people"]
@@ -66,7 +67,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                     :image="activity.image" :name="activity.name" :price="activity.price"
+                     :image="activity.images_path" :name="activity.name" :price="activity.price"
                      :max_people="activity.maxPeople"/>
     </div>
   </div>
