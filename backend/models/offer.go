@@ -15,10 +15,10 @@ const (
 )
 
 type Offer struct {
+	ID string `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" form:"-"`
 	gorm.Model
 	Name             string    `gorm:"size:100;not null" form:"name"`
 	Description      string    `gorm:"size:300;not null" form:"description"`
-	ImageFilenames   []string  `gorm:"-" form:"image_filenames"`
 	Price            float64   `gorm:"not null" form:"price"`
 	MaxPeople        int       `gorm:"not null" form:"max_people"`
 	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
@@ -27,7 +27,6 @@ type Offer struct {
 	HostID           uint      `gorm:"not null" form:"host_id"`
 	TownID           uint      `gorm:"not null" form:"town_id"`
 	Reservations     []Reservation
-	ID               string `gorm:"type:uuid;default:uuid_generate_v4()" form:"-"`
 }
 
 func (o *Offer) Save() error {

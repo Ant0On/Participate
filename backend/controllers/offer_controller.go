@@ -75,14 +75,11 @@ func CreateOffer(c *gin.Context) {
 
 	offer.ID = uuid.New().String()
 
-	images, err := handleImageUploads(c, offer.ID)
-	if err != nil {
+	if err := handleImageUploads(c, offer.ID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
 
-	// Save the offer
-	offer.ImageFilenames = images
 	if err := offer.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
@@ -91,28 +88,23 @@ func CreateOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func handleImageUploads(c *gin.Context, offerID string) ([]string, error) {
+func handleImageUploads(c *gin.Context, offerID string) error {
 	form, err := c.MultipartForm()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	var filenames []string
 
 	files := form.File["images"]
 	for i, file := range files {
-		// Change the filename to include both offerID and index
 		filename := fmt.Sprintf("%s_%d.jpeg", offerID, i)
 		dst := filepath.Join("images/offers", offerID, filename)
 
 		if err := c.SaveUploadedFile(file, dst); err != nil {
-			return nil, err
+			return err
 		}
-
-		filenames = append(filenames, filename)
 	}
 
-	return filenames, nil
+	return nil
 }
 
 func DeleteOffer(c *gin.Context) {
