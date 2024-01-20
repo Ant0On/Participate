@@ -7,7 +7,6 @@ type OfferWithLocation struct {
 	Name             string           `json:"name"`
 	Description      string           `json:"description"`
 	Price            float64          `json:"price"`
-	ImagesPath       string           `json:"images_path"`
 	MaxPeople        int              `json:"max_people"`
 	IsAnimalFriendly bool             `json:"is_animal_friendly"`
 	IsRecommended    bool             `json:"is_recommended"`

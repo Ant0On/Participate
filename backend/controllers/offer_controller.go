@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -68,12 +68,13 @@ func GetOfferByID(c *gin.Context) {
 func CreateOffer(c *gin.Context) {
 	var offer models.Offer
 
-	if err := c.ShouldBindJSON(&offer); err != nil {
+	if err := c.ShouldBind(&offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with createOffer": err.Error()})
 		return
 	}
 
-	// Handle image uploads
+	offer.ID = uuid.New().String()
+
 	images, err := handleImageUploads(c, offer.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
@@ -90,7 +91,7 @@ func CreateOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func handleImageUploads(c *gin.Context, offerID uint) ([]string, error) {
+func handleImageUploads(c *gin.Context, offerID string) ([]string, error) {
 	form, err := c.MultipartForm()
 	if err != nil {
 		return nil, err
@@ -99,9 +100,10 @@ func handleImageUploads(c *gin.Context, offerID uint) ([]string, error) {
 	var filenames []string
 
 	files := form.File["images"]
-	for _, file := range files {
-		filename := fmt.Sprintf("%d_%s", offerID, filepath.Base(file.Filename))
-		dst := filepath.Join("images/offers", strconv.Itoa(int(offerID)), filename)
+	for i, file := range files {
+		// Change the filename to include both offerID and index
+		filename := fmt.Sprintf("%s_%d.jpeg", offerID, i)
+		dst := filepath.Join("images/offers", offerID, filename)
 
 		if err := c.SaveUploadedFile(file, dst); err != nil {
 			return nil, err

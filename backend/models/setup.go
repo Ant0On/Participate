@@ -30,6 +30,8 @@ func ConnectDatabase() {
 		},
 	})
 
+	DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
+
 	if err != nil {
 		fmt.Println("Cannot connect to database")
 		log.Fatal("Connection error:", err)

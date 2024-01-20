@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"backend/middlewares"
+	"backend/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,8 @@ func RegisterRoutes(r *gin.Engine) {
 	public.GET("/offers/:id", GetOfferByID)
 	public.GET("/host/:id", GetHostByID)
 	public.GET("/offers/recommended", GetRecommendedOffers)
+
+	public.POST("/test", models.CreateImage)
 
 	register := r.Group("api/register")
 	register.POST("/customer", RegisterCustomer)

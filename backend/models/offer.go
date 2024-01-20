@@ -16,17 +16,18 @@ const (
 
 type Offer struct {
 	gorm.Model
-	Name             string    `gorm:"size:100;not null" json:"name"`
-	Description      string    `gorm:"size:300;not null" json:"description"`
-	ImageFilenames   []string  `gorm:"-" json:"image_filenames"`
-	Price            float64   `gorm:"not null" json:"price"`
-	MaxPeople        int       `gorm:"not null" json:"max_people"`
-	IsAnimalFriendly bool      `gorm:"not null" json:"is_animal_friendly"`
-	IsRecommended    bool      `gorm:"not null" json:"is_recommended"`
-	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'place'); column:offer_type; not null" json:"offer_type"`
-	HostID           uint      `gorm:"not null" json:"host_id"`
-	TownID           uint      `gorm:"not null" json:"town_id"`
+	Name             string    `gorm:"size:100;not null" form:"name"`
+	Description      string    `gorm:"size:300;not null" form:"description"`
+	ImageFilenames   []string  `gorm:"-" form:"image_filenames"`
+	Price            float64   `gorm:"not null" form:"price"`
+	MaxPeople        int       `gorm:"not null" form:"max_people"`
+	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
+	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
+	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'place'); column:offer_type; not null" form:"offer_type"`
+	HostID           uint      `gorm:"not null" form:"host_id"`
+	TownID           uint      `gorm:"not null" form:"town_id"`
 	Reservations     []Reservation
+	ID               string `gorm:"type:uuid;default:uuid_generate_v4()" form:"-"`
 }
 
 func (o *Offer) Save() error {
