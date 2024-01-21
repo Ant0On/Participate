@@ -1,6 +1,7 @@
 <script setup>
 import { defineEmits, ref} from 'vue';
 import AccountNavItem from "@/components/account/AccountNavItem.vue";
+import {useAuthStore} from "@/stores/auth.store";
 
 const emits = defineEmits(['pageChanged'])
 const activeItem = ref('Account Information');
@@ -9,7 +10,10 @@ function onItemClicked(navItem){
   activeItem.value = navItem
   emits('pageChanged', navItem)
 }
+const auth = useAuthStore();
+const user = auth.user;
 
+const userRole = user.Role
 
 </script>
 
@@ -19,7 +23,7 @@ function onItemClicked(navItem){
   <AccountNavItem text="History" :is-active="activeItem === 'History'" @item-clicked="onItemClicked"/>
   <AccountNavItem text="New Offer" :is-active="activeItem === 'New Offer'" @item-clicked="onItemClicked"/>
   <AccountNavItem text="Current Offers" :is-active="activeItem === 'Current Offers'" @item-clicked="onItemClicked"/>
-  <AccountNavItem text="Become a host" :is-active="activeItem === 'Become a host'" @item-clicked="onItemClicked"/>
+  <AccountNavItem v-if="userRole === 'customer'" text="Become a host" :is-active="activeItem === 'Become a host'" @item-clicked="onItemClicked"/>
 </div>
 </template>
 

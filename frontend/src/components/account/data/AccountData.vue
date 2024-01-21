@@ -61,7 +61,7 @@ async function onSubmit() {
     user.last_name = hostData.value.last_name
     user.email = hostData.value.email
   }).catch(error =>{
-        error.apiError = "Incorrect data!"
+        errors.apiError = "Incorrect data!"
       }
   )
 }
@@ -82,7 +82,7 @@ const schemaCustomer = Yup.object().shape({
 });
 
 const schemaHost = Yup.object().shape({
-  description: Yup.string().required('Offer type is required'),
+  description: Yup.string().required('Description is required'),
   phoneNumber: Yup.number().min(9),
   bankAccount: Yup.number().min(16),
 });
