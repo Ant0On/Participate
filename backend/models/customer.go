@@ -11,11 +11,11 @@ import (
 )
 
 type Customer struct {
-	ID string `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" form:"-"`
 	gorm.Model
 	FirstName    string `gorm:"size:30;not null" form:"first_name" binding:"required"`
 	LastName     string `gorm:"size:100" form:"last_name"`
 	Email        string `gorm:"size:100;not null;unique" form:"email" binding:"required"`
+	ImagePath    string `gorm:"default:images/customers/default_image.png" form:"image_path"`
 	Password     string `gorm:"size:100;not null;" form:"password" binding:"required"`
 	Role         string `gorm:"default:customer"`
 	Reservations []Reservation

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"backend/models"
 	"backend/utils/token"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func CurrentUser(c *gin.Context) {
@@ -32,16 +32,12 @@ func CurrentUser(c *gin.Context) {
 
 func RegisterCustomer(c *gin.Context) {
 	var customer models.Customer
+	var dst string
+	var wasImageUploaded bool
+	var err error
 
 	if err := c.ShouldBind(&customer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
-		return
-	}
-
-	customer.ID = uuid.New().String()
-
-	if err := handleUserImageUploads(c, customer.ID, customer.Role); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
 
@@ -49,32 +45,65 @@ func RegisterCustomer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"customer.SaveCustomer error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "customer": customer})
-}
 
-func handleUserImageUploads(c *gin.Context, userID, role string) error {
-	form, err := c.MultipartForm()
-	if err != nil {
-		return err
+	if dst, wasImageUploaded, err = handleUserImageUploads(c, customer.ID, customer.Role); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
 	}
 
-	files := form.File["images"]
-	for i, file := range files {
-		filename := fmt.Sprintf("%s_%d.jpeg", userID, i)
-		dst := filepath.Join("images/offers", userID, filename)
-
-		if err := c.SaveUploadedFile(file, dst); err != nil {
-			return err
+	if wasImageUploaded {
+		customer.ImagePath = dst
+		if err := customer.Update(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"customer.Update error": err.Error()})
+			return
 		}
 	}
 
-	return nil
+	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "customer": customer})
+}
+
+func handleUserImageUploads(c *gin.Context, userID uint, role string) (string, bool, error) {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return "", false, fmt.Errorf("multipart form error: %v", err)
+	}
+
+	files := form.File["image"]
+
+	if len(files) > 1 {
+		return "", false, fmt.Errorf("only one image can be uploaded, but %d images were provided", len(files))
+	}
+
+	if len(files) == 0 {
+		c.JSON(http.StatusOK, gin.H{"warning": "image not uploaded, using default one instead"})
+		return "", false, nil
+	}
+
+	file := files[0]
+
+	filename := fmt.Sprintf("%d.jpeg", userID)
+	var dst string
+
+	if role == "customer" {
+		dst = filepath.Join("images/customers", strconv.Itoa(int(userID)), filename)
+	} else {
+		dst = filepath.Join("images/hosts", strconv.Itoa(int(userID)), filename)
+	}
+
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		return "", false, fmt.Errorf("error saving uploaded file: %v", err)
+	}
+
+	return dst, true, nil
 }
 
 func RegisterHost(c *gin.Context) {
 	host := models.NewHost()
+	var dst string
+	var wasImageUploaded bool
+	var err error
 
-	if err := c.ShouldBindJSON(&host); err != nil {
+	if err := c.ShouldBind(&host); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
 		return
 	}
@@ -82,6 +111,19 @@ func RegisterHost(c *gin.Context) {
 	if err := host.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"host.SaveHost error": err.Error()})
 		return
+	}
+
+	if dst, wasImageUploaded, err = handleUserImageUploads(c, host.ID, host.Role); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
+	}
+
+	if wasImageUploaded {
+		host.ImagePath = dst
+		if err := host.Update(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"host.Update error": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "host": host})
