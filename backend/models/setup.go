@@ -28,9 +28,8 @@ func ConnectDatabase() {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
-
-	DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
 
 	if err != nil {
 		fmt.Println("Cannot connect to database")

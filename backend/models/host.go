@@ -15,8 +15,8 @@ type Host struct {
 	Offers      []Offer
 }
 
-func NewHost() *Host {
-	return &Host{
+func NewHost() Host {
+	return Host{
 		Customer: &Customer{
 			Role: "host",
 		},

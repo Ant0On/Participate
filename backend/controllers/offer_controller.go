@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +27,7 @@ func GetOffers(c *gin.Context) {
 	result = query.
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Select("offer.id as offer_id, offer.name, offer.description, offer.images_path, offer.price, offer.max_people, offer.is_animal_friendly," +
+		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
 		Find(&offersWithLocation)
 
@@ -48,7 +48,7 @@ func GetOfferByID(c *gin.Context) {
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("offer.id = ?", offerID).
-		Select("offer.id as offer_id, offer.name, offer.description, offer.images_path, offer.price, offer.max_people, offer.is_animal_friendly," +
+		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
 		Find(&offerWithLocation)
 
@@ -73,22 +73,20 @@ func CreateOffer(c *gin.Context) {
 		return
 	}
 
-	offer.ID = uuid.New().String()
-
-	if err := handleImageUploads(c, offer.ID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+	if err := offer.Save(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
 	}
 
-	if err := offer.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
+	if err := handleOfferImageUploads(c, offer.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func handleImageUploads(c *gin.Context, offerID string) error {
+func handleOfferImageUploads(c *gin.Context, offerID uint) error {
 	form, err := c.MultipartForm()
 	if err != nil {
 		return err
@@ -96,8 +94,8 @@ func handleImageUploads(c *gin.Context, offerID string) error {
 
 	files := form.File["images"]
 	for i, file := range files {
-		filename := fmt.Sprintf("%s_%d.jpeg", offerID, i)
-		dst := filepath.Join("images/offers", offerID, filename)
+		filename := fmt.Sprintf("%d_%d.jpeg", offerID, i)
+		dst := filepath.Join("images/offers", strconv.Itoa(int(offerID)), filename)
 
 		if err := c.SaveUploadedFile(file, dst); err != nil {
 			return err

@@ -9,13 +9,12 @@ import (
 type OfferType string
 
 const (
-	Activity OfferType = "activity"
-	Event    OfferType = "event"
-	Place    OfferType = "place"
+	Activity      OfferType = "activity"
+	Event         OfferType = "event"
+	Accommodation OfferType = "accommodation"
 )
 
 type Offer struct {
-	ID string `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" form:"-"`
 	gorm.Model
 	Name             string    `gorm:"size:100;not null" form:"name"`
 	Description      string    `gorm:"size:300;not null" form:"description"`
@@ -23,7 +22,7 @@ type Offer struct {
 	MaxPeople        int       `gorm:"not null" form:"max_people"`
 	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
 	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
-	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'place'); column:offer_type; not null" form:"offer_type"`
+	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type"`
 	HostID           uint      `gorm:"not null" form:"host_id"`
 	TownID           uint      `gorm:"not null" form:"town_id"`
 	Reservations     []Reservation

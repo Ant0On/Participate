@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"backend/models"
 	"backend/utils/token"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func CurrentUser(c *gin.Context) {
@@ -28,10 +31,17 @@ func CurrentUser(c *gin.Context) {
 }
 
 func RegisterCustomer(c *gin.Context) {
-	var customer *models.Customer
+	var customer models.Customer
 
-	if err := c.ShouldBindJSON(&customer); err != nil {
+	if err := c.ShouldBind(&customer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
+		return
+	}
+
+	customer.ID = uuid.New().String()
+
+	if err := handleUserImageUploads(c, customer.ID, customer.Role); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
 
@@ -40,6 +50,25 @@ func RegisterCustomer(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "customer": customer})
+}
+
+func handleUserImageUploads(c *gin.Context, userID, role string) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+
+	files := form.File["images"]
+	for i, file := range files {
+		filename := fmt.Sprintf("%s_%d.jpeg", userID, i)
+		dst := filepath.Join("images/offers", userID, filename)
+
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func RegisterHost(c *gin.Context) {
