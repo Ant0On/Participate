@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"strconv"
 
 	"backend/models"
 	"backend/utils/token"
@@ -75,7 +74,7 @@ func handleUserImageUploads(c *gin.Context, userID uint, role string) (string, b
 	}
 
 	if len(files) == 0 {
-		c.JSON(http.StatusOK, gin.H{"warning": "image not uploaded, using default one instead"})
+		fmt.Println("Warning: No image uploaded, using default one instead")
 		return "", false, nil
 	}
 
@@ -85,9 +84,9 @@ func handleUserImageUploads(c *gin.Context, userID uint, role string) (string, b
 	var dst string
 
 	if role == "customer" {
-		dst = filepath.Join("images/customers", strconv.Itoa(int(userID)), filename)
+		dst = filepath.Join("images/customers", filename)
 	} else {
-		dst = filepath.Join("images/hosts", strconv.Itoa(int(userID)), filename)
+		dst = filepath.Join("images/hosts", filename)
 	}
 
 	if err := c.SaveUploadedFile(file, dst); err != nil {

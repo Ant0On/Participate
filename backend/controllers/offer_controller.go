@@ -93,6 +93,9 @@ func handleOfferImageUploads(c *gin.Context, offerID uint) error {
 	}
 
 	files := form.File["images"]
+	if len(files) == 0 {
+		return fmt.Errorf("no images were uploaded for the offer")
+	}
 	for i, file := range files {
 		filename := fmt.Sprintf("%d_%d.jpeg", offerID, i)
 		dst := filepath.Join("images/offers", strconv.Itoa(int(offerID)), filename)
