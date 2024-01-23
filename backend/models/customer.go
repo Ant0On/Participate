@@ -14,11 +14,11 @@ import (
 
 type Customer struct {
 	gorm.Model
-	FirstName    string `gorm:"size:30;not null" form:"first_name" json:"first_name" binding:"required"`
-	LastName     string `gorm:"size:100" form:"last_name" json:"last_name"`
-	Email        string `gorm:"size:100;not null;unique" form:"email" json:"email" binding:"required"`
+	FirstName    string `gorm:"size:30;not null" form:"first_name" binding:"required"`
+	LastName     string `gorm:"size:100" form:"last_name"`
+	Email        string `gorm:"size:100;not null;unique" form:"email" binding:"required"`
 	ImagePath    string `gorm:"default:images/customers/default_image.png" form:"image_path"`
-	Password     string `gorm:"size:100;not null;" form:"password" json:"password" binding:"required"`
+	Password     string `gorm:"size:100;not null;" form:"password" binding:"required"`
 	Role         string `gorm:"default:customer"`
 	Reservations []Reservation
 }
