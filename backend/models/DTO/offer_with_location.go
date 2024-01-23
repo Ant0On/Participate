@@ -3,7 +3,7 @@ package DTO
 import "backend/models"
 
 type OfferWithLocation struct {
-	OfferID          string           `json:"offer_id"`
+	OfferID          uint             `json:"offer_id"`
 	Name             string           `json:"name"`
 	Description      string           `json:"description"`
 	Price            float64          `json:"price"`

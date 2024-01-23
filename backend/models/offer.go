@@ -2,7 +2,10 @@ package models
 
 import (
 	"fmt"
+	"path/filepath"
+	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -55,5 +58,27 @@ func (o *Offer) Update() error {
 	if err := DB.Save(&o).Error; err != nil {
 		return err
 	}
+	return nil
+}
+
+func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+
+	files := form.File["images"]
+	if len(files) == 0 {
+		return fmt.Errorf("no images were uploaded for the offer")
+	}
+	for i, file := range files {
+		filename := fmt.Sprintf("%d_%d.jpeg", offerID, i)
+		dst := filepath.Join("images/offers", strconv.Itoa(int(offerID)), filename)
+
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
-	"path/filepath"
 
 	"backend/models"
 	"backend/utils/token"
@@ -45,7 +43,7 @@ func RegisterCustomer(c *gin.Context) {
 		return
 	}
 
-	if dst, wasImageUploaded, err = handleUserImageUploads(c, customer.ID, customer.Role); err != nil {
+	if dst, wasImageUploaded, err = customer.HandleUserImageUploads(c, customer.ID, customer.Role); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
@@ -59,41 +57,6 @@ func RegisterCustomer(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "customer": customer})
-}
-
-func handleUserImageUploads(c *gin.Context, userID uint, role string) (string, bool, error) {
-	form, err := c.MultipartForm()
-	if err != nil {
-		return "", false, fmt.Errorf("multipart form error: %v", err)
-	}
-
-	files := form.File["image"]
-
-	if len(files) > 1 {
-		return "", false, fmt.Errorf("only one image can be uploaded, but %d images were provided", len(files))
-	}
-
-	if len(files) == 0 {
-		fmt.Println("Warning: No image uploaded, using default one instead")
-		return "", false, nil
-	}
-
-	file := files[0]
-
-	filename := fmt.Sprintf("%d.jpeg", userID)
-	var dst string
-
-	if role == "customer" {
-		dst = filepath.Join("images/customers", filename)
-	} else {
-		dst = filepath.Join("images/hosts", filename)
-	}
-
-	if err := c.SaveUploadedFile(file, dst); err != nil {
-		return "", false, fmt.Errorf("error saving uploaded file: %v", err)
-	}
-
-	return dst, true, nil
 }
 
 func RegisterHost(c *gin.Context) {
@@ -112,7 +75,7 @@ func RegisterHost(c *gin.Context) {
 		return
 	}
 
-	if dst, wasImageUploaded, err = handleUserImageUploads(c, host.ID, host.Role); err != nil {
+	if dst, wasImageUploaded, err = host.HandleUserImageUploads(c, host.ID, host.Role); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}

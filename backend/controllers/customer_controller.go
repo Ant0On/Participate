@@ -29,7 +29,7 @@ func ChangeFirstName(c *gin.Context) {
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Host not found"})
+		c.JSON(404, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -41,7 +41,7 @@ func ChangeFirstName(c *gin.Context) {
 	customer.FirstName = firstNameReq.FirstName
 
 	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Save": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
 		return
 	}
 
@@ -52,13 +52,13 @@ func ChangeLastName(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "email is required"})
+		c.JSON(400, gin.H{"error": "Customer ID is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Host not found"})
+		c.JSON(404, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -70,7 +70,7 @@ func ChangeLastName(c *gin.Context) {
 	customer.LastName = lastNameReq.LastName
 
 	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Save": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
 		return
 	}
 
@@ -81,13 +81,13 @@ func ChangeEmail(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "email is required"})
+		c.JSON(400, gin.H{"error": "Customer ID is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Host not found"})
+		c.JSON(404, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -99,7 +99,7 @@ func ChangeEmail(c *gin.Context) {
 	customer.Email = emailReq.Email
 
 	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Save": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
 		return
 	}
 
