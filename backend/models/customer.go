@@ -2,21 +2,24 @@ package models
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"backend/pkg/passHelper"
 	"backend/utils/token"
 
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type Customer struct {
 	gorm.Model
-	FirstName    string `gorm:"size:30;not null" json:"first_name" binding:"required"`
-	LastName     string `gorm:"size:100" json:"last_name"`
-	Email        string `gorm:"size:100;not null;unique" json:"email" binding:"required"`
-	Password     string `gorm:"size:100;not null;" json:"password" binding:"required"`
-	Role         string `gorm:"size:100;default:customer"`
+	FirstName    string `gorm:"size:30;not null" form:"first_name" binding:"required"`
+	LastName     string `gorm:"size:100" form:"last_name"`
+	Email        string `gorm:"size:100;not null;unique" form:"email" binding:"required"`
+	ImagePath    string `gorm:"default:images/customers/default_image.png" form:"image_path"`
+	Password     string `gorm:"size:100;not null;" form:"password" binding:"required"`
+	Role         string `gorm:"default:customer"`
 	Reservations []Reservation
 }
 
@@ -116,7 +119,7 @@ func GetUser(email string) (any, error) {
 	return c, nil
 }
 
-func (c *Customer) BeforeSave(*gorm.DB) error {
+func (c *Customer) BeforeCreate(*gorm.DB) error {
 	//turn password into hash
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(c.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -125,4 +128,39 @@ func (c *Customer) BeforeSave(*gorm.DB) error {
 	c.Password = string(hashedPassword)
 
 	return nil
+}
+
+func (c *Customer) HandleUserImageUploads(context *gin.Context, userID uint, role string) (string, bool, error) {
+	form, err := context.MultipartForm()
+	if err != nil {
+		return "", false, fmt.Errorf("multipart form error: %v", err)
+	}
+
+	files := form.File["image"]
+
+	if len(files) > 1 {
+		return "", false, fmt.Errorf("only one image can be uploaded, but %d images were provided", len(files))
+	}
+
+	if len(files) == 0 {
+		fmt.Println("Warning: No image uploaded, using default one instead")
+		return "", false, nil
+	}
+
+	file := files[0]
+
+	filename := fmt.Sprintf("%d.jpeg", userID)
+	var dst string
+
+	if role == "customer" {
+		dst = filepath.Join("images/customers", filename)
+	} else {
+		dst = filepath.Join("images/hosts", filename)
+	}
+
+	if err := context.SaveUploadedFile(file, dst); err != nil {
+		return "", false, fmt.Errorf("error saving uploaded file: %v", err)
+	}
+
+	return dst, true, nil
 }

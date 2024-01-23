@@ -19,9 +19,10 @@ function onItemClicked() {
 }
 </script>
 
+
 <template>
   <div class="offer_item" @click="onItemClicked">
-    <img :src="image" alt="Image">
+    <img :src="require(`@/../images/${image}`)" alt="Image">
     <div class="item_details">
       <div class="title">{{ name }}</div>
       <div class="description"> {{ description }}</div>

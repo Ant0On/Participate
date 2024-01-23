@@ -25,6 +25,7 @@ async function getCurrentActivities() {
       'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
+      'images_path': data["images_path"],
       'name': data["name"],
       'price': data["price"],
       'maxPeople': data["max_people"]

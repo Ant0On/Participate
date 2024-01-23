@@ -16,25 +16,30 @@ func AddReservation(c *gin.Context) {
 		return
 	}
 
+	if err := reservation.ValidateDates(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error with date validation": err.Error()})
+		return
+	}
+
 	if err := reservation.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"reservation.Save error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "reservation added successfully!"})
+	c.JSON(http.StatusOK, gin.H{"message": "reservation added successfully!", "reservation": reservation})
 }
 
 func GetReservationById(c *gin.Context) {
 	reservationID := c.Param("id")
 
 	if reservationID == "" {
-		c.JSON(400, gin.H{"error": "reservation ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "reservation ID is required"})
 		return
 	}
 
 	reservation, err := models.GetReservationById(reservationID)
 
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Reservation not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		return
 	}
 
@@ -44,22 +49,22 @@ func GetReservationById(c *gin.Context) {
 func ChangeReservationState(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(400, gin.H{"error": "id is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
 		return
 	}
 	state := c.Param("state")
 	if state == "" {
-		c.JSON(400, gin.H{"error": "state is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "state is required"})
 		return
 	}
 	if !checkState(state) {
-		c.JSON(400, gin.H{"error": "wrong state"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong state"})
 		return
 	}
 
 	reservation, err := models.GetReservationById(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "reservation not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "reservation not found"})
 		return
 	}
 
@@ -70,7 +75,7 @@ func ChangeReservationState(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "reservation": reservation})
 }
 
 func checkState(state string) bool {

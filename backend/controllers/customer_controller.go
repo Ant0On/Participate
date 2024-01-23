@@ -23,13 +23,13 @@ func ChangeFirstName(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "id is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Host not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -41,24 +41,24 @@ func ChangeFirstName(c *gin.Context) {
 	customer.FirstName = firstNameReq.FirstName
 
 	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Save": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeLastName(c *gin.Context) {
 	var lastNameReq lastNameRequest
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "email is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Host not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -70,24 +70,24 @@ func ChangeLastName(c *gin.Context) {
 	customer.LastName = lastNameReq.LastName
 
 	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Save": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeEmail(c *gin.Context) {
 	var emailReq emailRequest
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "email is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Host not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -99,9 +99,9 @@ func ChangeEmail(c *gin.Context) {
 	customer.Email = emailReq.Email
 
 	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Save": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }

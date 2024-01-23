@@ -65,7 +65,7 @@ func GetOfferByID(c *gin.Context) {
 func CreateOffer(c *gin.Context) {
 	var offer models.Offer
 
-	if err := c.ShouldBindJSON(&offer); err != nil {
+	if err := c.ShouldBind(&offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with createOffer": err.Error()})
 		return
 	}
@@ -74,7 +74,13 @@ func CreateOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!"})
+
+	if err := offer.HandleOfferImageUploads(c, offer.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
 func DeleteOffer(c *gin.Context) {
@@ -116,7 +122,7 @@ func UpdateOffer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
 }
 
 func GetRecommendedOffers(c *gin.Context) {
@@ -129,7 +135,7 @@ func GetRecommendedOffers(c *gin.Context) {
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("is_recommended = ?", true).
-		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
+		Select("offer.id as offer_id, offer.name, offer.description, offer.images_path, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
 		Find(&recommendedOffers)
 

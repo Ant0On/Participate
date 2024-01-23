@@ -12,16 +12,14 @@ func GetHostByID(c *gin.Context) {
 	hostID := c.Param("id")
 
 	if hostID == "" {
-		c.JSON(400, gin.H{"error": "Host ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Host ID is required"})
 		return
 	}
 
-	var host models.Host
-
-	_, err := models.GetHost(&host, hostID)
+	host, err := models.GetHost(hostID)
 
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Host not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Host not found"})
 		return
 	}
 
