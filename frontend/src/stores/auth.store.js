@@ -31,16 +31,13 @@ export const useAuthStore = defineStore({
                 "first_name": name,
                 "email": email,
                 "password": password
-            })
+            }, "multipart/form-data")
 
             if (request.message === "registration success!") {
                 const user = await fetchWrapper.post('/api/login', {email, password});
                 localStorage.setItem('user', JSON.stringify(user));
                 router.push('/')
-
             }
-
-
         }
     }
 });
