@@ -31,10 +31,10 @@ func (h *Host) Save() error {
 	return nil
 }
 
-func GetHost(host *Host, id string) (*Host, error) {
-	if err := DB.First(host, id).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
+func GetHost(id string) (*Host, error) {
+	var h Host
+	if err := DB.Model(&Host{}).Where("id = ?", id).Scan(&h).Error; err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
 	}
-
-	return host, nil
+	return &h, nil
 }
