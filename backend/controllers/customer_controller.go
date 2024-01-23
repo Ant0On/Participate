@@ -23,13 +23,13 @@ func ChangeFirstName(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "id is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -52,13 +52,13 @@ func ChangeLastName(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "Customer ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		return
 	}
 
@@ -81,13 +81,13 @@ func ChangeEmail(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(400, gin.H{"error": "Customer ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
 		return
 	}
 
 	customer, err := models.GetCustomer(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		return
 	}
 

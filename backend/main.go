@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"backend/controllers"
 	"backend/models"
@@ -46,7 +47,7 @@ func runServer(args arguments) error {
 	r.Use(static.Serve("/", static.LocalFile(args.StaticContents, false)))
 
 	r.GET("/api/v1/hello", func(c *gin.Context) {
-		c.String(200, `{"message":"hello, hello, hello"}`)
+		c.String(http.StatusOK, `{"message":"hello, hello, hello"}`)
 	})
 
 	controllers.RegisterRoutes(r)
