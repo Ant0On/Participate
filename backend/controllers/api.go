@@ -25,6 +25,7 @@ func RegisterRoutes(r *gin.Engine) {
 	host.PUT("/update/:id", UpdateOffer)
 
 	customer := r.Group("api/customer/:id")
+	customer.Use(middlewares.JwtAuthMiddleware("customer"))
 	customer.POST("/change/first_name", ChangeFirstName)
 	customer.POST("/change/last_name", ChangeLastName)
 	customer.POST("/change/email", ChangeEmail)

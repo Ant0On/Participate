@@ -119,7 +119,7 @@ func GetUser(email string) (any, error) {
 	return c, nil
 }
 
-func (c *Customer) BeforeSave(*gorm.DB) error {
+func (c *Customer) BeforeCreate(*gorm.DB) error {
 	//turn password into hash
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(c.Password), bcrypt.DefaultCost)
 	if err != nil {
