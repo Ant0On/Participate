@@ -69,7 +69,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
     <div class="offer_items">
       <OfferListItem v-for="offer in offers" :location="offer.location"
                      :description="offer.description"
-                     :image="offer.image" :name="offer.name" :price="offer.price"
+                     :name="offer.name" :price="offer.price"
                      :max_people="offer.maxPeople"/>
     </div>
   </div>

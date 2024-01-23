@@ -6,7 +6,6 @@ const props = defineProps({
   type: String,
   id: String,
   location: String,
-  image: String,
   name: String,
   description: String,
   price: String,
@@ -22,7 +21,7 @@ function onItemClicked() {
 
 <template>
   <div class="offer_item" @click="onItemClicked">
-    <img :src="require(`@/../images/${image}`)" alt="Image">
+    <img :src="require(`@/../images/offers/${id}/${id}_0.jpeg`)" alt="Image">
     <div class="item_details">
       <div class="title">{{ name }}</div>
       <div class="description"> {{ description }}</div>
@@ -102,9 +101,10 @@ div.location {
 img {
   border-radius: 10px;
   overflow: hidden;
-  height: 300px;
-  width: 300px;
+  height: 250px;
+  width: 250px;
   opacity: 0.9;
   flex-shrink: 0;
+  margin: 2%;
 }
 </style>
