@@ -2,29 +2,32 @@ package models
 
 import (
 	"fmt"
+	"path/filepath"
+	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type OfferType string
 
 const (
-	Activity OfferType = "activity"
-	Event    OfferType = "event"
-	Place    OfferType = "place"
+	Activity      OfferType = "activity"
+	Event         OfferType = "event"
+	Accommodation OfferType = "accommodation"
 )
 
 type Offer struct {
 	gorm.Model
-	Name             string    `gorm:"size:100;not null" json:"name"`
-	Description      string    `gorm:"size:300;not null" json:"description"`
-	Price            float64   `gorm:"not null" json:"price"`
-	MaxPeople        int       `gorm:"not null" json:"max_people"`
-	IsAnimalFriendly bool      `gorm:"not null" json:"is_animal_friendly"`
-	IsRecommended    bool      `gorm:"not null" json:"is_recommended"`
-	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'place'); column:offer_type; not null" json:"offer_type"`
-	HostID           uint      `gorm:"not null" json:"host_id"`
-	TownID           uint      `gorm:"not null" json:"town_id"`
+	Name             string    `gorm:"size:100;not null" form:"name"`
+	Description      string    `gorm:"size:300;not null" form:"description"`
+	Price            float64   `gorm:"not null" form:"price"`
+	MaxPeople        int       `gorm:"not null" form:"max_people"`
+	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
+	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
+	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type"`
+	HostID           uint      `gorm:"not null" form:"host_id"`
+	TownID           uint      `gorm:"not null" form:"town_id"`
 	Reservations     []Reservation
 }
 
@@ -55,5 +58,27 @@ func (o *Offer) Update() error {
 	if err := DB.Save(&o).Error; err != nil {
 		return err
 	}
+	return nil
+}
+
+func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+
+	files := form.File["images"]
+	if len(files) == 0 {
+		return fmt.Errorf("no images were uploaded for the offer")
+	}
+	for i, file := range files {
+		filename := fmt.Sprintf("%d_%d.jpeg", offerID, i)
+		dst := filepath.Join("images/offers", strconv.Itoa(int(offerID)), filename)
+
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

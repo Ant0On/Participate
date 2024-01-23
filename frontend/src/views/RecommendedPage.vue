@@ -11,20 +11,19 @@ import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 const searchStore = useSearchStore();
 const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
 
-const activities = ref([]);
+const offers = ref([]);
 
-const allActivities = ref([]);
+const allOffers = ref([]);
 
-async function getCurrentActivities() {
-  const response = await fetchWrapper.get(`/api/offers?type=activity`)
+async function getCurrentRecommendedOffers() {
+  const response = await fetchWrapper.get(`/api/offers/recommended`)
 
   const responseData = response.data
 
-  allActivities.value = responseData.map((data) => {
+  allOffers.value = responseData.map((data) => {
     return {
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
-      'images_path': data["images_path"],
       'name': data["name"],
       'price': data["price"],
       'maxPeople': data["max_people"]
@@ -32,49 +31,52 @@ async function getCurrentActivities() {
   })
 }
 
-function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
-  return allActivities.value.filter((data) => {
+function getNewRecommendedOffers(location, dateFrom, dateTo, numberOfPeople) {
+  return allOffers.value.filter((data) => {
 
     return data.location.startsWith(location)
   })
 }
 
 onMounted(async () => {
-  await getCurrentActivities();
-  activities.value = allActivities.value
+  await getCurrentRecommendedOffers();
+  offers.value = allOffers.value
 });
 
 watch(location, (newLocation) => {
-  activities.value = getNewActivities(newLocation, dateFrom, dateTo, numberOfPeople)
+  offers.value = getNewRecommendedOffers(newLocation, dateFrom, dateTo, numberOfPeople)
 })
 watch(dateFrom, (newDateFrom) => {
-  activities.value = getNewActivities(location, newDateFrom, dateTo, numberOfPeople)
+  offers.value = getNewRecommendedOffers(location, newDateFrom, dateTo, numberOfPeople)
 })
 watch(dateTo, (newDateTo) => {
-  activities.value = getNewActivities(location, dateFrom, newDateTo, numberOfPeople)
+  offers.value = getNewRecommendedOffers(location, dateFrom, newDateTo, numberOfPeople)
 })
+
 watch(numberOfPeople, (newNumberOfPeople) => {
-  activities.value = getNewActivities(location, dateFrom, dateTo, newNumberOfPeople)
+  offers.value = getNewRecommendedOffers(location, dateFrom, dateTo, newNumberOfPeople)
 })
+
 </script>
 
 <template>
-  <div class="activities_page">
-    <NavBar currentPage="activities"/>
-    <p>Inspiring activities</p>
-    <OfferSearch offer_type="Activities" v-model:location="location"
+  <div class="recommended_page">
+    <NavBar currentPage="recommended"/>
+    <p>Recommended offers</p>
+    <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-      <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                     :image="activity.images_path" :name="activity.name" :price="activity.price"
-                     :max_people="activity.maxPeople"/>
+      <OfferListItem v-for="offer in offers" :location="offer.location"
+                     :description="offer.description"
+                     :image="offer.image" :name="offer.name" :price="offer.price"
+                     :max_people="offer.maxPeople"/>
     </div>
   </div>
 </template>
 
 <style scoped>
-div.activities_page {
+div.recommended_page {
   display: flex;
   flex-direction: column;
   overflow: scroll;

@@ -28,6 +28,7 @@ func ConnectDatabase() {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 
 	if err != nil {

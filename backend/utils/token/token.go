@@ -34,12 +34,12 @@ func GenerateToken(email, role string) (string, error) {
 
 func IsTokenValid(c *gin.Context, role string) error {
 	token, err := getToken(c)
+	if err != nil {
+		return fmt.Errorf("IsTokenValid: %w", err)
+	}
 	extractedRole, err := extractRole(token)
 	if extractedRole != role {
 		return fmt.Errorf("unauthorized role - expected: %s, got: %s", role, extractedRole)
-	}
-	if err != nil {
-		return fmt.Errorf("IsTokenValid: %w", err)
 	}
 	return nil
 }
