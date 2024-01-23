@@ -1,15 +1,15 @@
 <script setup>
-import {ref, watch, onMounted} from 'vue';
-import {storeToRefs} from 'pinia';
+import { ref, watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {useSearchStore} from "@/stores/search.store";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import { useSearchStore } from "@/stores/search.store";
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const activities = ref([]);
 
@@ -22,6 +22,7 @@ async function getCurrentActivities() {
 
   allActivities.value = responseData.map((data) => {
     return {
+      'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
       'images_path': data["images_path"],
@@ -35,8 +36,23 @@ async function getCurrentActivities() {
 function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
   return allActivities.value.filter((data) => {
 
-    return data.location.startsWith(location)
+    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople)
   })
+}
+
+function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople){
+  let isMatchingSearch = true;
+  if (typeof location !== "undefined" && location !== "")
+  {
+    isMatchingSearch = data.location.includes(location)
+  }
+
+  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0)
+  {
+    isMatchingSearch = numberOfPeople <= data.maxPeople
+  }
+
+  return isMatchingSearch
 }
 
 onMounted(async () => {
@@ -67,8 +83,8 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                     :image="activity.images_path" :name="activity.name" :price="activity.price"
-                     :max_people="activity.maxPeople"/>
+                     :image="activity.image" :name="activity.name" :price="activity.price"
+                     :max_people="activity.maxPeople" type="activities" :id="activity.offerId"/>
     </div>
   </div>
 </template>

@@ -1,15 +1,15 @@
 <script setup>
-import {ref, watch, onMounted} from 'vue';
-import {storeToRefs} from 'pinia';
+import { ref, watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {useSearchStore} from "@/stores/search.store";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import { useSearchStore } from "@/stores/search.store";
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const accommodations = ref([]);
 
@@ -22,6 +22,7 @@ async function getCurrentAccommodations() {
 
   allAccommodations.value = responseData.map((data) => {
     return {
+      'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
       'name': data["name"],
@@ -33,9 +34,22 @@ async function getCurrentAccommodations() {
 
 function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople) {
   return allAccommodations.value.filter((data) => {
-
-    return data.location.startsWith(location) // W tym miejscu trzeba dobry warunek
+    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople)
   })
+}
+function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople){
+  let isMatchingSearch = true;
+  if (typeof location !== "undefined" && location !== "")
+  {
+    isMatchingSearch = data.location.includes(location)
+  }
+
+  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0)
+  {
+    isMatchingSearch = numberOfPeople <= data.maxPeople
+  }
+
+  return isMatchingSearch
 }
 
 onMounted(async () => {
@@ -67,10 +81,10 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-      <OfferListItem v-for="accommodation in accommodations" :location="accommodation.location"
-                     :description="accommodation.description"
-                     :image="accommodation.image" :name="accommodation.name" :price="accommodation.price"
-                     :max_people="accommodation.maxPeople"/>
+      <OfferListItem v-for="accommodation in accommodations"
+                     :location="accommodation.location"
+                     :description="accommodation.description" :image="accommodation.image" :name="accommodation.name"
+                     :price="accommodation.price" :max_people="accommodation.maxPeople" type="accommodations" :id="accommodation.offerId"/>
     </div>
   </div>
 </template>

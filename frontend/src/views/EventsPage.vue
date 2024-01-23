@@ -1,15 +1,15 @@
 <script setup>
-import {ref, watch, onMounted} from 'vue';
-import {storeToRefs} from 'pinia';
+import { ref, watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {useSearchStore} from "@/stores/search.store";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import { useSearchStore } from "@/stores/search.store";
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const events = ref([]);
 
@@ -22,6 +22,7 @@ async function getCurrentEvents() {
 
   allEvents.value = responseData.map((data) => {
     return {
+      'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
       'name': data["name"],
@@ -34,8 +35,23 @@ async function getCurrentEvents() {
 function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
   return allEvents.value.filter((data) => {
 
-    return data.location.startsWith(location)
+    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople)
   })
+}
+
+function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople){
+  let isMatchingSearch = true;
+  if (typeof location !== "undefined" && location !== "")
+  {
+    isMatchingSearch = data.location.includes(location)
+  }
+
+  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0)
+  {
+    isMatchingSearch = numberOfPeople <= data.maxPeople
+  }
+
+  return isMatchingSearch
 }
 
 onMounted(async () => {
@@ -67,7 +83,7 @@ watch(numberOfPeople, (newNumberOfPeople) => {
     <div class="offer_items">
       <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
                      :image="event.image" :name="event.name" :price="event.price"
-                     :max_people="event.maxPeople"/>
+                     :max_people="event.maxPeople" type="events" :id="event.offerId"/>
     </div>
   </div>
 </template>

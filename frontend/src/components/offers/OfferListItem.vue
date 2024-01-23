@@ -1,7 +1,10 @@
 <script setup>
-import {defineEmits, defineProps} from 'vue'
+import {defineProps} from 'vue'
+import {router} from '@/router'
 
 const props = defineProps({
+  type: String,
+  id: String,
   location: String,
   image: String,
   name: String,
@@ -9,11 +12,10 @@ const props = defineProps({
   price: String,
   max_people: String,
 })
-
-const emit = defineEmits(['itemClicked'])
+console.log(props)
 
 function onItemClicked() {
-  emit('itemClicked')
+  router.push({name: 'Offers', params:{type: props.type, id: props.id}})
 }
 </script>
 
@@ -22,7 +24,7 @@ function onItemClicked() {
   <div class="offer_item" @click="onItemClicked">
     <img :src="require(`@/../images/${image}`)" alt="Image">
     <div class="item_details">
-      <div class="name">{{ name }}</div>
+      <div class="title">{{ name }}</div>
       <div class="description"> {{ description }}</div>
       <div class="price">Price: {{ price }}</div>
       <div class="number_of_people">Number of people: {{ max_people }}</div>
@@ -41,14 +43,16 @@ div.offer_item {
   background-color: #E6E6E6;
   border-radius: 10px;
 }
-div.item_details{
+
+div.item_details {
   margin: 1% 5% 1% 5%;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 
 }
-div.name{
+
+div.title {
   color: #000000;
   font-family: "Poppins", Helvetica;
   font-size: 1.8rem;
@@ -57,7 +61,8 @@ div.name{
   align-self: center;
   padding: 1%;
 }
-div.price{
+
+div.price {
   color: #7a7a7a;
   font-family: "Poppins", Helvetica;
   font-size: 1.2rem;
@@ -65,7 +70,8 @@ div.price{
   line-height: normal;
   padding: 1%;
 }
-div.number_of_people{
+
+div.number_of_people {
   color: #7a7a7a;
   font-family: "Poppins", Helvetica;
   font-size: 1.2rem;
@@ -73,7 +79,8 @@ div.number_of_people{
   line-height: normal;
   padding: 1%;
 }
-div.description{
+
+div.description {
   color: #7a7a7a;
   font-family: "Poppins", Helvetica;
   font-size: 1.2rem;
@@ -81,7 +88,8 @@ div.description{
   line-height: normal;
   padding: 1%;
 }
-div.location{
+
+div.location {
   color: #7a7a7a;
   font-family: "Poppins", Helvetica;
   font-size: 1.2rem;
@@ -90,7 +98,8 @@ div.location{
   align-self: flex-end;
   padding: 1%;
 }
-img{
+
+img {
   border-radius: 10px;
   overflow: hidden;
   height: 300px;
