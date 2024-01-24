@@ -1,5 +1,6 @@
 <script setup>
 import {defineProps, ref, watch} from 'vue';
+import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const props = defineProps({
   id: String,
@@ -16,10 +17,13 @@ const isRejected = ref(false);
 
 function onAccept() {
   isAccepted.value = true;
+  fetchWrapper.post(`/api/${props.id}/accepted`, {})
+
 }
 
 function onReject() {
   isRejected.value = true;
+  fetchWrapper.post(`/api/${props.id}/rejected`, {})
 
 }
 watch(() => props.id, () =>{
@@ -51,10 +55,10 @@ watch(() => props.id, () =>{
           </button>
         </div>
         <div class="accepted_offer" v-else-if="isAccepted">
-
+          <p class="accepted">Accepted</p>
         </div>
         <div class="rejected_offer" v-else-if="isRejected">
-
+          <p class="rejected">Rejected</p>
         </div>
       </div>
     </div>
@@ -63,6 +67,18 @@ watch(() => props.id, () =>{
 </template>
 
 <style scoped>
+p.accepted{
+  color: green;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+p.rejected{
+  color: red;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
 button.accept_button{
   border: 0px;
   height: 50px;
