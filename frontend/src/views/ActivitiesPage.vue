@@ -120,11 +120,30 @@ p {
 
 .pagination {
   display: flex;
-  justify-content: space-between;
-  margin: 10px;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
 }
 
 .pagination button {
   cursor: pointer;
+  background-color: #3498db;
+  color: #ffffff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 0 5px;
 }
+
+.pagination button:hover {
+  background-color: #2980b9;
+}
+
+.pagination span {
+  margin: 0 10px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
 </style>
+
