@@ -22,8 +22,8 @@ function onReject() {
   isRejected.value = true;
 
 }
-watch(props.id, () =>{
-  isAccepted.value = false;
+watch(() => props.id, () =>{
+  isAccepted.value = false
   isRejected.value = false;
 })
 </script>
