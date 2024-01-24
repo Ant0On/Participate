@@ -27,6 +27,17 @@ const hostData = ref({
   bankAccount: user.bankAccount ? user.bankAccount : '',
 })
 
+const currentCustomerData = ref({
+  name: user.first_name,
+  lastName: user.last_name,
+  email: user.email,
+})
+const currentHostData = ref({
+  description: user.description ? user.description : '',
+  phoneNumber: user.phoneNumber ? user.phoneNumber : '',
+  bankAccount: user.bankAccount ? user.bankAccount : '',
+})
+
 async function onSubmit() {
   await schemaCustomer.validate(customerData.value).then(async () => {
     if(user.Role === "host"){
@@ -60,6 +71,9 @@ async function onSubmit() {
     user.first_name = hostData.value.first_name
     user.last_name = hostData.value.last_name
     user.email = hostData.value.email
+
+    currentHostData.value = hostData.value
+    currentCustomerData.value = customerData.value
   }).catch(error =>{
         errors.apiError = "Incorrect data!"
       }
@@ -67,6 +81,8 @@ async function onSubmit() {
 }
 function onCancel() {
   isSubmitMode.value = false
+  customerData.value = currentCustomerData.value
+  hostData.value = currentHostData.value
 }
 
 function onChangeData() {
@@ -92,8 +108,8 @@ const schemaHost = Yup.object().shape({
 <template>
   <div class="account_data_component">
     <div class="user_data">
+      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
       <div class="user_fields">
-        <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
         <div class="customer_fields">
           <TextInput label-text="Name" :is-active="isSubmitMode" v-model="customerData.name" width="100%"/>
           <TextInput label-text="Last Name" :is-active="isSubmitMode" v-model="customerData.lastName" width="100%"/>
