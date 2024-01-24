@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps} from 'vue';
+import {defineProps, ref, watch} from 'vue';
 
 const props = defineProps({
   id: String,
@@ -11,13 +11,21 @@ const props = defineProps({
   withAnimals: Boolean,
 });
 
-function onAccept() {
+const isAccepted = ref(false);
+const isRejected = ref(false);
 
+function onAccept() {
+  isAccepted.value = true;
 }
 
 function onReject() {
+  isRejected.value = true;
 
 }
+watch(props.id, () =>{
+  isAccepted.value = false;
+  isRejected.value = false;
+})
 </script>
 
 <template>
@@ -34,13 +42,19 @@ function onReject() {
           <div class="field">Date from: {{ dateFrom }}</div>
           <div class="field">Date to: {{ dateTo }}</div>
         </div>
-        <div class="accept_reject_buttons">
+        <div class="accept_reject_buttons" v-if="!isAccepted && !isRejected">
           <button class="accept_button" @click="onAccept">
             <p class="button_image">&#10003;</p>
           </button>
           <button class="reject_button" @click="onReject">
             <p class="button_image">&#10006;</p>
           </button>
+        </div>
+        <div class="accepted_offer" v-else-if="isAccepted">
+
+        </div>
+        <div class="rejected_offer" v-else-if="isRejected">
+
         </div>
       </div>
     </div>
@@ -49,6 +63,21 @@ function onReject() {
 </template>
 
 <style scoped>
+button.accept_button{
+  border: 0px;
+  height: 50px;
+  width: 50px;
+  font-size: 2rem;
+  background-color: #E6E6E6;
+}
+button.reject_button{
+  border: 0px;
+  height: 50px;
+  width: 50px;
+  font-size: 2rem;
+  background-color: #E6E6E6;
+
+}
 div.summary_data {
   display: flex;
   flex-direction: row;

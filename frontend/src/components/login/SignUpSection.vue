@@ -24,7 +24,7 @@ async function onSubmit() {
     return authStore.signUp(signUpData.value.Name, signUpData.value.Login, signUpData.value.Password)
   }).catch(error => {
         if (error === "Bad Request") {
-          errors.apiError = "Incorrect sing up data!"
+          errors.apiError = "Incorrect sign up data!"
         } else {
           errors.apiError = error.message
         }
