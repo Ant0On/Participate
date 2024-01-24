@@ -12,15 +12,14 @@ const searchStore = useSearchStore();
 const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const activities = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(0);
 
-const allActivities = ref([]);
-
-async function getCurrentActivities() {
-  const response = await fetchWrapper.get(`/api/offers?type=activity`)
-
+async function getCurrentActivities(page) {
+  const response = await fetchWrapper.get(`/api/offers?type=activity&page=${page}`)
   const responseData = response.data
 
-  allActivities.value = responseData.map((data) => {
+  activities.value = responseData.map((data) => {
     return {
       'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
@@ -30,24 +29,23 @@ async function getCurrentActivities() {
       'maxPeople': data["max_people"]
     }
   })
+
+  totalPages.value = response.totalPages;
 }
 
 function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
-  return allActivities.value.filter((data) => {
-
+  return activities.value.filter((data) => {
     return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople)
   })
 }
 
-function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople){
+function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople) {
   let isMatchingSearch = true;
-  if (typeof location !== "undefined" && location !== "")
-  {
+  if (typeof location !== "undefined" && location !== "") {
     isMatchingSearch = data.location.includes(location)
   }
 
-  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0)
-  {
+  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0) {
     isMatchingSearch = numberOfPeople <= data.maxPeople
   }
 
@@ -55,21 +53,27 @@ function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeo
 }
 
 onMounted(async () => {
-  await getCurrentActivities();
-  activities.value = allActivities.value
+  await getCurrentActivities(currentPage.value);
 });
 
 watch(location, (newLocation) => {
   activities.value = getNewActivities(newLocation, dateFrom, dateTo, numberOfPeople)
 })
+
 watch(dateFrom, (newDateFrom) => {
   activities.value = getNewActivities(location, newDateFrom, dateTo, numberOfPeople)
 })
+
 watch(dateTo, (newDateTo) => {
   activities.value = getNewActivities(location, dateFrom, newDateTo, numberOfPeople)
 })
+
 watch(numberOfPeople, (newNumberOfPeople) => {
   activities.value = getNewActivities(location, dateFrom, dateTo, newNumberOfPeople)
+})
+
+watch(currentPage, (newPage) => {
+  getCurrentActivities(newPage);
 })
 </script>
 
@@ -84,6 +88,11 @@ watch(numberOfPeople, (newNumberOfPeople) => {
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
                      :name="activity.name" :price="activity.price"
                      :max_people="activity.maxPeople" type="activities" :id="activity.offerId"/>
+    </div>
+    <div class="pagination">
+      <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
+      <span>Page {{ currentPage }} of {{ totalPages }}</span>
+      <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>
 </template>
@@ -107,5 +116,15 @@ p {
 
 .offer_items {
   margin: 3% 5% 0 5%;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+}
+
+.pagination button {
+  cursor: pointer;
 }
 </style>
