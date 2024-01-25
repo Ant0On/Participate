@@ -8,21 +8,21 @@ const props = defineProps({
   labelText: String,
   placeholder: String,
   isRequired: Boolean,
-  modelValue: String | Number,
+  modelValue: Boolean,
   width: {
     type: String,
     default: "100%"
   }
 })
 
-const emits = defineEmits(['update:modelValue'])
+const emits = defineEmits(['changedValue'])
 </script>
 
 <template>
   <div class="text_input">
     <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue" type="checkbox"
-           @input="$emit('update:modelValue', $event.target.value)"/>
+    <input :id="inputUUID" :placeholder="placeholder" :checked="modelValue"  type="checkbox"
+           @change="$emit('changedValue')"/>
   </div>
 </template>
 
