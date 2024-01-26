@@ -107,23 +107,21 @@ onMounted(async () => {
 
 <template>
   <div class="new_offer">
-    <Transition>
-      <div v-if="!isAddingNewOffer && !addedNewOffer" class="new_offer_start">
+    <div v-if="!isAddingNewOffer && !addedNewOffer" class="new_offer_start">
         <p class="new_offer_text">Add new amazing experience!</p>
         <button v-if="!isAddingNewOffer" class="button_basic" @click="isAddingNewOffer = !isAddingNewOffer">
           Start now!
         </button>
       </div>
-    </Transition>
-    <Transition>
-      <div v-if="isAddingNewOffer" class="new_offer_info">
+    <Transition name="bounce">
+    <div v-if="isAddingNewOffer" class="new_offer_info">
         <p class="new_offer_text">Fill all information below to add a new experience!</p>
         <SelectionInput v-model="newOffer.offerType" label-text="Offer type" placeholder="Type" :items="offerTypes"
                         width="100%"/>
       </div>
     </Transition>
-    <Transition>
-      <div v-if="isOfferTypeFilled" class="new_offer_info">
+    <Transition name="bounce">
+    <div v-if="isOfferTypeFilled" class="new_offer_info">
         <TextInput v-model="newOffer.name" label-text="Name" width="100%"/>
         <TextInput v-model="newOffer.description" label-text="Description" width="100%"/>
         <NumberInput v-model="newOffer.price" label-text="Price"/>
@@ -133,14 +131,14 @@ onMounted(async () => {
                           label-text="Is animal friendly?" width="100%"/>
       </div>
     </Transition>
-    <Transition>
-      <div v-if="isOfferInfoFilled" class="new_offer_info">
+    <Transition name="bounce">
+    <div v-if="isOfferInfoFilled" class="new_offer_info">
         <SelectionInput v-model="newOffer.country" label-text="Country" :items="countries" width="100%"/>
         <TextInput v-model="newOffer.city" label-text="City" width="100%"/>
       </div>
     </Transition>
-    <Transition>
-      <div v-if="isOfferCountryFilled" class="new_offer_image">
+    <Transition name="bounce">
+    <div v-if="isOfferCountryFilled" class="new_offer_image">
         <div class="upload_image">
           <img v-if="newOffer.image !== ''" :src="newOffer.image" class="preview_image"/>
           <div id="image_input" v-if="newOffer.image === ''">
@@ -153,15 +151,15 @@ onMounted(async () => {
         </div>
       </div>
     </Transition>
-    <Transition>
-      <div>
+    <Transition name="bounce">
+    <div class="submit_container">
         <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
         <button v-if="isOfferImageFilled" class="button_basic" @click="onSubmit">
           Create an offer
         </button>
       </div>
     </Transition>
-    <Transition>
+    <Transition name="bounce">
       <div v-if="addedNewOffer" class="new_offer_start">
         <p class="new_offer_text">Add another amazing experience!</p>
         <button class="button_basic" @click="addedNewOffer = false">
@@ -173,6 +171,28 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.bounce-enter-active {
+  animation: bounce-in 0.5s;
+}
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.10);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+div.submit_container{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
 div.new_offer_image {
   display: flex;
   flex-grow: 1;
@@ -254,7 +274,6 @@ p.new_offer_text {
   padding: 4px 16px;
   border: 1px solid #808080;
   border-radius: 6px;
-
   width: 150px;
   height: 35px;
   display: flex;
