@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted, ref, reactive} from 'vue';
 
 import NumberInput from "@/components/ui/NumberInput.vue";
 import TextInput from "@/components/ui/TextInput.vue";
@@ -7,20 +7,6 @@ import CheckButtonInput from "@/components/ui/CheckButtonInput.vue";
 import SelectionInput from "@/components/ui/SelectionInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
-const offerTypes = ['Accommodation', 'Activities', 'Events']
-
-async function onSubmit() {
-  fetchWrapper.post('/api/host/create', {
-
-  },
-  "multipart/form-data")
-      .then(()=>{
-
-      })
-      .catch(()=>{
-
-      })
-}
 
 const newOffer = ref({
   offerType: '',
@@ -34,20 +20,48 @@ const newOffer = ref({
   image: '',
 });
 
+const errors = reactive({
+  apiError: '',
+})
+
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '');
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
-const isOfferImageFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
+const isOfferImageFilled = computed(() => newOffer.value.image !== '')
+const isAddingNewOffer = ref(false)
+const addedNewOffer = ref(false)
+const countries = ref([])
+const countriesId = ref([])
+const offerTypes = ['Accommodation', 'Activities', 'Events']
 
-function checkIfOfferInfoIsFilled() {
-  let offerValues = newOffer.value;
-  return offerValues.name !== '' && offerValues.description !== '' && offerValues.price !== ''
-      && offerValues.maxPeople !== '' && offerValues.isAnimalFriendly !== ''
+async function onSubmit() {
 
+  fetchWrapper.post('/api/host/create', {
+
+  },
+  "multipart/form-data")
+      .then(()=>{
+        newOffer.value = {
+          offerType: '',
+          name: '',
+          description: '',
+          price: '',
+          maxPeople: '',
+          isAnimalFriendly: false,
+          country: '',
+          city: '',
+          image: '',
+        }
+        isAddingNewOffer.value = false;
+        addedNewOffer.value = true;
+      })
+      .catch(()=>{
+        console.log(newOffer.value)
+        errors.apiError = "Incorrect data!"
+      })
 }
 
-
-function uploadImage(imageInput) {
+async function uploadImage(imageInput) {
   const image = imageInput.target.files[0];
   const reader = new FileReader();
   reader.readAsDataURL(image);
@@ -56,9 +70,12 @@ function uploadImage(imageInput) {
   };
 }
 
-const isAddingNewOffer = ref(false)
-const countries = ref([])
-const countriesId = ref([])
+function checkIfOfferInfoIsFilled() {
+  let offerValues = newOffer.value;
+  return offerValues.name !== '' && offerValues.description !== '' && offerValues.price !== ''
+      && offerValues.maxPeople !== '' && offerValues.isAnimalFriendly !== ''
+
+}
 
 onMounted(async () => {
   const response = await fetchWrapper.get('/api/country/get/all')
@@ -78,7 +95,7 @@ onMounted(async () => {
 <template>
   <div class="new_offer">
     <Transition>
-      <div v-if="!isAddingNewOffer" class="new_offer_start">
+      <div v-if="!isAddingNewOffer && !addedNewOffer" class="new_offer_start">
         <p class="new_offer_text">Add new amazing experience!</p>
         <button v-if="!isAddingNewOffer" class="button_basic" @click="isAddingNewOffer = !isAddingNewOffer">
           Start now!
@@ -124,11 +141,21 @@ onMounted(async () => {
       </div>
     </Transition>
     <Transition>
-      <button v-if="isOfferImageFilled" class="button_basic" @click="onSubmit">
-        Create an offer
-      </button>
+      <div>
+        <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+        <button v-if="isOfferImageFilled" class="button_basic" @click="onSubmit">
+          Create an offer
+        </button>
+      </div>
     </Transition>
-
+    <Transition>
+      <div v-if="addedNewOffer" class="new_offer_start">
+        <p class="new_offer_text">Add another amazing experience!</p>
+        <button class="button_basic" @click="addedNewOffer = false">
+          Add experience!
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -218,10 +245,17 @@ p.new_offer_text {
   justify-content: center;
   align-self: center;
   align-items: center;
+  text-align: center;
 }
 
 .button_basic:active {
   background-color: rgba(22, 89, 224, 0.5);
   color: var(--systemwhite)
+}
+div.errors {
+  font-family: "Sarabun", Helvetica;
+  margin-bottom: 5%;
+  margin-top: 5%;
+  text-align: center;
 }
 </style>
