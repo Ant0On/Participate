@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from 'vue';
+import {ref, onMounted} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -10,26 +10,30 @@ const auth = useAuthStore();
 const user = auth.user;
 const pageSize = 5;
 
-const allCurrentOffers = ref(await getCurrentOffers())
+const allCurrentOffers = ref([])
 const currentOffers = ref([])
 
 async function getCurrentOffers() {
-  const response = fetchWrapper.get(`/api/reservation/${user.ID}/pending`)
+  fetchWrapper.get(`/api/reservation/${user.ID}/pending`)
+      .then((response) => {
+        const responseData = response.data
 
-  const responseData = response.data
+        allCurrentOffers.value = responseData.map((data) => {
+          return {
+            'location': data["country_name"] + ', ' + data["town_name"],
+            'name': data["name"],
+            'price': data["price"],
+            'dateFrom': data['dateFrom'],
+            'dateTo': data['dateTo'],
+            'offerType': data['offer_type'],
+            'withAnimals': data['animals']
+          }
+        })
+        currentOffers.value = currentOffers.value.slice(0, pageSize);
+      })
+      .catch((error) =>{
 
-  allCurrentOffers.value = responseData.map((data) => {
-    return {
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'name': data["name"],
-      'price': data["price"],
-      'dateFrom': data['dateFrom'],
-      'dateTo': data['dateTo'],
-      'offerType': data['offer_type'],
-      'withAnimals': data['animals']
-    }
-  })
-  currentOffers.value = currentOffers.value.slice(0, pageSize);
+      })
 }
 
 currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
@@ -51,6 +55,8 @@ function pageFroward() {
 
   }
 }
+
+onMounted(async () => getCurrentOffers())
 </script>
 
 <template>

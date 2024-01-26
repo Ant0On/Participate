@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from 'vue';
+import {ref, onMounted} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -9,26 +9,28 @@ const auth = useAuthStore();
 const user = auth.user;
 const pageSize = 5;
 
-const allHistoryItems = ref(await getHistoryItems())
+const allHistoryItems = ref([])
 const historyItems = ref([])
 
 async function getHistoryItems() {
-  const response = fetchWrapper.get(`/api/reservation/${user.ID}/finished`)
-
-  const responseData = response.data
-
-  allHistoryItems.value = responseData.map((data) => {
-    return {
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'name': data["name"],
-      'price': data["price"],
-      'dateFrom': data['dateFrom'],
-      'dateTo': data['dateTo'],
-      'offerType': data['offer_type'],
-      'withAnimals': data['animals']
-    }
-  })
-  historyItems.value = allHistoryItems.value.slice(0, pageSize);
+  fetchWrapper.get(`/api/reservation/${user.ID}/finished`)
+      .then((response)=>{
+        const responseData = response.data
+        allHistoryItems.value = responseData.map((data) => {
+          return {
+            'location': data["country_name"] + ', ' + data["town_name"],
+            'name': data["name"],
+            'price': data["price"],
+            'dateFrom': data['dateFrom'],
+            'dateTo': data['dateTo'],
+            'offerType': data['offer_type'],
+            'withAnimals': data['animals']
+          }
+        })
+        historyItems.value = allHistoryItems.value.slice(0, pageSize);
+      })
+      .catch((error)=>{
+      })
 }
 
 let currentPage = 1;
@@ -49,6 +51,8 @@ function pageFroward() {
 
   }
 }
+
+onMounted(async () => getHistoryItems())
 </script>
 
 <template>
