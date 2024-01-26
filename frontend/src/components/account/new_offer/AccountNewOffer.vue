@@ -35,7 +35,7 @@ function checkIfOfferInfoIsFilled() {
       && offerValues.maxPeople !== '' && offerValues.isAnimalFriendly !== ''
 
 }
-
+const isAddingNewOffer = ref(false)
 const countries = ref([])
 const countriesId = ref([])
 
@@ -56,11 +56,20 @@ onMounted(async () => {
 
 <template>
   <div class="new_offer">
-    <div class="new_offer_info">
-      <p class="new_offer_text">Add new amazing experience!</p>
-      <SelectionInput v-model="newOffer.offerType" label-text="Offer type" placeholder="Type" :items="offerTypes"
-                      width="100%"/>
-    </div>
+    <Transition>
+      <div v-if="!isAddingNewOffer" class="new_offer_start">
+        <p class="new_offer_text">Add new amazing experience!</p>
+        <button v-if="!isAddingNewOffer" class="button_basic" @click="isAddingNewOffer = !isAddingNewOffer">
+          Start now!
+        </button>
+      </div>
+    </Transition>
+    <Transition>
+      <div v-if="isAddingNewOffer" class="new_offer_info">
+        <SelectionInput v-model="newOffer.offerType" label-text="Offer type" placeholder="Type" :items="offerTypes"
+                        width="100%"/>
+      </div>
+    </Transition>
     <Transition>
       <div v-if="isOfferTypeFilled" class="new_offer_info">
         <TextInput v-model="newOffer.name" label-text="Name" width="100%"/>
@@ -109,6 +118,15 @@ div.new_offer_info {
   width: 60%;
   row-gap: 15px;
 
+}
+div.new_offer_start{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 60%;
+  row-gap: 15px;
 }
 
 p.new_offer_text {
