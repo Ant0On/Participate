@@ -10,7 +10,16 @@ import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 const offerTypes = ['Accommodation', 'Activities', 'Events']
 
 async function onSubmit() {
+  fetchWrapper.post('/api/host/create', {
 
+  },
+  "multipart/form-data")
+      .then(()=>{
+
+      })
+      .catch(()=>{
+
+      })
 }
 
 const newOffer = ref({
@@ -22,6 +31,7 @@ const newOffer = ref({
   isAnimalFriendly: false,
   country: '',
   city: '',
+  image: '',
 });
 
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '');
@@ -35,6 +45,17 @@ function checkIfOfferInfoIsFilled() {
       && offerValues.maxPeople !== '' && offerValues.isAnimalFriendly !== ''
 
 }
+
+
+function uploadImage(imageInput) {
+  const image = imageInput.target.files[0];
+  const reader = new FileReader();
+  reader.readAsDataURL(image);
+  reader.onload = source => {
+    newOffer.value.image = source.target.result;
+  };
+}
+
 const isAddingNewOffer = ref(false)
 const countries = ref([])
 const countriesId = ref([])
@@ -66,6 +87,7 @@ onMounted(async () => {
     </Transition>
     <Transition>
       <div v-if="isAddingNewOffer" class="new_offer_info">
+        <p class="new_offer_text">Fill all information below to add a new experience!</p>
         <SelectionInput v-model="newOffer.offerType" label-text="Offer type" placeholder="Type" :items="offerTypes"
                         width="100%"/>
       </div>
@@ -89,12 +111,21 @@ onMounted(async () => {
     </Transition>
     <Transition>
       <div v-if="isOfferCountryFilled" class="new_offer_image">
-        tutaj bedzie dodanie obrazka...
+        <div class="upload_image">
+          <img v-if="newOffer.image !== ''" :src="newOffer.image" class="preview_image"/>
+          <div id="image_input" v-if="newOffer.image === ''">
+            <label for="image_upload">
+              Add a photo
+            </label>
+            <input id="image_upload" type="file" accept="image/jpeg, image/png, image/jpg"
+                   @change=uploadImage>
+          </div>
+        </div>
       </div>
     </Transition>
     <Transition>
       <button v-if="isOfferImageFilled" class="button_basic" @click="onSubmit">
-        Create offer
+        Create an offer
       </button>
     </Transition>
 
@@ -102,6 +133,35 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+div.new_offer_image{
+  display: flex;
+  flex-grow: 1;
+}
+div#image_input{
+  display: flex;
+  flex-grow: 1;
+}
+label{
+  border: 1px solid black;
+  padding: 5%;
+  border-radius: 5px;
+  width: 150px;
+  text-align: center;
+}
+input#image_upload {
+  position: absolute;
+  left: -99999rem
+}
+
+img.preview_image {
+  padding-top: 5%;
+  padding-bottom: 5%;
+  width: 300px;
+  height: 300px;
+  align-self: center;
+
+}
+
 div.new_offer {
   display: flex;
   flex-grow: 1;
@@ -119,7 +179,8 @@ div.new_offer_info {
   row-gap: 15px;
 
 }
-div.new_offer_start{
+
+div.new_offer_start {
   display: flex;
   align-items: center;
   justify-content: center;
