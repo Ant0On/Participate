@@ -45,7 +45,6 @@ async function getCountryId(countryName){
   return response.data.filter((country) => country.Name === countryName)[0].ID
 }
 async function onSubmit() {
- console.log(await getCountryId(newOffer.value.country))
   fetchWrapper.post('/api/town/add', {
     name: newOffer.value.city,
     country_id: await getCountryId(newOffer.value.country)
