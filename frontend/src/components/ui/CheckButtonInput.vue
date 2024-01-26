@@ -27,6 +27,10 @@ const emits = defineEmits(['changedValue'])
 </template>
 
 <style scoped>
+div.text_input{
+  display: flex;
+  align-items: center;
+}
 input[type=number]{
   width: v-bind(width);
   height: 40px;
