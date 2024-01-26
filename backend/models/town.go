@@ -11,7 +11,7 @@ type Town struct {
 	Name       string `gorm:"size:50;not null" json:"name"`
 	Offers     []Offer
 	CountryID  uint `gorm:"not null" json:"country_id"`
-	TownTypeID uint `gorm:"not null" json:"town_type_id"`
+	TownTypeID uint `json:"town_type_id"`
 }
 
 func (t *Town) Save() error {

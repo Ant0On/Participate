@@ -1,11 +1,12 @@
 <script setup>
-import {computed, onMounted, ref, reactive} from 'vue';
+import {computed, onMounted, reactive, ref} from 'vue';
 
 import NumberInput from "@/components/ui/NumberInput.vue";
 import TextInput from "@/components/ui/TextInput.vue";
 import CheckButtonInput from "@/components/ui/CheckButtonInput.vue";
 import SelectionInput from "@/components/ui/SelectionInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import {useAuthStore} from "@/stores/auth.store";
 
 
 const newOffer = ref({
@@ -23,7 +24,8 @@ const newOffer = ref({
 const errors = reactive({
   apiError: '',
 })
-
+const userStore = useAuthStore();
+const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '');
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
@@ -31,34 +33,54 @@ const isOfferImageFilled = computed(() => newOffer.value.image !== '')
 const isAddingNewOffer = ref(false)
 const addedNewOffer = ref(false)
 const countries = ref([])
-const countriesId = ref([])
 const offerTypes = ['Accommodation', 'Activities', 'Events']
+const offerTypesId = {
+  'Accommodation': 'place',
+  'Events': 'event',
+  'Activities': 'activity'
+}
 
+async function getCountryId(countryName){
+  const response = await fetchWrapper.get('/api/country/get/all')
+  return response.data.filter((country) => country.Name === countryName)[0].ID
+}
 async function onSubmit() {
-
-  fetchWrapper.post('/api/host/create', {
-
-  },
-  "multipart/form-data")
-      .then(()=>{
-        newOffer.value = {
-          offerType: '',
-          name: '',
-          description: '',
-          price: '',
-          maxPeople: '',
-          isAnimalFriendly: false,
-          country: '',
-          city: '',
-          image: '',
-        }
-        isAddingNewOffer.value = false;
-        addedNewOffer.value = true;
-      })
-      .catch(()=>{
-        console.log(newOffer.value)
-        errors.apiError = "Incorrect data!"
-      })
+ console.log(await getCountryId(newOffer.value.country))
+  fetchWrapper.post('/api/town/add', {
+    name: newOffer.value.city,
+    country_id: await getCountryId(newOffer.value.country)
+  }).then((town) => {
+        fetchWrapper.post('/api/host/create', {
+              name: newOffer.value.name,
+              description: newOffer.value.description,
+              price: newOffer.value.price,
+              max_people: newOffer.value.maxPeople,
+              is_animal_friendly: newOffer.value.isAnimalFriendly,
+              is_recommended: false,
+              offer_type: offerTypesId[newOffer.value.offerType],
+              host_id: user.ID,
+              town_id: town.data.ID
+            },
+            "multipart/form-data")
+            .then(() => {
+              newOffer.value = {
+                offerType: '',
+                name: '',
+                description: '',
+                price: '',
+                maxPeople: '',
+                isAnimalFriendly: false,
+                country: '',
+                city: '',
+                image: '',
+              }
+              isAddingNewOffer.value = false;
+              addedNewOffer.value = true;
+            })
+      }
+  ).catch(() => {
+    errors.apiError = "A problem occurred during addition of an offer!"
+  })
 }
 
 async function uploadImage(imageInput) {
@@ -79,15 +101,7 @@ function checkIfOfferInfoIsFilled() {
 
 onMounted(async () => {
   const response = await fetchWrapper.get('/api/country/get/all')
-
   countries.value = response.data.map((country) => country.Name)
-
-  let countriesId = {}
-  response.data.forEach((country) => {
-    countriesId[country.Name] = country.ID
-  })
-
-  countriesId.value = countriesId
 })
 
 </script>
@@ -160,21 +174,24 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-div.new_offer_image{
+div.new_offer_image {
   display: flex;
   flex-grow: 1;
 }
-div#image_input{
+
+div#image_input {
   display: flex;
   flex-grow: 1;
 }
-label{
+
+label {
   border: 1px solid black;
   padding: 5%;
   border-radius: 5px;
   width: 150px;
   text-align: center;
 }
+
 input#image_upload {
   position: absolute;
   left: -99999rem
@@ -252,6 +269,7 @@ p.new_offer_text {
   background-color: rgba(22, 89, 224, 0.5);
   color: var(--systemwhite)
 }
+
 div.errors {
   font-family: "Sarabun", Helvetica;
   margin-bottom: 5%;
