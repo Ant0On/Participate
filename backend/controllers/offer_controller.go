@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
@@ -15,7 +17,18 @@ func GetOffers(c *gin.Context) {
 	var result *gorm.DB
 	offerType := c.Query("type")
 
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit := 10
+	offset := (page - 1) * limit
+
 	query := models.DB.Model(&models.Offer{})
+
+	var totalRecords int64
+	query.Count(&totalRecords)
+	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
 
 	if offerType != "" {
 		query = query.Where("offer_type = ?", offerType)
@@ -26,6 +39,7 @@ func GetOffers(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
+		Offset(offset).Limit(limit).
 		Find(&offersWithLocation)
 
 	if err := result.Error; err != nil {
@@ -33,7 +47,14 @@ func GetOffers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": offersWithLocation})
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "offers fetched successfully",
+		"data":         offersWithLocation,
+		"page":         page,
+		"limit":        limit,
+		"totalPages":   totalPages,
+		"totalRecords": totalRecords,
+	})
 }
 
 func GetOfferByID(c *gin.Context) {
