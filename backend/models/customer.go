@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Customer TODO make the role immutable and set as customer (same for host and admin)
 type Customer struct {
 	gorm.Model
 	FirstName    string `gorm:"size:30;not null" form:"first_name" binding:"required"`
@@ -20,8 +19,14 @@ type Customer struct {
 	Email        string `gorm:"size:100;not null;unique" form:"email" binding:"required"`
 	ImagePath    string `gorm:"default:images/customers/default_image.png" form:"image_path"`
 	Password     string `gorm:"size:100;not null;" form:"password" binding:"required"`
-	Role         string `gorm:"default:customer"`
+	Role         string
 	Reservations []Reservation
+}
+
+func NewCustomer() Customer {
+	return Customer{
+		Role: "customer",
+	}
 }
 
 func GetUserByEmail(email string) (any, error) {
