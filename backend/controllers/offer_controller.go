@@ -12,6 +12,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type discountRequest struct {
+	Discount float64 `json:"discount"`
+}
+
 func GetOffers(c *gin.Context) {
 	var offersWithLocation []DTO.OfferWithLocation
 	var result *gorm.DB
@@ -146,26 +150,30 @@ func UpdateOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
 }
 
-// DiscountOffer TODO do przemyślenia czy my w ogóle chcemy zniżkę w bazie
 func DiscountOffer(c *gin.Context) {
 	offerID := c.Param("offerID")
-	discountID := c.Param("discountID")
 
 	var offer models.Offer
-	var discount models.Discount
+	var discountReq discountRequest
 
 	if err := models.DB.First(&offer, offerID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
 		return
 	}
 
-	if err := models.DB.First(&discount, discountID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Discount not found"})
+	if err := c.ShouldBindJSON(&discountReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	offer.DiscountID = discount.ID
-	if err := models.DB.Save(&offer).Error; err != nil {
+	if discountReq.Discount < 0 || discountReq.Discount > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "The discount must be between 0 and 100"})
+		return
+	}
+
+	offer.Discount = discountReq.Discount
+
+	if err := offer.Save().Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign discount"})
 		return
 	}

@@ -25,7 +25,6 @@ type Reservation struct {
 	CustomerID       uint             `gorm:"not null"`
 	OfferID          uint             `gorm:"not null"`
 	GradeID          uint
-	DiscountID       uint
 	PaymentID        uint `gorm:"not null"`
 	AnimalID         uint
 }
