@@ -8,8 +8,8 @@ import (
 
 type Discount struct {
 	gorm.Model
-	Amount       float64 `gorm:"not null" json:"amount"`
-	Reservations []Reservation
+	Amount float64 `gorm:"not null" json:"amount"`
+	Offers []Offer
 }
 
 func (d *Discount) Save() error {

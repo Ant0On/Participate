@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Customer TODO make the role immutable and set as customer (same for host and admin)
 type Customer struct {
 	gorm.Model
 	FirstName    string `gorm:"size:30;not null" form:"first_name" binding:"required"`
@@ -80,7 +81,7 @@ func LoginCheck(email, password string) (string, any, error) {
 
 	}
 
-	if t, err = token.GenerateToken(c.Email, role); err != nil {
+	if t, err = token.GenerateToken(c.ID, c.Email, role); err != nil {
 		return "", nil, fmt.Errorf("token.GenerateToken: %w", err)
 	}
 
@@ -90,6 +91,7 @@ func LoginCheck(email, password string) (string, any, error) {
 
 	return t, user, nil
 }
+
 func (c *Customer) checkIfEmailExist(email string) (string, string, error) {
 	h := NewHost()
 

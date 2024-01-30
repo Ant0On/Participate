@@ -27,6 +27,7 @@ type Offer struct {
 	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type"`
 	HostID           uint      `gorm:"not null" form:"host_id"`
 	TownID           uint      `gorm:"not null" form:"town_id"`
+	DiscountID       uint      `form:"discount_id"`
 	Reservations     []Reservation
 }
 

@@ -105,3 +105,44 @@ func ChangeEmail(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
+
+func GradeReservation(c *gin.Context) {
+	offerID := c.Param("id")
+	if offerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offer ID"})
+		return
+	}
+
+	customer, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	customerObj, ok := customer.(*models.Customer)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	var reservation models.Reservation
+	err := models.DB.Where("customer_id = ? AND offer_id = ?", customerObj.ID, offerID).First(&reservation).Error
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
+		return
+	}
+
+	if reservation.ReservationState != models.Finished {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
+		return
+	}
+
+	var grade models.Grade
+	if err := c.ShouldBindJSON(&grade); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	reservation.GradeID = grade.ID
+
+	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})
+}

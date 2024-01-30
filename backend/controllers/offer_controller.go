@@ -146,6 +146,33 @@ func UpdateOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
 }
 
+// DiscountOffer TODO do przemyślenia czy my w ogóle chcemy zniżkę w bazie
+func DiscountOffer(c *gin.Context) {
+	offerID := c.Param("offerID")
+	discountID := c.Param("discountID")
+
+	var offer models.Offer
+	var discount models.Discount
+
+	if err := models.DB.First(&offer, offerID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	if err := models.DB.First(&discount, discountID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Discount not found"})
+		return
+	}
+
+	offer.DiscountID = discount.ID
+	if err := models.DB.Save(&offer).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign discount"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
+}
+
 func GetRecommendedOffers(c *gin.Context) {
 	var recommendedOffers []DTO.OfferWithLocation
 	var result *gorm.DB
