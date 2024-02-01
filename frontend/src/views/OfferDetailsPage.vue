@@ -5,12 +5,25 @@ import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
 import OfferDetailDescription from "@/components/detail/OfferDetailDescription.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import ChatButton from "@/components/detail/ChatButton.vue";
+import ChatPopup from "@/components/detail/ChatPopup.vue";
 
 const props = defineProps({
   type: String,
   id: String,
 })
 
+const showChat = ref(false);
+
+function openChat({ type, id }) {
+  // Add your logic to join the chat based on the type and id
+  // For now, just toggle the showChat ref
+  showChat.value = true;
+}
+
+function closeChat() {
+  showChat.value = false;
+}
 
 const offer = ref({
   name: '',
@@ -51,6 +64,8 @@ onMounted(async () => {
                               :numberOfPeople="offer.numberOfPeople" :hostId="offer.hostId"
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
       <OfferDetailSummary :price="offer.price" :image="offer.image" :id="id" v-else/>
+      <ChatButton :type="type" :id="id" @join-chat="openChat"/>
+      <ChatPopup v-if="showChat" @close-chat="closeChat"/>
     </div>
   </div>
 </template>
