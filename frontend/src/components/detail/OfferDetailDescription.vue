@@ -9,7 +9,7 @@ const props = defineProps({
   price: 0,
   location: '',
   numberOfPeople: 0,
-  hostId: 0,
+  hostID: 0,
   type: '',
 })
 const emits = defineEmits(['moveToSummary'])

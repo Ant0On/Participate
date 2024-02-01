@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="chat-input">
-      <textarea v-model="newMessage" placeholder="Type your message..."></textarea>
+      <textarea v-model="newMessage" placeholder="Type your message..." @keydown.enter.prevent="sendMessage"></textarea>
       <button @click="sendMessage">Send</button>
     </div>
   </div>
@@ -32,10 +32,10 @@ export default {
       this.$emit('close-chat');
     },
     sendMessage() {
-      // Add the new message to the messages array
-      this.messages.push(`User: ${this.newMessage}`);
-      // Clear the input field
-      this.newMessage = '';
+      if (this.newMessage.trim() !== '') {
+        this.messages.push(`User: ${this.newMessage}`);
+        this.newMessage = '';
+      }
     },
   },
 };

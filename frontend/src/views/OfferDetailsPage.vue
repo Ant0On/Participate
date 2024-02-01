@@ -30,7 +30,7 @@ const offer = ref({
   price: 0,
   location: '',
   numberOfPeople: 0,
-  hostId: 0,
+  hostID: 0,
 })
 
 const isDescription = ref(true)
@@ -40,7 +40,7 @@ async function getOfferDetails() {
 
   const responseData = response.data
   offer.value = {
-      'hostId': responseData["hostId"],
+      'hostID': responseData["host_id"],
       'location': responseData["country_name"] + ', ' + responseData["town_name"],
       'description': responseData["description"],
       'name': responseData["name"],
@@ -61,7 +61,7 @@ onMounted(async () => {
     <NavBar :currentPage="type"/>
     <div class="item_detail">
       <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
-                              :numberOfPeople="offer.numberOfPeople" :hostId="offer.hostId"
+                              :numberOfPeople="offer.numberOfPeople" :hostID="offer.hostID"
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
       <OfferDetailSummary :price="offer.price" :image="offer.image" :id="id" v-else/>
       <ChatButton :type="type" :id="id" @join-chat="openChat"/>
