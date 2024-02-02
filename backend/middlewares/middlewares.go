@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 
 	"backend/models"
@@ -26,25 +27,27 @@ func JwtAuthMiddleware(role string) gin.HandlerFunc {
 			return
 		}
 
-		userID := claims["user_id"].(uint)
+		userID := claims["user_id"].(float64) //TODO
 		if err := token.IsTokenValid(c, role); err != nil {
 			c.String(http.StatusUnauthorized, "Unauthorized, wrong role")
 			c.Abort()
 			return
 		}
 
-		var cust models.Customer
+		var customer models.Customer
 		var h models.Host
 
+		fmt.Println(userID)
+
 		if role == "customer" {
-			if err := models.DB.First(&cust, userID).Error; err != nil {
+			if err := models.DB.First(&customer, int(userID)).Error; err != nil {
 				c.String(http.StatusUnauthorized, "User not found")
 				c.Abort()
 				return
 			}
-			c.Set("user", &cust)
+			c.Set("user", &customer)
 		} else {
-			if err := models.DB.First(&h, userID).Error; err != nil {
+			if err := models.DB.First(&h, int(userID)).Error; err != nil {
 				c.String(http.StatusUnauthorized, "User not found")
 				c.Abort()
 				return
