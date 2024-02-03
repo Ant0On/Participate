@@ -45,3 +45,11 @@ func GetGrades() ([]Grade, error) {
 	}
 	return grade, nil
 }
+
+func GetGradeByCount(count string) (*Grade, error) {
+	var g *Grade
+	if err := DB.Where("count = ?", count).First(&g).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return g, nil
+}

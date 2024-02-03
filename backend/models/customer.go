@@ -19,8 +19,14 @@ type Customer struct {
 	Email        string `gorm:"size:100;not null;unique" form:"email" binding:"required"`
 	ImagePath    string `gorm:"default:images/customers/default_image.png" form:"image_path"`
 	Password     string `gorm:"size:100;not null;" form:"password" binding:"required"`
-	Role         string `gorm:"default:customer"`
+	Role         string
 	Reservations []Reservation
+}
+
+func NewCustomer() Customer {
+	return Customer{
+		Role: "customer",
+	}
 }
 
 func GetUserByEmail(email string) (any, error) {
@@ -67,11 +73,12 @@ func (c *Customer) Update() error {
 
 func LoginCheck(email, password string) (string, any, error) {
 	var role, uPassword, t string
+	var userID uint
 	var user any
 	var err error
 	c := Customer{}
 
-	if role, uPassword, err = c.checkIfEmailExist(email); err != nil {
+	if userID, role, uPassword, err = c.checkIfEmailExist(email); err != nil {
 		return "", nil, fmt.Errorf("user with given email doesn't exist: %w", err)
 	}
 
@@ -80,7 +87,7 @@ func LoginCheck(email, password string) (string, any, error) {
 
 	}
 
-	if t, err = token.GenerateToken(c.Email, role); err != nil {
+	if t, err = token.GenerateToken(userID, email, role); err != nil {
 		return "", nil, fmt.Errorf("token.GenerateToken: %w", err)
 	}
 
@@ -90,16 +97,17 @@ func LoginCheck(email, password string) (string, any, error) {
 
 	return t, user, nil
 }
-func (c *Customer) checkIfEmailExist(email string) (string, string, error) {
+
+func (c *Customer) checkIfEmailExist(email string) (uint, string, string, error) {
 	h := NewHost()
 
 	if err := DB.Where("email = ?", email).First(&c).Error; err != nil {
 		if err = DB.Where("email = ?", email).First(&h).Error; err != nil {
-			return "", "", fmt.Errorf("user not found: %w", err)
+			return 0, "", "", fmt.Errorf("user not found: %w", err)
 		}
-		return h.Role, h.Password, nil
+		return h.ID, h.Role, h.Password, nil
 	}
-	return c.Role, c.Password, nil
+	return c.ID, c.Role, c.Password, nil
 }
 
 func GetUser(email string) (any, error) {

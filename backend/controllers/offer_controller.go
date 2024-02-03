@@ -12,6 +12,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type discountRequest struct {
+	Discount float64 `json:"discount"`
+}
+
 func GetOffers(c *gin.Context) {
 	var offersWithLocation []DTO.OfferWithLocation
 	var result *gorm.DB
@@ -144,6 +148,37 @@ func UpdateOffer(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
+}
+
+func DiscountOffer(c *gin.Context) {
+	offerID := c.Param("offerID")
+
+	var offer models.Offer
+	var discountReq discountRequest
+
+	if err := models.DB.First(&offer, offerID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&discountReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if discountReq.Discount < 0 || discountReq.Discount > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "The discount must be between 0 and 100"})
+		return
+	}
+
+	offer.Discount = discountReq.Discount
+
+	if err := offer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign discount"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
 }
 
 func GetRecommendedOffers(c *gin.Context) {

@@ -25,6 +25,7 @@ type Offer struct {
 	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
 	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
 	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type"`
+	Discount         float64   `gorm:"not null;default: 0.00" form:"discount"`
 	HostID           uint      `gorm:"not null" form:"host_id"`
 	TownID           uint      `gorm:"not null" form:"town_id"`
 	Reservations     []Reservation
