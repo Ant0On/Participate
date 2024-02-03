@@ -89,8 +89,23 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-div.item_detail{
+div.item_detail {
   margin: 5% 5% 1% 5%;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  border-radius: 10px;
+}
+
+div.item_detail:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('@/../images/offers/6.jpeg') center/cover no-repeat;
+  opacity: 0.5;
+  z-index: -1;
+  border-radius: 10px;
 }
 </style>
