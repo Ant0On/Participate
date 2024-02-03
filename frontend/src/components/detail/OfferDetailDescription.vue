@@ -9,10 +9,15 @@ const props = defineProps({
   price: 0,
   location: '',
   numberOfPeople: 0,
-  hostID: 0,
+  host_detail: '',
+  imagePath:'',
+  host_first_name: '',
   type: '',
+  offer_id: 0,
+
 })
 const emits = defineEmits(['moveToSummary'])
+console.log(props.imagePath)
 
 </script>
 
@@ -22,7 +27,7 @@ const emits = defineEmits(['moveToSummary'])
     <div class="line"/>
     <OfferDetailReserve @move-to-summary="$emit('moveToSummary')"/>
     <div class="line"/>
-    <OfferDetailHost />
+    <OfferDetailHost :offer_id="offer_id" :host_detail="host_detail" :host_first_name="host_first_name" :imagePath="imagePath"/>
   </div>
 </template>
 

@@ -13,4 +13,5 @@ type OfferWithLocation struct {
 	OfferType        models.OfferType `json:"offer_type"`
 	TownName         string           `json:"town_name"`
 	CountryName      string           `json:"country_name"`
+	HostID           uint             `json:"host_id"`
 }

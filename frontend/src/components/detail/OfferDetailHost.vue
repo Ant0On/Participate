@@ -1,20 +1,14 @@
 <script setup>
 
-import {defineProps, ref} from 'vue';
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import {defineProps} from 'vue';
 
 const props = defineProps({
-  hostId: 0,
-  offerImage: '@/assets/img/test.jpg',
+  host_first_name: '',
+  offer_id: 0,
+  host_detail: '',
+  imagePath: '',
 })
-
-const hostData = ref(fetchHostData())
-
-function fetchHostData(){
-  //const response = fetchWrapper.get(`/api/host/${props.hostId}`)
-
-  return ""
-}
+console.log("tata", props.imagePath)
 </script>
 
 <template>
@@ -23,15 +17,15 @@ function fetchHostData(){
     <div class="about_host">
       About the host
     </div>
-    <img class="detail_host_image" :src="hostData.image" alt="Host picture">
+<!--    <img class="detail_host_image" :src="`@/../${host_image_path}`" alt="Host picture">-->
     <div class="host_name">
-      {{ hostData.firstName }}
+      {{host_first_name }}
     </div>
   </div>
   <div class="offer_detail_host_description">
-    {{ hostData.detail }}
+    {{ host_detail }}
   </div>
-  <img class="detail_offer_image" :src="props.offerImage" alt="Offer image">
+  <img class="detail_offer_image" :src="require(`@/../images/offers/${offer_id}.jpeg`)" alt="Offer image">
 </div>
 </template>
 

@@ -11,7 +11,6 @@ const props = defineProps({
   price: String,
   max_people: String,
 })
-console.log(props)
 
 function onItemClicked() {
   router.push({name: 'Offers', params:{type: props.type, id: props.id}})
