@@ -95,13 +95,13 @@ func CreateOffer(c *gin.Context) {
 		return
 	}
 
-	if err := offer.HandleOfferImageUploads(c, offer.ID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+	if err := offer.Save(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
 	}
 
-	if err := offer.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
+	if err := offer.HandleOfferImageUploads(c, offer.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
 
@@ -173,7 +173,7 @@ func DiscountOffer(c *gin.Context) {
 
 	offer.Discount = discountReq.Discount
 
-	if err := offer.Save().Error; err != nil {
+	if err := offer.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign discount"})
 		return
 	}

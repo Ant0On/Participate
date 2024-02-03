@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"backend/models"
 
@@ -137,12 +139,25 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	var grade models.Grade
-	if err := c.ShouldBindJSON(&grade); err != nil {
+	var request *models.Grade
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	grade, err := models.GetGradeById(strconv.Itoa(request.Count))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
 	reservation.GradeID = grade.ID
+
+	fmt.Println(grade.ID)
+
+	if err := reservation.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})
 }

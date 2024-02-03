@@ -20,7 +20,7 @@ func RecommendOffer(c *gin.Context) {
 
 	offer.IsRecommended = true
 
-	if err := offer.Save().Error; err != nil {
+	if err := offer.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update offer"})
 		return
 	}

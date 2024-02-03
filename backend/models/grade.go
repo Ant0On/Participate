@@ -45,3 +45,11 @@ func GetGrades() ([]Grade, error) {
 	}
 	return grade, nil
 }
+
+func GetGradeById(id string) (*Grade, error) {
+	var g *Grade
+	if err := DB.First(&g, id).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return g, nil
+}

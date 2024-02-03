@@ -78,7 +78,7 @@ func ConnectDatabase() {
 	}
 
 	if err = DB.AutoMigrate(&Country{}, &TownType{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
-		&Town{}, &Animal{}, &Offer{}); err != nil {
+		&Town{}, &Animal{}, &Offer{}, &Reservation{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}
 }
