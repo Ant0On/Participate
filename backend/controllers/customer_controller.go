@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -145,14 +144,12 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	grade, err := models.GetGradeById(strconv.Itoa(request.Count))
+	grade, err := models.GetGradeByCount(strconv.Itoa(request.Count))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
 	reservation.GradeID = grade.ID
-
-	fmt.Println(grade.ID)
 
 	if err := reservation.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
