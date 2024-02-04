@@ -17,13 +17,12 @@ const isRejected = ref(false);
 
 function onAccept() {
   isAccepted.value = true;
-  fetchWrapper.post(`/api/${props.id}/accepted`, {})
-
+  fetchWrapper.post(`/api/offer/${props.id}/accepted`, {})
 }
 
 function onReject() {
   isRejected.value = true;
-  fetchWrapper.post(`/api/${props.id}/rejected`, {})
+  fetchWrapper.post(`/api/offer/${props.id}/rejected`, {})
 
 }
 watch(() => props.id, () =>{
