@@ -14,7 +14,7 @@ const auth = useAuthStore();
 const user = auth.user;
 
 const navigateTo = (auth.user === null)? '/login' : '/account'
-const text = (auth.user === null)? 'Log in': auth.user.first_name + ' ' + auth.user.last_name;
+const text = (auth.user === null)? 'Log in': auth.user.FirstName + ' ' + auth.user.LastName;
 </script>
 
 <template>

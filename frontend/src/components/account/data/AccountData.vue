@@ -16,61 +16,67 @@ const errors = reactive({
 })
 
 const customerData = ref({
-  name: user.first_name,
-  lastName: user.last_name,
-  email: user.email,
+  Name: user.FirstName,
+  LastName: user.LastName,
+  Email: user.Email,
 })
 
 const hostData = ref({
-  description: user.description ? user.description : '',
-  phoneNumber: user.phoneNumber ? user.phoneNumber : '',
-  bankAccount: user.bankAccount ? user.bankAccount : '',
+  Description: user.Description ? user.Description : '',
+  PhoneNumber: user.PhoneNumber ? user.PhoneNumber : '',
+  BankAccount: user.BankAccount ? user.BankAccount : '',
 })
 
 const currentCustomerData = ref({
-  name: user.first_name,
-  lastName: user.last_name,
-  email: user.email,
+  Name: user.FirstName,
+  LastName: user.LastName,
+  Email: user.Email,
 })
 const currentHostData = ref({
-  description: user.description ? user.description : '',
-  phoneNumber: user.phoneNumber ? user.phoneNumber : '',
-  bankAccount: user.bankAccount ? user.bankAccount : '',
+  Description: user.Description ? user.Description : '',
+  PhoneNumber: user.PhoneNumber ? user.PhoneNumber : '',
+  BankAccount: user.BankAccount ? user.BankAccount : '',
 })
 
 async function onSubmit() {
   await schemaCustomer.validate(customerData.value).then(async () => {
     if(user.Role === "host"){
       await schemaHost.validate(hostData.value).then(async () => {
-        await fetchWrapper.post(`/api/host/${user.ID}/change/description`, {
-          description: hostData.value.description
-        })
-        await fetchWrapper.post(`/api/host/${user.ID}/change/phone_number`, {
-          phone_number: hostData.value.phoneNumber
-        })
-        await fetchWrapper.post(`/api/host/${user.ID}/change/bank_account`, {
-          bank_account: hostData.value.bankAccount
-        })
+        if(hostData.value.Description !== currentHostData.value.Description)
+          await fetchWrapper.post(`/api/host/${user.ID}/change/description`, {
+            description: hostData.value.Description
+          })
+        if(hostData.value.PhoneNumber !== currentHostData.value.PhoneNumber)
+          await fetchWrapper.post(`/api/host/${user.ID}/change/phone_number`, {
+            phone_number: hostData.value.PhoneNumber
+          })
+        if(hostData.value.BankAccount !== currentHostData.value.BankAccount)
+          await fetchWrapper.post(`/api/host/${user.ID}/change/bank_account`, {
+            bank_account: hostData.value.BankAccount
+          })
 
-        user.description = hostData.value.description
-        user.phone_number = hostData.value.phone_number
-        user.bank_account = hostData.value.bank_account
+        user.Description = hostData.value.Description
+        user.PhoneNumber = hostData.value.PhoneNumber
+        user.BankAccount = hostData.value.BankAccount
       })
 
     }
     isSubmitMode.value = false;
-    await fetchWrapper.post(`/api/customer/${user.ID}/change/first_name`, {
-      first_name: customerData.value.name.trim()
-    })
-    await fetchWrapper.post(`/api/customer/${user.ID}/change/last_name`, {
-      last_name: customerData.value.lastName.trim()
-    })
-    await fetchWrapper.post(`/api/customer/${user.ID}/change/email`,{
-      email: customerData.value.email.trim()
-    })
-    user.first_name = hostData.value.first_name
-    user.last_name = hostData.value.last_name
-    user.email = hostData.value.email
+    if(customerData.value.Name !== currentCustomerData.value.Name)
+      await fetchWrapper.post(`/api/customer/${user.ID}/change/first_name`, {
+        first_name: customerData.value.Name.trim()
+      })
+    if(customerData.value.LastName !== currentCustomerData.value.LastName)
+      await fetchWrapper.post(`/api/customer/${user.ID}/change/last_name`, {
+        last_name: customerData.value.LastName.trim()
+      })
+    if(customerData.value.Email !== currentCustomerData.value.Email)
+      await fetchWrapper.post(`/api/customer/${user.ID}/change/email`,{
+        email: customerData.value.Email.trim()
+      })
+    user.FirstName = hostData.value.FirstName
+    user.LastName = hostData.value.LastName
+    user.Email = hostData.value.Email
 
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
@@ -92,15 +98,15 @@ function onChangeData() {
 const isSubmitMode = ref(false)
 
 const schemaCustomer = Yup.object().shape({
-  name: Yup.string().min(5).required('Name is required'),
-  lastName: Yup.string().min(5).required('Last name is required'),
-  email: Yup.string().email().required('Email is required'),
+  Name: Yup.string().min(5).required('Name is required'),
+  LastName: Yup.string().min(5).required('Last name is required'),
+  Email: Yup.string().email().required('Email is required'),
 });
 
 const schemaHost = Yup.object().shape({
-  description: Yup.string().required('Description is required'),
-  phoneNumber: Yup.number().min(9),
-  bankAccount: Yup.number().min(16),
+  Description: Yup.string().required('Description is required'),
+  PhoneNumber: Yup.number().min(9),
+  BankAccount: Yup.number().min(16),
 });
 
 </script>
@@ -111,14 +117,14 @@ const schemaHost = Yup.object().shape({
       <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
       <div class="user_fields">
         <div class="customer_fields">
-          <TextInput label-text="Name" :is-active="isSubmitMode" v-model="customerData.name" width="100%"/>
-          <TextInput label-text="Last Name" :is-active="isSubmitMode" v-model="customerData.lastName" width="100%"/>
-          <TextInput label-text="Email" :is-active="isSubmitMode" v-model="customerData.email" width="100%"/>
+          <TextInput label-text="Name" :is-active="isSubmitMode" v-model="customerData.Name" width="100%"/>
+          <TextInput label-text="Last Name" :is-active="isSubmitMode" v-model="customerData.LastName" width="100%"/>
+          <TextInput label-text="Email" :is-active="isSubmitMode" v-model="customerData.Email" width="100%"/>
         </div>
         <div class="host_fields" v-if="userRole === 'host'">
-          <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.description" width="100%"/>
-          <TextInput label-text="Phone number" :is-active="isSubmitMode" v-model="hostData.phoneNumber" width="100%"/>
-          <TextInput label-text="Bank account" :is-active="isSubmitMode" v-model="hostData.bankAccount" width="100%"/>
+          <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.Description" width="100%"/>
+          <TextInput label-text="Phone number" :is-active="isSubmitMode" v-model="hostData.PhoneNumber" width="100%"/>
+          <TextInput label-text="Bank account" :is-active="isSubmitMode" v-model="hostData.BankAccount" width="100%"/>
         </div>
       </div>
       <div class="buttons">
