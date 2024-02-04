@@ -8,7 +8,6 @@ const props = defineProps({
   host_detail: '',
   imagePath: '',
 })
-console.log("tata", props.imagePath)
 </script>
 
 <template>
@@ -17,7 +16,7 @@ console.log("tata", props.imagePath)
     <div class="about_host">
       About the host
     </div>
-<!--    <img class="detail_host_image" :src="`@/../${host_image_path}`" alt="Host picture">-->
+    <img v-if="imagePath" class="detail_host_image" :src="require(`@/../${imagePath}`)" alt="Host picture">
     <div class="host_name">
       {{host_first_name }}
     </div>
@@ -65,8 +64,8 @@ div.offer_detail_host_description{
 }
 img.detail_host_image{
   border-radius: 50%;
-  height: 70%;
-  width: 70%;
+  height: 250px;
+  width: 250px;
   align-self: center;
 
 }

@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps, ref, onMounted} from 'vue';
+import {defineProps, ref, onMounted, computed} from 'vue';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
@@ -39,7 +39,7 @@ const hostData = ref({
   imagePath: '',
 })
 const isDescription = ref(true)
-
+const backgroundImage = computed(() => `url(${require(`@/../images/offers/${props.id}.jpeg`)})`);
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.id}`)
 
@@ -55,16 +55,11 @@ async function getOfferDetails() {
 
   const response_host = await fetchWrapper.get(`/api/host/${offer.value.hostID}`)
 
-  console.log('ala', response_host)
-
   hostData.value = {
     'firstName': response_host["FirstName"],
     'detail': response_host["Description"],
     'imagePath': response_host["ImagePath"]
   }
-
-  console.log('kut', hostData.value)
-
 }
 
 onMounted(async () => {
@@ -81,7 +76,7 @@ onMounted(async () => {
                               :numberOfPeople="offer.numberOfPeople" :host_first_name="hostData.firstName" :offer_id="id"
                              :host_detail="hostData.detail" :imagePath="hostData.imagePath"
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
-      <OfferDetailSummary :price="offer.price" :image="require(`@/../images/offers/6.jpeg`)" :id="id" v-else/>
+      <OfferDetailSummary :price="offer.price" :image="require(`@/../images/offers/${id}.jpeg`)" :id="id" v-else/>
       <ChatButton :type="type" :id="id" @join-chat="openChat"/>
       <ChatPopup v-if="showChat" @close-chat="closeChat"/>
     </div>
@@ -103,7 +98,7 @@ div.item_detail:before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('@/../images/offers/6.jpeg') center/cover no-repeat;
+  background: v-bind(backgroundImage) center/cover no-repeat;
   opacity: 0.5;
   z-index: -1;
   border-radius: 10px;

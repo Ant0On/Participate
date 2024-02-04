@@ -17,7 +17,6 @@ const props = defineProps({
 
 })
 const emits = defineEmits(['moveToSummary'])
-console.log(props.imagePath)
 
 </script>
 
