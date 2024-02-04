@@ -45,10 +45,6 @@ func runServer(args arguments) error {
 	r = gin.Default()
 	r.Use(static.Serve("/", static.LocalFile(args.StaticContents, false)))
 
-	r.GET("/api/v1/hello", func(c *gin.Context) {
-		c.String(200, `{"message":"hello, hello, hello"}`)
-	})
-
 	controllers.RegisterRoutes(r)
 
 	if err := r.Run(fmt.Sprintf("%s:%d", args.BindAddress, args.BindPort)); err != nil {

@@ -28,6 +28,7 @@ func ConnectDatabase() {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 
 	if err != nil {
@@ -77,8 +78,7 @@ func ConnectDatabase() {
 	}
 
 	if err = DB.AutoMigrate(&Country{}, &TownType{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
-		&Town{}, &Discount{},
-		&Animal{}, &Offer{}); err != nil {
+		&Town{}, &Animal{}, &Offer{}, &Reservation{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}
 }

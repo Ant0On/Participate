@@ -27,7 +27,7 @@ func GetTownByID(c *gin.Context) {
 	townID := c.Param("id")
 
 	if townID == "" {
-		c.JSON(400, gin.H{"error": "Town ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Town ID is required"})
 		return
 	}
 
@@ -36,7 +36,7 @@ func GetTownByID(c *gin.Context) {
 	_, err := models.GetTown(&town, townID)
 
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Town not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Town not found"})
 		return
 	}
 

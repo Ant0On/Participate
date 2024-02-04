@@ -8,23 +8,33 @@ export const fetchWrapper = {
 };
 
 function request(method) {
-    return (url, body) => {
+    return (url, data, contentType = 'application/json') => {
         const requestOptions = {
             method,
             headers: authHeader(url)
         };
-        if (body) {
-            requestOptions.headers['Content-Type'] = 'application/json';
-            requestOptions.body = JSON.stringify(body);
-        }
 
-        console.log('Request URL:', url);
-        console.log('Request Options:', requestOptions);
+        if (data) {
+            if (method === 'GET') {
+                const queryParams = new URLSearchParams(data);
+                url = `${url}?${queryParams}`;
+            } else {
+                if (contentType === 'application/json') {
+                    requestOptions.headers['Content-Type'] = 'application/json';
+                    requestOptions.body = JSON.stringify(data);
+                } else if (contentType === 'multipart/form-data') {
+                    const formData = new FormData();
+                    for (const key in data) {
+                        formData.append(key, data[key]);
+                    }
+                    requestOptions.body = formData;
+                }
+            }
+        }
 
         return fetch(url, requestOptions).then(handleResponse);
     }
 }
-
 
 function authHeader(url) {
     const { user } = useAuthStore();

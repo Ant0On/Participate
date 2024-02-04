@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
@@ -10,12 +12,27 @@ import (
 	"gorm.io/gorm"
 )
 
+type discountRequest struct {
+	Discount float64 `json:"discount"`
+}
+
 func GetOffers(c *gin.Context) {
 	var offersWithLocation []DTO.OfferWithLocation
 	var result *gorm.DB
 	offerType := c.Query("type")
 
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit := 10
+	offset := (page - 1) * limit
+
 	query := models.DB.Model(&models.Offer{})
+
+	var totalRecords int64
+	query.Count(&totalRecords)
+	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
 
 	if offerType != "" {
 		query = query.Where("offer_type = ?", offerType)
@@ -26,6 +43,7 @@ func GetOffers(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
+		Offset(offset).Limit(limit).
 		Find(&offersWithLocation)
 
 	if err := result.Error; err != nil {
@@ -33,7 +51,14 @@ func GetOffers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": offersWithLocation})
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "offers fetched successfully",
+		"data":         offersWithLocation,
+		"page":         page,
+		"limit":        limit,
+		"totalPages":   totalPages,
+		"totalRecords": totalRecords,
+	})
 }
 
 func GetOfferByID(c *gin.Context) {
@@ -65,7 +90,7 @@ func GetOfferByID(c *gin.Context) {
 func CreateOffer(c *gin.Context) {
 	var offer models.Offer
 
-	if err := c.ShouldBindJSON(&offer); err != nil {
+	if err := c.ShouldBind(&offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with createOffer": err.Error()})
 		return
 	}
@@ -74,6 +99,12 @@ func CreateOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
 		return
 	}
+
+	if err := offer.HandleOfferImageUploads(c, offer.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
@@ -119,6 +150,37 @@ func UpdateOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
 }
 
+func DiscountOffer(c *gin.Context) {
+	offerID := c.Param("offerID")
+
+	var offer models.Offer
+	var discountReq discountRequest
+
+	if err := models.DB.First(&offer, offerID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&discountReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if discountReq.Discount < 0 || discountReq.Discount > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "The discount must be between 0 and 100"})
+		return
+	}
+
+	offer.Discount = discountReq.Discount
+
+	if err := offer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign discount"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
+}
+
 func GetRecommendedOffers(c *gin.Context) {
 	var recommendedOffers []DTO.OfferWithLocation
 	var result *gorm.DB
@@ -129,7 +191,7 @@ func GetRecommendedOffers(c *gin.Context) {
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("is_recommended = ?", true).
-		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
+		Select("offer.id as offer_id, offer.name, offer.description, offer.images_path, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
 		Find(&recommendedOffers)
 

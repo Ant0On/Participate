@@ -1,6 +1,6 @@
 <script setup>
 
-import {ref} from 'vue';
+import {ref, reactive} from 'vue';
 import * as Yup from 'yup';
 import { router } from "@/router";
 import { storeToRefs } from 'pinia';
@@ -29,6 +29,10 @@ const searchOffer = ref({
   numberOfPeople: '',
 })
 
+const errors = reactive({
+  apiError: ""
+})
+
 function searchOffers() {
   schema.validate(searchOffer.value).then((value) => {
     location.value = value.location
@@ -38,18 +42,24 @@ function searchOffers() {
     router.push(offerRoutes[searchOffer.value.offerType])
 
 
-  }).catch((err) => {
-    console.log('not validated', err)
+  }).catch(error => {
+    if(error === "Bad Request")
+    {
+      errors.apiError = "Incorrect data!"
+    }
+    else{
+      errors.apiError = "Fill all required fields!"
+    }
+
   })
 }
 
-//TODO validate if dateFrom is smaller than dateTo and dateTo nullable
 const schema = Yup.object().shape({
   offerType: Yup.string().required('Offer type is required'),
   location: Yup.string().min(5).required('Location is required'),
   dateFrom: Yup.date().required('Date is required'),
-  dateTo: Yup.date().nullable(),
-  numberOfPeople: Yup.number().required('Number of people is required'),
+  dateTo: Yup.date().min(Yup.ref('dateFrom')),
+  numberOfPeople: Yup.number().min(1).required('Number of people is required'),
 });
 
 
@@ -58,8 +68,9 @@ const schema = Yup.object().shape({
 <template>
   <div class="home_offer_search">
     <p>What are you looking for?</p>
+    <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <SelectionInput v-model="searchOffer.offerType" label-text="Offer type" placeholder="Type" :is-required="true" :items="offerTypes"/>
-    <TextInput v-model="searchOffer.location" width="100%" label-text="Location" placeholder="Location" :is-required="true" />
+    <TextInput v-model="searchOffer.location" width="100%" label-text="Location" placeholder="At least 5 characters" :is-required="true" />
     <DateInput v-model="searchOffer.dateFrom" label-text="Date from" :is-required="true"/>
     <DateInput v-model="searchOffer.dateTo" label-text="Date to" :is-required="true"/>
     <NumberInput v-model="searchOffer.numberOfPeople" label-text="Number of people" placeholder="People" :is-required="true"/>
@@ -69,6 +80,11 @@ const schema = Yup.object().shape({
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&display=swap');
+
+div.errors{
+  font-family: "Sarabun", Helvetica;
+
+}
 
 .home_offer_search {
   display: flex;

@@ -1,62 +1,80 @@
 <script setup>
-import {ref, watch, onMounted} from 'vue';
-import {storeToRefs} from 'pinia';
+import { ref, watch, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {useSearchStore} from "@/stores/search.store";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import { useSearchStore } from "@/stores/search.store";
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const searchStore = useSearchStore();
-const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
+const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const accommodations = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(0);
 
-const allAccommodations = ref([]);
+async function getCurrentAccommodations(page) {
+  const response = await fetchWrapper.get(`/api/offers?type=accommodation&page=${page}`);
+  const responseData = response.data;
 
-async function getCurrentAccommodations() {
-  const response = await fetchWrapper.get(`/api/offers?type=accommodation`)
-
-  const responseData = response.data
-
-  allAccommodations.value = responseData.map((data) => {
+  accommodations.value = responseData.map((data) => {
     return {
+      'offerId': data["offer_id"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
       'name': data["name"],
       'price': data["price"],
       'maxPeople': data["max_people"]
-    }
-  })
+    };
+  });
+
+  totalPages.value = response.totalPages;
 }
 
 function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople) {
-  return allAccommodations.value.filter((data) => {
+  return accommodations.value.filter((data) => {
+    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople);
+  });
+}
 
-    return data.location.startsWith(location) // W tym miejscu trzeba dobry warunek
-  })
+function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople) {
+  let isMatchingSearch = true;
+  if (typeof location !== "undefined" && location !== "") {
+    isMatchingSearch = data.location.includes(location);
+  }
+
+  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0) {
+    isMatchingSearch = numberOfPeople <= data.maxPeople;
+  }
+
+  return isMatchingSearch;
 }
 
 onMounted(async () => {
-  await getCurrentAccommodations();
-  accommodations.value = allAccommodations.value
+  await getCurrentAccommodations(currentPage.value);
 });
 
 watch(location, (newLocation) => {
-  accommodations.value = getNewAccommodations(newLocation, dateFrom, dateTo, numberOfPeople)
-})
+  accommodations.value = getNewAccommodations(newLocation, dateFrom, dateTo, numberOfPeople);
+});
+
 watch(dateFrom, (newDateFrom) => {
-  accommodations.value = getNewAccommodations(location, newDateFrom, dateTo, numberOfPeople)
-})
+  accommodations.value = getNewAccommodations(location, newDateFrom, dateTo, numberOfPeople);
+});
+
 watch(dateTo, (newDateTo) => {
-  accommodations.value = getNewAccommodations(location, dateFrom, newDateTo, numberOfPeople)
-})
+  accommodations.value = getNewAccommodations(location, dateFrom, newDateTo, numberOfPeople);
+});
 
 watch(numberOfPeople, (newNumberOfPeople) => {
-  accommodations.value = getNewAccommodations(location, dateFrom, dateTo, newNumberOfPeople)
-})
+  accommodations.value = getNewAccommodations(location, dateFrom, dateTo, newNumberOfPeople);
+});
 
+watch(currentPage, (newPage) => {
+  getCurrentAccommodations(newPage);
+});
 </script>
 
 <template>
@@ -67,10 +85,15 @@ watch(numberOfPeople, (newNumberOfPeople) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div class="offer_items">
-      <OfferListItem v-for="accommodation in accommodations" :location="accommodation.location"
-                     :description="accommodation.description"
-                     :image="accommodation.image" :name="accommodation.name" :price="accommodation.price"
-                     :max_people="accommodation.maxPeople"/>
+      <OfferListItem v-for="accommodation in accommodations"
+                     :location="accommodation.location"
+                     :description="accommodation.description" :name="accommodation.name"
+                     :price="accommodation.price" :max_people="accommodation.maxPeople" type="accommodations" :id="accommodation.offerId"/>
+    </div>
+    <div class="pagination">
+      <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
+      <span v-if="totalPages > 0">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>
 </template>
@@ -94,5 +117,32 @@ p {
 
 .offer_items {
   margin: 3% 5% 0 5%;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.pagination button {
+  cursor: pointer;
+  background-color: #3498db;
+  color: #ffffff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.pagination button:hover {
+  background-color: #2980b9;
+}
+
+.pagination span {
+  margin: 0 10px;
+  font-size: 1.2rem;
+  color: #333;
 }
 </style>
