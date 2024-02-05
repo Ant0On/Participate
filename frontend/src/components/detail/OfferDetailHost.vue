@@ -1,15 +1,3 @@
-<script setup>
-
-import {defineProps} from 'vue';
-
-const props = defineProps({
-  host_first_name: '',
-  offer_id: 0,
-  host_detail: '',
-  imagePath: '',
-})
-</script>
-
 <template>
 <div class="offer_detail_host">
   <div class="offer_detail_host_picture">
@@ -24,9 +12,55 @@ const props = defineProps({
   <div class="offer_detail_host_description">
     {{ host_detail }}
   </div>
-  <img class="detail_offer_image" :src="require(`@/../images/offers/${offer_id}.jpeg`)" alt="Offer image">
-</div>
+  <transition name="fade" mode="out-in" :style="{ transitionDuration: `${transitionDuration}ms` }">
+    <img :key="currentOfferImageIndex" class="detail_offer_image" :src="currentOfferImagePath" alt="Offer image">
+  </transition></div>
 </template>
+
+<script setup>
+import {computed, onMounted, ref} from 'vue';
+
+const props = defineProps({
+  host_first_name: '',
+  offer_id: 0,
+  host_detail: '',
+  imagePath: '',
+});
+
+const currentOfferImageIndex = ref(0);
+const transitionDuration = ref(1000);
+
+const currentOfferImagePath = computed(() => {
+  const imageIndex = currentOfferImageIndex.value;
+  const imageName = `${props.offer_id}_${imageIndex}.jpeg`;
+  const imagePath = require(`@/../images/offers/${props.offer_id}/${imageName}`);
+
+  new Image().src = imagePath;
+  return imagePath;
+});
+
+function changeImage() {
+  if (!imageExists(currentOfferImageIndex.value + 1)) {
+    currentOfferImageIndex.value = 0;
+  } else {
+    currentOfferImageIndex.value += 1;
+  }
+}
+
+function imageExists(index) {
+  const imageName = `${props.offer_id}_${index}.jpeg`;
+  try {
+    require(`@/../images/offers/${props.offer_id}/${imageName}`);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+onMounted(() => {
+  setInterval(changeImage, 3000);
+});
+</script>
 
 <style scoped>
 div.offer_detail_host{
@@ -73,5 +107,12 @@ img.detail_offer_image{
   padding: 1%;
   height: 20%;
   width: 20%;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

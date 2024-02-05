@@ -39,7 +39,7 @@ const hostData = ref({
   imagePath: '',
 })
 const isDescription = ref(true)
-const backgroundImage = computed(() => `url(${require(`@/../images/offers/${props.id}.jpeg`)})`);
+const backgroundImage = computed(() => `url(${require(`@/../images/offers/${props.id}/${props.id}_0.jpeg`)})`);
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.id}`)
 
