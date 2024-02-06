@@ -53,7 +53,7 @@ function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeo
 }
 
 onMounted(async () => {
-  await getCurrentRecommendedOffers(currentPage.value);
+  await getCurrentRecommendedOffers(currentPage.value).catch(error => {});
 });
 
 watch(location, (newLocation) => {
@@ -90,9 +90,9 @@ watch(currentPage, (newPage) => {
                      :name="offer.name" :price="offer.price"
                      :max_people="offer.maxPeople"/>
     </div>
-    <div class="pagination">
+    <div v-if="totalPages > 0" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span v-if="totalPages > 0">Page {{ currentPage }} of {{ totalPages }}</span>
+      <span >Page {{ currentPage }} of {{ totalPages }}</span>
       <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>

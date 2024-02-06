@@ -45,10 +45,12 @@ async function getCountryId(countryName){
   return response.data.filter((country) => country.Name === countryName)[0].ID
 }
 async function onSubmit() {
-  fetchWrapper.post('/api/town/add', {
+  await fetchWrapper.post('/api/town/add', {
     name: newOffer.value.city,
-    country_id: await getCountryId(newOffer.value.country)
-  }).then((town) => {
+    country_id: await getCountryId(newOffer.value.country),
+    town_type_id: 1
+  }).then((data) => {
+        console.log(data, newOffer)
         fetchWrapper.post('/api/host/create', {
               name: newOffer.value.name,
               description: newOffer.value.description,
@@ -58,7 +60,8 @@ async function onSubmit() {
               is_recommended: false,
               offer_type: offerTypesId[newOffer.value.offerType],
               host_id: user.ID,
-              town_id: town.data.ID
+              town_id: data.town.ID,
+              image: newOffer.value.image
             },
             "multipart/form-data")
             .then(() => {
@@ -77,7 +80,7 @@ async function onSubmit() {
               addedNewOffer.value = true;
             })
       }
-  ).catch(() => {
+  ).catch((error) => {
     errors.apiError = "A problem occurred during addition of an offer!"
   })
 }

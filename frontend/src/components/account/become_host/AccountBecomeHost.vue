@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import {useAuthStore} from "@/stores/auth.store";
 import TextInput from "@/components/ui/TextInput.vue";
+import PasswordInput from "@/components/ui/PasswordInput.vue";
 
 const isJoining = ref(false);
 const auth = useAuthStore();
@@ -14,6 +15,7 @@ const hostData = ref({
   description: '',
   phoneNumber: '',
   bankAccount: '',
+  confirmPassword: '',
 })
 
 const errors = reactive({
@@ -28,11 +30,11 @@ const schemaHost = Yup.object().shape({
 
 async function onSubmit(){
   await schemaHost.validate(hostData.value).then(async () => {
-    await fetchWrapper.post('/api/register/host', {
-      customer: user.ID,
+    await fetchWrapper.post(`/api/customer/${user.ID}/promote`, {
       description: hostData.value.description,
-      phoneNumber: hostData.value.phoneNumber,
-      bankAccount: hostData.value.bankAccount,
+      phone_number: hostData.value.phoneNumber,
+      bank_account: hostData.value.bankAccount,
+      password: hostData.value.password,
     })
     alert("Soon you will be logged out. Please log in again!")
     auth.logout()
@@ -57,6 +59,7 @@ async function onSubmit(){
       <TextInput label-text="Description" v-model="hostData.description" width="100%"/>
       <TextInput label-text="Phone number" v-model="hostData.phoneNumber" width="100%"/>
       <TextInput label-text="Bank account" v-model="hostData.bankAccount" width="100%"/>
+      <PasswordInput v-model="hostData.password"/>
     </div>
     <button class="button_basic" @click="onSubmit">
       Join now!

@@ -14,7 +14,7 @@ const allCurrentOffers = ref([])
 const currentOffers = ref([])
 
 async function getCurrentOffers() {
-  fetchWrapper.get(`/api/reservation/${user.ID}/pending`)
+  fetchWrapper.get(`/api/reservation/host/${user.ID}/pending`)
       .then((response) => {
         const responseData = response.data
 

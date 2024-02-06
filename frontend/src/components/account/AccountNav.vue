@@ -21,8 +21,8 @@ const userRole = user.Role
 <div class="account_nav">
   <AccountNavItem text="Account Information" :is-active="activeItem === 'Account Information'" @item-clicked="onItemClicked" style="margin-top: 20px"/>
   <AccountNavItem text="History" :is-active="activeItem === 'History'" @item-clicked="onItemClicked"/>
-  <AccountNavItem v-if="userRole === 'host'" text="New Offer" :is-active="activeItem === 'New Offer'" @item-clicked="onItemClicked"/>
-  <AccountNavItem text="Current Offers" :is-active="activeItem === 'Current Offers'" @item-clicked="onItemClicked"/>
+  <AccountNavItem text="New Offer" :is-active="activeItem === 'New Offer'" @item-clicked="onItemClicked"/>
+  <AccountNavItem v-if="userRole === 'host'" text="Current Offers" :is-active="activeItem === 'Current Offers'" @item-clicked="onItemClicked"/>
   <AccountNavItem v-if="userRole === 'customer'" text="Become a host" :is-active="activeItem === 'Become a host'" @item-clicked="onItemClicked"/>
 </div>
 </template>
