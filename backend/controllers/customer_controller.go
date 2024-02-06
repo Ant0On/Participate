@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"backend/models"
+	"backend/pkg/passHelper"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +22,7 @@ type emailRequest struct {
 }
 
 type promoteRequest struct {
+	Password    string `json:"password" binding:"required"`
 	Description string `json:"description" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required"`
 	BankAccount string `json:"bank_account" binding:"required"`
@@ -186,7 +188,13 @@ func PromoteToHost(c *gin.Context) {
 		return
 	}
 
+	if err := passHelper.VerifyPassword(promoteReq.Password, customer.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Passwords do not match"})
+		return
+	}
+
 	customer.Role = "host"
+	customer.Password = promoteReq.Password
 
 	host := models.Host{
 		Customer:    customer,
@@ -195,11 +203,13 @@ func PromoteToHost(c *gin.Context) {
 		BankAccount: promoteReq.BankAccount,
 		Offers:      nil,
 	}
-	if err := host.Save(); err != nil {
+
+	if err := customer.Delete(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if err := customer.Delete(); err != nil {
+
+	if err := host.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

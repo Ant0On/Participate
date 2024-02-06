@@ -63,3 +63,11 @@ func GetReservationById(id string) (*Reservation, error) {
 	}
 	return &r, nil
 }
+
+func GetReservationsByState(state string) ([]Reservation, error) {
+	var reservations []Reservation
+	if err := DB.Model(&Reservation{}).Where("reservation_state = ?", state).Scan(reservations).Error; err != nil {
+		return nil, fmt.Errorf("reservation not found: %w", err)
+	}
+	return reservations, nil
+}
