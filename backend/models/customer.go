@@ -90,8 +90,7 @@ func LoginCheck(email, password string) (string, any, error) {
 	}
 
 	if err = passHelper.VerifyPassword(password, uPassword); err != nil {
-		return "", nil, fmt.Errorf("VerifyPassword: %s", role)
-
+		return "", nil, fmt.Errorf("VerifyPassword: wrong password")
 	}
 
 	if t, err = token.GenerateToken(userID, email, role); err != nil {
