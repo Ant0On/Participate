@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(email, role string) (string, error) {
+func GenerateToken(id uint, email, role string) (string, error) {
 	tokenLifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
 
 	if err != nil {
@@ -21,6 +21,7 @@ func GenerateToken(email, role string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["email"] = email
+	claims["user_id"] = id
 	if email == "admin@participate.com" {
 		claims["role"] = "admin"
 	} else {
@@ -33,7 +34,7 @@ func GenerateToken(email, role string) (string, error) {
 }
 
 func IsTokenValid(c *gin.Context, role string) error {
-	token, err := getToken(c)
+	token, err := GetToken(c)
 	if err != nil {
 		return fmt.Errorf("IsTokenValid: %w", err)
 	}
@@ -44,7 +45,7 @@ func IsTokenValid(c *gin.Context, role string) error {
 	return nil
 }
 
-func getToken(c *gin.Context) (*jwt.Token, error) {
+func GetToken(c *gin.Context) (*jwt.Token, error) {
 	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -80,7 +81,7 @@ func extractRole(token *jwt.Token) (string, error) {
 }
 
 func ExtractTokenEmail(c *gin.Context) (string, error) {
-	token, err := getToken(c)
+	token, err := GetToken(c)
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		uEmail := fmt.Sprintf("%s", claims["email"])

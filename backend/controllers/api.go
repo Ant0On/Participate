@@ -23,22 +23,22 @@ func RegisterRoutes(r *gin.Engine) {
 	host.POST("/create", CreateOffer)
 	host.DELETE("/delete/:id", DeleteOffer)
 	host.PUT("/update/:id", UpdateOffer)
+	host.POST("/discount/:offerID", DiscountOffer)
 
-	customer := r.Group("api/customer/:id")
+	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))
-	customer.POST("/change/first_name", ChangeFirstName)
-	customer.POST("/change/last_name", ChangeLastName)
-	customer.POST("/change/email", ChangeEmail)
-	customer.POST("/promote", PromoteToHost)
+	customer.PUT(":id/change/first_name", ChangeFirstName)
+	customer.PUT(":id/change/last_name", ChangeLastName)
+	customer.PUT(":id/change/email", ChangeEmail)
+	customer.POST("/offer/:id/grade", GradeReservation)
+	customer.POST(":id/promote", PromoteToHost)
+
 
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)
 
 	animal := r.Group("/api/animal")
 	animal.POST("/add", AddAnimal)
-
-	discount := r.Group("/api/discount")
-	discount.POST("/add", AddDiscount)
 
 	payment := r.Group("/api/payment")
 	payment.POST("/get", GetAllPayments)
@@ -61,4 +61,5 @@ func RegisterRoutes(r *gin.Engine) {
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
+	protected.PUT("/offer/:id/recommend", RecommendOffer)
 }

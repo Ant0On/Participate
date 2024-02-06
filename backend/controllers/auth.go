@@ -28,7 +28,7 @@ func CurrentUser(c *gin.Context) {
 }
 
 func RegisterCustomer(c *gin.Context) {
-	var customer models.Customer
+	var customer = models.NewCustomer()
 	var dst string
 	var wasImageUploaded bool
 	var err error
