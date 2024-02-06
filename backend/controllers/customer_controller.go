@@ -186,6 +186,8 @@ func PromoteToHost(c *gin.Context) {
 		return
 	}
 
+	customer.Role = "host"
+
 	host := models.Host{
 		Customer:    customer,
 		Description: promoteReq.Description,
