@@ -29,6 +29,7 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.POST("/change/first_name", ChangeFirstName)
 	customer.POST("/change/last_name", ChangeLastName)
 	customer.POST("/change/email", ChangeEmail)
+	customer.POST("/promote", PromoteToHost)
 
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)

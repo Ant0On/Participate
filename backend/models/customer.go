@@ -65,6 +65,13 @@ func (c *Customer) Update() error {
 	return nil
 }
 
+func (c *Customer) Delete() error {
+	if err := DB.Delete(&c).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func LoginCheck(email, password string) (string, any, error) {
 	var role, uPassword, t string
 	var user any

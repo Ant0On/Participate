@@ -18,6 +18,12 @@ type emailRequest struct {
 	Email string `json:"email"`
 }
 
+type promoteRequest struct {
+	Description string `json:"description" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
+	BankAccount string `json:"bank_account" binding:"required"`
+}
+
 func ChangeFirstName(c *gin.Context) {
 	var firstNameReq firstNameRequest
 	id := c.Param("id")
@@ -104,4 +110,42 @@ func ChangeEmail(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+}
+
+func PromoteToHost(c *gin.Context) {
+	id := c.Param("id")
+	var promoteReq promoteRequest
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
+		return
+	}
+
+	customer, err := models.GetCustomer(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&promoteReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	host := models.Host{
+		Customer:    customer,
+		Description: promoteReq.Description,
+		PhoneNumber: promoteReq.PhoneNumber,
+		BankAccount: promoteReq.BankAccount,
+		Offers:      nil,
+	}
+	if err := host.Save(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if err := customer.Delete(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Customer upgraded to Host successfully", "host": host})
 }
