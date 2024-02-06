@@ -43,15 +43,15 @@ async function onSubmit() {
     if(user.Role === "host"){
       await schemaHost.validate(hostData.value).then(async () => {
         if(hostData.value.Description !== currentHostData.value.Description)
-          await fetchWrapper.post(`/api/host/${user.ID}/change/description`, {
+          await fetchWrapper.put(`/api/host/${user.ID}/change/description`, {
             description: hostData.value.Description
           })
         if(hostData.value.PhoneNumber !== currentHostData.value.PhoneNumber)
-          await fetchWrapper.post(`/api/host/${user.ID}/change/phone_number`, {
+          await fetchWrapper.put(`/api/host/${user.ID}/change/phone_number`, {
             phone_number: hostData.value.PhoneNumber
           })
         if(hostData.value.BankAccount !== currentHostData.value.BankAccount)
-          await fetchWrapper.post(`/api/host/${user.ID}/change/bank_account`, {
+          await fetchWrapper.put(`/api/host/${user.ID}/change/bank_account`, {
             bank_account: hostData.value.BankAccount
           })
 
@@ -63,15 +63,15 @@ async function onSubmit() {
     }
     isSubmitMode.value = false;
     if(customerData.value.Name !== currentCustomerData.value.Name)
-      await fetchWrapper.post(`/api/customer/${user.ID}/change/first_name`, {
+      await fetchWrapper.put(`/api/customer/${user.ID}/change/first_name`, {
         first_name: customerData.value.Name.trim()
       })
     if(customerData.value.LastName !== currentCustomerData.value.LastName)
-      await fetchWrapper.post(`/api/customer/${user.ID}/change/last_name`, {
+      await fetchWrapper.put(`/api/customer/${user.ID}/change/last_name`, {
         last_name: customerData.value.LastName.trim()
       })
     if(customerData.value.Email !== currentCustomerData.value.Email)
-      await fetchWrapper.post(`/api/customer/${user.ID}/change/email`,{
+      await fetchWrapper.put(`/api/customer/${user.ID}/change/email`,{
         email: customerData.value.Email.trim()
       })
     user.FirstName = hostData.value.FirstName
