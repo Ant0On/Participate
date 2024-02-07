@@ -17,20 +17,22 @@ const totalPages = ref(0);
 
 async function getCurrentAccommodations(page) {
   const response = await fetchWrapper.get(`/api/offers?type=accommodation&page=${page}`);
-  const responseData = response.data;
+  const responseData = response?.data || [] ;
 
-  accommodations.value = responseData.map((data) => {
-    return {
-      'offerId': data["offer_id"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'name': data["name"],
-      'price': data["price"],
-      'maxPeople': data["max_people"]
-    };
-  });
+  if(responseData){
+    accommodations.value = responseData.map((data) => {
+      return {
+        'offerId': data["offer_id"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'name': data["name"],
+        'price': data["price"],
+        'maxPeople': data["max_people"]
+      };
+    });
 
-  totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages;
+  }
 }
 
 function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople) {

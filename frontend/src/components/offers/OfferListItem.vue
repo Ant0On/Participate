@@ -11,7 +11,6 @@ const props = defineProps({
   price: String,
   max_people: String,
 })
-console.log(props)
 
 function onItemClicked() {
   router.push({name: 'Offers', params:{type: props.type, id: props.id}})
@@ -21,7 +20,7 @@ function onItemClicked() {
 
 <template>
   <div class="offer_item" @click="onItemClicked">
-    <img :src="require(`@/../images/offers/${id}.jpeg`)" alt="Image">
+    <img :src="require(`@/../images/offers/${id}.jpg`)" alt="Image">
     <div class="item_details">
       <div class="title">{{ name }}</div>
       <div class="description"> {{ description }}</div>

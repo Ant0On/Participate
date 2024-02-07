@@ -35,7 +35,7 @@ const addedNewOffer = ref(false)
 const countries = ref([])
 const offerTypes = ['Accommodation', 'Activities', 'Events']
 const offerTypesId = {
-  'Accommodation': 'place',
+  'Accommodation': 'accommodation',
   'Events': 'event',
   'Activities': 'activity'
 }

@@ -17,20 +17,22 @@ const totalPages = ref(0);
 
 async function getCurrentActivities(page) {
   const response = await fetchWrapper.get(`/api/offers?type=activity&page=${page}`)
-  const responseData = response.data
+  const responseData = response?.data || [] ;
 
-  activities.value = responseData.map((data) => {
-    return {
-      'offerId': data["offer_id"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'name': data["name"],
-      'price': data["price"],
-      'maxPeople': data["max_people"]
-    }
-  })
+  if(responseData){
+    activities.value = responseData.map((data) => {
+      return {
+        'offerId': data["offer_id"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'name': data["name"],
+        'price': data["price"],
+        'maxPeople': data["max_people"]
+      }
+    })
 
-  totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages;
+  }
 }
 
 function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {

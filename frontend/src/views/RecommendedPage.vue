@@ -18,19 +18,20 @@ const totalPages = ref(0);
 async function getCurrentRecommendedOffers(page) {
   const response = await fetchWrapper.get(`/api/offers/recommended?page=${page}`);
 
-  const responseData = response.data;
+  const responseData = response?.data || [] ;
+  if(responseData){
+    offers.value = responseData.map((data) => {
+      return {
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'name': data["name"],
+        'price': data["price"],
+        'maxPeople': data["max_people"]
+      };
+    });
 
-  offers.value = responseData.map((data) => {
-    return {
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'name': data["name"],
-      'price': data["price"],
-      'maxPeople': data["max_people"]
-    };
-  });
-
-  totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages;
+  }
 }
 
 function getNewRecommendedOffers(location, dateFrom, dateTo, numberOfPeople) {
