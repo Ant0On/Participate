@@ -16,6 +16,7 @@ const currentOffers = ref([])
 async function getCurrentOffers() {
   fetchWrapper.get(`/api/host/${user.ID}/reservations/pending`)
       .then((response) => {
+        console.log('hello', response)
         const responseData = response.data
 
         allCurrentOffers.value = responseData.map((data) => {
@@ -23,13 +24,15 @@ async function getCurrentOffers() {
             'location': data["country_name"] + ', ' + data["town_name"],
             'name': data["name"],
             'price': data["price"],
-            'dateFrom': data['dateFrom'],
-            'dateTo': data['dateTo'],
+            'dateFrom': data['date_from'],
+            'dateTo': data['date_to'],
             'offerType': data['offer_type'],
-            'withAnimals': data['animals']
+            'withAnimals': data['is_animal_friendly']
           }
         })
-        currentOffers.value = currentOffers.value.slice(0, pageSize);
+        console.log('value', allCurrentOffers.value)
+        currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
+        console.log('sliced', currentOffers.value)
       })
       .catch((error) =>{
 

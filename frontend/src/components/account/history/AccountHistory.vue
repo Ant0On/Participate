@@ -24,7 +24,7 @@ async function getHistoryItems() {
             'dateFrom': data['dateFrom'],
             'dateTo': data['dateTo'],
             'offerType': data['offer_type'],
-            'withAnimals': data['animals']
+            'withAnimals': data['is_animal_friendly']
           }
         })
         historyItems.value = allHistoryItems.value.slice(0, pageSize);
