@@ -54,6 +54,14 @@ func GetOfferByID(id string) (*Offer, error) {
 	return o, nil
 }
 
+func GetOffersForHost(hostID string) ([]Offer, error) {
+	var offers []Offer
+	if err := DB.Find(&offers).Where("host_id = ?", hostID).Error; err != nil {
+		return nil, fmt.Errorf("DB.Find: %w", err)
+	}
+	return offers, nil
+}
+
 func (o *Offer) Update() error {
 	if err := DB.Save(&o).Error; err != nil {
 		return err
