@@ -71,9 +71,6 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 	if len(files) == 0 {
 		return fmt.Errorf("no image was uploaded for the offer")
 	}
-	if len(files) > 1 {
-		return fmt.Errorf("only one image can be uploaded")
-	}
 
 	file := files[0]
 

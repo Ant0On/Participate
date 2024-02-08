@@ -50,6 +50,8 @@ async function onSubmit() {
     country_id: await getCountryId(newOffer.value.country),
     town_type_id: 1
   }).then((data) => {
+    const imageFile = dataURLtoFile(newOffer.value.image, 'image.jpeg');
+    console.log(imageFile)
         console.log(data, newOffer)
         fetchWrapper.post('/api/host/create', {
               name: newOffer.value.name,
@@ -61,7 +63,7 @@ async function onSubmit() {
               offer_type: offerTypesId[newOffer.value.offerType],
               host_id: user.ID,
               town_id: data.town.ID,
-              image: newOffer.value.image
+              image: imageFile
             },
             "multipart/form-data")
             .then(() => {
@@ -92,6 +94,18 @@ async function uploadImage(imageInput) {
   reader.onload = source => {
     newOffer.value.image = source.target.result;
   };
+}
+
+function dataURLtoFile(dataURL, fileName) {
+  const arr = dataURL.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], fileName, { type: mime });
 }
 
 function checkIfOfferInfoIsFilled() {
@@ -143,7 +157,7 @@ onMounted(async () => {
     <Transition name="bounce">
     <div v-if="isOfferCountryFilled" class="new_offer_image">
         <div class="upload_image">
-          <img v-if="newOffer.image !== ''" :src="newOffer.image" class="preview_image"/>
+          <img v-if="newOffer.image !== ''" :src="newOffer.image" class="preview_image" alt="offerImage"/>
           <div id="image_input" v-if="newOffer.image === ''">
             <label for="image_upload">
               Add a photo
