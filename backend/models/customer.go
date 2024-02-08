@@ -71,6 +71,13 @@ func (c *Customer) Update() error {
 	return nil
 }
 
+func (c *Customer) Delete() error {
+	if err := DB.Delete(&c).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func LoginCheck(email, password string) (string, any, error) {
 	var role, uPassword, t string
 	var userID uint
@@ -83,8 +90,7 @@ func LoginCheck(email, password string) (string, any, error) {
 	}
 
 	if err = passHelper.VerifyPassword(password, uPassword); err != nil {
-		return "", nil, fmt.Errorf("VerifyPassword: %s", role)
-
+		return "", nil, fmt.Errorf("VerifyPassword: wrong password")
 	}
 
 	if t, err = token.GenerateToken(userID, email, role); err != nil {

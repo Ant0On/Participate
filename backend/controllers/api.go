@@ -31,6 +31,7 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.PUT(":id/change/last_name", ChangeLastName)
 	customer.PUT(":id/change/email", ChangeEmail)
 	customer.POST("/offer/:id/grade", GradeReservation)
+	customer.POST(":id/promote", PromoteToHost)
 
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)
@@ -53,6 +54,7 @@ func RegisterRoutes(r *gin.Engine) {
 
 	reservation := r.Group("/api/reservation")
 	reservation.GET("/get/:id", GetReservationById)
+	reservation.GET("/:state", GetReservationsByState)
 	reservation.POST("/add", AddReservation)
 	reservation.POST("/:id/:state", ChangeReservationState)
 

@@ -46,6 +46,24 @@ func GetReservationById(c *gin.Context) {
 	c.JSON(http.StatusOK, reservation)
 }
 
+func GetReservationsByState(c *gin.Context) {
+	reservationState := c.Param("state")
+
+	if reservationState == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "reservation state is required"})
+		return
+	}
+
+	reservations, err := models.GetReservationsByState(reservationState)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, reservations)
+}
+
 func ChangeReservationState(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
