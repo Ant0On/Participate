@@ -35,7 +35,7 @@ func GetPendingReservations(c *gin.Context) {
 		return
 	}
 
-	var pendingReservations []DTO.PendingReservation
+	var pendingReservations []DTO.ReservationWithOffer
 	result := models.DB.
 		Model(&models.Reservation{}).
 		Joins("JOIN offer ON reservation.offer_id = offer.id").
@@ -43,8 +43,8 @@ func GetPendingReservations(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Joins("JOIN host ON offer.host_id = host.id").
 		Where("host.id = ? AND reservation_state = 'pending'", hostID).
-		Select("reservation.id as reservation_id, offer.name, offer.price, offer.is_animal_friendly," +
-			"offer.offer_type, town.name as town_name, country.name as country_name").
+		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, offer.name," + "" +
+			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name").
 		Find(&pendingReservations)
 
 	if err := result.Error; err != nil {

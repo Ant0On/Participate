@@ -28,6 +28,7 @@ func RegisterRoutes(r *gin.Engine) {
 
 	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))
+	customer.GET(":id/reservations/history", GetReservationsHistory)
 	customer.PUT(":id/change/first_name", ChangeFirstName)
 	customer.PUT(":id/change/last_name", ChangeLastName)
 	customer.PUT(":id/change/email", ChangeEmail)
