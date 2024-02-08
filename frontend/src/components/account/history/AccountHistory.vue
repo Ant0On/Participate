@@ -21,8 +21,8 @@ async function getHistoryItems() {
             'location': data["country_name"] + ', ' + data["town_name"],
             'name': data["name"],
             'price': data["price"],
-            'dateFrom': data['dateFrom'],
-            'dateTo': data['dateTo'],
+            'dateFrom': data['date_from'],
+            'dateTo': data['date_to'],
             'offerType': data['offer_type'],
             'withAnimals': data['is_animal_friendly']
           }

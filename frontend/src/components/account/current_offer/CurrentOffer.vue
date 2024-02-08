@@ -16,7 +16,6 @@ const currentOffers = ref([])
 async function getCurrentOffers() {
   fetchWrapper.get(`/api/host/${user.ID}/reservations/pending`)
       .then((response) => {
-        console.log('hello', response)
         const responseData = response.data
 
         allCurrentOffers.value = responseData.map((data) => {
@@ -30,9 +29,7 @@ async function getCurrentOffers() {
             'withAnimals': data['is_animal_friendly']
           }
         })
-        console.log('value', allCurrentOffers.value)
         currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
-        console.log('sliced', currentOffers.value)
       })
       .catch((error) =>{
 
