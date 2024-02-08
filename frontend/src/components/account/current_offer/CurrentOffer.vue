@@ -20,6 +20,7 @@ async function getCurrentOffers() {
 
         allCurrentOffers.value = responseData.map((data) => {
           return {
+            'reservationID': data["reservation_id"],
             'location': data["country_name"] + ', ' + data["town_name"],
             'name': data["name"],
             'price': data["price"],
@@ -66,7 +67,7 @@ onMounted(async () => getCurrentOffers())
     <div class="items_list">
       <div class="offer_items">
         <CurrentOfferItem v-for="currentOffer in currentOffers" :name="currentOffer.name" :offer-type="currentOffer.offerType"
-                     :date-from="currentOffer.dateFrom" :date-to="currentOffer.dateTo" :id="currentOffer.id"
+                     :date-from="currentOffer.dateFrom" :date-to="currentOffer.dateTo" :id="currentOffer.reservationID"
                      :with-animals="currentOffer.withAnimals"/>
       </div>
       <div class="navigation">
