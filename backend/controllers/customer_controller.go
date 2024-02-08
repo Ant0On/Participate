@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"backend/models"
-	"backend/models/DTO"
 	"backend/pkg/passHelper"
 
 	"github.com/gin-gonic/gin"
@@ -215,37 +214,4 @@ func PromoteToHost(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Customer upgraded to Host successfully", "host": host})
-}
-
-func GetReservationsHistory(c *gin.Context) {
-	customerID := c.Param("id")
-
-	if customerID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
-		return
-	}
-
-	var finishedReservations []DTO.ReservationWithOffer
-	result := models.DB.
-		Model(&models.Reservation{}).
-		Joins("JOIN offer ON reservation.offer_id = offer.id").
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN customer ON reservation.customer_id = customer.id").
-		Where("customer.id = ? AND reservation_state = 'finished'", customerID).
-		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, offer.name," + "" +
-			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name").
-		Find(&finishedReservations)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No finished reservations"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "finished reservations fetched successfully", "data": finishedReservations})
 }

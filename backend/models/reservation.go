@@ -71,11 +71,3 @@ func GetReservationsByState(state string) ([]Reservation, error) {
 	}
 	return reservations, nil
 }
-
-func GetPendingReservations(offerIDs []uint) ([]Reservation, error) {
-	var pendingReservations []Reservation
-	if err := DB.Where("reservation_state = ? AND offer_id IN ?", Pending, offerIDs).Find(&pendingReservations).Error; err != nil {
-		return nil, fmt.Errorf("no pending reservations: %w", err)
-	}
-	return pendingReservations, nil
-}
