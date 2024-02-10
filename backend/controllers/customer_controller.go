@@ -58,6 +58,7 @@ func ChangeFirstName(c *gin.Context) {
 		return
 	}
 
+	customer.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeLastName(c *gin.Context) {
@@ -87,6 +88,7 @@ func ChangeLastName(c *gin.Context) {
 		return
 	}
 
+	customer.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeEmail(c *gin.Context) {
@@ -116,6 +118,7 @@ func ChangeEmail(c *gin.Context) {
 		return
 	}
 
+	customer.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 
@@ -216,6 +219,8 @@ func PromoteToHost(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	host.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "Customer upgraded to Host successfully", "host": host})
 }
 

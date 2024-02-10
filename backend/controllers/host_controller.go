@@ -24,6 +24,8 @@ func GetHostByID(c *gin.Context) {
 		return
 	}
 
+	host.Password = ""
+
 	c.JSON(http.StatusOK, host)
 }
 
