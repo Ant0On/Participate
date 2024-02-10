@@ -19,7 +19,6 @@ async function getCurrentOffers() {
         const responseData = response.data
 
         allCurrentOffers.value = responseData.map((data) => {
-          console.log(data)
           return {
             'reservationID': data["reservation_id"],
             'location': data["country_name"] + ', ' + data["town_name"],

@@ -24,7 +24,6 @@ function onReject() {
   isRejected.value = true;
   fetchWrapper.post(`/api/reservation/${props.id}/rejected`, {})
 }
-console.log(props)
 watch(() => props.id, () =>{
   isAccepted.value = false
   isRejected.value = false;
