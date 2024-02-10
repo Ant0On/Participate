@@ -18,10 +18,10 @@ const (
 
 type Offer struct {
 	gorm.Model
-	Name             string    `gorm:"size:100;not null" form:"name"`
-	Description      string    `gorm:"size:300;not null" form:"description"`
-	Price            float64   `gorm:"not null" form:"price"`
-	MaxPeople        int       `gorm:"not null" form:"max_people"`
+	Name             string    `gorm:"size:100;not null" form:"name" binding:"required,min=2,max=100"`
+	Description      string    `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
+	Price            float64   `gorm:"not null" form:"price" binding:"required,gt=0"`
+	MaxPeople        int       `gorm:"not null" form:"max_people" binding:"required,gt=0"`
 	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
 	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
 	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type"`

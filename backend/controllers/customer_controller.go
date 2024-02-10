@@ -13,20 +13,22 @@ import (
 )
 
 type firstNameRequest struct {
-	FirstName string `json:"first_name"`
+	FirstName string `json:"first_name" binding:"required"`
 }
+
 type lastNameRequest struct {
-	LastName string `json:"last_name"`
+	LastName string `json:"last_name" binding:"required"`
 }
+
 type emailRequest struct {
-	Email string `json:"email"`
+	Email string `json:"email" binding:"required,email"`
 }
 
 type promoteRequest struct {
-	Password    string `json:"password" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required"`
-	BankAccount string `json:"bank_account" binding:"required"`
+	Password    string `json:"password" binding:"required,min=8"`
+	Description string `json:"description" binding:"required,min=15,max=255"`
+	PhoneNumber string `json:"phone_number" binding:"required,numeric,min=9,max=15"`
+	BankAccount string `json:"bank_account" binding:"required,numeric,min=16,max=40"`
 }
 
 func ChangeFirstName(c *gin.Context) {
@@ -56,6 +58,7 @@ func ChangeFirstName(c *gin.Context) {
 		return
 	}
 
+	customer.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeLastName(c *gin.Context) {
@@ -85,6 +88,7 @@ func ChangeLastName(c *gin.Context) {
 		return
 	}
 
+	customer.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 func ChangeEmail(c *gin.Context) {
@@ -114,6 +118,38 @@ func ChangeEmail(c *gin.Context) {
 		return
 	}
 
+	customer.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+}
+
+func ChangePicture(c *gin.Context) {
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
+		return
+	}
+
+	customer, err := models.GetCustomer(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		return
+	}
+
+	var dst string
+	if dst, _, err = customer.HandleUserImageUploads(c, customer.ID, customer.Role); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
+	}
+
+	customer.ImagePath = dst
+
+	if err := customer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
+		return
+	}
+
+	customer.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 
@@ -214,6 +250,8 @@ func PromoteToHost(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	host.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "Customer upgraded to Host successfully", "host": host})
 }
 
@@ -233,7 +271,7 @@ func GetReservationsHistory(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Joins("JOIN customer ON reservation.customer_id = customer.id").
 		Where("customer.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", customerID).
-		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, offer.name," + "" +
+		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
 		Find(&finishedReservations)
 
