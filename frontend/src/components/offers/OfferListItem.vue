@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps} from 'vue'
+import {defineProps, computed} from 'vue'
 import {router} from '@/router'
 
 const props = defineProps({
@@ -15,12 +15,23 @@ const props = defineProps({
 function onItemClicked() {
   router.push({name: 'Offers', params:{type: props.type, id: props.id}})
 }
+
+const isImageSource = computed(() =>{
+  try{
+    require(`@/../images/offers/${props.id}.jpeg`)
+    return true
+  }
+  catch{
+    return false
+  }
+})
 </script>
 
 
 <template>
   <div class="offer_item" @click="onItemClicked">
-    <img :src="require(`@/../images/offers/${id}.jpeg`)" alt="Image">
+    <img v-if="isImageSource" :src="require(`@/../images/offers/${props.id}.jpeg`)" alt="Image">
+    <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="item_details">
       <div class="title">{{ name }}</div>
       <div class="description"> {{ description }}</div>
