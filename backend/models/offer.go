@@ -54,6 +54,14 @@ func GetOfferByID(id string) (*Offer, error) {
 	return o, nil
 }
 
+func GetOffersForHost(hostID string) ([]Offer, error) {
+	var offers []Offer
+	if err := DB.Find(&offers).Where("host_id = ?", hostID).Error; err != nil {
+		return nil, fmt.Errorf("DB.Find: %w", err)
+	}
+	return offers, nil
+}
+
 func (o *Offer) Update() error {
 	if err := DB.Save(&o).Error; err != nil {
 		return err
@@ -70,9 +78,6 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 	files := form.File["image"]
 	if len(files) == 0 {
 		return fmt.Errorf("no image was uploaded for the offer")
-	}
-	if len(files) > 1 {
-		return fmt.Errorf("only one image can be uploaded")
 	}
 
 	file := files[0]

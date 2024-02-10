@@ -17,20 +17,21 @@ const totalPages = ref(0);
 
 async function getCurrentEvents(page) {
   const response = await fetchWrapper.get(`/api/offers?type=event&page=${page}`);
-  const responseData = response.data;
+  const responseData = response?.data || [] ;
+  if (responseData){
+    events.value = responseData.map((data) => {
+      return {
+        'offerId': data["offer_id"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'name': data["name"],
+        'price': data["price"],
+        'maxPeople': data["max_people"]
+      };
+    });
 
-  events.value = responseData.map((data) => {
-    return {
-      'offerId': data["offer_id"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'name': data["name"],
-      'price': data["price"],
-      'maxPeople': data["max_people"]
-    };
-  });
-
-  totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages;
+  }
 }
 
 function getNewEvents(location, dateFrom, dateTo, numberOfPeople) {
@@ -89,9 +90,9 @@ watch(currentPage, (newPage) => {
                      :name="event.name" :price="event.price"
                      :max_people="event.maxPeople" type="events" :id="event.offerId"/>
     </div>
-    <div class="pagination">
+    <div v-if="totalPages > 0" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span v-if="totalPages > 0">Page {{ currentPage }} of {{ totalPages }}</span>
+      <span >Page {{ currentPage }} of {{ totalPages }}</span>
       <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>

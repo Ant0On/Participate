@@ -37,10 +37,9 @@ function request(method) {
 }
 
 function authHeader(url) {
-    const { user } = useAuthStore();
-    const isLoggedIn = !!user?.token;
-    if (isLoggedIn) {
-        return { Authorization: `Bearer ${user.token}` };
+    const { token } = useAuthStore();
+    if (typeof token !== "undefined") {
+        return { Authorization: `Bearer ${token}` };
     } else {
         return {};
     }
@@ -48,8 +47,7 @@ function authHeader(url) {
 
 function handleResponse(response) {
     return response.text().then(text => {
-        const data = text && JSON.parse(text);
-
+        const data = text && text !== "Unauthorized" && JSON.parse(text);
         if (!response.ok) {
             const { user, logout } = useAuthStore();
             if ([401, 403].includes(response.status) && user) {

@@ -4,10 +4,24 @@ import Footer from "@/components/layout/FooterBar.vue";
 import NavBar from "@/components/nav/NavBar.vue";
 import LoginSection from "@/components/login/LoginSection.vue";
 import SignUpSection from "@/components/login/SignUpSection.vue";
+import {useAuthStore} from "@/stores/auth.store";
+import AccountNav from "@/components/account/AccountNav.vue";
+import AccountData from "@/components/account/data/AccountData.vue";
+import AccountHistory from "@/components/account/history/AccountHistory.vue";
+import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
+import AccountCurrentOffer from "@/components/account/current_offer/CurrentOffer.vue";
+import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
 
 const loginPage = ref(true)
 
+const authStore = useAuthStore()
+const user = authStore.user;
 
+const currentPage = ref('Account Information')
+
+function onPageChange(page){
+  currentPage.value = page;
+}
 
 </script>
 
@@ -15,7 +29,7 @@ const loginPage = ref(true)
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <div class="logging">
     <NavBar currentPage="login"/>
-    <div class="login_container">
+    <div class="login_container" v-if="user === null">
       <Transition name="slide-fade">
         <div class="login" v-if="loginPage">
           <LoginSection @sign-up-clicked="loginPage = !loginPage"/>
@@ -27,11 +41,50 @@ const loginPage = ref(true)
         </div>
       </Transition>
     </div>
+    <div class="account_container" v-else>
+      <p> Welcome again {{ user.first_name }}!</p>
+      <div class="account_data">
+        <AccountNav @page-changed="onPageChange"/>
+        <div class="data">
+          <AccountData v-if="currentPage === 'Account Information'"/>
+          <AccountHistory v-else-if="currentPage === 'History'"/>
+          <AccountNewOffer v-else-if="currentPage === 'New Offer'"/>
+          <AccountBecomeHost v-else-if="currentPage === 'Become a host'"/>
+          <AccountCurrentOffer v-else/>
+        </div>
+      </div>
+    </div>
     <Footer/>
   </div>
 </template>
 
 <style scoped>
+div.account_container{
+  display: flex;
+  flex-direction: column;
+  margin-top: 3%;
+  row-gap: 30px;
+  height: 450px;
+}
+div.account_data{
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+div.data{
+  margin: 2%;
+  display: flex;
+  flex-grow: 1;
+}
+p{
+  color: #000000;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: normal;
+  align-self: center;
+
+}
 .logging {
   display: flex;
   flex-direction: column;

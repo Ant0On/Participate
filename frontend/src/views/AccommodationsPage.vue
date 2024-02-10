@@ -17,20 +17,22 @@ const totalPages = ref(0);
 
 async function getCurrentAccommodations(page) {
   const response = await fetchWrapper.get(`/api/offers?type=accommodation&page=${page}`);
-  const responseData = response.data;
+  const responseData = response?.data || [] ;
 
-  accommodations.value = responseData.map((data) => {
-    return {
-      'offerId': data["offer_id"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'name': data["name"],
-      'price': data["price"],
-      'maxPeople': data["max_people"]
-    };
-  });
+  if(responseData){
+    accommodations.value = responseData.map((data) => {
+      return {
+        'offerId': data["offer_id"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'name': data["name"],
+        'price': data["price"],
+        'maxPeople': data["max_people"]
+      };
+    });
 
-  totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages;
+  }
 }
 
 function getNewAccommodations(location, dateFrom, dateTo, numberOfPeople) {
@@ -90,9 +92,9 @@ watch(currentPage, (newPage) => {
                      :description="accommodation.description" :name="accommodation.name"
                      :price="accommodation.price" :max_people="accommodation.maxPeople" type="accommodations" :id="accommodation.offerId"/>
     </div>
-    <div class="pagination">
+    <div v-if="totalPages > 0" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span v-if="totalPages > 0">Page {{ currentPage }} of {{ totalPages }}</span>
+      <span >Page {{ currentPage }} of {{ totalPages }}</span>
       <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>

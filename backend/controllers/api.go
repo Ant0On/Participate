@@ -24,9 +24,11 @@ func RegisterRoutes(r *gin.Engine) {
 	host.DELETE("/delete/:id", DeleteOffer)
 	host.PUT("/update/:id", UpdateOffer)
 	host.POST("/discount/:offerID", DiscountOffer)
+	host.GET("/:id/reservations/pending", GetPendingReservations)
 
 	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))
+	customer.GET(":id/reservations/history", GetReservationsHistory)
 	customer.PUT(":id/change/first_name", ChangeFirstName)
 	customer.PUT(":id/change/last_name", ChangeLastName)
 	customer.PUT(":id/change/email", ChangeEmail)
@@ -45,9 +47,6 @@ func RegisterRoutes(r *gin.Engine) {
 	town := r.Group("/api/town")
 	town.POST("/add", AddTown)
 	town.GET("/get/:id", GetTownByID)
-
-	townType := r.Group("/api/town_type")
-	townType.GET("/get", GetAllTownTypes)
 
 	grade := r.Group("/api/grade")
 	grade.GET("/get", GetAllGrades)

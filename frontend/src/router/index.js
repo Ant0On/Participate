@@ -17,6 +17,7 @@ const routes = [
     },
     {
         path: '/login',
+        alias: '/account',
         name: "Login",
         component: Login
     },

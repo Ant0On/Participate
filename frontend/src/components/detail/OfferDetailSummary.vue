@@ -48,8 +48,8 @@ function submitOffer(){
   })
       .then((data)=>{
         fetchWrapper.post('/api/reservation/add ', {
-          'dateFrom': data['dateFrom'],
-          'dateTo': data['dateTo'],
+          'date_from': data['dateFrom'],
+          'date_to': data['dateTo'],
           'numberOfPeople': data['numberOfPeople'],
           'reservation_state': 'pending',
           'CustomerId': user.ID,

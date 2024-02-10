@@ -18,19 +18,20 @@ const totalPages = ref(0);
 async function getCurrentRecommendedOffers(page) {
   const response = await fetchWrapper.get(`/api/offers/recommended?page=${page}`);
 
-  const responseData = response.data;
+  const responseData = response?.data || [] ;
+  if(responseData){
+    offers.value = responseData.map((data) => {
+      return {
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'name': data["name"],
+        'price': data["price"],
+        'maxPeople': data["max_people"]
+      };
+    });
 
-  offers.value = responseData.map((data) => {
-    return {
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'name': data["name"],
-      'price': data["price"],
-      'maxPeople': data["max_people"]
-    };
-  });
-
-  totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages;
+  }
 }
 
 function getNewRecommendedOffers(location, dateFrom, dateTo, numberOfPeople) {
@@ -53,7 +54,7 @@ function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeo
 }
 
 onMounted(async () => {
-  await getCurrentRecommendedOffers(currentPage.value);
+  await getCurrentRecommendedOffers(currentPage.value).catch(error => {});
 });
 
 watch(location, (newLocation) => {
@@ -90,9 +91,9 @@ watch(currentPage, (newPage) => {
                      :name="offer.name" :price="offer.price"
                      :max_people="offer.maxPeople"/>
     </div>
-    <div class="pagination">
+    <div v-if="totalPages > 0" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span v-if="totalPages > 0">Page {{ currentPage }} of {{ totalPages }}</span>
+      <span >Page {{ currentPage }} of {{ totalPages }}</span>
       <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>

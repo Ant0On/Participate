@@ -23,8 +23,10 @@ export const useAuthStore = defineStore({
         },
         async logout() {
             this.user = null;
+            this.token = null;
             localStorage.removeItem('user');
-            router.push('/login');
+            localStorage.removeItem('token');
+            router.push('/');
         },
         async signUp(name, email, password) {
             const request = await fetchWrapper.post('/api/register/customer', {
