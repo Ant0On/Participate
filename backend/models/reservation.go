@@ -22,6 +22,7 @@ type Reservation struct {
 	DateFrom         time.Time        `gorm:"not null" json:"date_from" binding:"required"`
 	DateTo           time.Time        `gorm:"not null" json:"date_to" binding:"required,gtfield=DateFrom"`
 	ReservationState ReservationState `gorm:"type:varchar(255);check:reservation_state IN ('pending', 'accepted', 'ongoing', 'finished', 'rejected'); column:reservation_state; not null" json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
+	NumberOfPeople   int              `gorm:"not null" json:"number_of_people" binding:"required;gt=0"`
 	CustomerID       uint             `gorm:"not null" json:"customer_id" binding:"required"`
 	OfferID          uint             `gorm:"not null" json:"offer_id" binding:"required"`
 	GradeID          uint
@@ -37,7 +38,23 @@ func (r *Reservation) ValidateDates() error {
 	return nil
 }
 
+func (r *Reservation) Validate() error {
+	var offer Offer
+	if err := DB.First(&offer, r.OfferID).Error; err != nil {
+		return fmt.Errorf("DB.First: %w", err)
+	}
+
+	if r.NumberOfPeople > offer.MaxPeople {
+		return fmt.Errorf("too many people added to reservation")
+	}
+	return nil
+}
+
 func (r *Reservation) Save() error {
+	if err := r.Validate().Error; err != nil {
+		return fmt.Errorf("r.Validate: %v", err)
+	}
+
 	if err := DB.Create(&r).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
@@ -46,6 +63,9 @@ func (r *Reservation) Save() error {
 }
 
 func (r *Reservation) Update() error {
+	if err := r.Validate().Error; err != nil {
+		return fmt.Errorf("r.Validate: %v", err)
+	}
 	if err := DB.Save(&r).Error; err != nil {
 		return err
 	}
