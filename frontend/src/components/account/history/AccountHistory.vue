@@ -13,7 +13,7 @@ const allHistoryItems = ref([])
 const historyItems = ref([])
 
 async function getHistoryItems() {
-  fetchWrapper.get(`/api/reservation/customer/${user.ID}/finished`)
+  fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
       .then((response)=>{
         const responseData = response.data
         allHistoryItems.value = responseData.map((data) => {
