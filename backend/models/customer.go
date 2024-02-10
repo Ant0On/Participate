@@ -31,14 +31,10 @@ func GetUserByEmail(email string) (any, error) {
 		if err = DB.Model(&Host{}).Where("email = ?", email).Scan(&h).Error; err != nil {
 			return nil, fmt.Errorf("user not found: %w", err)
 		}
-		//Reset password to hide it from JSON
 		h.Password = ""
 		return &h, nil
 	}
-
-	//Reset password to hide it from JSON
 	c.Password = ""
-
 	return &c, nil
 }
 
