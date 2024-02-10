@@ -56,7 +56,7 @@ func GetCustomer(id string) (*Customer, error) {
 }
 
 func (c *Customer) Save() error {
-	if err := validateLastName(c.LastName).Error; err != nil {
+	if err := validateLastName(c.LastName); err != nil {
 		return fmt.Errorf("validateLastName: %v", err)
 	}
 	if err := DB.Create(&c).Error; err != nil {
@@ -67,7 +67,7 @@ func (c *Customer) Save() error {
 }
 
 func (c *Customer) Update() error {
-	if err := validateLastName(c.LastName).Error; err != nil {
+	if err := validateLastName(c.LastName); err != nil {
 		return fmt.Errorf("validateLastName: %v", err)
 	}
 	if err := DB.Save(&c).Error; err != nil {

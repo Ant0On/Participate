@@ -51,7 +51,7 @@ func (r *Reservation) Validate() error {
 }
 
 func (r *Reservation) Save() error {
-	if err := r.Validate().Error; err != nil {
+	if err := r.Validate(); err != nil {
 		return fmt.Errorf("r.Validate: %v", err)
 	}
 
@@ -63,7 +63,7 @@ func (r *Reservation) Save() error {
 }
 
 func (r *Reservation) Update() error {
-	if err := r.Validate().Error; err != nil {
+	if err := r.Validate(); err != nil {
 		return fmt.Errorf("r.Validate: %v", err)
 	}
 	if err := DB.Save(&r).Error; err != nil {

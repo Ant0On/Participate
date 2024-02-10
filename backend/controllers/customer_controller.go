@@ -25,10 +25,10 @@ type emailRequest struct {
 }
 
 type promoteRequest struct {
-	Password    string `json:"password" binding:"required"`
+	Password    string `json:"password" binding:"required,min=8"`
 	Description string `json:"description" binding:"required,min=15,max=255"`
 	PhoneNumber string `json:"phone_number" binding:"required,numeric,min=9,max=15"`
-	BankAccount string `json:"bank_account" binding:"required,numeric,min=9,max=12"`
+	BankAccount string `json:"bank_account" binding:"required,numeric,min=16,max=40"`
 }
 
 func ChangeFirstName(c *gin.Context) {
