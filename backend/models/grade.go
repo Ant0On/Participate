@@ -10,7 +10,7 @@ type Grade struct {
 	gorm.Model
 	Count        int
 	Description  string
-	Reservations []Reservation
+	Reservations []Reservation `gorm:"foreignKey:GradeID"`
 }
 
 var GradesList = []Grade{

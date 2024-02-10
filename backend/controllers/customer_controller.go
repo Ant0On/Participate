@@ -13,20 +13,22 @@ import (
 )
 
 type firstNameRequest struct {
-	FirstName string `json:"first_name"`
+	FirstName string `json:"first_name" binding:"required"`
 }
+
 type lastNameRequest struct {
-	LastName string `json:"last_name"`
+	LastName string `json:"last_name" binding:"required"`
 }
+
 type emailRequest struct {
-	Email string `json:"email"`
+	Email string `json:"email" binding:"required,email"`
 }
 
 type promoteRequest struct {
 	Password    string `json:"password" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required"`
-	BankAccount string `json:"bank_account" binding:"required"`
+	Description string `json:"description" binding:"required,min=15,max=255"`
+	PhoneNumber string `json:"phone_number" binding:"required,numeric,min=9,max=15"`
+	BankAccount string `json:"bank_account" binding:"required,numeric,min=9,max=12"`
 }
 
 func ChangeFirstName(c *gin.Context) {
