@@ -17,4 +17,5 @@ type ReservationWithOffer struct {
 	TownName         string           `json:"town_name"`
 	CountryName      string           `json:"country_name"`
 	OfferID          uint             `json:"offer_id"`
+	ReservationState string           `json:"reservation_state"`
 }

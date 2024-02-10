@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted} from 'vue';
+import {onMounted, ref} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -14,7 +14,7 @@ const historyItems = ref([])
 
 async function getHistoryItems() {
   fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
-      .then((response)=>{
+      .then((response) => {
         const responseData = response.data
         allHistoryItems.value = responseData.map((data) => {
           return {
@@ -24,12 +24,14 @@ async function getHistoryItems() {
             'dateFrom': data['date_from'],
             'dateTo': data['date_to'],
             'offerType': data['offer_type'],
-            'withAnimals': data['is_animal_friendly']
+            'withAnimals': data['is_animal_friendly'],
+            'reservationState': data['reservation_state'],
+            'offerId': data["offer_id"]
           }
         })
         historyItems.value = allHistoryItems.value.slice(0, pageSize);
       })
-      .catch((error)=>{
+      .catch((error) => {
       })
 }
 
@@ -40,14 +42,14 @@ let maxPage = Math.floor(allHistoryItems.value.length / pageSize) + 1
 function pageBack() {
   if (currentPage > 1) {
     currentPage -= 1;
-    historyItems.value = allHistoryItems.value.slice((currentPage - 1) *pageSize, currentPage * pageSize )
+    historyItems.value = allHistoryItems.value.slice((currentPage - 1) * pageSize, currentPage * pageSize)
   }
 }
 
 function pageFroward() {
   if (currentPage < maxPage) {
     currentPage += 1;
-    historyItems.value = allHistoryItems.value.slice((currentPage - 1) *pageSize, currentPage * pageSize )
+    historyItems.value = allHistoryItems.value.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   }
 }
@@ -63,7 +65,8 @@ onMounted(async () => getHistoryItems())
       <div class="history_items">
         <HistoryItem v-for="historyItem in historyItems" :name="historyItem.name" :offer-type="historyItem.offerType"
                      :date-from="historyItem.dateFrom" :date-to="historyItem.dateTo"
-                     :with-animals="historyItem.withAnimals"/>
+                     :with-animals="historyItem.withAnimals" :offer-id="historyItem.offerId"
+                     :reservation-state="historyItem.reservationState"/>
       </div>
       <div class="navigation">
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
@@ -75,12 +78,13 @@ onMounted(async () => getHistoryItems())
 </template>
 
 <style scoped>
-div.account_history{
+div.account_history {
   display: flex;
   flex-direction: column;
   height: max(500px, 80%);
   flex-grow: 1;
 }
+
 div.items_list {
   display: flex;
   flex-direction: column;
@@ -89,15 +93,18 @@ div.items_list {
   padding-top: 2%;
 
 }
-div.history_items{
+
+div.history_items {
   display: flex;
   flex-direction: column;
   padding-left: 2%;
 }
-div.navigation{
+
+div.navigation {
   padding-top: 2%;
 }
-p{
+
+p {
   color: #000000;
   font-family: "Poppins", Helvetica;
   font-size: 1.4rem;

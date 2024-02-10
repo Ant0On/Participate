@@ -232,9 +232,9 @@ func GetReservationsHistory(c *gin.Context) {
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Joins("JOIN customer ON reservation.customer_id = customer.id").
-		Where("customer.id = ? AND reservation_state = 'finished'", customerID).
+		Where("customer.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", customerID).
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, offer.name," + "" +
-			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name").
+			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
 		Find(&finishedReservations)
 
 	if err := result.Error; err != nil {

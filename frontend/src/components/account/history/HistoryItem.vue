@@ -1,19 +1,23 @@
 <script setup>
-import {defineProps} from 'vue';
+import {defineProps, computed} from 'vue';
 const props = defineProps({
   name: String,
   offerType: String,
-  image: String,
   dateFrom: String,
   dateTo: String,
   withAnimals: Boolean,
+  reservationState: String,
+  offerId: String,
 });
+
+const isAccepted = computed(() => props.reservationState === "accepted")
+const isRejected = computed(() => props.reservationState === "rejected")
 
 </script>
 
 <template>
   <div class="account_history_item">
-    <img :src="image" alt="Image">
+    <img :src="require(`@/../images/offers/${offerId}.jpeg`)" alt="Image">
     <div class="account_history_item_details">
       <div class="title">{{ name }}</div>
       <div class="summary_data">
@@ -22,8 +26,17 @@ const props = defineProps({
           <div class="field">Animals: {{ (withAnimals)? 'Yes': 'No'}}</div>
         </div>
         <div class="details">
-          <div class="field">Date from: {{ dateFrom }}</div>
-          <div class="field">Date to: {{ dateTo }}</div>
+          <div class="field">Date from: {{ dateFrom.split('T')[0] }}</div>
+          <div class="field">Date to: {{ dateTo.split('T')[0] }}</div>
+        </div>
+        <div class="accepted_offer" v-if="isAccepted">
+          <p class="accepted">Accepted</p>
+        </div>
+        <div class="rejected_offer" v-else-if="isRejected">
+          <p class="rejected">Rejected</p>
+        </div>
+        <div class="finished_offer" v-else>
+          <p class="finished">Finished</p>
         </div>
       </div>
     </div>
@@ -86,5 +99,23 @@ img {
   align-self: center;
   margin-right: 2%;
   margin-left: 2%;
+}
+p.accepted{
+  color: green;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+p.rejected{
+  color: red;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+p.finished{
+  color: mediumpurple;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 </style>
