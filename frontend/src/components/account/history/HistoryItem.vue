@@ -12,12 +12,21 @@ const props = defineProps({
 
 const isAccepted = computed(() => props.reservationState === "accepted")
 const isRejected = computed(() => props.reservationState === "rejected")
-
+const isImageSource = computed(() =>{
+  try{
+    require(`@/../images/offers/${props.offerId}.jpeg`)
+    return true
+  }
+  catch{
+    return false
+  }
+})
 </script>
 
 <template>
   <div class="account_history_item">
-    <img :src="require(`@/../images/offers/${offerId}.jpeg`)" alt="Image">
+    <img v-if="isImageSource" :src="require(`@/../images/offers/${offerId}.jpeg`)" alt="Image">
+    <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="account_history_item_details">
       <div class="title">{{ name }}</div>
       <div class="summary_data">

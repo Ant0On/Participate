@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps, ref, watch} from 'vue';
+import {defineProps, ref, watch, computed} from 'vue';
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const props = defineProps({
@@ -28,11 +28,21 @@ watch(() => props.id, () =>{
   isAccepted.value = false
   isRejected.value = false;
 })
+const isImageSource = computed(() =>{
+  try{
+    require(`@/../images/offers/${props.offerId}.jpeg`)
+    return true
+  }
+  catch{
+    return false
+  }
+})
 </script>
 
 <template>
   <div class="current_offer_item">
-    <img :src="require(`@/../images/offers/${offerId}.jpeg`)" alt="Image">
+    <img v-if="isImageSource" :src="require(`@/../images/offers/${offerId}.jpeg`)" alt="Image">
+    <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="current_offer_item_details">
       <div class="title">{{ name }}</div>
       <div class="summary_data">
