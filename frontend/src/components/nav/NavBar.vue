@@ -1,25 +1,28 @@
 <script setup>
-import {defineProps} from 'vue';
+import { defineProps } from 'vue';
 import NavItem from "./NavItem.vue";
-import {useAuthStore} from "@/stores/auth.store";
+import { useAuthStore } from "@/stores/auth.store";
 
 const props = defineProps({
   currentPage: String
 })
 
 function isActive(text, currentPage) {
-  return text === currentPage
+  return text === currentPage;
 }
+
 const auth = useAuthStore();
 const user = auth.user;
 
-const navigateTo = (auth.user === null)? '/login' : '/account'
-const text = (auth.user === null)? 'Log in': auth.user.FirstName + ' ' + auth.user.LastName;
+const navigateTo = auth.user === null ? '/login' : '/account';
+const text = auth.user === null ? 'Log in' : auth.user.FirstName + ' ' + auth.user.LastName;
 </script>
 
 <template>
   <nav>
-    <img alt="Image" src="../../assets/img/logo.png"/>
+    <router-link to="/">
+      <img alt="Image" src="../../assets/img/logo.png"/>
+    </router-link>
     <div>
       <NavItem text="Home" :isActive="isActive('home', currentPage)" navigateTo="/"/>
       <NavItem text="Recommended" :isActive="isActive('recommended', currentPage)" navigateTo="/recommended"/>
@@ -64,6 +67,5 @@ div {
     flex-direction: column;
     max-height: fit-content;
   }
-
 }
 </style>
