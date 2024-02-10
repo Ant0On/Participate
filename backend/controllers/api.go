@@ -48,9 +48,6 @@ func RegisterRoutes(r *gin.Engine) {
 	town.POST("/add", AddTown)
 	town.GET("/get/:id", GetTownByID)
 
-	townType := r.Group("/api/town_type")
-	townType.GET("/get", GetAllTownTypes)
-
 	grade := r.Group("/api/grade")
 	grade.GET("/get", GetAllGrades)
 

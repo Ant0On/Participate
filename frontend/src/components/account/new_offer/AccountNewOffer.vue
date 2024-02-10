@@ -48,7 +48,6 @@ async function onSubmit() {
   await fetchWrapper.post('/api/town/add', {
     name: newOffer.value.city,
     country_id: await getCountryId(newOffer.value.country),
-    town_type_id: 1
   }).then((data) => {
     const imageFile = dataURLtoFile(newOffer.value.image, 'image.jpeg');
     console.log(imageFile)

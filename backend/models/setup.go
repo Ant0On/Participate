@@ -47,16 +47,6 @@ func ConnectDatabase() {
 		}
 	}
 
-	allTownTypes, err := GetAllTownTypes()
-	if err != nil {
-		log.Fatal("GetAllTownTypes", err)
-	}
-	if len(allTownTypes) == 0 {
-		if err := AddTownTypes(); err != nil {
-			log.Fatal("AddTownTypes:", err)
-		}
-	}
-
 	allGrades, err := GetGrades()
 	if err != nil {
 		log.Fatal("GetGrades", err)
@@ -77,7 +67,7 @@ func ConnectDatabase() {
 		}
 	}
 
-	if err = DB.AutoMigrate(&Country{}, &TownType{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
+	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
 		&Town{}, &Animal{}, &Offer{}, &Reservation{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}
