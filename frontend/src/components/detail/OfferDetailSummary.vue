@@ -88,7 +88,7 @@ function submitOffer(){
       </div>
       <div class="offer_detail_payment">
         <div class="offer_detail_price">
-          Price: {{ price }}
+          Price: {{ price }} $
         </div>
         <div class="offer_detail_summary_book_button">
           <button class="book" @click="submitOffer()">

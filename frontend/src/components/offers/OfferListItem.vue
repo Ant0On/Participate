@@ -24,7 +24,7 @@ function onItemClicked() {
     <div class="item_details">
       <div class="title">{{ name }}</div>
       <div class="description"> {{ description }}</div>
-      <div class="price">Price: {{ price }}</div>
+      <div class="price">Price: {{ price }} $</div>
       <div class="number_of_people">Number of people: {{ max_people }}</div>
       <div class="location">Location: {{ location }}</div>
     </div>
