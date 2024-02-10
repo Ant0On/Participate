@@ -91,7 +91,7 @@ watch(currentPage, (newPage) => {
                      :name="offer.name" :price="offer.price"
                      :max_people="offer.maxPeople"/>
     </div>
-    <div v-if="totalPages > 0" class="pagination">
+    <div v-if="totalPages > 1" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
       <span >Page {{ currentPage }} of {{ totalPages }}</span>
       <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>

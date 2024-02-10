@@ -42,7 +42,7 @@ function onPageChange(page){
       </Transition>
     </div>
     <div class="account_container" v-else>
-      <p> Welcome again {{ user.first_name }}!</p>
+      <p> Welcome again {{ user.FirstName }}!</p>
       <div class="account_data">
         <AccountNav @page-changed="onPageChange"/>
         <div class="data">
