@@ -9,7 +9,7 @@ import (
 type Payment struct {
 	gorm.Model
 	Type         string
-	Reservations []Reservation `gorm:"foreignKey:ReservationID"`
+	Reservations []Reservation
 }
 
 var PaymentList = []Payment{

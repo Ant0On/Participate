@@ -9,7 +9,7 @@ import (
 type Country struct {
 	gorm.Model
 	Name  string
-	Towns []Town `gorm:"foreignKey:CountryID"`
+	Towns []Town
 }
 
 var CountryList = []Country{

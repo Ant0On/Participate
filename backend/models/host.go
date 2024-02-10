@@ -9,10 +9,10 @@ import (
 type Host struct {
 	gorm.Model
 	*Customer
-	Description string  `gorm:"not null;" form:"description" binding:"required,min=15,max=255"`
-	PhoneNumber string  `gorm:"size:12;not null;unique" form:"phone_number" binding:"required,min=9,max=15"`
-	BankAccount string  `gorm:"size:31;not null;unique" form:"bank_account" binding:"required,min=9,max=12"`
-	Offers      []Offer `gorm:"foreignKey:HostID"`
+	Description string `gorm:"not null;" form:"description" binding:"required,min=15,max=255"`
+	PhoneNumber string `gorm:"size:12;not null;unique" form:"phone_number" binding:"required,min=9,max=15"`
+	BankAccount string `gorm:"size:31;not null;unique" form:"bank_account" binding:"required,min=9,max=12"`
+	Offers      []Offer
 }
 
 func NewHost() Host {
