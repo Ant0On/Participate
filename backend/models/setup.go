@@ -37,11 +37,16 @@ func ConnectDatabase() {
 	}
 	fmt.Println("We are connected to the database")
 
+	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
+		&Town{}, &Animal{}, &Offer{}, &Reservation{}); err != nil {
+		log.Fatal("Migration error:", err)
+	}
+
 	allCountries, err := GetAllCountries()
 	if err != nil {
 		log.Fatal("GetAllCountries", err)
 	}
-	if len(allCountries) == 0 {
+	if len(allCountries) == 0 || allCountries == nil {
 		if err := AddCountries(); err != nil {
 			log.Fatal("AddCountries:", err)
 		}
@@ -51,7 +56,7 @@ func ConnectDatabase() {
 	if err != nil {
 		log.Fatal("GetGrades", err)
 	}
-	if len(allGrades) == 0 {
+	if len(allGrades) == 0 || allGrades == nil {
 		if err := AddGrades(); err != nil {
 			log.Fatal("AddGrades:", err)
 		}
@@ -61,14 +66,9 @@ func ConnectDatabase() {
 	if err != nil {
 		log.Fatal("GetAllPayments", err)
 	}
-	if len(allPaymentsMethod) == 0 {
+	if len(allPaymentsMethod) == 0 || allPaymentsMethod == nil {
 		if err := AddPayments(); err != nil {
 			log.Fatal("AddPayments:", err)
 		}
-	}
-
-	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
-		&Town{}, &Animal{}, &Offer{}, &Reservation{}); err != nil {
-		log.Fatal("Migration error:", err)
 	}
 }
