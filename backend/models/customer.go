@@ -22,6 +22,7 @@ type Customer struct {
 	Password     string `gorm:"size:100;not null" form:"password" binding:"required,min=8"`
 	Role         string `gorm:"size:20;not null;default:'customer'" form:"-"`
 	Reservations []Reservation
+	Messages     []Message
 }
 
 func validateLastName(lastName string) error {
