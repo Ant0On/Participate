@@ -48,7 +48,7 @@ onMounted(async () => {
     <NavBar :currentPage="type"/>
     <div class="item_detail">
       <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
-                              :numberOfPeople="offer.numberOfPeople" :hostId="offer.hostId"
+                              :numberOfPeople="offer.numberOfPeople" :hostId="offer.hostId" :description="offer.description"
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
       <OfferDetailSummary :price="offer.price" :image="offer.image" :id="id" v-else/>
     </div>
