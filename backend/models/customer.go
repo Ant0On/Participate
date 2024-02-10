@@ -21,6 +21,7 @@ type Customer struct {
 	Password     string `gorm:"size:100;not null;" form:"password" binding:"required"`
 	Role         string
 	Reservations []Reservation
+	Messages     []Message
 }
 
 func NewCustomer() Customer {

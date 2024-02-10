@@ -1,0 +1,72 @@
+package controllers
+
+import (
+	"net/http"
+	"strconv"
+
+	"backend/models"
+
+	"github.com/gin-gonic/gin"
+)
+
+func SendMessage(c *gin.Context) {
+	var message models.Message
+
+	if err := c.ShouldBindJSON(&message); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userId := c.Param("id")
+	chatId := c.Param("chatId")
+
+	user, err := models.GetCustomer(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	chatID, err := strconv.Atoi(chatId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	message.UserName = user.FirstName
+	message.CustomerID = user.ID
+	message.ChatID = uint(chatID)
+
+	if err := message.Save(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": message})
+
+}
+
+func GetAllMessages(c *gin.Context) {
+	offerID := c.Param("id")
+
+	chat, err := models.GetChatByOfferId(offerID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Chat nor found"})
+		return
+	}
+
+	messages, err := models.GetAllMessages(chat)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if messages == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Messages not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": messages})
+}
