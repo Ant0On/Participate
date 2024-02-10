@@ -16,4 +16,5 @@ type ReservationWithOffer struct {
 	OfferType        models.OfferType `json:"offer_type"`
 	TownName         string           `json:"town_name"`
 	CountryName      string           `json:"country_name"`
+	OfferID          uint             `json:"offer_id"`
 }

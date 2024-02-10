@@ -6,10 +6,10 @@ const props = defineProps({
   id: String,
   name: String,
   offerType: String,
-  image: String,
   dateFrom: String,
   dateTo: String,
   withAnimals: Boolean,
+  offerId: String,
 });
 
 const isAccepted = ref(false);
@@ -23,8 +23,8 @@ function onAccept() {
 function onReject() {
   isRejected.value = true;
   fetchWrapper.post(`/api/reservation/${props.id}/rejected`, {})
-
 }
+console.log(props)
 watch(() => props.id, () =>{
   isAccepted.value = false
   isRejected.value = false;
@@ -33,7 +33,7 @@ watch(() => props.id, () =>{
 
 <template>
   <div class="current_offer_item">
-    <img :src="image" alt="Image">
+    <img :src="require(`@/../images/offers/${offerId}.jpeg`)" alt="Image">
     <div class="current_offer_item_details">
       <div class="title">{{ name }}</div>
       <div class="summary_data">
@@ -42,8 +42,8 @@ watch(() => props.id, () =>{
           <div class="field">Animals: {{ (withAnimals) ? 'Yes' : 'No' }}</div>
         </div>
         <div class="details">
-          <div class="field">Date from: {{ dateFrom }}</div>
-          <div class="field">Date to: {{ dateTo }}</div>
+          <div class="field">Date from: {{ dateFrom.split('T')[0] }}</div>
+          <div class="field">Date to: {{ dateTo.split('T')[0] }}</div>
         </div>
         <div class="accept_reject_buttons" v-if="!isAccepted && !isRejected">
           <button class="accept_button" @click="onAccept">
@@ -107,6 +107,7 @@ div.details {
 div.current_offer_item {
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
   row-gap: 10px;
   margin-top: 1%;
   background-color: #E6E6E6;
@@ -148,6 +149,6 @@ img {
   flex-shrink: 0;
   align-self: center;
   margin-right: 2%;
-  margin-left: 2%;
+  margin-left: 5%;
 }
 </style>

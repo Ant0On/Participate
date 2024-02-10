@@ -19,6 +19,7 @@ async function getCurrentOffers() {
         const responseData = response.data
 
         allCurrentOffers.value = responseData.map((data) => {
+          console.log(data)
           return {
             'reservationID': data["reservation_id"],
             'location': data["country_name"] + ', ' + data["town_name"],
@@ -27,7 +28,8 @@ async function getCurrentOffers() {
             'dateFrom': data['date_from'],
             'dateTo': data['date_to'],
             'offerType': data['offer_type'],
-            'withAnimals': data['is_animal_friendly']
+            'withAnimals': data['is_animal_friendly'],
+            'offerId': data['offer_id']
           }
         })
         currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
@@ -68,7 +70,7 @@ onMounted(async () => getCurrentOffers())
       <div class="offer_items">
         <CurrentOfferItem v-for="currentOffer in currentOffers" :name="currentOffer.name" :offer-type="currentOffer.offerType"
                      :date-from="currentOffer.dateFrom" :date-to="currentOffer.dateTo" :id="currentOffer.reservationID"
-                     :with-animals="currentOffer.withAnimals"/>
+                     :with-animals="currentOffer.withAnimals" :offer-id="currentOffer.offerId"/>
       </div>
       <div class="navigation">
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"

@@ -44,7 +44,7 @@ func GetPendingReservations(c *gin.Context) {
 		Joins("JOIN host ON offer.host_id = host.id").
 		Where("host.id = ? AND reservation_state = 'pending'", hostID).
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, offer.name," + "" +
-			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name").
+			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, offer.id as offer_id").
 		Find(&pendingReservations)
 
 	if err := result.Error; err != nil {

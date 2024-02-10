@@ -50,10 +50,10 @@ function submitOffer(){
         fetchWrapper.post('/api/reservation/add ', {
           'date_from': data['dateFrom'],
           'date_to': data['dateTo'],
-          'numberOfPeople': data['numberOfPeople'],
+          'number_of_people': data['numberOfPeople'],
           'reservation_state': 'pending',
-          'CustomerId': user.ID,
-          'OfferId': props.id.value
+          'customer_id': user.ID,
+          'offer_id': parseInt(props.id)
         }).then(() =>{
           router.push('/');
         }).catch(error =>{
