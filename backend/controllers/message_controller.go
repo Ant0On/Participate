@@ -36,7 +36,7 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 
-	message.UserName = user.FirstName
+	message.Email = user.Email
 	message.CustomerID = user.ID
 	message.ChatID = uint(chatID)
 
@@ -53,7 +53,7 @@ func GetAllMessages(c *gin.Context) {
 
 	chat, err := models.GetChatByOfferId(offerID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Chat nor found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Chat not found"})
 		return
 	}
 

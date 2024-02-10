@@ -28,7 +28,7 @@ type Offer struct {
 	Discount         float64   `gorm:"not null;default: 0.00" form:"discount"`
 	HostID           uint      `gorm:"not null" form:"host_id"`
 	TownID           uint      `gorm:"not null" form:"town_id"`
-	ChatID           uint
+	ChatID           uint      `form:"chat_id"`
 	Reservations     []Reservation
 }
 

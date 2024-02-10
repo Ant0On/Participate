@@ -10,10 +10,15 @@ import (
 )
 
 func CreateChat(c *gin.Context) {
-	offerId := c.Param("id")
+	offerId := c.Param("offerID")
 	offer, err := models.GetOfferByID(offerId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "offer not found"})
+		return
+	}
+
+	if offer.OfferType != "event" {
+		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "chat is available only for events"})
 		return
 	}
 

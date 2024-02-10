@@ -2,18 +2,16 @@ package models
 
 import (
 	"fmt"
-	"time"
 
 	"gorm.io/gorm"
 )
 
 type Message struct {
 	gorm.Model
-	CustomerID uint
-	UserName   string
+	CustomerID uint   `json:"customer_id"`
+	Email      string `gorm:"size:100" json:"email"`
 	Content    string `gorm:"not null" json:"content"`
-	CreatedAt  time.Time
-	ChatID     uint
+	ChatID     uint   `json:"chat_id"`
 }
 
 func (m *Message) Save() error {
