@@ -12,6 +12,8 @@ const pageSize = 5;
 
 const allCurrentOffers = ref([])
 const currentOffers = ref([])
+const currentPage = ref(1)
+const maxPage = ref(1)
 
 async function getCurrentOffers() {
   fetchWrapper.get(`/api/host/${user.ID}/reservations/pending`)
@@ -32,33 +34,30 @@ async function getCurrentOffers() {
           }
         })
         currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
+        maxPage.value = Math.floor(allCurrentOffers.value.length / pageSize) + 1
       })
       .catch((error) =>{
 
       })
 }
 
-currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
-let currentPage = 1;
-
-let maxPage = Math.floor(allCurrentOffers.value.length / pageSize) + 1
 
 function pageBack() {
-  if (currentPage > 1) {
-    currentPage -= 1;
-    currentOffers.value = allCurrentOffers.value.slice((currentPage - 1) *pageSize, currentPage * pageSize )
+  if (currentPage.value > 1) {
+    currentPage.value -= 1;
+    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) *pageSize, currentPage.value * pageSize )
   }
 }
 
 function pageFroward() {
-  if (currentPage < maxPage) {
-    currentPage += 1;
-    currentOffers.value = allCurrentOffers.value.slice((currentPage - 1) *pageSize, currentPage * pageSize )
+  if (currentPage.value < maxPage.value) {
+    currentPage.value += 1;
+    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) *pageSize, currentPage.value * pageSize )
 
   }
 }
 
-onMounted(async () => getCurrentOffers())
+onMounted(async () => await getCurrentOffers())
 </script>
 
 <template>

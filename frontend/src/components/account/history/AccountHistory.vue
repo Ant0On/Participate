@@ -11,6 +11,8 @@ const pageSize = 5;
 
 const allHistoryItems = ref([])
 const historyItems = ref([])
+const currentPage = ref(1)
+const maxPage = ref(1)
 
 async function getHistoryItems() {
   fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
@@ -30,31 +32,28 @@ async function getHistoryItems() {
           }
         })
         historyItems.value = allHistoryItems.value.slice(0, pageSize);
+        maxPage.value = Math.floor(allHistoryItems.value.length / pageSize) + 1
       })
       .catch((error) => {
       })
 }
 
-let currentPage = 1;
-
-let maxPage = Math.floor(allHistoryItems.value.length / pageSize) + 1
-
 function pageBack() {
-  if (currentPage > 1) {
-    currentPage -= 1;
-    historyItems.value = allHistoryItems.value.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  if (currentPage.value > 1) {
+    currentPage.value -= 1;
+    historyItems.value = allHistoryItems.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
   }
 }
 
 function pageFroward() {
-  if (currentPage < maxPage) {
-    currentPage += 1;
-    historyItems.value = allHistoryItems.value.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  if (currentPage.value < maxPage.value) {
+    currentPage.value += 1;
+    historyItems.value = allHistoryItems.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
 
   }
 }
 
-onMounted(async () => getHistoryItems())
+onMounted(async () => await getHistoryItems())
 </script>
 
 <template>
