@@ -24,8 +24,8 @@ const errors = reactive({
 
 const schemaHost = Yup.object().shape({
   description: Yup.string().required('Description is required'),
-  phoneNumber: Yup.number().min(9),
-  bankAccount: Yup.number().min(16),
+  phoneNumber: Yup.number().min(9).max(15),
+  bankAccount: Yup.number().min(16).max(40),
 });
 
 async function onSubmit(){
