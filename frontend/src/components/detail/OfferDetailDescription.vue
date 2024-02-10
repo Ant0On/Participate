@@ -3,6 +3,7 @@ import {defineProps, defineEmits} from 'vue';
 import OfferDetailHeader from "@/components/detail/OfferDetailHeader.vue";
 import OfferDetailReserve from "@/components/detail/OfferDetailReserve.vue";
 import OfferDetailHost from "@/components/detail/OfferDetailHost.vue";
+import OfferDetailInformations from "@/components/detail/OfferDetailInformation.vue";
 
 const props = defineProps({
   name: '',
@@ -11,6 +12,7 @@ const props = defineProps({
   numberOfPeople: 0,
   hostId: 0,
   type: '',
+  description: '',
 })
 const emits = defineEmits(['moveToSummary'])
 
@@ -21,6 +23,8 @@ const emits = defineEmits(['moveToSummary'])
     <OfferDetailHeader :name="name" :location="location" :type="type" :numberOfPeople="numberOfPeople"/>
     <div class="line"/>
     <OfferDetailReserve @move-to-summary="$emit('moveToSummary')"/>
+    <div class="line"/>
+    <OfferDetailInformations :description="description"/>
     <div class="line"/>
     <OfferDetailHost />
   </div>
