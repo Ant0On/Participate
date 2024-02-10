@@ -32,6 +32,7 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.PUT(":id/change/first_name", ChangeFirstName)
 	customer.PUT(":id/change/last_name", ChangeLastName)
 	customer.PUT(":id/change/email", ChangeEmail)
+	customer.PUT(":id/change/picture", ChangePicture)
 	customer.POST("/offer/:id/grade", GradeReservation)
 	customer.POST(":id/promote", PromoteToHost)
 

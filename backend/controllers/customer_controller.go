@@ -122,6 +122,37 @@ func ChangeEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 
+func ChangePicture(c *gin.Context) {
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
+		return
+	}
+
+	customer, err := models.GetCustomer(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		return
+	}
+
+	var dst string
+	if dst, _, err = customer.HandleUserImageUploads(c, customer.ID, customer.Role); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
+	}
+
+	customer.ImagePath = dst
+
+	if err := customer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
+		return
+	}
+
+	customer.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+}
+
 func GradeReservation(c *gin.Context) {
 	offerID := c.Param("id")
 	if offerID == "" {
