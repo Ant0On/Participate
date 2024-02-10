@@ -77,6 +77,7 @@ async function onSubmit() {
               }
               isAddingNewOffer.value = false;
               addedNewOffer.value = true;
+              errors.apiError = null
             })
       }
   ).catch((error) => {

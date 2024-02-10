@@ -80,6 +80,7 @@ async function onSubmit() {
 
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
+    errors.apiError =null
   }).catch(error =>{
         errors.apiError = "Incorrect data!"
       }
@@ -89,6 +90,7 @@ function onCancel() {
   isSubmitMode.value = false
   customerData.value = currentCustomerData.value
   hostData.value = currentHostData.value
+  errors.apiError = null
 }
 
 function onChangeData() {
