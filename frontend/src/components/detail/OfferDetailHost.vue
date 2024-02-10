@@ -103,11 +103,14 @@ img.detail_host_image{
   align-self: center;
 
 }
-img.detail_offer_image{
+
+img.detail_offer_image {
   padding: 1%;
-  height: 20%;
-  width: 20%;
+  height: 200px;
+  width: 200px;
+  object-fit: cover;
 }
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity;
 }
