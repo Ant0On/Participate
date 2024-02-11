@@ -40,21 +40,6 @@ func SendMessage(c *gin.Context) {
 	message.CustomerID = user.ID
 	message.ChatID = uint(chatID)
 
-	var chat *models.Chat
-
-	if chat, err = models.GetChat(chatId); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	tempArr := append(chat.Messages, message)
-	chat.Messages = tempArr
-
-	if err := chat.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
 	if err := message.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

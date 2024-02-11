@@ -29,8 +29,7 @@ func CreateChat(c *gin.Context) {
 	}
 
 	chat := models.Chat{
-		OfferID:  uint(offerID),
-		Messages: []models.Message{},
+		OfferID: uint(offerID),
 	}
 
 	if err := chat.Save(); err != nil {
