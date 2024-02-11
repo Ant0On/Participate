@@ -4,6 +4,7 @@ import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import HistoryItem from "@/components/account/history/HistoryItem.vue";
+import RateOfferModal from "@/components/account/history/rate_offer/RateOfferModal.vue";
 
 const auth = useAuthStore();
 const user = auth.user;
@@ -28,7 +29,8 @@ async function getHistoryItems() {
             'offerType': data['offer_type'],
             'withAnimals': data['is_animal_friendly'],
             'reservationState': data['reservation_state'],
-            'offerId': data["offer_id"]
+            'offerId': data["offer_id"],
+            'gradeId': data["grade_id"]
           }
         })
         historyItems.value = allHistoryItems.value.slice(0, pageSize);
@@ -37,7 +39,10 @@ async function getHistoryItems() {
       .catch((error) => {
       })
 }
+function gradeOffers(){
 
+
+}
 function pageBack() {
   if (currentPage.value > 1) {
     currentPage.value -= 1;
@@ -53,7 +58,10 @@ function pageFroward() {
   }
 }
 
-onMounted(async () => await getHistoryItems())
+onMounted(async () => {
+  await getHistoryItems()
+  gradeOffers()
+})
 </script>
 
 <template>
@@ -71,6 +79,7 @@ onMounted(async () => await getHistoryItems())
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
                         @page-forward="pageFroward"/>
       </div>
+      <RateOfferModal :offers-to-grade="[]"/>
     </div>
   </div>
 
