@@ -87,3 +87,20 @@ func GetReservationsByState(state string) ([]Reservation, error) {
 	}
 	return reservations, nil
 }
+
+func CheckReservations() error {
+	var reservations []Reservation
+	if err := DB.Model(&Reservation{}).Scan(reservations).Error; err != nil {
+		return fmt.Errorf("reservations not found: %w", err)
+	}
+
+	for _, reservation := range reservations {
+		if time.Now().After(reservation.DateTo) {
+			reservation.ReservationState = "finished"
+			if err := reservation.Update(); err != nil {
+				return fmt.Errorf("reservation update: %w", err)
+			}
+		}
+	}
+	return nil
+}
