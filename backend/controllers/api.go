@@ -26,6 +26,7 @@ func RegisterRoutes(r *gin.Engine) {
 	host.POST("/discount/:offerID", DiscountOffer)
 	host.GET("/:id/reservations/pending", GetPendingReservations)
 	host.PUT(":id/change/picture", ChangeImage)
+	host.POST("/:offerID/chat/create", CreateChat)
 
 	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))
@@ -33,15 +34,13 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.PUT(":id/change/first_name", ChangeFirstName)
 	customer.PUT(":id/change/last_name", ChangeLastName)
 	customer.PUT(":id/change/email", ChangeEmail)
-	customer.PUT(":id/change/picture", ChangeImage)
+	customer.PUT(":id/change/picture", ChangePicture)
 	customer.POST("/offer/:id/grade", GradeReservation)
 	customer.POST(":id/promote", PromoteToHost)
+	customer.POST(":id/:chatId/message/send", SendMessage)
 
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)
-
-	animal := r.Group("/api/animal")
-	animal.POST("/add", AddAnimal)
 
 	payment := r.Group("/api/payment")
 	payment.POST("/get", GetAllPayments)
@@ -63,4 +62,7 @@ func RegisterRoutes(r *gin.Engine) {
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
 	protected.PUT("/offer/:id/recommend", RecommendOffer)
+
+	chat := r.Group("api/chat")
+	chat.GET("/:id/messages", GetAllMessages)
 }

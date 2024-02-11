@@ -37,6 +37,11 @@ func ConnectDatabase() {
 	}
 	fmt.Println("We are connected to the database")
 
+	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
+		&Town{}, &Offer{}, &Reservation{}, &Message{}, Chat{}); err != nil {
+		log.Fatal("Migration error:", err)
+	}
+
 	allCountries, err := GetAllCountries()
 	if err != nil {
 		log.Fatal("GetAllCountries", err)
@@ -65,10 +70,5 @@ func ConnectDatabase() {
 		if err := AddPayments(); err != nil {
 			log.Fatal("AddPayments:", err)
 		}
-	}
-
-	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &Customer{}, &Host{},
-		&Town{}, &Animal{}, &Offer{}, &Reservation{}); err != nil {
-		log.Fatal("Migration error:", err)
 	}
 }

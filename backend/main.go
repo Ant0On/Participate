@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 )
 
@@ -67,4 +68,17 @@ func main() {
 	if err := runServer(args); err != nil {
 		logger.WithError(err).Fatal("Server exits with error")
 	}
+	c := cron.New()
+	_, err := c.AddFunc("@daily", func() {
+		err := models.CheckReservations()
+		if err != nil {
+			return
+		}
+	})
+	if err != nil {
+		return
+	}
+	c.Start()
+
+	select {}
 }

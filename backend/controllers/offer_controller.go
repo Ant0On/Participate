@@ -13,7 +13,7 @@ import (
 )
 
 type discountRequest struct {
-	Discount float64 `json:"discount"`
+	Discount float64 `json:"discount" binding:"required,gte=0,lte=100"`
 }
 
 func GetOffers(c *gin.Context) {
@@ -163,11 +163,6 @@ func DiscountOffer(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&discountReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if discountReq.Discount < 0 || discountReq.Discount > 100 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "The discount must be between 0 and 100"})
 		return
 	}
 

@@ -15,7 +15,7 @@ const hostData = ref({
   description: '',
   phoneNumber: '',
   bankAccount: '',
-  confirmPassword: '',
+  password: '',
 })
 
 const errors = reactive({
@@ -24,12 +24,13 @@ const errors = reactive({
 
 const schemaHost = Yup.object().shape({
   description: Yup.string().required('Description is required'),
-  phoneNumber: Yup.number().min(9).max(15),
-  bankAccount: Yup.number().min(16).max(40),
+  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters'),
+  bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters'),
 });
 
 async function onSubmit(){
   await schemaHost.validate(hostData.value).then(async () => {
+    console.log(hostData.value)
     await fetchWrapper.post(`/api/customer/${user.ID}/promote`, {
       description: hostData.value.description,
       phone_number: hostData.value.phoneNumber,
@@ -37,8 +38,9 @@ async function onSubmit(){
       password: hostData.value.password,
     })
     alert("Soon you will be logged out. Please log in again!")
-    auth.logout()
+    await auth.logout()
   }).catch(error =>{
+    console.log(error)
     errors.apiError = "Incorrect data!"
   })
 }
