@@ -32,7 +32,7 @@ function nextOffer(){
 <style scoped>
 div.data{
   background-color: white;
-  height: 40%;
+  height: max(40%, 350px);
   width: 30%;
 }
 div.modal_wrapper {
@@ -57,6 +57,6 @@ div.modal_wrapper {
 
 .modal-fade-enter-active,
 .modal-fade-leave-active {
-  transition: 0.25s ease all;
+  transition: 0.5s ease all;
 }
 </style>

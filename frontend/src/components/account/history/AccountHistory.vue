@@ -14,6 +14,7 @@ const allHistoryItems = ref([])
 const historyItems = ref([])
 const currentPage = ref(1)
 const maxPage = ref(1)
+const offerToGrade = ref([])
 
 async function getHistoryItems() {
   fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
@@ -40,8 +41,7 @@ async function getHistoryItems() {
       })
 }
 function gradeOffers(){
-
-
+  offerToGrade.value = historyItems.value.filter((item) => typeof item.gradeId === "undefined")
 }
 function pageBack() {
   if (currentPage.value > 1) {
@@ -79,7 +79,7 @@ onMounted(async () => {
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
                         @page-forward="pageFroward"/>
       </div>
-      <RateOfferModal :offers-to-grade="[{id:1 , value: 'aaa'}, {id:2 , value: 'bbb'}]"/>
+      <RateOfferModal :offers-to-grade="offerToGrade"/>
     </div>
   </div>
 

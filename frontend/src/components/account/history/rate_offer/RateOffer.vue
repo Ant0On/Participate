@@ -1,5 +1,5 @@
 <script setup>
-import {defineEmits, defineProps, onMounted} from 'vue';
+import {defineEmits, defineProps, computed} from 'vue';
 import StarRating from 'vue-star-rating';
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
@@ -9,31 +9,69 @@ const props = defineProps({
 const emits = defineEmits(['nextOffer'])
 
 function updateRating(rating){
-  emits('nextOffer')
-  // fetchWrapper.post(`/api/customer/offer/${props.offerData.ID}/grade`, {
-  //
-  // }).then(()=>{
-  //   emits('nextOffer')
-  // }).catch(errors => {
-  //
-  // })
+  fetchWrapper.post(`/api/customer/offer/${props.offerData.value.offerId}/grade`, {
+      count: rating
+  }).then(()=>{
+    emits('nextOffer')
+  }).catch(errors => {
+    emits('nextOffer')
+  })
 }
-onMounted(async ()=>{
 
+const isImageSource = computed(() =>{
+  try{
+    require(`@/../images/offers/${props.offerData.value.offerId}.jpeg`)
+    return true
+  }
+  catch{
+    return false
+  }
 })
 
 </script>
 
 <template>
-<div class="offer_rate">
-  <p class="header">Rate this offer:</p>
-  <div class="offer_rate_description">
-    {{ offerData.value }}
-  </div>
-  <star-rating :show-rating="false" @update:rating="updateRating"></star-rating>
-</div>
+  <Transition name="fade">
+    <div :key="offerData.value.offerId" class="offer_rate">
+      <p class="header">Rate this offer:</p>
+      <div class="offer_rate_description">
+        <p class="offer_name">{{ offerData.value.name }}</p>
+        <img v-if="isImageSource" :src=" require(`@/../images/offers/${offerData.value.offerId}.jpeg`)" alt="Image"/>
+        <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
+        <star-rating :show-rating="false" @update:rating="updateRating"></star-rating>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <style scoped>
+img{
+  height: 40%;
+  width: 40%;
+  border-radius: 50%;
+}
+div.offer_rate_description{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+p {
+  color: #000000;
+  font-family: "Poppins", Helvetica;
+  font-size: 1.4rem;
+  padding: 2%;
+  margin-top: 2%;
+  font-weight: 400;
+  text-align: center;
 
+}
+p.offer_name {
+  font-size: 1rem;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
 </style>
