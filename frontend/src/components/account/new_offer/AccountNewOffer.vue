@@ -78,7 +78,9 @@ async function onSubmit() {
               isAddingNewOffer.value = false;
               addedNewOffer.value = true;
               errors.apiError = null
-            })
+            }).catch(error => {
+              errors.apiError = "Something went wrong"
+        })
       }
   ).catch((error) => {
     errors.apiError = "A problem occurred during addition of an offer!"

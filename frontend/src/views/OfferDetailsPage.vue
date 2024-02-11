@@ -25,10 +25,16 @@ function createChatHost() {
     console.error('You are not the owner of this offer!')
     return
   }
-  fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
-        showChat.value = true
-      }
-  ).catch()
+  if (isChatAlreadyCreated.value) {
+    openChatCustomer()
+  }else {
+    fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
+          isChatAlreadyCreated.value = true;
+          showChat.value = true
+          window.location.reload();
+        }
+    ).catch()
+  }
 }
 
 const email = ref(user.Email);
@@ -113,9 +119,10 @@ onMounted(async () => {
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
       <OfferDetailSummary :price="offer.price" :id="id" v-else/>
       <ChatButton v-if="user.Role === 'host' && type === 'events'" :is-host="true"
-                  :is-chat-already-created=isChatAlreadyCreated @join-chat="createChatHost"/>
+                  :is-chat-already-created=!isChatAlreadyCreated @click="createChatHost"/>
       <ChatButton v-else-if="user.Role === 'customer' && type === 'events'" :is-host="false"
                   :is-chat-already-created=isChatAlreadyCreated @join-chat="openChatCustomer"/>
+
       <ChatPopup v-if="showChat" :email="email" :userID="userID" :offerID="id" :chatID="chatID"
                  @close-chat="closeChat"/>
     </div>
