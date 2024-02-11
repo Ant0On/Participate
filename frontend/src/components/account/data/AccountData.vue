@@ -58,7 +58,9 @@ async function onSubmit() {
         user.Description = hostData.value.Description
         user.PhoneNumber = hostData.value.PhoneNumber
         user.BankAccount = hostData.value.BankAccount
-      })
+      }).catch((hostErrors) => {
+        errors.apiError = formatErrors(hostErrors.errors);
+      });
 
     }
     isSubmitMode.value = false;
@@ -81,11 +83,20 @@ async function onSubmit() {
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
     errors.apiError =null
-  }).catch(error =>{
-        errors.apiError = "Incorrect data!"
-      }
-  )
+  }).catch((customerErrors) => {
+    errors.apiError = formatErrors(customerErrors.errors);
+  })
 }
+
+function formatErrors(validationErrors) {
+  let errorMessage = "Incorrect data! Please check the following errors:";
+  for (const field in validationErrors) {
+    errorMessage += `\n ${validationErrors[field]}`;
+  }
+  return errorMessage;
+}
+
+
 function onCancel() {
   isSubmitMode.value = false
   customerData.value = currentCustomerData.value

@@ -24,13 +24,18 @@ const errors = reactive({
 
 const schemaHost = Yup.object().shape({
   description: Yup.string().required('Description is required'),
-  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters'),
-  bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters'),
+  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
+  bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
+  password: Yup.string()
+      .required('Password is required')
+      .min(8, 'Password must be at least 8 characters')
+      .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
+      .matches(/\d/, 'Password must contain at least one digit')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
 });
 
 async function onSubmit(){
   await schemaHost.validate(hostData.value).then(async () => {
-    console.log(hostData.value)
     await fetchWrapper.post(`/api/customer/${user.ID}/promote`, {
       description: hostData.value.description,
       phone_number: hostData.value.phoneNumber,
@@ -40,9 +45,12 @@ async function onSubmit(){
     alert("Soon you will be logged out. Please log in again!")
     await auth.logout()
   }).catch(error =>{
-    console.log(error)
-    errors.apiError = "Incorrect data!"
-  })
+    console.log(error);
+    errors.apiError = "Incorrect data! Please check the following errors:";
+    for (const field in error.errors) {
+      errors.apiError += `\n- ${error.errors[field]}`;
+    }
+  });
 }
 </script>
 
