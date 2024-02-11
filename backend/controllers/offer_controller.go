@@ -13,7 +13,7 @@ import (
 )
 
 type discountRequest struct {
-	Discount float64 `json:"discount" binding:"required;gte=0,lte=100"`
+	Discount float64 `json:"discount" binding:"required,gte=0,lte=100"`
 }
 
 func GetOffers(c *gin.Context) {
