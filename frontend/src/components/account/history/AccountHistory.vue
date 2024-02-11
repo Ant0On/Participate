@@ -14,6 +14,8 @@ const historyItems = ref([])
 const currentPage = ref(1)
 const maxPage = ref(1)
 
+const error = ref(null);
+
 async function getHistoryItems() {
   fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
       .then((response) => {
@@ -35,6 +37,8 @@ async function getHistoryItems() {
         maxPage.value = Math.floor(allHistoryItems.value.length / pageSize) + 1
       })
       .catch((error) => {
+        error.value = 'Failed to fetch history items. Please try again later.';
+
       })
 }
 
@@ -61,6 +65,7 @@ onMounted(async () => await getHistoryItems())
   <div class="account_history">
     <p>Previously booked offers</p>
     <div class="items_list">
+      <div v-if="error" class="error-message">{{ error }}</div>
       <div class="history_items">
         <HistoryItem v-for="historyItem in historyItems" :name="historyItem.name" :offer-type="historyItem.offerType"
                      :date-from="historyItem.dateFrom" :date-to="historyItem.dateTo"
@@ -110,6 +115,12 @@ p {
   padding-bottom: 2%;
   font-weight: 400;
   align-self: center;
+}
+
+div.error-message {
+  color: red;
+  padding: 1%;
+  text-align: center;
 }
 
 </style>
