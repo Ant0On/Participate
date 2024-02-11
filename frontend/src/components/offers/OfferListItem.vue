@@ -18,7 +18,7 @@ function onItemClicked() {
 
 const isImageSource = computed(() =>{
   try{
-    require(`@/../images/offers/${props.id}_0.jpeg`)
+    require(`@/../images/offers/${props.id}/${props.id}_0.jpeg`)
     return true
   }
   catch{

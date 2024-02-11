@@ -60,7 +60,7 @@ async function onSubmit() {
               offer_type: offerTypesId[newOffer.value.offerType],
               host_id: user.ID,
               town_id: data.town.ID,
-              image: imageFile
+              images: imageFile
             },
             "multipart/form-data")
             .then(() => {

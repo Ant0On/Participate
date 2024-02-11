@@ -106,8 +106,8 @@ img.detail_host_image{
 
 img.detail_offer_image {
   padding: 1%;
-  height: 200px;
-  width: 200px;
+  height: 250px;
+  width: 250px;
   object-fit: cover;
 }
 

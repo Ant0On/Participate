@@ -49,7 +49,7 @@ func SendMessage(c *gin.Context) {
 }
 
 func GetAllMessages(c *gin.Context) {
-	offerID := c.Param("id")
+	offerID := c.Param("offerID")
 
 	chat, err := models.GetChatByOfferId(offerID)
 	if err != nil {

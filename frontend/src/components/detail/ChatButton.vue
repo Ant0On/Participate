@@ -1,22 +1,19 @@
-<!-- ChatButton.vue -->
-<template>
-  <button class="chat-button" @click="joinChat">Join Chat</button>
-</template>
+<script setup>
+import { defineProps, defineEmits } from 'vue';
 
-<script>
-export default {
-  props: {
-    type: String,
-    id: String,
-  },
-  methods: {
-    joinChat() {
-      // Emit an event to notify the parent component to open the chat
-      this.$emit('join-chat', { type: this.type, id: this.id });
-    },
-  },
-};
+const props = defineProps({
+  type: String,
+  id: String,
+  isHost: Boolean,
+  isChatAlreadyCreated: Boolean
+})
+
+const emits = defineEmits(['joinChat'])
 </script>
+
+<template>
+  <button class="chat-button" :disabled="isChatAlreadyCreated" @click="$emit('joinChat')">{{ (isHost)? 'Create Chat' : 'Join Chat'}}</button>
+</template>
 
 <style scoped>
 .chat-button {
@@ -30,5 +27,6 @@ export default {
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
+  border-radius: 10px;
 }
 </style>

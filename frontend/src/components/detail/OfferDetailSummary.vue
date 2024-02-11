@@ -25,7 +25,6 @@ const errors = reactive({
 const props = defineProps({
   id: '',
   price: '',
-  image: '',
 })
 const schema = Yup.object().shape({
   dateFrom: Yup.date().required('Starting date is required'),
@@ -96,9 +95,6 @@ function submitOffer(){
           </button>
         </div>
       </div>
-    </div>
-    <div class="offer_detail_summary_image">
-      <img class="offer_detail_summary_image" :src="image" alt="Offer image">
     </div>
   </div>
 </div>

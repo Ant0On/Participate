@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps, ref, onMounted, computed} from 'vue';
+import {computed, defineProps, onMounted, ref} from 'vue';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
@@ -7,18 +7,31 @@ import OfferDetailDescription from "@/components/detail/OfferDetailDescription.v
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import ChatButton from "@/components/detail/ChatButton.vue";
 import ChatPopup from "@/components/detail/ChatPopup.vue";
+import {useAuthStore} from "@/stores/auth.store";
+
+const auth = useAuthStore();
+const user = auth.user;
 
 const props = defineProps({
   type: String,
   id: String,
+  chatID: String
 })
-
+const isChatAlreadyCreated = ref(false)
 const showChat = ref(false);
 
-function openChat({ type, id }) {
-  // Add your logic to join the chat based on the type and id
-  // For now, just toggle the showChat ref
-  showChat.value = true;
+function createChatHost() {
+  fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
+        showChat.value = true
+      }
+  ).catch()
+}
+
+const email = ref(user.Email);
+const userID = ref(user.ID);
+
+function openChatCustomer() {
+  showChat.value = true
 }
 
 function closeChat() {
@@ -38,20 +51,22 @@ const hostData = ref({
   detail: '',
   imagePath: '',
 })
+
 const isDescription = ref(true)
 const backgroundImage = computed(() => `url(${require(`@/../images/offers/${props.id}/${props.id}_0.jpeg`)})`);
+
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.id}`)
 
   const responseData = response.data
   offer.value = {
-      'hostID': responseData["host_id"],
-      'location': responseData["country_name"] + ', ' + responseData["town_name"],
-      'description': responseData["description"],
-      'name': responseData["name"],
-      'price': responseData["price"],
-      'numberOfPeople': responseData["max_people"],
-    }
+    'hostID': responseData["host_id"],
+    'location': responseData["country_name"] + ', ' + responseData["town_name"],
+    'description': responseData["description"],
+    'name': responseData["name"],
+    'price': responseData["price"],
+    'numberOfPeople': responseData["max_people"],
+  }
 
   const response_host = await fetchWrapper.get(`/api/host/${offer.value.hostID}`)
 
@@ -62,8 +77,24 @@ async function getOfferDetails() {
   }
 }
 
+async function doesChatExist() {
+  return fetchWrapper.get(`/api/chat/offer/${props.id}`).then((response) => {
+    if (!response) {
+      isChatAlreadyCreated.value = false
+    } else {
+      props.chatID = response.data["ID"]
+      isChatAlreadyCreated.value = true
+    }
+  }).catch(error => {
+    console.log(error)
+  })
+}
+
+doesChatExist().then(response => console.log(response))
+
 onMounted(async () => {
   await getOfferDetails();
+  await doesChatExist();
 });
 
 </script>
@@ -73,12 +104,17 @@ onMounted(async () => {
     <NavBar :currentPage="type"/>
     <div class="item_detail">
       <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
-                              :numberOfPeople="offer.numberOfPeople" :host_first_name="hostData.firstName" :offer_id="id"
-                             :host_detail="hostData.detail" :imagePath="hostData.imagePath"
+                              :numberOfPeople="offer.numberOfPeople" :host_first_name="hostData.firstName"
+                              :offer_id="id"
+                              :host_detail="hostData.detail" :imagePath="hostData.imagePath"
                               v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
-      <OfferDetailSummary :price="offer.price" :image="require(`@/../images/offers/${id}.jpeg`)" :id="id" v-else/>
-      <ChatButton :type="type" :id="id" @join-chat="openChat"/>
-      <ChatPopup v-if="showChat" @close-chat="closeChat"/>
+      <OfferDetailSummary :price="offer.price" :id="id" v-else/>
+      <ChatButton v-if="user.Role === 'host' && type === 'events'" :is-host="true"
+                  :is-chat-already-created=isChatAlreadyCreated @join-chat="createChatHost"/>
+      <ChatButton v-else-if="user.Role === 'customer' && type === 'events'" :is-host="false"
+                  :is-chat-already-created=isChatAlreadyCreated @join-chat="openChatCustomer"/>
+      <ChatPopup v-if="showChat" :email="email" :userID="userID" :offerID="id" :chatID="chatID"
+                 @close-chat="closeChat"/>
     </div>
   </div>
 </template>
