@@ -17,20 +17,21 @@ const totalPages = ref(0);
 
 async function getCurrentEvents(page) {
   const response = await fetchWrapper.get(`/api/offers?type=event&page=${page}`);
-  const responseData = response.data;
+  const responseData = response?.data || [] ;
+  if (responseData){
+    events.value = responseData.map((data) => {
+      return {
+        'offerId': data["offer_id"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'name': data["name"],
+        'price': data["price"],
+        'maxPeople': data["max_people"]
+      };
+    });
 
-  events.value = responseData.map((data) => {
-    return {
-      'offerId': data["offer_id"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'name': data["name"],
-      'price': data["price"],
-      'maxPeople': data["max_people"]
-    };
-  });
-
-  totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages;
+  }
 }
 
 function getNewEvents(location, dateFrom, dateTo, numberOfPeople) {
@@ -84,20 +85,33 @@ watch(currentPage, (newPage) => {
     <OfferSearch offer_type="Events" v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
-    <div class="offer_items">
+    <div v-if="events.length > 0" class="offer_items">
       <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
                      :name="event.name" :price="event.price"
                      :max_people="event.maxPeople" type="events" :id="event.offerId"/>
     </div>
-    <div class="pagination">
+    <div v-else class="no_offers">
+      <p class="no_offer_placeholder"> Currently there are no offers of given type!  </p>
+    </div>
+    <div v-if="totalPages > 1" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span v-if="totalPages > 0">Page {{ currentPage }} of {{ totalPages }}</span>
+      <span >Page {{ currentPage }} of {{ totalPages }}</span>
       <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>
 </template>
 
 <style scoped>
+div.no_offers{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10%;
+}
+p.no_offer_placeholder{
+  text-align: center;
+}
+
 div.event_page {
   display: flex;
   flex-direction: column;

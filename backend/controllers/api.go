@@ -23,21 +23,23 @@ func RegisterRoutes(r *gin.Engine) {
 	host.POST("/create", CreateOffer)
 	host.DELETE("/delete/:id", DeleteOffer)
 	host.PUT("/update/:id", UpdateOffer)
+	host.POST("/discount/:offerID", DiscountOffer)
+	host.GET("/:id/reservations/pending", GetPendingReservations)
+	host.POST("/:offerID/chat/create", CreateChat)
 
-	customer := r.Group("api/customer/:id")
+	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))
-	customer.POST("/change/first_name", ChangeFirstName)
-	customer.POST("/change/last_name", ChangeLastName)
-	customer.POST("/change/email", ChangeEmail)
+	customer.GET(":id/reservations/history", GetReservationsHistory)
+	customer.PUT(":id/change/first_name", ChangeFirstName)
+	customer.PUT(":id/change/last_name", ChangeLastName)
+	customer.PUT(":id/change/email", ChangeEmail)
+	customer.PUT(":id/change/picture", ChangePicture)
+	customer.POST("/offer/:id/grade", GradeReservation)
+	customer.POST(":id/promote", PromoteToHost)
+	customer.POST(":id/:chatId/message/send", SendMessage)
 
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)
-
-	animal := r.Group("/api/animal")
-	animal.POST("/add", AddAnimal)
-
-	discount := r.Group("/api/discount")
-	discount.POST("/add", AddDiscount)
 
 	payment := r.Group("/api/payment")
 	payment.POST("/get", GetAllPayments)
@@ -46,18 +48,20 @@ func RegisterRoutes(r *gin.Engine) {
 	town.POST("/add", AddTown)
 	town.GET("/get/:id", GetTownByID)
 
-	townType := r.Group("/api/town_type")
-	townType.GET("/get", GetAllTownTypes)
-
 	grade := r.Group("/api/grade")
 	grade.GET("/get", GetAllGrades)
 
 	reservation := r.Group("/api/reservation")
 	reservation.GET("/get/:id", GetReservationById)
+	reservation.GET("/:state", GetReservationsByState)
 	reservation.POST("/add", AddReservation)
 	reservation.POST("/:id/:state", ChangeReservationState)
 
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
+	protected.PUT("/offer/:id/recommend", RecommendOffer)
+
+	chat := r.Group("api/chat")
+	chat.GET("/:id/messages", GetAllMessages)
 }

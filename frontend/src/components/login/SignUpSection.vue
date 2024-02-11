@@ -23,17 +23,20 @@ async function onSubmit() {
   await schema.validate(signUpData.value).then(() => {
     return authStore.signUp(signUpData.value.Name, signUpData.value.Login, signUpData.value.Password)
   }).catch(error => {
-    console.log(error)
           errors.apiError = "Incorrect sign up data!"
       }
   )
 }
 
 const schema = Yup.object().shape({
-  Name: Yup.string().required('Name is required'),
+  Name: Yup.string().required('Name is requred'),
   Login: Yup.string().required('Email is required'),
-  Password: Yup.string().required('Password is required')
+  Password: Yup.string().when('Login', {
+    is: (value) => value !== '' || typeof value !== 'undefined',
+    then: schema => schema.required('Password is required')
+  } )
 });
+
 
 </script>
 

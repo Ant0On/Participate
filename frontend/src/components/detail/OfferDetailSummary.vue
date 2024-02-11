@@ -48,12 +48,12 @@ function submitOffer(){
   })
       .then((data)=>{
         fetchWrapper.post('/api/reservation/add ', {
-          'dateFrom': data['dateFrom'],
-          'dateTo': data['dateTo'],
-          'numberOfPeople': data['numberOfPeople'],
+          'date_from': data['dateFrom'],
+          'date_to': data['dateTo'],
+          'number_of_people': data['numberOfPeople'],
           'reservation_state': 'pending',
-          'CustomerId': user.ID,
-          'OfferId': props.id.value
+          'customer_id': user.ID,
+          'offer_id': parseInt(props.id)
         }).then(() =>{
           router.push('/');
         }).catch(error =>{
@@ -88,7 +88,7 @@ function submitOffer(){
       </div>
       <div class="offer_detail_payment">
         <div class="offer_detail_price">
-          Price: {{ price }}
+          Price: {{ price }} $
         </div>
         <div class="offer_detail_summary_book_button">
           <button class="book" @click="submitOffer()">

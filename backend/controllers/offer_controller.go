@@ -12,6 +12,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type discountRequest struct {
+	Discount float64 `json:"discount" binding:"required,gte=0,lte=100"`
+}
+
 func GetOffers(c *gin.Context) {
 	var offersWithLocation []DTO.OfferWithLocation
 	var result *gorm.DB
@@ -146,6 +150,32 @@ func UpdateOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
 }
 
+func DiscountOffer(c *gin.Context) {
+	offerID := c.Param("offerID")
+
+	var offer models.Offer
+	var discountReq discountRequest
+
+	if err := models.DB.First(&offer, offerID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&discountReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offer.Discount = discountReq.Discount
+
+	if err := offer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign discount"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
+}
+
 func GetRecommendedOffers(c *gin.Context) {
 	var recommendedOffers []DTO.OfferWithLocation
 	var result *gorm.DB
@@ -156,7 +186,7 @@ func GetRecommendedOffers(c *gin.Context) {
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("is_recommended = ?", true).
-		Select("offer.id as offer_id, offer.name, offer.description, offer.images_path, offer.price, offer.max_people, offer.is_animal_friendly," +
+		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
 		Find(&recommendedOffers)
 

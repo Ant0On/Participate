@@ -56,6 +56,7 @@ func RegisterCustomer(c *gin.Context) {
 		}
 	}
 
+	customer.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "customer": customer})
 }
 
@@ -88,6 +89,7 @@ func RegisterHost(c *gin.Context) {
 		}
 	}
 
+	host.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "registration success!", "host": host})
 }
 
