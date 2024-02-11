@@ -12,6 +12,17 @@ const props = defineProps({
   width: {
     type: String,
     default: "100%"
+  },
+  min: {
+    type: Number,
+    default: 1
+  },
+  max: {
+    type: Number,
+  },
+  alignItems: {
+    type: String,
+    default: 'flex-start'
   }
 })
 
@@ -21,7 +32,7 @@ const emits = defineEmits(['update:modelValue'])
 <template>
   <div class="text_input">
     <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue" type="number" min="1"
+    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue" type="number" :min="min" :max="max"
            @input="$emit('update:modelValue', $event.target.value)"/>
   </div>
 </template>
@@ -36,7 +47,7 @@ input[type=number]{
 }
 .text_input {
   display: flex;
-  align-items: flex-start;
+  align-items: v-bind(alignItems);
   flex-direction: column;
   position: relative;
   width: 100%;
