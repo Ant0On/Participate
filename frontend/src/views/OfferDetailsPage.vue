@@ -21,7 +21,10 @@ const isChatAlreadyCreated = ref(false)
 const showChat = ref(false);
 
 function createChatHost() {
-  console.log('Hello from host')
+  if (user.Role === 'host' && offer.value.hostID !== user.ID) {
+    console.error('You are not the owner of this offer!')
+    return
+  }
   fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
         showChat.value = true
       }
@@ -33,7 +36,6 @@ const userID = ref(user.ID);
 const chatID = toRef(props.chatID)
 
 function openChatCustomer() {
-  console.log('HELLO')
   showChat.value = true
 }
 
@@ -82,7 +84,6 @@ async function getOfferDetails() {
 
 async function doesChatExist() {
   return fetchWrapper.get(`/api/chat/offer/${props.id}`).then((response) => {
-    console.log(response)
     if (!response) {
       isChatAlreadyCreated.value = false
     } else {
@@ -93,8 +94,6 @@ async function doesChatExist() {
     console.log(error)
   })
 }
-
-doesChatExist().then(response => console.log(response))
 
 onMounted(async () => {
   await getOfferDetails();
