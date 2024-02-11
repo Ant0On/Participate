@@ -24,10 +24,10 @@ type Offer struct {
 	MaxPeople        int       `gorm:"not null" form:"max_people" binding:"required,gt=0"`
 	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
 	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
-	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type"`
+	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type" binding:"required,oneof=activity event accommodation"`
 	Discount         float64   `gorm:"not null;default: 0.00" form:"discount"`
-	HostID           uint      `gorm:"not null" form:"host_id"`
-	TownID           uint      `gorm:"not null" form:"town_id"`
+	HostID           uint      `gorm:"not null" form:"host_id" binding:"required"`
+	TownID           uint      `gorm:"not null" form:"town_id" binding:"required"`
 	ChatID           uint      `form:"chat_id"`
 	Reservations     []Reservation
 }
