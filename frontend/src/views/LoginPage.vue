@@ -11,6 +11,7 @@ import AccountHistory from "@/components/account/history/AccountHistory.vue";
 import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
 import AccountCurrentOffer from "@/components/account/current_offer/CurrentOffer.vue";
 import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
+import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
 
 const loginPage = ref(true)
 
@@ -47,6 +48,7 @@ function onPageChange(page){
         <AccountNav @page-changed="onPageChange"/>
         <div class="data">
           <AccountData v-if="currentPage === 'Account Information'"/>
+          <AccountMyOffers v-else-if="currentPage === 'My Offers'"/>
           <AccountHistory v-else-if="currentPage === 'History'"/>
           <AccountNewOffer v-else-if="currentPage === 'New Offer'"/>
           <AccountBecomeHost v-else-if="currentPage === 'Become a host'"/>
