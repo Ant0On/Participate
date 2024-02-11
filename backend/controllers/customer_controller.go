@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"strconv"
@@ -275,8 +274,6 @@ func GetReservationsHistory(c *gin.Context) {
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, reservation.grade_id, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
 		Find(&finishedReservations)
-
-	fmt.Println(finishedReservations)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

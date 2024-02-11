@@ -21,7 +21,6 @@ async function getHistoryItems() {
   await fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
       .then((response) => {
         const responseData = response.data
-        console.log(responseData)
         allHistoryItems.value = responseData.map((data) => {
           return {
             'location': data["country_name"] + ', ' + data["town_name"],
@@ -47,7 +46,6 @@ async function getHistoryItems() {
 function gradeOffers(){
   const allFinishedItems =  allHistoryItems.value.filter((item) => item.gradeId === 0 && item.reservationState === 'finished')
   offerToGrade.value =  JSON.parse(JSON.stringify(allFinishedItems.map((item) => JSON.parse(JSON.stringify(item)))))
-  console.log(offerToGrade.value)
 }
 function pageBack() {
   if (currentPage.value > 1) {
