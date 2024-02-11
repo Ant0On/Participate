@@ -197,3 +197,16 @@ func GetRecommendedOffers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": recommendedOffers})
 }
+
+func GetOffersForHost(c *gin.Context) {
+	hostId := c.Param("id")
+
+	offers, err := models.GetOffersForHost(hostId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offers})
+
+}
