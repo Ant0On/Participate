@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, ref } from 'vue';
+import { defineProps, computed, ref } from 'vue';
 import RateOffer from "@/components/account/history/rate_offer/RateOffer.vue";
 
 const props = defineProps({
@@ -8,21 +8,22 @@ const props = defineProps({
     default: []
   }
 })
-const isModalVisible = ref(false);
 const offerToGradeIterator = ref(props.offersToGrade[Symbol.iterator]())
 const offerData = ref(offerToGradeIterator.value.next())
+const isModalVisible = ref(typeof offerData.value.value !== "undefined")
 
 function nextOffer(){
- offerData.value = offerToGradeIterator.value.next()
+  offerData.value = offerToGradeIterator.value.next()
+  isModalVisible.value = typeof offerData.value.value !== "undefined"
 }
 
 </script>
 <template>
   <Teleport to="body">
     <Transition name="modal-fade">
-      <div v-if="true" class="modal_wrapper">
+      <div :key="offerData.id" v-if="isModalVisible" class="modal_wrapper">
         <div class="data">
-          <RateOffer :offerData="offerData" @next-offer="nextOffer"/>
+            <RateOffer :offerData="offerData" @next-offer="nextOffer"/>
         </div>
       </div>
     </Transition>

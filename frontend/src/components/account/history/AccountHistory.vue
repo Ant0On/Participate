@@ -79,7 +79,7 @@ onMounted(async () => {
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
                         @page-forward="pageFroward"/>
       </div>
-      <RateOfferModal :offers-to-grade="[]"/>
+      <RateOfferModal :offers-to-grade="[{id:1 , value: 'aaa'}, {id:2 , value: 'bbb'}]"/>
     </div>
   </div>
 
