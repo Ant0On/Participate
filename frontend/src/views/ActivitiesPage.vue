@@ -86,10 +86,13 @@ watch(currentPage, (newPage) => {
     <OfferSearch offer_type="Activities" v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
-    <div class="offer_items">
+    <div v-if="activities.length > 0" class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
                      :name="activity.name" :price="activity.price"
                      :max_people="activity.maxPeople" type="activities" :id="activity.offerId"/>
+    </div>
+    <div v-else class="no_offers">
+      <p class="no_offer_placeholder"> Currently there are no offers of given type!  </p>
     </div>
     <div v-if="totalPages > 1" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
@@ -100,6 +103,15 @@ watch(currentPage, (newPage) => {
 </template>
 
 <style scoped>
+div.no_offers{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10%;
+}
+p.no_offer_placeholder{
+  text-align: center;
+}
 div.activities_page {
   display: flex;
   flex-direction: column;
