@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, onMounted, ref} from 'vue';
+import {computed, defineProps, onMounted, ref, toRef} from 'vue';
 
 import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
@@ -21,6 +21,7 @@ const isChatAlreadyCreated = ref(false)
 const showChat = ref(false);
 
 function createChatHost() {
+  console.log('Hello from host')
   fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
         showChat.value = true
       }
@@ -29,8 +30,10 @@ function createChatHost() {
 
 const email = ref(user.Email);
 const userID = ref(user.ID);
+const chatID = toRef(props.chatID)
 
 function openChatCustomer() {
+  console.log('HELLO')
   showChat.value = true
 }
 
@@ -79,10 +82,11 @@ async function getOfferDetails() {
 
 async function doesChatExist() {
   return fetchWrapper.get(`/api/chat/offer/${props.id}`).then((response) => {
+    console.log(response)
     if (!response) {
       isChatAlreadyCreated.value = false
     } else {
-      props.chatID = response.data["ID"]
+      chatID.value = response.data["ID"]
       isChatAlreadyCreated.value = true
     }
   }).catch(error => {

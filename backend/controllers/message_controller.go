@@ -40,6 +40,21 @@ func SendMessage(c *gin.Context) {
 	message.CustomerID = user.ID
 	message.ChatID = uint(chatID)
 
+	var chat *models.Chat
+
+	if chat, err = models.GetChat(chatId); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	tempArr := append(chat.Messages, message)
+	chat.Messages = tempArr
+
+	if err := chat.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	if err := message.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -53,7 +68,7 @@ func GetAllMessages(c *gin.Context) {
 
 	chat, err := models.GetChatByOfferId(offerID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Chat not found"})
+		c.JSON(http.StatusNoContent, gin.H{"error": "Chat not found"})
 		return
 	}
 
@@ -64,7 +79,7 @@ func GetAllMessages(c *gin.Context) {
 	}
 
 	if messages == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Messages not found"})
+		c.JSON(http.StatusNoContent, gin.H{"error": "Messages not found"})
 		return
 	}
 

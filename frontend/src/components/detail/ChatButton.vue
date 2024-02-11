@@ -12,7 +12,7 @@ const emits = defineEmits(['joinChat'])
 </script>
 
 <template>
-  <button class="chat-button" :disabled="isChatAlreadyCreated" @click="$emit('joinChat')">{{ (isHost)? 'Create Chat' : 'Join Chat'}}</button>
+  <button class="chat-button" :disabled="(isChatAlreadyCreated && isHost) || (!isChatAlreadyCreated && !isHost)" @click="$emit('joinChat')">{{ isHost ? 'Create Chat' : 'Join Chat' }}</button>
 </template>
 
 <style scoped>

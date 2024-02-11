@@ -1,9 +1,12 @@
 <script setup>
-import {defineProps, defineEmits, onMounted} from 'vue';
+import {defineProps, defineEmits, onMounted, toRef} from 'vue';
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const props = defineProps({
-  messages: [],
+  messages: {
+    type: Array,
+    default: () => []
+  },
   newMessage: '',
   email: '',
   offerID: 0,
@@ -11,26 +14,32 @@ const props = defineProps({
   chatID: 0
 })
 
+const messages = toRef(props.messages)
+const newMessage = toRef(props.newMessage)
 const emits = defineEmits(['closeChat'])
 
 function sendMessage() {
-  if (props.newMessage.trim() !== '') {
-    props.messages.push(`${props.email}: ${props.newMessage}`);
-    fetchWrapper.post(`/api/customer/${props.userID}/${props.offerID}/message/send`, {
+  if (newMessage.value.trim() !== '') {
+    props.messages.push(`${props.email}: ${newMessage.value}`);
+    fetchWrapper.post(`/api/customer/${props.userID}/${props.chatID}/message/send`, {
       'customer_id': props.userID,
       'email': props.email,
-      'content': props.newMessage,
+      'content': newMessage.value,
       'chat_id': props.chatID
     }).catch()
-    props.newMessage = '';
+    newMessage.value = '';
   }
 }
 
-onMounted(async()=> {
-  await fetchWrapper.get(`/api/chat/${props.chatID}/messages`).then(response => {
-    props.messages = response.data
-  })
-})
+onMounted(async () => {
+  try {
+    const response = await fetchWrapper.get(`/api/chat/${props.chatID}/messages`);
+    console.log('old msgs', response)
+    messages.value = response.data || [];
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }
+});
 
 </script>
 <template>
