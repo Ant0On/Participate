@@ -17,6 +17,8 @@ function nextOffer(){
   isModalVisible.value = typeof offerData.value.value !== "undefined"
 }
 
+console.log(props.offersToGrade)
+
 </script>
 <template>
   <Teleport to="body">

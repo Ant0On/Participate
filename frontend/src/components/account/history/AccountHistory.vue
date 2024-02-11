@@ -17,9 +17,11 @@ const maxPage = ref(1)
 const offerToGrade = ref([])
 
 async function getHistoryItems() {
-  fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
+
+  await fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
       .then((response) => {
         const responseData = response.data
+        console.log(responseData)
         allHistoryItems.value = responseData.map((data) => {
           return {
             'location': data["country_name"] + ', ' + data["town_name"],
@@ -30,18 +32,22 @@ async function getHistoryItems() {
             'offerType': data['offer_type'],
             'withAnimals': data['is_animal_friendly'],
             'reservationState': data['reservation_state'],
+            'reservationId': data['reservation_id'],
             'offerId': data["offer_id"],
             'gradeId': data["grade_id"]
           }
         })
         historyItems.value = allHistoryItems.value.slice(0, pageSize);
         maxPage.value = Math.floor(allHistoryItems.value.length / pageSize) + 1
+        gradeOffers()
       })
       .catch((error) => {
       })
 }
 function gradeOffers(){
-  offerToGrade.value = historyItems.value.filter((item) => typeof item.gradeId === "undefined")
+  const allFinishedItems =  allHistoryItems.value.filter((item) => item.gradeId === 0 && item.reservationState === 'finished')
+  offerToGrade.value =  JSON.parse(JSON.stringify(allFinishedItems.map((item) => JSON.parse(JSON.stringify(item)))))
+  console.log(offerToGrade.value)
 }
 function pageBack() {
   if (currentPage.value > 1) {
@@ -60,7 +66,6 @@ function pageFroward() {
 
 onMounted(async () => {
   await getHistoryItems()
-  gradeOffers()
 })
 </script>
 
@@ -79,7 +84,7 @@ onMounted(async () => {
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
                         @page-forward="pageFroward"/>
       </div>
-      <RateOfferModal :offers-to-grade="offerToGrade"/>
+      <RateOfferModal v-if="offerToGrade.length > 0" :offers-to-grade="offerToGrade"/>
     </div>
   </div>
 

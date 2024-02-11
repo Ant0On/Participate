@@ -9,7 +9,7 @@ const props = defineProps({
 const emits = defineEmits(['nextOffer'])
 
 function updateRating(rating){
-  fetchWrapper.post(`/api/customer/offer/${props.offerData.value.offerId}/grade`, {
+  fetchWrapper.post(`/api/customer/offer/${props.offerData.value.reservationId}/grade`, {
       count: rating
   }).then(()=>{
     emits('nextOffer')
