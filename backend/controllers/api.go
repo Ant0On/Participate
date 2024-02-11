@@ -25,6 +25,7 @@ func RegisterRoutes(r *gin.Engine) {
 	host.PUT("/update/:id", UpdateOffer)
 	host.POST("/discount/:offerID", DiscountOffer)
 	host.GET("/:id/reservations/pending", GetPendingReservations)
+	host.PUT(":id/change/picture", ChangeImage)
 	host.POST("/:offerID/chat/create", CreateChat)
 
 	customer := r.Group("api/customer")
