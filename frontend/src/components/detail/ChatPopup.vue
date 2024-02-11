@@ -1,6 +1,6 @@
 <script setup>
-import {defineProps, defineEmits, onMounted, toRef} from 'vue';
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import { defineProps, defineEmits, onMounted, toRef, ref, nextTick } from 'vue';
+import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 
 const props = defineProps({
   messages: {
@@ -12,43 +12,66 @@ const props = defineProps({
   offerID: 0,
   userID: 0,
   chatID: 0
-})
+});
 
-const messages = toRef(props.messages)
-const newMessage = toRef(props.newMessage)
-const emits = defineEmits(['closeChat'])
+const messages = toRef(props.messages);
+const newMessage = toRef(props.newMessage);
+const chatMessagesRef = ref(null);
+const emits = defineEmits(['closeChat']);
 
 function sendMessage() {
   if (newMessage.value.trim() !== '') {
-    props.messages.push(`${props.email}: ${newMessage.value}`);
+    const newMessageContent = `${props.email}: ${newMessage.value}`;
+    messages.value.push(newMessageContent);
+
     fetchWrapper.post(`/api/customer/${props.userID}/${props.chatID}/message/send`, {
       'customer_id': props.userID,
       'email': props.email,
       'content': newMessage.value,
       'chat_id': props.chatID
-    }).catch()
+    }).catch(() => {
+      const index = messages.value.indexOf(newMessageContent);
+      if (index !== -1) {
+        messages.value.splice(index, 1);
+      }
+    });
+
     newMessage.value = '';
+
+    nextTick(() => {
+      scrollToBottom();
+    });
+  }
+}
+
+function scrollToBottom() {
+  if (chatMessagesRef.value) {
+    chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
   }
 }
 
 onMounted(async () => {
   try {
-    const response = await fetchWrapper.get(`/api/chat/${props.chatID}/messages`);
-    console.log('old msgs', response)
-    messages.value = response.data || [];
+    const response = await fetchWrapper.get(`/api/chat/${props.offerID}/messages`);
+    messages.value = response.data.map(record => `${record.email}: ${record.content}`) || [];
+
+    nextTick(() => {
+      scrollToBottom();
+    });
   } catch (error) {
     console.error('Error fetching messages:', error);
   }
 });
 
 </script>
+
 <template>
   <div class="chat-popup">
     <div class="chat-header">
       <h2>Chat Room</h2>
       <button @click="$emit('closeChat')">Close Chat</button>
     </div>
-    <div class="chat-messages">
+    <div class="chat-messages" ref="chatMessagesRef">
       <div v-for="(message, index) in messages" :key="index" class="chat-message">
         {{ message }}
       </div>
