@@ -26,14 +26,27 @@ async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.id}`)
 
   const responseData = response.data
+
+  const priceAfterDiscount = calculatePriceAfterDiscount(responseData['price'], responseData['discount'])
   offer.value = {
       'hostId': responseData["hostId"],
       'location': responseData["country_name"] + ', ' + responseData["town_name"],
       'description': responseData["description"],
       'name': responseData["name"],
-      'price': responseData["price"],
-      'numberOfPeople': responseData["max_people"]
+      'price': priceAfterDiscount,
+      'numberOfPeople': responseData["max_people"],
     }
+
+}
+function calculatePriceAfterDiscount(price, discount) {
+  try{
+    if(discount === 0)
+      return price
+    return price - price * discount / 100
+  }
+  catch{
+    return price
+  }
 
 }
 

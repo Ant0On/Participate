@@ -64,7 +64,7 @@ onMounted(async () => await getMyOffers())
     <div class="items_list">
       <div class="my_offer_items">
         <MyOffersItem v-for="myOffer in myOffers" :name="myOffer.name" :offer-type="myOffer.offerType" :discount="myOffer.discount"
-                      :with-animals="myOffer.withAnimals" :offer-id="myOffer.offerId"/>
+                      :with-animals="myOffer.withAnimals" :offer-id="myOffer.offerId" :price="myOffer.price"/>
       </div>
       <div class="navigation">
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
