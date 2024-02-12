@@ -13,7 +13,7 @@ const price = toRef(props.price)
 
 function setDiscount(){
   fetchWrapper.put(`/api/host/price/${props.id}/`, {
-    discount: Number(price.value)
+    price: Number(price.value)
   }).then(()=>{
     emits('priceChange', price.value)
     isModalVisible.value = false

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -223,4 +224,44 @@ func GetOffersForHost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": offerWithLocation})
 
+}
+
+type ChangePriceReq struct {
+	Price float64 `json:"price"`
+}
+
+func ChangePrice(c *gin.Context) {
+	offerId := c.Param("id")
+	var changePriceReq ChangePriceReq
+
+	if err := c.ShouldBindJSON(&changePriceReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if changePriceReq.Price <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Price need to be grater than 0"})
+		return
+	}
+
+	offer, err := models.GetOfferByID(offerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if offer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
+		return
+	}
+
+	offer.Price = changePriceReq.Price
+
+	if err := offer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	fmt.Println(offer.Price)
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }
