@@ -12,10 +12,10 @@ const isModalVisible = toRef(props.isSetDiscountModal)
 const discount = toRef(props.discount)
 
 function setDiscount(){
-  fetchWrapper.put('', {
-    discount: discount
+  fetchWrapper.put(`/api/host/discount/${props.id}/`, {
+    discount: Number(discount.value)
   }).then(()=>{
-    emits('discountChanged', discount)
+    emits('discountChanged', discount.value)
     isModalVisible.value = false
   }).catch(error => {
     isModalVisible.value = false

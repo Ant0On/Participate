@@ -1,22 +1,20 @@
 <script setup>
-import {defineProps, ref, computed, toRef} from 'vue';
+import {defineProps, ref, computed, toRef, watch} from 'vue';
 import DiscountModal from "@/components/account/my_offers/DiscountModal.vue";
 
 const props = defineProps({
   id: String,
   name: String,
   offerType: String,
-  dateFrom: String,
-  dateTo: String,
   withAnimals: Boolean,
   offerId: String,
   discount: String,
 });
 
-const discount = toRef(props.discount)
+const discountRef = toRef(props.discount)
 const isSetDiscountModal = ref(false)
 function onDiscountChanged(discount){
-  discount.value = discount
+  discountRef.value = discount
 }
 const isImageSource = computed(() =>{
   try{
@@ -41,15 +39,13 @@ const isImageSource = computed(() =>{
           <div class="field">Animals: {{ (withAnimals) ? 'Yes' : 'No' }}</div>
         </div>
         <div class="details">
-          <div class="field">Date from: {{ dateFrom.split('T')[0] }}</div>
-          <div class="field">Date to: {{ dateTo.split('T')[0] }}</div>
-          <div class="field">Discount: {{ discount }}</div>
+          <div class="field">Discount: {{ discountRef }}%</div>
         </div>
         <div class="set_discount">
           <button class="button_basic" @click="isSetDiscountModal = !isSetDiscountModal">
             Set discount
           </button>
-          <DiscountModal :id="id" :is-set-discount-modal="isSetDiscountModal" @discount-changed="onDiscountChanged"/>
+          <DiscountModal :id="offerId" :is-set-discount-modal="isSetDiscountModal" @discount-changed="onDiscountChanged"/>
         </div>
       </div>
     </div>

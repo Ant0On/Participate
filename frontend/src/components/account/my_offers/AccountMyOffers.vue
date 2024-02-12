@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted} from 'vue';
+import {onMounted, ref} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -19,23 +19,21 @@ async function getMyOffers() {
   fetchWrapper.get(`/api/host/${user.ID}/offers`)
       .then((response) => {
         const responseData = response.data
-        console.log(responseData)
         allMyOffers.value = responseData.map((data) => {
           return {
             'location': data["country_name"] + ', ' + data["town_name"],
             'name': data["name"],
             'price': data["price"],
-            'dateFrom': data['date_from'],
-            'dateTo': data['date_to'],
             'offerType': data['offer_type'],
             'withAnimals': data['is_animal_friendly'],
-            'offerId': data['offer_id']
+            'offerId': data['offer_id'],
+            'discount': data['discount']
           }
         })
         myOffers.value = allMyOffers.value.slice(0, pageSize);
         maxPage.value = Math.floor(allMyOffers.value.length / pageSize) + 1
       })
-      .catch((error) =>{
+      .catch((error) => {
 
       })
 }
@@ -44,14 +42,14 @@ async function getMyOffers() {
 function pageBack() {
   if (currentPage.value > 1) {
     currentPage.value -= 1;
-    myOffers.value = allMyOffers.value.slice((currentPage.value - 1) *pageSize, currentPage.value * pageSize )
+    myOffers.value = allMyOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
   }
 }
 
 function pageFroward() {
   if (currentPage.value < maxPage.value) {
     currentPage.value += 1;
-    myOffers.value = allMyOffers.value.slice((currentPage.value - 1) *pageSize, currentPage.value * pageSize )
+    myOffers.value = allMyOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
 
   }
 }
@@ -65,9 +63,8 @@ onMounted(async () => await getMyOffers())
     <p>My offers</p>
     <div class="items_list">
       <div class="my_offer_items">
-        <MyOffersItem v-for="myOffer in myOffers" :name="myOffer.name" :offer-type="myOffer.offerType" discount="10%"
-                          :date-from="myOffer.dateFrom" :date-to="myOffer.dateTo" :id="myOffer.offer_id"
-                          :with-animals="myOffer.withAnimals" :offer-id="myOffer.offerId"/>
+        <MyOffersItem v-for="myOffer in myOffers" :name="myOffer.name" :offer-type="myOffer.offerType" :discount="myOffer.discount"
+                      :with-animals="myOffer.withAnimals" :offer-id="myOffer.offerId"/>
       </div>
       <div class="navigation">
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
@@ -79,12 +76,13 @@ onMounted(async () => await getMyOffers())
 </template>
 
 <style scoped>
-div.my_offers{
+div.my_offers {
   display: flex;
   flex-direction: column;
   height: max(500px, 80%);
   flex-grow: 1;
 }
+
 div.items_list {
   display: flex;
   flex-direction: column;
@@ -93,15 +91,18 @@ div.items_list {
   padding-top: 2%;
 
 }
-div.my_offer_items{
+
+div.my_offer_items {
   display: flex;
   flex-direction: column;
   padding-left: 2%;
 }
-div.navigation{
+
+div.navigation {
   padding-top: 2%;
 }
-p{
+
+p {
   color: #000000;
   font-family: "Poppins", Helvetica;
   font-size: 1.4rem;
