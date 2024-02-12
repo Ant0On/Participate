@@ -23,7 +23,7 @@ func RegisterRoutes(r *gin.Engine) {
 	host.POST("/create", CreateOffer)
 	host.DELETE("/delete/:id", DeleteOffer)
 	host.PUT("/update/:id", UpdateOffer)
-	host.POST("/discount/:offerID", DiscountOffer)
+	host.PUT("/discount/:offerID", DiscountOffer)
 	host.GET("/:id/reservations/pending", GetPendingReservations)
 	host.POST("/:offerID/chat/create", CreateChat)
 	host.GET("/:id/offers", GetOffersForHost)

@@ -199,14 +199,28 @@ func GetRecommendedOffers(c *gin.Context) {
 }
 
 func GetOffersForHost(c *gin.Context) {
-	hostId := c.Param("id")
+	hostID := c.Param("id")
 
-	offers, err := models.GetOffersForHost(hostId)
-	if err != nil {
+	var offerWithLocation []DTO.OfferWithLocation
+	result := models.DB.
+		Model(&models.Offer{}).
+		Joins("JOIN town ON offer.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Where("offer.host_id = ?", hostID).
+		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
+			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
+		Find(&offerWithLocation)
+
+	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offers})
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": offerWithLocation})
 
 }
