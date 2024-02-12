@@ -92,3 +92,28 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 
 	return nil
 }
+
+func AddRecommendedOffers() ([]Offer, error) {
+	var offers []Offer
+
+	query := DB.Model(&Offer{})
+
+	result := query.
+		Joins("INNER JOIN reservation ON offer.id = reservation.offer_id").
+		Joins("JOIN town ON offer.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Select("offer.id as ID, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
+			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name, AVG(reservation.grade_id) as avg_grade").
+		Group("offer.id").
+		Group("town_name").
+		Group("country_name").
+		Order("avg_grade desc").
+		Limit(10).
+		Find(&offers)
+
+	if err := result.Error; err != nil {
+		return nil, fmt.Errorf("DB.Error: %w", err)
+	}
+
+	return offers, nil
+}
