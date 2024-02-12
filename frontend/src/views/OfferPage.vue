@@ -5,6 +5,7 @@ import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
 import OfferDetailDescription from "@/components/detail/OfferDetailDescription.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 
 const props = defineProps({
   type: String,
@@ -28,6 +29,7 @@ async function getOfferDetails() {
   const responseData = response.data
 
   const priceAfterDiscount = calculatePriceAfterDiscount(responseData['price'], responseData['discount'])
+  console.log(priceAfterDiscount)
   offer.value = {
       'hostId': responseData["hostId"],
       'location': responseData["country_name"] + ', ' + responseData["town_name"],
@@ -36,17 +38,6 @@ async function getOfferDetails() {
       'price': priceAfterDiscount,
       'numberOfPeople': responseData["max_people"],
     }
-
-}
-function calculatePriceAfterDiscount(price, discount) {
-  try{
-    if(discount === 0)
-      return price
-    return price - price * discount / 100
-  }
-  catch{
-    return price
-  }
 
 }
 

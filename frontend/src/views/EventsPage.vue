@@ -7,6 +7,7 @@ import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import { useSearchStore } from "@/stores/search.store";
 import { fetchWrapper } from "@/_helpers/fetch-wrapper";
+import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 
 const searchStore = useSearchStore();
 const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
@@ -20,12 +21,13 @@ async function getCurrentEvents(page) {
   const responseData = response?.data || [] ;
   if (responseData){
     events.value = responseData.map((data) => {
+      const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
       return {
         'offerId': data["offer_id"],
         'location': data["country_name"] + ', ' + data["town_name"],
         'description': data["description"],
         'name': data["name"],
-        'price': data["price"],
+        'price': priceAfterDiscount,
         'maxPeople': data["max_people"]
       };
     });
