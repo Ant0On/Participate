@@ -25,6 +25,7 @@ func RegisterRoutes(r *gin.Engine) {
 	host.PUT("/update/:id", UpdateOffer)
 	host.POST("/discount/:offerID", DiscountOffer)
 	host.GET("/:id/reservations/pending", GetPendingReservations)
+	host.PUT(":id/change/picture", ChangeImage)
 	host.POST("/:offerID/chat/create", CreateChat)
 
 	customer := r.Group("api/customer")
@@ -63,5 +64,6 @@ func RegisterRoutes(r *gin.Engine) {
 	protected.PUT("/offer/:id/recommend", RecommendOffer)
 
 	chat := r.Group("api/chat")
-	chat.GET("/:id/messages", GetAllMessages)
+	chat.GET("/:offerID/messages", GetAllMessages)
+	chat.GET("/offer/:offerID", GetChatByOfferID)
 }

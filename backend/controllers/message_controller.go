@@ -49,11 +49,11 @@ func SendMessage(c *gin.Context) {
 }
 
 func GetAllMessages(c *gin.Context) {
-	offerID := c.Param("id")
+	offerID := c.Param("offerID")
 
 	chat, err := models.GetChatByOfferId(offerID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Chat not found"})
+		c.JSON(http.StatusNoContent, gin.H{"error": "Chat not found"})
 		return
 	}
 
@@ -64,7 +64,7 @@ func GetAllMessages(c *gin.Context) {
 	}
 
 	if messages == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Messages not found"})
+		c.JSON(http.StatusNoContent, gin.H{"error": "Messages not found"})
 		return
 	}
 

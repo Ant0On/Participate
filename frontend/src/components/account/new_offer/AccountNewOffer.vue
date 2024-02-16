@@ -60,7 +60,7 @@ async function onSubmit() {
               offer_type: offerTypesId[newOffer.value.offerType],
               host_id: user.ID,
               town_id: data.town.ID,
-              image: imageFile
+              images: imageFile
             },
             "multipart/form-data")
             .then(() => {
@@ -78,7 +78,9 @@ async function onSubmit() {
               isAddingNewOffer.value = false;
               addedNewOffer.value = true;
               errors.apiError = null
-            })
+            }).catch(error => {
+              errors.apiError = "Something went wrong"
+        })
       }
   ).catch((error) => {
     errors.apiError = "A problem occurred during addition of an offer!"

@@ -18,7 +18,7 @@ function onItemClicked() {
 
 const isImageSource = computed(() =>{
   try{
-    require(`@/../images/offers/${props.id}.jpeg`)
+    require(`@/../images/offers/${props.id}/${props.id}_0.jpeg`)
     return true
   }
   catch{
@@ -30,7 +30,7 @@ const isImageSource = computed(() =>{
 
 <template>
   <div class="offer_item" @click="onItemClicked">
-    <img v-if="isImageSource" :src="require(`@/../images/offers/${props.id}.jpeg`)" alt="Image">
+    <img v-if="isImageSource" :src="require(`@/../images/offers/${id}/${id}_0.jpeg`)" alt="Image">
     <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="item_details">
       <div class="title">{{ name }}</div>

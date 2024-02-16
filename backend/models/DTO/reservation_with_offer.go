@@ -18,5 +18,6 @@ type ReservationWithOffer struct {
 	TownName         string           `json:"town_name" binding:"required,min=2"`
 	CountryName      string           `json:"country_name" binding:"required,min=3"`
 	OfferID          uint             `json:"offer_id" binding:"required"`
+	GradeId          uint             `json:"grade_id"`
 	ReservationState string           `json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
 }
