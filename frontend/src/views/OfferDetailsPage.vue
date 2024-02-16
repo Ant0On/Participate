@@ -21,13 +21,12 @@ const isChatAlreadyCreated = ref(false)
 const showChat = ref(false);
 
 function createChatHost() {
-  if (user.Role === 'host' && offer.value.hostID !== user.ID) {
-    console.error('You are not the owner of this offer!')
-    return
-  }
   if (isChatAlreadyCreated.value) {
     openChatCustomer()
-  }else {
+  }
+  if (user.Role === 'host' && offer.value.hostID !== user.ID) {
+    console.error('You are not the owner of this offer!')
+  } else {
     fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
           isChatAlreadyCreated.value = true;
           showChat.value = true
