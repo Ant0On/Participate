@@ -64,5 +64,6 @@ func RegisterRoutes(r *gin.Engine) {
 	protected.PUT("/offer/:id/recommend", RecommendOffer)
 
 	chat := r.Group("api/chat")
-	chat.GET("/:id/messages", GetAllMessages)
+	chat.GET("/:offerID/messages", GetAllMessages)
+	chat.GET("/offer/:offerID", GetChatByOfferID)
 }

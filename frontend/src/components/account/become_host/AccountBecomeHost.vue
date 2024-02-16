@@ -30,7 +30,6 @@ const schemaHost = Yup.object().shape({
 
 async function onSubmit(){
   await schemaHost.validate(hostData.value).then(async () => {
-    console.log(hostData.value)
     await fetchWrapper.post(`/api/customer/${user.ID}/promote`, {
       description: hostData.value.description,
       phone_number: hostData.value.phoneNumber,

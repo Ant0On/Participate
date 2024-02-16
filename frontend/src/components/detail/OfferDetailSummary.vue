@@ -13,7 +13,7 @@ import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import {router} from "@/router";
 
 const searchStore = useSearchStore();
-const {user} = useAuthStore();
+const { user } = useAuthStore();
 
 const {numberOfPeople, dateFrom, dateTo} = storeToRefs(searchStore)
 
@@ -24,7 +24,6 @@ const errors = reactive({
 const props = defineProps({
   id: '',
   price: '',
-  image: '',
 })
 const schema = Yup.object().shape({
   dateFrom: Yup.date().required('Starting date is required'),
