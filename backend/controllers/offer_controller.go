@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -227,7 +226,7 @@ func GetOffersForHost(c *gin.Context) {
 }
 
 type ChangePriceReq struct {
-	Price float64 `json:"price"`
+	Price float64 `json:"price" binding:"required,min=1"`
 }
 
 func ChangePrice(c *gin.Context) {
@@ -236,10 +235,6 @@ func ChangePrice(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&changePriceReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if changePriceReq.Price <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Price need to be grater than 0"})
 		return
 	}
 
@@ -260,8 +255,6 @@ func ChangePrice(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println(offer.Price)
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }

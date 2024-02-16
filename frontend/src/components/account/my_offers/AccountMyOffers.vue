@@ -34,7 +34,7 @@ async function getMyOffers() {
         maxPage.value = Math.floor(allMyOffers.value.length / pageSize) + 1
       })
       .catch((error) => {
-
+        errors.apiError = "Default Error"
       })
 }
 

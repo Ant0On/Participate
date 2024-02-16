@@ -29,7 +29,6 @@ async function getOfferDetails() {
   const responseData = response.data
 
   const priceAfterDiscount = calculatePriceAfterDiscount(responseData['price'], responseData['discount'])
-  console.log(priceAfterDiscount)
   offer.value = {
       'hostId': responseData["hostId"],
       'location': responseData["country_name"] + ', ' + responseData["town_name"],
