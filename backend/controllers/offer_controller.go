@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -210,6 +211,7 @@ func AddRecommendedOffers(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		fmt.Println(offer)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offers})

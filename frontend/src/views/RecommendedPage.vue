@@ -16,7 +16,7 @@ const currentPage = ref(1);
 const totalPages = ref(0);
 
 async function getCurrentRecommendedOffers(page) {
-  const response = await fetchWrapper.get(`/api/offers/recommended/add`);
+  const response = await fetchWrapper.get(`/api/offers/recommended`);
 
   const responseData = response?.data || [] ;
 
