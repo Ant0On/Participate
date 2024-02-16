@@ -29,12 +29,14 @@ async function onSubmit() {
 }
 
 const schema = Yup.object().shape({
-  Name: Yup.string().required('Name is required'),
+  Name: Yup.string().min(2).required('Name is required'),
   Login: Yup.string().email().required('Email is required'),
-  Password: Yup.string().when('Login', {
-    is: (value) => value !== '' || typeof value !== 'undefined',
-    then: schema => schema.required('Password is required')
-  } )
+  Password: Yup.string()
+      .required('Password is required')
+      .min(8, 'Password must be at least 8 characters')
+      .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
+      .matches(/\d/, 'Password must contain at least one digit')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
 });
 
 
