@@ -15,7 +15,7 @@ type Payment struct {
 var PaymentList = []Payment{
 	{Type: "PayPal"},
 	{Type: "Credit Card"},
-	{Type: "Bank transfer"},
+	{Type: "Bitcoin"},
 }
 
 func (p *Payment) save() error {
