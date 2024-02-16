@@ -45,7 +45,6 @@ async function onSubmit(){
     alert("Soon you will be logged out. Please log in again!")
     await auth.logout()
   }).catch(error =>{
-    console.log(error);
     errors.apiError = "Incorrect data! Please check the following errors:";
     for (const field in error.errors) {
       errors.apiError += `\n- ${error.errors[field]}`;

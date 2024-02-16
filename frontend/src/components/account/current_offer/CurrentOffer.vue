@@ -40,7 +40,7 @@ async function getCurrentOffers() {
         maxPage.value = Math.floor(allCurrentOffers.value.length / pageSize) + 1
       })
       .catch((error) =>{
-        errors.apiError = "Failed to fetch current offers. Please try again later." + error;
+        errors.apiError = "Failed to fetch current offers. Please try again later. " + error.message;
       })
 }
 

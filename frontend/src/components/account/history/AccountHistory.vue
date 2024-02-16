@@ -43,8 +43,7 @@ async function getHistoryItems() {
         gradeOffers()
       })
       .catch((error) => {
-        error.value = 'Failed to fetch history items. Please try again later.';
-
+        error.value = 'Failed to fetch history items. Please try again later. ' + error.message;
       })
 }
 function gradeOffers(){
@@ -62,7 +61,6 @@ function pageFroward() {
   if (currentPage.value < maxPage.value) {
     currentPage.value += 1;
     historyItems.value = allHistoryItems.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
-
   }
 }
 

@@ -23,7 +23,7 @@ async function onSubmit() {
   }).catch(error =>{
         if(error === "Bad Request")
         {
-          errors.apiError = "Incorrect login data!"
+          errors.apiError = "Incorrect login data! " + errors.message
         }
         else{
           errors.apiError = error.message

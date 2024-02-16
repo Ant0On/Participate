@@ -18,6 +18,7 @@ const messages = toRef(props.messages);
 const newMessage = toRef(props.newMessage);
 const chatMessagesRef = ref(null);
 const emits = defineEmits(['closeChat']);
+let errorMessage = null;
 
 function sendMessage() {
   if (newMessage.value.trim() !== '') {
@@ -30,6 +31,7 @@ function sendMessage() {
       'content': newMessage.value,
       'chat_id': props.chatID
     }).catch(() => {
+      errorMessage = 'Error sending message. Please try again.';
       const index = messages.value.indexOf(newMessageContent);
       if (index !== -1) {
         messages.value.splice(index, 1);
@@ -59,7 +61,7 @@ onMounted(async () => {
       scrollToBottom();
     });
   } catch (error) {
-    console.error('Error fetching messages:', error);
+    errorMessage = 'Error fetching messages. Please try again. ' + error.message;
   }
 });
 
@@ -70,6 +72,9 @@ onMounted(async () => {
     <div class="chat-header">
       <h2>Chat Room</h2>
       <button @click="$emit('closeChat')">Close Chat</button>
+    </div>
+    <div v-if="errorMessage" class="error-message">
+      {{ errorMessage }}
     </div>
     <div class="chat-messages" ref="chatMessagesRef">
       <div v-for="(message, index) in messages" :key="index" class="chat-message">
@@ -131,4 +136,10 @@ button {
   font-size: 14px;
   cursor: pointer;
 }
+
+.error-message {
+  color: red;
+  margin-bottom: 10px;
+}
+
 </style>

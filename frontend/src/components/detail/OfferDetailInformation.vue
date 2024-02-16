@@ -7,22 +7,22 @@ const props = defineProps({
 </script>
 
 <template>
-<div class="offer_detail_information">
-  <p class="information_header">Description</p>
-  <p class="information">{{ description }}</p>
-</div>
+  <div class="offer_detail_information">
+    <p class="information_header">Description</p>
+    <p class="information">{{ description }}</p>
+  </div>
 </template>
 
 <style scoped>
-div.offer_detail_information{
-}
-p.information_header{
+
+p.information_header {
   font-family: "Poppins-SemiBold", Helvetica;
   font-size: 1.4rem;
   font-weight: 600;
   padding: 2%;
 }
-p.information{
+
+p.information {
   padding-left: 3%;
   padding-top: 0;
   padding-bottom: 2%;
