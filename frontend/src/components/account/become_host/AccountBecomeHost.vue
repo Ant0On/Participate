@@ -26,12 +26,7 @@ const schemaHost = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
   bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
-  password: Yup.string()
-      .required('Password is required')
-      .min(8, 'Password must be at least 8 characters')
-      .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
-      .matches(/\d/, 'Password must contain at least one digit')
-      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
+  password: Yup.string().required('Password is required')
 });
 
 async function onSubmit(){
