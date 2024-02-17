@@ -16,6 +16,8 @@ const currentPage = ref(1)
 const maxPage = ref(1)
 const offerToGrade = ref([])
 
+const error = ref(null);
+
 async function getHistoryItems() {
 
   await fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
@@ -41,6 +43,7 @@ async function getHistoryItems() {
         gradeOffers()
       })
       .catch((error) => {
+        error.value = 'Failed to fetch history items. Please try again later. ' + error.message;
       })
 }
 function gradeOffers(){
@@ -58,7 +61,6 @@ function pageFroward() {
   if (currentPage.value < maxPage.value) {
     currentPage.value += 1;
     historyItems.value = allHistoryItems.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
-
   }
 }
 
@@ -72,6 +74,7 @@ onMounted(async () => {
   <div class="account_history">
     <p>Previously booked offers</p>
     <div class="items_list">
+      <div v-if="error" class="error-message">{{ error }}</div>
       <div class="history_items">
         <HistoryItem v-for="historyItem in historyItems" :name="historyItem.name" :offer-type="historyItem.offerType"
                      :date-from="historyItem.dateFrom" :date-to="historyItem.dateTo"
@@ -122,6 +125,12 @@ p {
   padding-bottom: 2%;
   font-weight: 400;
   align-self: center;
+}
+
+div.error-message {
+  color: red;
+  padding: 1%;
+  text-align: center;
 }
 
 </style>

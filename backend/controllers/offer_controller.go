@@ -42,7 +42,7 @@ func GetOffers(c *gin.Context) {
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name, offer.host_id").
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.host_id, town.name as town_name, country.name as country_name").
 		Offset(offset).Limit(limit).
 		Find(&offersWithLocation)
 
@@ -71,7 +71,7 @@ func GetOfferByID(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("offer.id = ?", offerID).
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.host_id, town.name as town_name, country.name as country_name").
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.host_id, town.name as town_name, country.name as country_name").
 		Find(&offerWithLocation)
 
 	if err := result.Error; err != nil {
@@ -196,4 +196,65 @@ func GetRecommendedOffers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": recommendedOffers})
+}
+
+func GetOffersForHost(c *gin.Context) {
+	hostID := c.Param("id")
+
+	var offerWithLocation []DTO.OfferWithLocation
+	result := models.DB.
+		Model(&models.Offer{}).
+		Joins("JOIN town ON offer.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Where("offer.host_id = ?", hostID).
+		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
+			"offer.is_recommended, offer.offer_type, offer.discount, town.name as town_name, country.name as country_name").
+		Find(&offerWithLocation)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": offerWithLocation})
+
+}
+
+type ChangePriceReq struct {
+	Price float64 `json:"price" binding:"required,min=1"`
+}
+
+func ChangePrice(c *gin.Context) {
+	offerId := c.Param("id")
+	var changePriceReq ChangePriceReq
+
+	if err := c.ShouldBindJSON(&changePriceReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offer, err := models.GetOfferByID(offerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if offer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
+		return
+	}
+
+	offer.Price = changePriceReq.Price
+
+	if err := offer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }

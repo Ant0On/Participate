@@ -26,9 +26,11 @@ const props = defineProps({
   price: '',
 })
 const schema = Yup.object().shape({
-  dateFrom: Yup.date().required('Starting date is required'),
-  dateTo: Yup.date().min(Yup.ref('dateFrom')),
-  numberOfPeople: Yup.number().required('Number of people is required'),
+  dateFrom: Yup.date().required('Please select a starting date'),
+  dateTo: Yup.date()
+      .min(Yup.ref('dateFrom'), 'Departure date must be after the arrival date')
+      .required('Please select a departure date'),
+  numberOfPeople: Yup.number().min(1, 'Please enter a valid number of people').required('Number of people is required'),
 });
 
 const paymentMethod = ref({
@@ -62,12 +64,16 @@ function submitOffer(payment) {
           router.push('/');
           window.open(paymentMethod.value[payment].url, '_blank');
         }).catch(error => {
-          errors.apiError = "Could not book the offer! Please try again later."
-        })
+          errors.apiError = "Failed to complete the booking. Please try again later. " + error.message;
+        });
       })
       .catch(error => {
-        errors.apiError = "Invalid data!"
-      })
+        if (error.name === 'ValidationError') {
+          errors.apiError = "Invalid input. Please check your data and try again. " + error.message;
+        } else {
+          errors.apiError = "An unexpected error occurred. Please try again later. " + error.message;
+        }
+      });
 }
 </script>
 
@@ -118,7 +124,6 @@ img.payment_image{
 
 div.errors {
   font-family: "Sarabun", Helvetica;
-
 }
 
 div.offer_detail_summary {
@@ -132,7 +137,6 @@ div.offer_detail_summary_header {
   flex-direction: row;
   justify-content: space-between;
   margin-bottom: 5%;
-
 }
 
 div.offer_detail_summary_title {

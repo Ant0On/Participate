@@ -1,10 +1,9 @@
 <script setup>
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, reactive} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import CurrentOfferItem from "@/components/account/current_offer/CurrentOfferItem.vue";
-
 
 const auth = useAuthStore();
 const user = auth.user;
@@ -14,6 +13,10 @@ const allCurrentOffers = ref([])
 const currentOffers = ref([])
 const currentPage = ref(1)
 const maxPage = ref(1)
+
+const errors = reactive({
+  apiError: ""
+})
 
 async function getCurrentOffers() {
   fetchWrapper.get(`/api/host/${user.ID}/reservations/pending`)
@@ -37,10 +40,9 @@ async function getCurrentOffers() {
         maxPage.value = Math.floor(allCurrentOffers.value.length / pageSize) + 1
       })
       .catch((error) =>{
-
+        errors.apiError = "Failed to fetch current offers. Please try again later. " + error;
       })
 }
-
 
 function pageBack() {
   if (currentPage.value > 1) {
@@ -74,6 +76,7 @@ onMounted(async () => await getCurrentOffers())
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
                         @page-forward="pageFroward"/>
       </div>
+      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     </div>
   </div>
 
@@ -109,6 +112,12 @@ p{
   padding-bottom: 2%;
   font-weight: 400;
   align-self: center;
+}
+
+div.errors {
+  font-family: "Sarabun", Helvetica;
+  color: red;
+  padding-top: 2%;
 }
 
 </style>

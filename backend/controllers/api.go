@@ -23,10 +23,12 @@ func RegisterRoutes(r *gin.Engine) {
 	host.POST("/create", CreateOffer)
 	host.DELETE("/delete/:id", DeleteOffer)
 	host.PUT("/update/:id", UpdateOffer)
-	host.POST("/discount/:offerID", DiscountOffer)
+	host.PUT("/discount/:offerID", DiscountOffer)
 	host.GET("/:id/reservations/pending", GetPendingReservations)
 	host.PUT(":id/change/picture", ChangeImage)
 	host.POST("/:offerID/chat/create", CreateChat)
+	host.GET("/:id/offers", GetOffersForHost)
+	host.PUT("/price/:id", ChangePrice)
 
 	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))

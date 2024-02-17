@@ -23,7 +23,12 @@ const newOffer = ref({
 
 const errors = reactive({
   apiError: '',
-})
+  offerType: '',
+  offerInfo: '',
+  country: '',
+  image: '',
+});
+
 const userStore = useAuthStore();
 const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '');
@@ -79,11 +84,11 @@ async function onSubmit() {
               addedNewOffer.value = true;
               errors.apiError = null
             }).catch(error => {
-              errors.apiError = "Something went wrong"
+              errors.apiError = "Something went wrong - " + error.message
         })
       }
   ).catch((error) => {
-    errors.apiError = "A problem occurred during addition of an offer!"
+    errors.apiError = "A problem occurred during addition of an offer! " + error.message;
   })
 }
 
@@ -110,9 +115,19 @@ function dataURLtoFile(dataURL, fileName) {
 
 function checkIfOfferInfoIsFilled() {
   let offerValues = newOffer.value;
-  return offerValues.name !== '' && offerValues.description !== '' && offerValues.price !== ''
-      && offerValues.maxPeople !== '' && offerValues.isAnimalFriendly !== ''
-
+  if (
+      offerValues.name === '' ||
+      offerValues.description === '' ||
+      offerValues.price === '' ||
+      offerValues.maxPeople === '' ||
+      offerValues.isAnimalFriendly === ''
+  ) {
+    errors.offerInfo = 'Please fill in all offer information fields.';
+    return false;
+  } else {
+    errors.offerInfo = '';
+    return true;
+  }
 }
 
 onMounted(async () => {
@@ -170,7 +185,11 @@ onMounted(async () => {
     </Transition>
     <Transition name="bounce">
     <div class="submit_container">
-        <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+      <div class="errors" v-if="errors.offerType">{{ errors.offerType }}</div>
+      <div class="errors" v-if="errors.offerInfo">{{ errors.offerInfo }}</div>
+      <div class="errors" v-if="errors.country">{{ errors.country }}</div>
+      <div class="errors" v-if="errors.image">{{ errors.image }}</div>
         <button v-if="isOfferImageFilled" class="button_basic" @click="onSubmit">
           Create an offer
         </button>
