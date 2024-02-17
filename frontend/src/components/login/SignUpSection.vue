@@ -23,18 +23,20 @@ async function onSubmit() {
   await schema.validate(signUpData.value).then(() => {
     return authStore.signUp(signUpData.value.Name, signUpData.value.Login, signUpData.value.Password)
   }).catch(error => {
-          errors.apiError = "Incorrect sign up data!"
+          errors.apiError = "Incorrect sign up data! " + error.message
       }
   )
 }
 
 const schema = Yup.object().shape({
-  Name: Yup.string().required('Name is requred'),
-  Login: Yup.string().required('Email is required'),
-  Password: Yup.string().when('Login', {
-    is: (value) => value !== '' || typeof value !== 'undefined',
-    then: schema => schema.required('Password is required')
-  } )
+  Name: Yup.string().min(2).required('Name is required'),
+  Login: Yup.string().email("This is not a valid email address").required('Email is required'),
+  Password: Yup.string()
+      .required('Password is required')
+      .min(8, 'Password must be at least 8 characters')
+      .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
+      .matches(/\d/, 'Password must contain at least one digit')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
 });
 
 
@@ -67,7 +69,6 @@ div.signup_section {
 
 div.errors {
   font-family: "Sarabun", Helvetica;
-
 }
 
 .signup_form {

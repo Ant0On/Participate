@@ -34,34 +34,51 @@ const errors = reactive({
 })
 
 function searchOffers() {
-  schema.validate(searchOffer.value).then((value) => {
-    location.value = value.location
-    dateFrom.value = value.dateFrom.toISOString().split('T')[0]
-    dateTo.value = value.dateTo.toISOString().split('T')[0]
-    numberOfPeople.value = value.numberOfPeople
-    router.push(offerRoutes[searchOffer.value.offerType])
-
-
-  }).catch(error => {
-    if(error === "Bad Request")
-    {
-      errors.apiError = "Incorrect data!"
-    }
-    else{
-      errors.apiError = "Fill all required fields!"
-    }
-
-  })
+  schema.validate(searchOffer.value, { abortEarly: false })
+      .then((value) => {
+        location.value = value.location;
+        dateFrom.value = value.dateFrom.toISOString().split('T')[0];
+        dateTo.value = value.dateTo.toISOString().split('T')[0];
+        numberOfPeople.value = value.numberOfPeople;
+        router.push(offerRoutes[searchOffer.value.offerType]);
+      })
+      .catch(validationError => {
+        errors.apiError = "Please fix the following issues:";
+        if (validationError.inner) {
+          validationError.inner.forEach(error => {
+            switch (error.path) {
+              case 'offerType':
+                errors.apiError += `\n- ${error.message}`;
+                break;
+              case 'location':
+                errors.apiError += `\n- ${error.message}`;
+                break;
+              case 'dateFrom':
+                errors.apiError += `\n- ${error.message}`;
+                break;
+              case 'dateTo':
+                errors.apiError += `\n- ${error.message}`;
+                break;
+              case 'numberOfPeople':
+                errors.apiError += `\n- ${error.message}`;
+                break;
+              default:
+                break;
+            }
+          });
+        } else {
+          errors.apiError += `\n- ${validationError.message}`;
+        }
+      });
 }
 
 const schema = Yup.object().shape({
-  offerType: Yup.string().required('Offer type is required'),
-  location: Yup.string().min(5).required('Location is required'),
-  dateFrom: Yup.date().required('Date is required'),
-  dateTo: Yup.date().min(Yup.ref('dateFrom')),
-  numberOfPeople: Yup.number().min(1).required('Number of people is required'),
+  offerType: Yup.string().required('Please select an offer type'),
+  location: Yup.string().min(3, 'Location must be at least 5 characters').required('Location is required'),
+  dateFrom: Yup.date().required('Please select a starting date'),
+  dateTo: Yup.date().required('Please select an ending date').min(Yup.ref('dateFrom'), 'Ending date must be after starting date'),
+  numberOfPeople: Yup.number().min(1, 'Number of people must be at least 1').required('Number of people is required'),
 });
-
 
 </script>
 
@@ -81,9 +98,11 @@ const schema = Yup.object().shape({
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&display=swap');
 
-div.errors{
+div.errors {
   font-family: "Sarabun", Helvetica;
-
+  color: #d9534f;
+  margin-top: 10px;
+  font-size: 0.9rem;
 }
 
 .home_offer_search {

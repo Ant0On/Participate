@@ -71,7 +71,10 @@ async function onSubmit() {
         user.Description = hostData.value.Description
         user.PhoneNumber = hostData.value.PhoneNumber
         user.BankAccount = hostData.value.BankAccount
-      })
+      }).catch((hostErrors) => {
+        errors.apiError = formatErrors(hostErrors.errors);
+      });
+
     }
     isSubmitMode.value = false;
     if (customerData.value.Name !== currentCustomerData.value.Name)
@@ -108,11 +111,17 @@ async function onSubmit() {
         }, "multipart/form-data")
       }
     }
+  }).catch((customerErrors) => {
+    errors.apiError = formatErrors(customerErrors.errors);
+  })
+}
 
-  }).catch(error => {
-        errors.apiError = "Incorrect data!"
-      }
-  )
+function formatErrors(validationErrors) {
+  let errorMessage = "Incorrect data! Please check the following errors:";
+  for (const field in validationErrors) {
+    errorMessage += `\n ${validationErrors[field]}`;
+  }
+  return errorMessage;
 }
 
 function onCancel() {
@@ -131,15 +140,15 @@ function onChangeData() {
 const isSubmitMode = ref(false)
 
 const schemaCustomer = Yup.object().shape({
-  Name: Yup.string().min(5).required('Name is required'),
-  LastName: Yup.string().min(5).required('Last name is required'),
+  Name: Yup.string().min(2).required('Name is required'),
+  LastName: Yup.string().min(2).required('Last name is required'),
   Email: Yup.string().email().required('Email is required'),
 });
 
 const schemaHost = Yup.object().shape({
   Description: Yup.string().required('Description is required'),
-  PhoneNumber: Yup.number().min(9),
-  BankAccount: Yup.number().min(16),
+  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
+  bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
 });
 
 async function uploadImage(imageInput) {
@@ -163,6 +172,8 @@ function dataURLtoFile(dataURL, fileName) {
   }
   return new File([u8arr], fileName, {type: mime});
 }
+
+
 </script>
 
 <template>
@@ -341,5 +352,20 @@ div.buttons {
 
 div.errors {
   font-family: "Sarabun", Helvetica;
+  border: 1px solid #ff0000;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
 }
+
+p.error-label {
+  font-weight: bold;
+  color: #ff0000;
+}
+
+p.error-message {
+  color: #ff0000;
+}
+
+
 </style>

@@ -1,20 +1,21 @@
 <template>
-<div class="offer_detail_host">
-  <div class="offer_detail_host_picture">
-    <div class="about_host">
-      About the host
+  <div class="offer_detail_host">
+    <div class="offer_detail_host_picture">
+      <div class="about_host">
+        About the host
+      </div>
+      <img v-if="imagePath" class="detail_host_image" :src="require(`@/../${imagePath}`)" alt="Host picture">
+      <div class="host_name">
+        {{ host_first_name }}
+      </div>
     </div>
-    <img v-if="imagePath" class="detail_host_image" :src="require(`@/../${imagePath}`)" alt="Host picture">
-    <div class="host_name">
-      {{host_first_name }}
+    <div class="offer_detail_host_description">
+      {{ host_detail }}
     </div>
+    <transition name="fade" mode="out-in" :style="{ transitionDuration: `${transitionDuration}ms` }">
+      <img :key="currentOfferImageIndex" class="detail_offer_image" :src="currentOfferImagePath" alt="Offer image">
+    </transition>
   </div>
-  <div class="offer_detail_host_description">
-    {{ host_detail }}
-  </div>
-  <transition name="fade" mode="out-in" :style="{ transitionDuration: `${transitionDuration}ms` }">
-    <img :key="currentOfferImageIndex" class="detail_offer_image" :src="currentOfferImagePath" alt="Offer image">
-  </transition></div>
 </template>
 
 <script setup>
@@ -63,45 +64,50 @@ onMounted(() => {
 </script>
 
 <style scoped>
-div.offer_detail_host{
+div.offer_detail_host {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   padding: 1%;
 }
-div.offer_detail_host_description{
-  font-family: "Poppins-Regular", Helvetica,serif;
+
+div.offer_detail_host_description {
+  font-family: "Poppins-Regular", Helvetica, serif;
   font-size: 1.4rem;
 }
-div.about_host{
+
+div.about_host {
   font-family: "Poppins-SemiBold", Helvetica;
   font-size: 1.4rem;
   font-weight: 600;
   align-self: center;
   padding-bottom: 5%;
 }
-div.host_name{
+
+div.host_name {
   font-family: "jsMath-cmr10-cmr10", Helvetica, serif;
   font-size: 1.4rem;
   font-weight: 400;
   align-self: center;
   padding-top: 5%;
 }
-div.offer_detail_host_picture{
+
+div.offer_detail_host_picture {
   display: flex;
   flex-direction: column;
   padding: 2%;
 }
-div.offer_detail_host_description{
+
+div.offer_detail_host_description {
   padding: 2% 5% 2% 5%;
   flex-grow: 1;
 }
-img.detail_host_image{
+
+img.detail_host_image {
   border-radius: 50%;
   height: 250px;
   width: 250px;
   align-self: center;
-
 }
 
 img.detail_offer_image {
