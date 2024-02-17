@@ -99,3 +99,25 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 
 	return nil
 }
+
+func AddRecommendedOffers() ([]Offer, error) {
+	var offers []Offer
+
+	query := DB.Model(&Offer{})
+
+	result := query.
+		Joins("INNER JOIN reservation ON offer.id = reservation.offer_id").
+		Select("offer.id as ID, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.host_id," +
+			"offer.town_id, AVG(reservation.grade_id) as avg_grade").
+		Group("offer.id").
+		Order("avg_grade desc").
+		Limit(10).
+		Find(&offers)
+
+	if err := result.Error; err != nil {
+		return nil, fmt.Errorf("DB.Error: %w", err)
+	}
+
+	return offers, nil
+}

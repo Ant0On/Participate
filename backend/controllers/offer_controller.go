@@ -198,6 +198,23 @@ func GetRecommendedOffers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": recommendedOffers})
 }
 
+func AddRecommendedOffers(c *gin.Context) {
+	offers, err := models.AddRecommendedOffers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	for _, offer := range offers {
+		offer.IsRecommended = true
+		if err := offer.Update(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offers})
+}
+
 func GetOffersForHost(c *gin.Context) {
 	hostID := c.Param("id")
 

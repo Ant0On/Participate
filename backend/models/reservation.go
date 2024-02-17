@@ -25,8 +25,8 @@ type Reservation struct {
 	NumberOfPeople   int              `gorm:"not null" json:"number_of_people" binding:"required,gt=0"`
 	CustomerID       uint             `gorm:"not null" json:"customer_id" binding:"required"`
 	OfferID          uint             `gorm:"not null" json:"offer_id" binding:"required"`
-	GradeID          uint
-	PaymentID        uint `gorm:"not null" json:"payment_id" binding:"required"`
+	GradeID          uint             `json:"grade_id" binding:"required"`
+	PaymentID        uint             `gorm:"not null" json:"payment_id" binding:"required"`
 	AnimalID         uint
 }
 
