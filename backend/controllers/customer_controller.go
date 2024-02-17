@@ -153,9 +153,45 @@ func ChangePicture(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
 }
 
+func ChangeImage(c *gin.Context) {
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
+		return
+	}
+
+	customer, err := models.GetCustomer(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		return
+	}
+
+	dst, wasImageUploaded, err := customer.HandleUserImageUploads(c, customer.ID, customer.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		return
+	}
+
+	if wasImageUploaded {
+		customer.ImagePath = dst
+		if err := customer.Update(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"customer.Update error": err.Error()})
+			return
+		}
+	}
+
+	if err := customer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+}
+
 func GradeReservation(c *gin.Context) {
-	offerID := c.Param("id")
-	if offerID == "" {
+	reservationId := c.Param("id")
+	if reservationId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offer ID"})
 		return
 	}
@@ -173,7 +209,7 @@ func GradeReservation(c *gin.Context) {
 	}
 
 	var reservation models.Reservation
-	err := models.DB.Where("customer_id = ? AND offer_id = ?", customerObj.ID, offerID).First(&reservation).Error
+	err := models.DB.Where("customer_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		return
@@ -271,7 +307,7 @@ func GetReservationsHistory(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Joins("JOIN customer ON reservation.customer_id = customer.id").
 		Where("customer.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", customerID).
-		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, offer.name," + "" +
+		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, reservation.grade_id, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
 		Find(&finishedReservations)
 

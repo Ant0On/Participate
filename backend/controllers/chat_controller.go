@@ -46,3 +46,15 @@ func CreateChat(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": chat})
 }
+
+func GetChatByOfferID(c *gin.Context) {
+	offerID := c.Param("offerID")
+
+	chat, err := models.GetChatByOfferId(offerID)
+	if err != nil {
+		c.JSON(http.StatusNoContent, gin.H{"error": "Chat not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": chat})
+}

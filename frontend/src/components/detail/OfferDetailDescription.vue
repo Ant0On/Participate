@@ -10,9 +10,12 @@ const props = defineProps({
   price: 0,
   location: '',
   numberOfPeople: 0,
-  hostId: 0,
+  host_detail: '',
+  imagePath:'',
+  host_first_name: '',
   type: '',
   description: '',
+  offer_id: 0,
 })
 const emits = defineEmits(['moveToSummary'])
 
@@ -26,7 +29,7 @@ const emits = defineEmits(['moveToSummary'])
     <div class="line"/>
     <OfferDetailInformations :description="description"/>
     <div class="line"/>
-    <OfferDetailHost />
+    <OfferDetailHost :offer_id="offer_id" :host_detail="host_detail" :host_first_name="host_first_name" :imagePath="imagePath"/>
   </div>
 </template>
 
