@@ -11,7 +11,8 @@ import LoginButton from "@/components/login/LoginButton.vue";
 const signUpData = ref({
   Name: '',
   Login: '',
-  Password: ''
+  Password: '',
+  ConfirmPassword: ''
 })
 
 const errors = reactive({
@@ -21,9 +22,9 @@ const errors = reactive({
 async function onSubmit() {
   const authStore = useAuthStore();
   await schema.validate(signUpData.value).then(() => {
-    return authStore.signUp(signUpData.value.Name, signUpData.value.Login, signUpData.value.Password)
+    return authStore.signUp(signUpData.value.Name, signUpData.value.Login, signUpData.value.Password, signUpData.value.ConfirmPassword)
   }).catch(error => {
-          errors.apiError = "Incorrect sign up data! " + error.message
+          errors.apiError = "Incorrect sign up data! " + error
       }
   )
 }
@@ -37,6 +38,7 @@ const schema = Yup.object().shape({
       .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
       .matches(/\d/, 'Password must contain at least one digit')
       .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
+  ConfirmPassword: Yup.string().oneOf([Yup.ref('Password'), null], 'Passwords must match')
 });
 
 
@@ -51,7 +53,9 @@ const schema = Yup.object().shape({
                  v-model="signUpData.Name"/>
       <TextInput width="440px" labelText="Your email" placeholder="Type your email" :isRequired="true"
                  v-model="signUpData.Login"/>
-      <PasswordInput v-model="signUpData.Password" @keyup.enter="onSubmit"/>
+      <PasswordInput v-model="signUpData.Password" :labelText="'Your password'" @keyup.enter="onSubmit" :isRequired="true"/>
+      <PasswordInput v-model="signUpData.ConfirmPassword" :labelText="'Confirm your password'"
+                     :placeholder="'Type your password again'" @keyup.enter="onSubmit" :isRequired="true"/>
       <LoginButton text="Sign up" @button-clicked="onSubmit" @keyup.enter="onSubmit"/>
     </form>
   </div>
