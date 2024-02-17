@@ -119,7 +119,5 @@ func AddRecommendedOffers() ([]Offer, error) {
 		return nil, fmt.Errorf("DB.Error: %w", err)
 	}
 
-	fmt.Println(offers)
-
 	return offers, nil
 }
