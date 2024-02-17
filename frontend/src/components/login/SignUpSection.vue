@@ -30,7 +30,7 @@ async function onSubmit() {
 
 const schema = Yup.object().shape({
   Name: Yup.string().min(2).required('Name is required'),
-  Login: Yup.string().email().required('Email is required'),
+  Login: Yup.string().email("This is not a valid email address").required('Email is required'),
   Password: Yup.string()
       .required('Password is required')
       .min(8, 'Password must be at least 8 characters')
