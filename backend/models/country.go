@@ -132,10 +132,10 @@ func AddCountries() error {
 }
 
 func GetAllCountries() ([]Country, error) {
-	var c []Country
+	var countries []Country
 
-	if err := DB.Model([]Country{}).Scan(&c).Error; err != nil {
-		return nil, fmt.Errorf("DB.Model([]Country{}).Scan: %w", err)
+	if err := DB.Order("name").Find(&countries).Error; err != nil {
+		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
 	}
-	return c, nil
+	return countries, nil
 }
