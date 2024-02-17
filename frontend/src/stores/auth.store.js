@@ -28,11 +28,12 @@ export const useAuthStore = defineStore({
             localStorage.removeItem('token');
             router.push('/');
         },
-        async signUp(name, email, password) {
+        async signUp(name, email, password, passwordConfirmation) {
             const request = await fetchWrapper.post('/api/register/customer', {
                 "first_name": name,
                 "email": email,
-                "password": password
+                "password": password,
+                "password_confirmation": passwordConfirmation
             }, "multipart/form-data")
 
             if (request.message === "registration success!") {

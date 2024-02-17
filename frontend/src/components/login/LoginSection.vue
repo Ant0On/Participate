@@ -53,7 +53,7 @@ const emits = defineEmits(['signUpClicked'])
     <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <form class="login_form" @submit.prevent>
       <TextInput width="440px" labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.Login"/>
-      <PasswordInput v-model="loginData.Password" @keyup.enter="onSubmit"/>
+      <PasswordInput v-model="loginData.Password" :labelText="'Your password'" @keyup.enter="onSubmit"/>
       <LoginButtons @log-in-clicked="onSubmit" @sign-up-clicked="onSignUp"/>
     </form>
   </div>
