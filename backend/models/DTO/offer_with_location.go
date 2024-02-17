@@ -13,4 +13,5 @@ type OfferWithLocation struct {
 	OfferType        models.OfferType `json:"offer_type" binding:"required,oneof=activity event accommodation"`
 	TownName         string           `json:"town_name" binding:"required,min=2"`
 	CountryName      string           `json:"country_name" binding:"required,min=3"`
+	HostID           uint             `json:"host_id" binding:"required"`
 }
