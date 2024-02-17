@@ -30,7 +30,7 @@ function onPriceChanged(price){
 
 const isImageSource = computed(() =>{
   try{
-    require(`@/../images/offers/${props.offerId}.jpeg`)
+    require(`@/../images/offers/${props.offerId}/${props.offerId}_0.jpeg`)
     return true
   }
   catch{
@@ -41,7 +41,7 @@ const isImageSource = computed(() =>{
 
 <template>
   <div class="my_offer_item">
-    <img v-if="isImageSource" :src="require(`@/../images/offers/${offerId}.jpeg`)" alt="Image">
+    <img v-if="isImageSource" :src="require(`@/../images/offers/${props.offerId}/${props.offerId}_0.jpeg`)" alt="Image">
     <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="my_offer_item_details">
       <div class="title">{{ name }}</div>
