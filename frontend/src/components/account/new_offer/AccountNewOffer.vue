@@ -18,7 +18,7 @@ const newOffer = ref({
   isAnimalFriendly: false,
   country: '',
   city: '',
-  image: '',
+  images: [],
 });
 
 const errors = reactive({
@@ -34,7 +34,7 @@ const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '');
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
-const isOfferImageFilled = computed(() => newOffer.value.image !== '')
+const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
 const addedNewOffer = ref(false)
 const countries = ref([])
@@ -54,7 +54,20 @@ async function onSubmit() {
     name: newOffer.value.city,
     country_id: await getCountryId(newOffer.value.country),
   }).then((data) => {
-    const imageFile = dataURLtoFile(newOffer.value.image, 'image.jpeg');
+    const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
+
+    console.log('Request Payload:', {
+      name: newOffer.value.name,
+      description: newOffer.value.description,
+      price: newOffer.value.price,
+      max_people: newOffer.value.maxPeople,
+      is_animal_friendly: newOffer.value.isAnimalFriendly,
+      offer_type: offerTypesId[newOffer.value.offerType],
+      host_id: user.ID,
+      town_id: data.town.ID, // Make sure `data.town` is defined
+      images: imageFiles,
+    });
+
         fetchWrapper.post('/api/host/create', {
               name: newOffer.value.name,
               description: newOffer.value.description,
@@ -65,7 +78,7 @@ async function onSubmit() {
               offer_type: offerTypesId[newOffer.value.offerType],
               host_id: user.ID,
               town_id: data.town.ID,
-              images: imageFile
+              images: imageFiles
             },
             "multipart/form-data")
             .then(() => {
@@ -78,13 +91,13 @@ async function onSubmit() {
                 isAnimalFriendly: false,
                 country: '',
                 city: '',
-                image: '',
+                images: [],
               }
               isAddingNewOffer.value = false;
               addedNewOffer.value = true;
               errors.apiError = null
             }).catch(error => {
-              errors.apiError = "Something went wrong - " + error.message
+              errors.apiError = "Something went wrong - " + error
         })
       }
   ).catch((error) => {
@@ -93,12 +106,24 @@ async function onSubmit() {
 }
 
 async function uploadImage(imageInput) {
-  const image = imageInput.target.files[0];
-  const reader = new FileReader();
-  reader.readAsDataURL(image);
-  reader.onload = source => {
-    newOffer.value.image = source.target.result;
-  };
+  const images = imageInput.target.files;
+  const promises = [];
+
+  for (const image of images) {
+    const reader = new FileReader();
+    promises.push(
+        new Promise((resolve) => {
+          reader.onload = (source) => {
+            resolve(source.target.result);
+          };
+          reader.readAsDataURL(image);
+        })
+    );
+  }
+
+  Promise.all(promises).then((imageDataArray) => {
+    newOffer.value.images = imageDataArray;
+  });
 }
 
 function dataURLtoFile(dataURL, fileName) {
@@ -111,6 +136,13 @@ function dataURLtoFile(dataURL, fileName) {
     u8arr[n] = bstr.charCodeAt(n);
   }
   return new File([u8arr], fileName, { type: mime });
+}
+
+function dataURLsToFiles(dataURLs, fileNameBase) {
+  return dataURLs.map((dataURL, index) => {
+    const fileName = `${fileNameBase}_${index}.jpeg`;
+    return dataURLtoFile(dataURL, fileName);
+  });
 }
 
 function checkIfOfferInfoIsFilled() {
@@ -170,15 +202,14 @@ onMounted(async () => {
       </div>
     </Transition>
     <Transition name="bounce">
-    <div v-if="isOfferCountryFilled" class="new_offer_image">
+      <div v-if="isOfferCountryFilled" class="new_offer_image">
         <div class="upload_image">
-          <img v-if="newOffer.image !== ''" :src="newOffer.image" class="preview_image" alt="offerImage"/>
-          <div id="image_input" v-if="newOffer.image === ''">
-            <label for="image_upload">
-              Add a photo
-            </label>
-            <input id="image_upload" type="file" accept="image/jpeg, image/png, image/jpg"
-                   @change=uploadImage>
+          <div v-for="(image, index) in newOffer.images" :key="index" class="image_preview">
+            <img :src="image" class="preview_image" alt="offerImage" />
+          </div>
+          <div id="image_input">
+            <label for="image_upload">Add photos</label>
+            <input id="image_upload" type="file" accept="image/jpeg, image/png, image/jpg" multiple @change="uploadImage" />
           </div>
         </div>
       </div>
@@ -229,9 +260,14 @@ div.submit_container{
   align-items: center;
   flex-direction: column;
 }
+
 div.new_offer_image {
   display: flex;
-  flex-grow: 1;
+  flex-direction: column;
+}
+
+div.image_preview {
+  margin-bottom: 10px;
 }
 
 div#image_input {
