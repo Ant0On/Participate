@@ -29,7 +29,7 @@ export const useAuthStore = defineStore({
             router.push('/');
         },
         async signUp(name, email, password, passwordConfirmation) {
-            const request = await fetchWrapper.post('/api/register/customer', {
+            const request = await fetchWrapper.post('/api/register', {
                 "first_name": name,
                 "email": email,
                 "password": password,

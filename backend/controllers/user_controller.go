@@ -17,7 +17,7 @@ type firstNameRequest struct {
 }
 
 type lastNameRequest struct {
-	LastName string `json:"last_name" binding:"required"`
+	LastName string `json:"last_name" binding:"required,min=2,max=100"`
 }
 
 type emailRequest struct {
@@ -35,14 +35,9 @@ func ChangeFirstName(c *gin.Context) {
 	var firstNameReq firstNameRequest
 	id := c.Param("id")
 
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
-		return
-	}
-
-	customer, err := models.GetCustomer(id)
+	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
 		return
 	}
 
@@ -51,28 +46,23 @@ func ChangeFirstName(c *gin.Context) {
 		return
 	}
 
-	customer.FirstName = firstNameReq.FirstName
+	user.FirstName = firstNameReq.FirstName
 
-	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
+	if err := user.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
 		return
 	}
 
-	customer.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
 }
 func ChangeLastName(c *gin.Context) {
 	var lastNameReq lastNameRequest
 	id := c.Param("id")
 
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
-		return
-	}
-
-	customer, err := models.GetCustomer(id)
+	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
 		return
 	}
 
@@ -81,28 +71,23 @@ func ChangeLastName(c *gin.Context) {
 		return
 	}
 
-	customer.LastName = lastNameReq.LastName
+	user.LastName = lastNameReq.LastName
 
-	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
+	if err := user.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
 		return
 	}
 
-	customer.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
 }
 func ChangeEmail(c *gin.Context) {
 	var emailReq emailRequest
 	id := c.Param("id")
 
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
-		return
-	}
-
-	customer, err := models.GetCustomer(id)
+	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
 		return
 	}
 
@@ -111,88 +96,57 @@ func ChangeEmail(c *gin.Context) {
 		return
 	}
 
-	customer.Email = emailReq.Email
+	user.Email = emailReq.Email
 
-	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
+	if err := user.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
 		return
 	}
 
-	customer.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
-}
-
-func ChangePicture(c *gin.Context) {
-	id := c.Param("id")
-
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
-		return
-	}
-
-	customer, err := models.GetCustomer(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
-		return
-	}
-
-	var dst string
-	if dst, _, err = customer.HandleUserImageUploads(c, customer.ID, customer.Role); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
-		return
-	}
-
-	customer.ImagePath = dst
-
-	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
-		return
-	}
-
-	customer.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
 }
 
 func ChangeImage(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "AppUser ID is required"})
 		return
 	}
 
-	customer, err := models.GetCustomer(id)
+	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
 		return
 	}
 
-	dst, wasImageUploaded, err := customer.HandleUserImageUploads(c, customer.ID, customer.Role)
+	dst, wasImageUploaded, err := user.HandleUserImageUploads(c, user.ID, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
 
 	if wasImageUploaded {
-		customer.ImagePath = dst
-		if err := customer.Update(); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"customer.Update error": err.Error()})
+		user.ImagePath = dst
+		if err := user.Update(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"user.Update error": err.Error()})
 			return
 		}
 	}
 
-	if err := customer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"customer.Update": err.Error()})
+	if err := user.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success", "customer": customer})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
 }
 
 func GradeReservation(c *gin.Context) {
 	reservationId := c.Param("id")
 	if reservationId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offer ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID"})
 		return
 	}
 
@@ -202,14 +156,14 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	customerObj, ok := customer.(*models.Customer)
+	customerObj, ok := customer.(*models.AppUser)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
 	var reservation models.Reservation
-	err := models.DB.Where("customer_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
+	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		return
@@ -220,7 +174,7 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	var request *models.Grade
+	var request models.Grade
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -250,9 +204,9 @@ func PromoteToHost(c *gin.Context) {
 		return
 	}
 
-	customer, err := models.GetCustomer(id)
+	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
 		return
 	}
 
@@ -261,41 +215,31 @@ func PromoteToHost(c *gin.Context) {
 		return
 	}
 
-	if err := passHelper.VerifyPassword(promoteReq.Password, customer.Password); err != nil {
+	if err := passHelper.VerifyPassword(promoteReq.Password, user.Password); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Passwords do not match"})
 		return
 	}
 
-	customer.Role = "host"
-	customer.Password = promoteReq.Password
+	user.Role = "host"
+	user.Password = promoteReq.Password
+	user.Description = promoteReq.Description
+	user.PhoneNumber = promoteReq.PhoneNumber
+	user.BankAccount = promoteReq.BankAccount
 
-	host := models.Host{
-		Customer:    customer,
-		Description: promoteReq.Description,
-		PhoneNumber: promoteReq.PhoneNumber,
-		BankAccount: promoteReq.BankAccount,
-		Offers:      nil,
-	}
-
-	if err := customer.Delete(); err != nil {
+	if err := user.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := host.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	host.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "Customer upgraded to Host successfully", "host": host})
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "AppUser upgraded to Host successfully", "host": user})
 }
 
 func GetReservationsHistory(c *gin.Context) {
-	customerID := c.Param("id")
+	userID := c.Param("id")
 
-	if customerID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "AppUser ID is required"})
 		return
 	}
 
@@ -305,8 +249,8 @@ func GetReservationsHistory(c *gin.Context) {
 		Joins("JOIN offer ON reservation.offer_id = offer.id").
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN customer ON reservation.customer_id = customer.id").
-		Where("customer.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", customerID).
+		Joins("JOIN user ON reservation.user_id = user.id").
+		Where("user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, reservation.grade_id, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
 		Find(&finishedReservations)
@@ -322,4 +266,37 @@ func GetReservationsHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "finished reservations fetched successfully", "data": finishedReservations})
+}
+
+func GetPendingReservations(c *gin.Context) {
+	userID := c.Param("id")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "AppUser ID is required"})
+		return
+	}
+
+	var pendingReservations []DTO.ReservationWithOffer
+	result := models.DB.
+		Model(&models.Reservation{}).
+		Joins("JOIN offer ON reservation.offer_id = offer.id").
+		Joins("JOIN town ON offer.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Joins("JOIN user ON offer.user_id = user.id").
+		Where("user.id = ? AND reservation_state = 'pending'", userID).
+		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, offer.name," + "" +
+			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, offer.id as offer_id").
+		Find(&pendingReservations)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No pending reservations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "pending reservations fetched successfully", "data": pendingReservations})
 }

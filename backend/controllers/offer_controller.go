@@ -71,7 +71,7 @@ func GetOfferByID(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("offer.id = ?", offerID).
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, offer.host_id, town.name as town_name, country.name as country_name").
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.user_id, town.name as town_name, country.name as country_name").
 		Find(&offerWithLocation)
 
 	if err := result.Error; err != nil {
