@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"backend/logger"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -95,7 +93,6 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 		dst := filepath.Join(offerFolder, filename)
 
 		if err := c.SaveUploadedFile(file, dst); err != nil {
-			logger.Logger.Info("Error with saving a file")
 			return err
 		}
 	}
