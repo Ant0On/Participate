@@ -76,24 +76,17 @@ func (o *Offer) Update() error {
 
 func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 	form, err := c.MultipartForm()
-	logger.Logger.Info(c.Request.Form)
 	if err != nil {
 		return err
 	}
 
-	for key := range form.File {
-		logger.Logger.Info("Form key:", key)
-	}
-
 	files := form.File["images"]
 	if len(files) == 0 {
-		logger.Logger.Info("Error with files length")
 		return fmt.Errorf("no images were uploaded for the offer")
 	}
 
 	offerFolder := filepath.Join("images/offers", fmt.Sprintf("%d", offerID))
 	if err := os.MkdirAll(offerFolder, os.ModePerm); err != nil {
-		logger.Logger.Info("Error with creating directory")
 		return err
 	}
 

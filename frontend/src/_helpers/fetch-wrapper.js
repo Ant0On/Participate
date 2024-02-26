@@ -25,7 +25,13 @@ function request(method) {
                 } else if (contentType === 'multipart/form-data') {
                     const formData = new FormData();
                     for (const key in data) {
-                        formData.append(key, data[key]);
+                        if (Array.isArray(data[key])) {
+                            data[key].forEach((item) => {
+                                formData.append(`${key}`, item);
+                            });
+                        } else {
+                            formData.append(key, data[key]);
+                        }
                     }
                     requestOptions.body = formData;
                 }
