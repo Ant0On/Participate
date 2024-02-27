@@ -33,7 +33,7 @@ type AppUser struct {
 func GetUserByEmail(email string) (*AppUser, error) {
 	var u AppUser
 
-	if err := DB.Model(&AppUser{}).Where("email = ?", email).Scan(&u).Error; err != nil {
+	if err := DB.Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("user not found: %w", err)
 		}
@@ -81,6 +81,7 @@ func LoginCheck(email, password string) (string, *AppUser, error) {
 	if err != nil {
 		return "", nil, fmt.Errorf("GetUserByEmail: %w", err)
 	}
+
 	if err := passHelper.VerifyPassword(password, user.Password); err != nil {
 		return "", nil, fmt.Errorf("VerifyPassword: wrong password")
 	}
@@ -94,16 +95,6 @@ func LoginCheck(email, password string) (string, *AppUser, error) {
 }
 
 func (u *AppUser) BeforeCreate(*gorm.DB) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
-	}
-	u.Password = string(hashedPassword)
-
-	return nil
-}
-
-func (u *AppUser) BeforeSave(*gorm.DB) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)

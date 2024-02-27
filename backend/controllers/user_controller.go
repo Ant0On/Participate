@@ -31,6 +31,26 @@ type promoteRequest struct {
 	BankAccount string `json:"bank_account" binding:"required,numeric,min=16,max=40"`
 }
 
+func GetHostByID(c *gin.Context) {
+	hostID := c.Param("id")
+
+	if hostID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Host ID is required"})
+		return
+	}
+
+	host, err := models.GetUserById(hostID)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Host not found"})
+		return
+	}
+
+	host.Password = ""
+
+	c.JSON(http.StatusOK, host)
+}
+
 func ChangeFirstName(c *gin.Context) {
 	var firstNameReq firstNameRequest
 	id := c.Param("id")
@@ -163,7 +183,7 @@ func GradeReservation(c *gin.Context) {
 	}
 
 	var reservation models.Reservation
-	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
+	err := models.DB.Where("app_user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		return
@@ -221,7 +241,6 @@ func PromoteToHost(c *gin.Context) {
 	}
 
 	user.Role = "host"
-	user.Password = promoteReq.Password
 	user.Description = promoteReq.Description
 	user.PhoneNumber = promoteReq.PhoneNumber
 	user.BankAccount = promoteReq.BankAccount
@@ -249,8 +268,8 @@ func GetReservationsHistory(c *gin.Context) {
 		Joins("JOIN offer ON reservation.offer_id = offer.id").
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN user ON reservation.user_id = user.id").
-		Where("user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
+		Joins("JOIN app_user ON reservation.app_user_id = app_user.id").
+		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, reservation.grade_id, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
 		Find(&finishedReservations)
@@ -272,7 +291,7 @@ func GetPendingReservations(c *gin.Context) {
 	userID := c.Param("id")
 
 	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "AppUser ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "app_user ID is required"})
 		return
 	}
 
@@ -282,8 +301,8 @@ func GetPendingReservations(c *gin.Context) {
 		Joins("JOIN offer ON reservation.offer_id = offer.id").
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN user ON offer.user_id = user.id").
-		Where("user.id = ? AND reservation_state = 'pending'", userID).
+		Joins("JOIN app_user ON offer.app_user_id = app_user.id").
+		Where("app_user.id = ? AND reservation_state = 'pending'", userID).
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, offer.id as offer_id").
 		Find(&pendingReservations)

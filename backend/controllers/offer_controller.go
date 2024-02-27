@@ -42,7 +42,7 @@ func GetOffers(c *gin.Context) {
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, offer.host_id, town.name as town_name, country.name as country_name").
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.app_user_id, town.name as town_name, country.name as country_name").
 		Offset(offset).Limit(limit).
 		Find(&offersWithLocation)
 
@@ -71,7 +71,7 @@ func GetOfferByID(c *gin.Context) {
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("offer.id = ?", offerID).
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, offer.user_id, town.name as town_name, country.name as country_name").
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.app_user_id, town.name as town_name, country.name as country_name").
 		Find(&offerWithLocation)
 
 	if err := result.Error; err != nil {
@@ -223,7 +223,7 @@ func GetOffersForHost(c *gin.Context) {
 		Model(&models.Offer{}).
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Where("offer.host_id = ?", hostID).
+		Where("offer.app_user_id = ?", hostID).
 		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
 			"offer.is_recommended, offer.offer_type, offer.discount, town.name as town_name, country.name as country_name").
 		Find(&offerWithLocation)

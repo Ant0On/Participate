@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"backend/models"
@@ -11,10 +12,13 @@ import (
 func AddReservation(c *gin.Context) {
 	var reservation *models.Reservation
 
+	fmt.Println("Bind")
 	if err := c.ShouldBindJSON(&reservation); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with AddReservation": err.Error()})
+		fmt.Println(err.Error())
 		return
 	}
+	fmt.Println("Validate")
 
 	if err := reservation.ValidateDates(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with date validation": err.Error()})

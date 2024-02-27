@@ -57,14 +57,6 @@ func GetOfferByID(id string) (*Offer, error) {
 	return o, nil
 }
 
-func GetOffersForHost(hostID string) ([]Offer, error) {
-	var offers []Offer
-	if err := DB.Find(&offers).Where("host_id = ?", hostID).Error; err != nil {
-		return nil, fmt.Errorf("DB.Find: %w", err)
-	}
-	return offers, nil
-}
-
 func (o *Offer) Update() error {
 	if err := DB.Save(&o).Error; err != nil {
 		return err
@@ -108,7 +100,7 @@ func AddRecommendedOffers() ([]Offer, error) {
 	result := query.
 		Joins("INNER JOIN reservation ON offer.id = reservation.offer_id").
 		Select("offer.id as ID, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, offer.host_id," +
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.app_user_id," +
 			"offer.town_id, AVG(reservation.grade_id) as avg_grade").
 		Group("offer.id").
 		Order("avg_grade desc").
