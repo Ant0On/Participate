@@ -26,7 +26,7 @@ function sendMessage() {
     messages.value.push(newMessageContent);
 
     fetchWrapper.post(`/api/customer/${props.userID}/${props.chatID}/message/send`, {
-      'app_user_id': props.userID,
+      'user_id': props.userID,
       'email': props.email,
       'content': newMessage.value,
       'chat_id': props.chatID

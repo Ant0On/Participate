@@ -26,7 +26,7 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 	if user == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -37,7 +37,7 @@ func SendMessage(c *gin.Context) {
 	}
 
 	message.Email = user.Email
-	message.AppUserID = user.ID
+	message.UserID = user.ID
 	message.ChatID = uint(chatID)
 
 	if err := message.Save(); err != nil {

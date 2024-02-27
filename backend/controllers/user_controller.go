@@ -55,9 +55,14 @@ func ChangeFirstName(c *gin.Context) {
 	var firstNameReq firstNameRequest
 	id := c.Param("id")
 
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -80,9 +85,14 @@ func ChangeLastName(c *gin.Context) {
 	var lastNameReq lastNameRequest
 	id := c.Param("id")
 
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -105,9 +115,14 @@ func ChangeEmail(c *gin.Context) {
 	var emailReq emailRequest
 	id := c.Param("id")
 
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -131,13 +146,13 @@ func ChangeImage(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "AppUser ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return
 	}
 
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -176,14 +191,14 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	customerObj, ok := customer.(*models.AppUser)
+	customerObj, ok := customer.(*models.User)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
 	var reservation models.Reservation
-	err := models.DB.Where("app_user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
+	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		return
@@ -226,7 +241,7 @@ func PromoteToHost(c *gin.Context) {
 
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "AppUser not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -251,14 +266,14 @@ func PromoteToHost(c *gin.Context) {
 	}
 
 	user.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "AppUser upgraded to Host successfully", "host": user})
+	c.JSON(http.StatusOK, gin.H{"message": "User upgraded to Host successfully", "host": user})
 }
 
 func GetReservationsHistory(c *gin.Context) {
 	userID := c.Param("id")
 
 	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "AppUser ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return
 	}
 
@@ -268,7 +283,7 @@ func GetReservationsHistory(c *gin.Context) {
 		Joins("JOIN offer ON reservation.offer_id = offer.id").
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN app_user ON reservation.app_user_id = app_user.id").
+		Joins("JOIN app_user ON reservation.user_id = app_user.id").
 		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, reservation.grade_id, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
@@ -301,7 +316,7 @@ func GetPendingReservations(c *gin.Context) {
 		Joins("JOIN offer ON reservation.offer_id = offer.id").
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN app_user ON offer.app_user_id = app_user.id").
+		Joins("JOIN app_user ON offer.user_id = app_user.id").
 		Where("app_user.id = ? AND reservation_state = 'pending'", userID).
 		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, offer.name," + "" +
 			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, offer.id as offer_id").

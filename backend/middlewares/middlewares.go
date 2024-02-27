@@ -33,10 +33,10 @@ func JwtAuthMiddleware(role string) gin.HandlerFunc {
 			return
 		}
 
-		var user models.AppUser
+		var user models.User
 
 		if err := models.DB.First(&user, int(userID)).Error; err != nil {
-			c.String(http.StatusUnauthorized, "AppUser not found")
+			c.String(http.StatusUnauthorized, "User not found")
 			c.Abort()
 			return
 		}

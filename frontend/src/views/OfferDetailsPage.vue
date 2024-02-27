@@ -24,7 +24,7 @@ function createChatHost() {
   if (isChatAlreadyCreated.value) {
     openChatCustomer()
   }
-  if (user.Role === 'host' && offer.value.appUserID !== user.ID) {
+  if (user.Role === 'host' && offer.value.userID !== user.ID) {
     console.error('You are not the owner of this offer!')
   } else {
     fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
@@ -53,7 +53,7 @@ const offer = ref({
   price: 0,
   location: '',
   numberOfPeople: 0,
-  appUserID: 0,
+  userID: 0,
   offer_id: 0,
 })
 const hostData = ref({
@@ -70,7 +70,7 @@ async function getOfferDetails() {
 
   const responseData = response.data
   offer.value = {
-    'appUserID': responseData["app_user_id"],
+    'userID': responseData["user_id"],
     'location': responseData["country_name"] + ', ' + responseData["town_name"],
     'description': responseData["description"],
     'name': responseData["name"],
@@ -78,7 +78,7 @@ async function getOfferDetails() {
     'numberOfPeople': responseData["max_people"],
   }
 
-  const response_host = await fetchWrapper.get(`/api/host/${offer.value.appUserID}`)
+  const response_host = await fetchWrapper.get(`/api/host/${offer.value.userID}`)
 
   hostData.value = {
     'firstName': response_host["FirstName"],

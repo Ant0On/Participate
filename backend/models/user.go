@@ -13,7 +13,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type AppUser struct {
+type Tabler interface {
+	TableName() string
+}
+
+type User struct {
 	gorm.Model
 	FirstName            string `gorm:"size:30;not null" form:"first_name" binding:"required,min=2,max=30"`
 	LastName             string `gorm:"size:100" form:"last_name"`
@@ -30,8 +34,12 @@ type AppUser struct {
 	Messages             []Message
 }
 
-func GetUserByEmail(email string) (*AppUser, error) {
-	var u AppUser
+func (User) TableName() string {
+	return "app_user"
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	var u User
 
 	if err := DB.Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -43,9 +51,9 @@ func GetUserByEmail(email string) (*AppUser, error) {
 	return &u, nil
 }
 
-func GetUserById(id string) (*AppUser, error) {
-	var u AppUser
-	if err := DB.Model(&AppUser{}).Where("id = ?", id).Scan(&u).Error; err != nil {
+func GetUserById(id string) (*User, error) {
+	var u User
+	if err := DB.Model(&User{}).Where("id = ?", id).Scan(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("user not found: %w", err)
 		}
@@ -54,7 +62,7 @@ func GetUserById(id string) (*AppUser, error) {
 	return &u, nil
 }
 
-func (u *AppUser) Save() error {
+func (u *User) Save() error {
 	if err := DB.Create(&u).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
@@ -62,21 +70,21 @@ func (u *AppUser) Save() error {
 	return nil
 }
 
-func (u *AppUser) Update() error {
+func (u *User) Update() error {
 	if err := DB.Save(&u).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u *AppUser) Delete() error {
+func (u *User) Delete() error {
 	if err := DB.Delete(&u).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func LoginCheck(email, password string) (string, *AppUser, error) {
+func LoginCheck(email, password string) (string, *User, error) {
 	user, err := GetUserByEmail(email)
 	if err != nil {
 		return "", nil, fmt.Errorf("GetUserByEmail: %w", err)
@@ -94,7 +102,7 @@ func LoginCheck(email, password string) (string, *AppUser, error) {
 	return t, user, nil
 }
 
-func (u *AppUser) BeforeCreate(*gorm.DB) error {
+func (u *User) BeforeCreate(*gorm.DB) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
@@ -104,7 +112,7 @@ func (u *AppUser) BeforeCreate(*gorm.DB) error {
 	return nil
 }
 
-func (u *AppUser) HandleUserImageUploads(context *gin.Context, userID uint, role string) (string, bool, error) {
+func (u *User) HandleUserImageUploads(context *gin.Context, userID uint, role string) (string, bool, error) {
 	form, err := context.MultipartForm()
 	if err != nil {
 		return "", false, fmt.Errorf("multipart form error: %v", err)

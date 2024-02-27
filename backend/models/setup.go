@@ -37,7 +37,7 @@ func ConnectDatabase() {
 	}
 	fmt.Println("We are connected to the database")
 
-	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &AppUser{},
+	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &User{},
 		&Town{}, &Offer{}, &Reservation{}, &Message{}, Chat{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}

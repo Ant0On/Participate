@@ -29,7 +29,7 @@ func CurrentUser(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-	var user models.AppUser
+	var user models.User
 	user.Role = "customer"
 
 	if err := c.ShouldBind(&user); err != nil {
