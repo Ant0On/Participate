@@ -22,23 +22,3 @@ func AddTown(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "town added successfully!", "town": town})
 }
-
-func GetTownByID(c *gin.Context) {
-	townID := c.Param("id")
-
-	if townID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Town ID is required"})
-		return
-	}
-
-	var town models.Town
-
-	_, err := models.GetTown(&town, townID)
-
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Town not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, town)
-}

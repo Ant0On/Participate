@@ -47,10 +47,6 @@ func RegisterRoutes(r *gin.Engine) {
 
 	town := r.Group("/api/town")
 	town.POST("/add", AddTown)
-	town.GET("/get/:id", GetTownByID)
-
-	grade := r.Group("/api/grade")
-	grade.GET("/get", GetAllGrades)
 
 	reservation := r.Group("/api/reservation")
 	reservation.GET("/get/:id", GetReservationById)

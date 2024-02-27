@@ -20,11 +20,3 @@ func (t *Town) Save() error {
 
 	return nil
 }
-
-func GetTown(town *Town, id string) (*Town, error) {
-	if err := DB.First(town, id).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
-	}
-
-	return town, nil
-}
