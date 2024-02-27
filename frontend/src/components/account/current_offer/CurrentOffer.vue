@@ -21,23 +21,25 @@ const errors = reactive({
 async function getCurrentOffers() {
   fetchWrapper.get(`/api/host/${user.ID}/reservations/pending`)
       .then((response) => {
-        const responseData = response.data
+        if (response) {
+          const responseData = response.data
 
-        allCurrentOffers.value = responseData.map((data) => {
-          return {
-            'reservationID': data["reservation_id"],
-            'location': data["country_name"] + ', ' + data["town_name"],
-            'name': data["name"],
-            'price': data["price"],
-            'dateFrom': data['date_from'],
-            'dateTo': data['date_to'],
-            'offerType': data['offer_type'],
-            'withAnimals': data['is_animal_friendly'],
-            'offerId': data['offer_id']
-          }
-        })
-        currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
-        maxPage.value = Math.floor(allCurrentOffers.value.length / pageSize) + 1
+          allCurrentOffers.value = responseData.map((data) => {
+            return {
+              'reservationID': data["reservation_id"],
+              'location': data["country_name"] + ', ' + data["town_name"],
+              'name': data["name"],
+              'price': data["price"],
+              'dateFrom': data['date_from'],
+              'dateTo': data['date_to'],
+              'offerType': data['offer_type'],
+              'withAnimals': data['is_animal_friendly'],
+              'offerId': data['offer_id']
+            }
+          })
+          currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
+          maxPage.value = Math.floor(allCurrentOffers.value.length / pageSize) + 1
+        }
       })
       .catch((error) =>{
         errors.apiError = "Failed to fetch current offers. Please try again later. " + error;

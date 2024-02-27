@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, reactive} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -9,6 +9,9 @@ import MyOffersItem from "@/components/account/my_offers/MyOffersItem.vue";
 const auth = useAuthStore();
 const user = auth.user;
 const pageSize = 5;
+const errors = reactive({
+  apiError: ""
+})
 
 const allMyOffers = ref([])
 const myOffers = ref([])

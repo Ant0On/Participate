@@ -280,7 +280,7 @@ func GetReservationsHistory(c *gin.Context) {
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No finished reservations"})
+		c.JSON(http.StatusNoContent, gin.H{"warning": "No finished reservations"})
 		return
 	}
 
@@ -313,7 +313,7 @@ func GetPendingReservations(c *gin.Context) {
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No pending reservations"})
+		c.JSON(http.StatusNoContent, gin.H{"error": "No pending reservations"})
 		return
 	}
 

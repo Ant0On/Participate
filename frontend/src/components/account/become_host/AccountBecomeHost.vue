@@ -63,7 +63,7 @@ async function onSubmit(){
       <TextInput label-text="Description" v-model="hostData.description" width="100%"/>
       <TextInput label-text="Phone number" v-model="hostData.phoneNumber" width="100%"/>
       <TextInput label-text="Bank account" v-model="hostData.bankAccount" width="100%"/>
-      <PasswordInput v-model="hostData.password"/>
+      <PasswordInput :labelText="'Enter your password'" v-model="hostData.password"/>
     </div>
     <button class="button_basic" @click="onSubmit">
       Join now!
