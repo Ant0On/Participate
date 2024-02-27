@@ -7,7 +7,6 @@ const props = defineProps({
   id: String,
   location: String,
   name: String,
-  description: String,
   price: String,
   max_people: String,
 })
@@ -34,9 +33,8 @@ const isImageSource = computed(() =>{
     <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="item_details">
       <div class="title">{{ name }}</div>
-      <div class="description"> {{ description }}</div>
       <div class="price">Price: {{ price }} $</div>
-      <div class="number_of_people">Number of people: {{ max_people }}</div>
+      <div class="number_of_people">Max number of people: {{ max_people }}</div>
       <div class="location">Location: {{ location }}</div>
     </div>
 
@@ -81,15 +79,6 @@ div.price {
 }
 
 div.number_of_people {
-  color: #7a7a7a;
-  font-family: "Poppins", Helvetica;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: normal;
-  padding: 1%;
-}
-
-div.description {
   color: #7a7a7a;
   font-family: "Poppins", Helvetica;
   font-size: 1.2rem;
