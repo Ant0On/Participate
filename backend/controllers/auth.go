@@ -28,14 +28,26 @@ func CurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success", "user": u})
 }
 
+type registerInput struct {
+	FirstName            string `form:"first_name" binding:"required,min=2,max=30"`
+	Email                string `form:"email" binding:"required,email"`
+	Password             string `form:"password" binding:"required,min=8"`
+	PasswordConfirmation string `form:"password_confirmation" binding:"required,eqfield=Password"`
+}
+
 func Register(c *gin.Context) {
 	var user models.User
+	var input registerInput
 	user.Role = "customer"
 
-	if err := c.ShouldBind(&user); err != nil {
+	if err := c.ShouldBind(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
 		return
 	}
+
+	user.FirstName = input.FirstName
+	user.Email = input.Email
+	user.Password = input.Password
 
 	if err := user.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"user.SaveCustomer error": err.Error()})
