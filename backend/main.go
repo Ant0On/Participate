@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"backend/controllers"
+	"backend/logger"
 	"backend/models"
 
 	"github.com/gin-contrib/static"
@@ -12,15 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var logger = logrus.New()
-
-var logLevelMap = map[string]logrus.Level{
-	"trace": logrus.TraceLevel,
-	"debug": logrus.DebugLevel,
-	"info":  logrus.InfoLevel,
-	"warn":  logrus.WarnLevel,
-	"error": logrus.ErrorLevel,
-}
+var r *gin.Engine
 
 type arguments struct {
 	LogLevel       string
@@ -29,17 +22,10 @@ type arguments struct {
 	StaticContents string
 }
 
-var r *gin.Engine
-
 func runServer(args arguments) error {
-	level, ok := logLevelMap[args.LogLevel]
-	if !ok {
-		return fmt.Errorf("invalid log level: %s", args.LogLevel)
-	}
-	logger.SetLevel(level)
-	logger.SetFormatter(&logrus.JSONFormatter{})
+	logger.InitLogger(args.LogLevel)
 
-	logger.WithFields(logrus.Fields{
+	logger.Logger.WithFields(logrus.Fields{
 		"args": args,
 	}).Info("Given options")
 
@@ -66,8 +52,9 @@ func main() {
 	models.ConnectDatabase()
 
 	if err := runServer(args); err != nil {
-		logger.WithError(err).Fatal("Server exits with error")
+		logger.Logger.WithError(err).Fatal("Server exits with error")
 	}
+
 	c := cron.New()
 	_, err := c.AddFunc("@daily", func() {
 		err := models.CheckReservations()

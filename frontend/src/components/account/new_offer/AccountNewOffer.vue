@@ -18,7 +18,7 @@ const newOffer = ref({
   isAnimalFriendly: false,
   country: '',
   city: '',
-  image: '',
+  images: [],
 });
 
 const errors = reactive({
@@ -34,7 +34,7 @@ const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '');
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
-const isOfferImageFilled = computed(() => newOffer.value.image !== '')
+const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
 const addedNewOffer = ref(false)
 const countries = ref([])
@@ -45,16 +45,18 @@ const offerTypesId = {
   'Activities': 'activity'
 }
 
-async function getCountryId(countryName){
+async function getCountryId(countryName) {
   const response = await fetchWrapper.get('/api/country/get/all')
   return response.data.filter((country) => country.Name === countryName)[0].ID
 }
+
 async function onSubmit() {
   await fetchWrapper.post('/api/town/add', {
     name: newOffer.value.city,
     country_id: await getCountryId(newOffer.value.country),
   }).then((data) => {
-    const imageFile = dataURLtoFile(newOffer.value.image, 'image.jpeg');
+        const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
+
         fetchWrapper.post('/api/host/create', {
               name: newOffer.value.name,
               description: newOffer.value.description,
@@ -65,7 +67,7 @@ async function onSubmit() {
               offer_type: offerTypesId[newOffer.value.offerType],
               host_id: user.ID,
               town_id: data.town.ID,
-              images: imageFile
+              images: imageFiles
             },
             "multipart/form-data")
             .then(() => {
@@ -78,13 +80,13 @@ async function onSubmit() {
                 isAnimalFriendly: false,
                 country: '',
                 city: '',
-                image: '',
+                images: [],
               }
               isAddingNewOffer.value = false;
               addedNewOffer.value = true;
               errors.apiError = null
             }).catch(error => {
-              errors.apiError = "Something went wrong - " + error.message
+          errors.apiError = "Something went wrong - " + error
         })
       }
   ).catch((error) => {
@@ -93,12 +95,24 @@ async function onSubmit() {
 }
 
 async function uploadImage(imageInput) {
-  const image = imageInput.target.files[0];
-  const reader = new FileReader();
-  reader.readAsDataURL(image);
-  reader.onload = source => {
-    newOffer.value.image = source.target.result;
-  };
+  const images = imageInput.target.files;
+  const promises = [];
+
+  for (const image of images) {
+    const reader = new FileReader();
+    promises.push(
+        new Promise((resolve) => {
+          reader.onload = (source) => {
+            resolve(source.target.result);
+          };
+          reader.readAsDataURL(image);
+        })
+    );
+  }
+
+  Promise.all(promises).then((imageDataArray) => {
+    newOffer.value.images = imageDataArray;
+  });
 }
 
 function dataURLtoFile(dataURL, fileName) {
@@ -110,7 +124,14 @@ function dataURLtoFile(dataURL, fileName) {
   while (n--) {
     u8arr[n] = bstr.charCodeAt(n);
   }
-  return new File([u8arr], fileName, { type: mime });
+  return new File([u8arr], fileName, {type: mime});
+}
+
+function dataURLsToFiles(dataURLs, fileNameBase) {
+  return dataURLs.map((dataURL, index) => {
+    const fileName = `${fileNameBase}_${index}.jpeg`;
+    return dataURLtoFile(dataURL, fileName);
+  });
 }
 
 function checkIfOfferInfoIsFilled() {
@@ -140,20 +161,20 @@ onMounted(async () => {
 <template>
   <div class="new_offer">
     <div v-if="!isAddingNewOffer && !addedNewOffer" class="new_offer_start">
-        <p class="new_offer_text">Add new amazing experience!</p>
-        <button v-if="!isAddingNewOffer" class="button_basic" @click="isAddingNewOffer = !isAddingNewOffer">
-          Start now!
-        </button>
-      </div>
+      <p class="new_offer_text">Add new amazing experience!</p>
+      <button v-if="!isAddingNewOffer" class="button_basic" @click="isAddingNewOffer = !isAddingNewOffer">
+        Start now!
+      </button>
+    </div>
     <Transition name="bounce">
-    <div v-if="isAddingNewOffer" class="new_offer_info">
+      <div v-if="isAddingNewOffer" class="new_offer_info">
         <p class="new_offer_text">Fill all information below to add a new experience!</p>
         <SelectionInput v-model="newOffer.offerType" label-text="Offer type" placeholder="Type" :items="offerTypes"
                         width="100%"/>
       </div>
     </Transition>
     <Transition name="bounce">
-    <div v-if="isOfferTypeFilled" class="new_offer_info">
+      <div v-if="isOfferTypeFilled" class="new_offer_info">
         <TextInput v-model="newOffer.name" label-text="Name" width="100%"/>
         <TextInput v-model="newOffer.description" label-text="Description" width="100%"/>
         <NumberInput v-model="newOffer.price" label-text="Price"/>
@@ -164,32 +185,32 @@ onMounted(async () => {
       </div>
     </Transition>
     <Transition name="bounce">
-    <div v-if="isOfferInfoFilled" class="new_offer_info">
+      <div v-if="isOfferInfoFilled" class="new_offer_info">
         <SelectionInput v-model="newOffer.country" label-text="Country" :items="countries" width="100%"/>
         <TextInput v-model="newOffer.city" label-text="City" width="100%"/>
       </div>
     </Transition>
     <Transition name="bounce">
-    <div v-if="isOfferCountryFilled" class="new_offer_image">
+      <div v-if="isOfferCountryFilled" class="new_offer_image">
         <div class="upload_image">
-          <img v-if="newOffer.image !== ''" :src="newOffer.image" class="preview_image" alt="offerImage"/>
-          <div id="image_input" v-if="newOffer.image === ''">
-            <label for="image_upload">
-              Add a photo
-            </label>
-            <input id="image_upload" type="file" accept="image/jpeg, image/png, image/jpg"
-                   @change=uploadImage>
+          <div v-for="(image, index) in newOffer.images" :key="index" class="image_preview">
+            <img :src="image" class="preview_image" alt="offerImage"/>
+          </div>
+          <div id="image_input">
+            <label for="image_upload">Add photos</label>
+            <input id="image_upload" type="file" accept="image/jpeg, image/png, image/jpg" multiple
+                   @change="uploadImage"/>
           </div>
         </div>
       </div>
     </Transition>
     <Transition name="bounce">
-    <div class="submit_container">
-      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
-      <div class="errors" v-if="errors.offerType">{{ errors.offerType }}</div>
-      <div class="errors" v-if="errors.offerInfo">{{ errors.offerInfo }}</div>
-      <div class="errors" v-if="errors.country">{{ errors.country }}</div>
-      <div class="errors" v-if="errors.image">{{ errors.image }}</div>
+      <div class="submit_container">
+        <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+        <div class="errors" v-if="errors.offerType">{{ errors.offerType }}</div>
+        <div class="errors" v-if="errors.offerInfo">{{ errors.offerInfo }}</div>
+        <div class="errors" v-if="errors.country">{{ errors.country }}</div>
+        <div class="errors" v-if="errors.image">{{ errors.image }}</div>
         <button v-if="isOfferImageFilled" class="button_basic" @click="onSubmit">
           Create an offer
         </button>
@@ -210,9 +231,11 @@ onMounted(async () => {
 .bounce-enter-active {
   animation: bounce-in 0.5s;
 }
+
 .bounce-leave-active {
   animation: bounce-in 0.5s reverse;
 }
+
 @keyframes bounce-in {
   0% {
     transform: scale(0);
@@ -224,14 +247,20 @@ onMounted(async () => {
     transform: scale(1);
   }
 }
-div.submit_container{
+
+div.submit_container {
   display: flex;
   align-items: center;
   flex-direction: column;
 }
+
 div.new_offer_image {
   display: flex;
-  flex-grow: 1;
+  flex-direction: column;
+}
+
+div.image_preview {
+  margin-bottom: 10px;
 }
 
 div#image_input {
