@@ -57,7 +57,7 @@ function submitOffer(payment) {
           'date_to': data['dateTo'],
           'number_of_people': data['numberOfPeople'],
           'reservation_state': 'pending',
-          'customer_id': user.ID,
+          'user_id': user.ID,
           'offer_id': parseInt(props.id),
           'payment_id': paymentMethod.value[payment].id
         }).then(() => {

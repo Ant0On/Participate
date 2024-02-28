@@ -20,7 +20,7 @@ func SendMessage(c *gin.Context) {
 	userId := c.Param("id")
 	chatId := c.Param("chatId")
 
-	user, err := models.GetCustomer(userId)
+	user, err := models.GetUserById(userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -37,7 +37,7 @@ func SendMessage(c *gin.Context) {
 	}
 
 	message.Email = user.Email
-	message.CustomerID = user.ID
+	message.UserID = user.ID
 	message.ChatID = uint(chatID)
 
 	if err := message.Save(); err != nil {

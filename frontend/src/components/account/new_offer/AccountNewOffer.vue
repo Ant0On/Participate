@@ -65,7 +65,7 @@ async function onSubmit() {
               is_animal_friendly: newOffer.value.isAnimalFriendly,
               is_recommended: false,
               offer_type: offerTypesId[newOffer.value.offerType],
-              host_id: user.ID,
+              user_id: user.ID,
               town_id: data.town.ID,
               images: imageFiles
             },

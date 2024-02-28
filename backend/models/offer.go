@@ -28,7 +28,7 @@ type Offer struct {
 	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
 	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type" binding:"required,oneof=activity event accommodation"`
 	Discount         float64   `gorm:"not null;default: 0.00" form:"discount"`
-	HostID           uint      `gorm:"not null" form:"host_id" binding:"required"`
+	UserID           uint      `gorm:"not null" form:"user_id" binding:"required"`
 	TownID           uint      `gorm:"not null" form:"town_id" binding:"required"`
 	ChatID           uint      `form:"chat_id"`
 	Reservations     []Reservation
@@ -55,14 +55,6 @@ func GetOfferByID(id string) (*Offer, error) {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
 	return o, nil
-}
-
-func GetOffersForHost(hostID string) ([]Offer, error) {
-	var offers []Offer
-	if err := DB.Find(&offers).Where("host_id = ?", hostID).Error; err != nil {
-		return nil, fmt.Errorf("DB.Find: %w", err)
-	}
-	return offers, nil
 }
 
 func (o *Offer) Update() error {
@@ -108,7 +100,7 @@ func AddRecommendedOffers() ([]Offer, error) {
 	result := query.
 		Joins("INNER JOIN reservation ON offer.id = reservation.offer_id").
 		Select("offer.id as ID, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, offer.host_id," +
+			"offer.is_recommended, offer.offer_type, offer.discount, offer.user_id," +
 			"offer.town_id, AVG(reservation.grade_id) as avg_grade").
 		Group("offer.id").
 		Order("avg_grade desc").

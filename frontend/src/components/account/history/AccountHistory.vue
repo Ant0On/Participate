@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, reactive} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -16,40 +16,45 @@ const currentPage = ref(1)
 const maxPage = ref(1)
 const offerToGrade = ref([])
 
-const error = ref(null);
+const errors = reactive({
+  apiError: ""
+})
 
 async function getHistoryItems() {
 
   await fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
       .then((response) => {
-        const responseData = response.data
-        allHistoryItems.value = responseData.map((data) => {
-          return {
-            'location': data["country_name"] + ', ' + data["town_name"],
-            'name': data["name"],
-            'price': data["price"],
-            'dateFrom': data['date_from'],
-            'dateTo': data['date_to'],
-            'offerType': data['offer_type'],
-            'withAnimals': data['is_animal_friendly'],
-            'reservationState': data['reservation_state'],
-            'reservationId': data['reservation_id'],
-            'offerId': data["offer_id"],
-            'gradeId': data["grade_id"]
-          }
-        })
-        historyItems.value = allHistoryItems.value.slice(0, pageSize);
-        maxPage.value = Math.floor(allHistoryItems.value.length / pageSize) + 1
-        gradeOffers()
+        if(response) {
+          const responseData = response.data
+          allHistoryItems.value = responseData.map((data) => {
+            return {
+              'location': data["country_name"] + ', ' + data["town_name"],
+              'name': data["name"],
+              'price': data["price"],
+              'dateFrom': data['date_from'],
+              'dateTo': data['date_to'],
+              'offerType': data['offer_type'],
+              'withAnimals': data['is_animal_friendly'],
+              'reservationState': data['reservation_state'],
+              'reservationId': data['reservation_id'],
+              'offerId': data["offer_id"],
+              'gradeId': data["grade_id"]
+            }
+          })
+          historyItems.value = allHistoryItems.value.slice(0, pageSize);
+          maxPage.value = Math.floor(allHistoryItems.value.length / pageSize) + 1
+          gradeOffers()
+        }
       })
       .catch((error) => {
-        error.value = 'Failed to fetch history items. Please try again later. ' + error.message;
+        errors.apiError = 'Failed to fetch history items. Please try again later. ' + error;
       })
 }
 function gradeOffers(){
   const allFinishedItems =  allHistoryItems.value.filter((item) => item.gradeId === 0 && item.reservationState === 'finished')
   offerToGrade.value =  JSON.parse(JSON.stringify(allFinishedItems.map((item) => JSON.parse(JSON.stringify(item)))))
 }
+
 function pageBack() {
   if (currentPage.value > 1) {
     currentPage.value -= 1;
@@ -74,7 +79,7 @@ onMounted(async () => {
   <div class="account_history">
     <p>Previously booked offers</p>
     <div class="items_list">
-      <div v-if="error" class="error-message">{{ error }}</div>
+      <div v-if="errors.apiError" class="error-message">{{ errors.apiError }}</div>
       <div class="history_items">
         <HistoryItem v-for="historyItem in historyItems" :name="historyItem.name" :offer-type="historyItem.offerType"
                      :date-from="historyItem.dateFrom" :date-to="historyItem.dateTo"

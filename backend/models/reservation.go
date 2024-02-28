@@ -23,9 +23,9 @@ type Reservation struct {
 	DateTo           time.Time        `gorm:"not null" json:"date_to" binding:"required,gtfield=DateFrom"`
 	ReservationState ReservationState `gorm:"type:varchar(255);check:reservation_state IN ('pending', 'accepted', 'ongoing', 'finished', 'rejected'); column:reservation_state; not null" json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
 	NumberOfPeople   int              `gorm:"not null" json:"number_of_people" binding:"required,gt=0"`
-	CustomerID       uint             `gorm:"not null" json:"customer_id" binding:"required"`
+	UserID           uint             `gorm:"not null" json:"user_id" binding:"required"`
 	OfferID          uint             `gorm:"not null" json:"offer_id" binding:"required"`
-	GradeID          uint             `json:"grade_id" binding:"required"`
+	GradeID          uint             `json:"grade_id"`
 	PaymentID        uint             `gorm:"not null" json:"payment_id" binding:"required"`
 	AnimalID         uint
 }
