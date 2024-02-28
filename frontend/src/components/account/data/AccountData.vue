@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import {useAuthStore} from "@/stores/auth.store";
 import TextInput from "@/components/ui/TextInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import PasswordInput from "@/components/ui/PasswordInput.vue";
 
 const auth = useAuthStore();
 const user = auth.user;
@@ -203,12 +204,15 @@ function dataURLtoFile(dataURL, fileName) {
       <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
       <div class="user_fields">
         <div class="customer_fields">
-          <TextInput label-text="Name" :is-active="isSubmitMode" v-model="customerData.Name" width="100%"/>
-          <TextInput label-text="Last Name" :is-active="isSubmitMode" v-model="customerData.LastName" width="100%"/>
-          <TextInput label-text="Email" :is-active="isSubmitMode" v-model="customerData.Email" width="100%"/>
-          <TextInput label-text="Old Password" :is-active="isSubmitMode" v-model="customerData.OldPassword" type="password" width="100%"/>
-          <TextInput label-text="New Password" :is-active="isSubmitMode" v-model="customerData.NewPassword" type="password" width="100%"/>
-          <TextInput label-text="Confirm New Password" :is-active="isSubmitMode" v-model="customerData.ConfirmNewPassword" type="password" width="100%"/>
+          <TextInput label-text="Name" :isActive="isSubmitMode" v-model="customerData.Name" width="100%"/>
+          <TextInput label-text="Last Name" :isActive="isSubmitMode" v-model="customerData.LastName" width="100%"/>
+          <TextInput label-text="Email" :isActive="isSubmitMode" v-model="customerData.Email" width="100%"/>
+          <PasswordInput :label-text="'Old Password'" :isActive="isSubmitMode" v-model="customerData.OldPassword"
+                     type="password" width="100%"/>
+          <PasswordInput :label-text="'New Password'" :isActive="isSubmitMode" v-model="customerData.NewPassword"
+                     type="password" width="100%"/>
+          <PasswordInput :label-text="'Confirm New Password'" :isActive="isSubmitMode"
+                     v-model="customerData.ConfirmNewPassword" type="password" width="100%"/>
           <p class="error-message" v-if="errors.oldPassword">{{ errors.oldPassword }}</p>
           <p class="error-message" v-if="errors.newPassword">{{ errors.newPassword }}</p>
           <p class="error-message" v-if="errors.confirmNewPassword">{{ errors.confirmNewPassword }}</p>
@@ -393,6 +397,4 @@ p.error-label {
 p.error-message {
   color: #ff0000;
 }
-
-
 </style>
