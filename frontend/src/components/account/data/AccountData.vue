@@ -12,7 +12,10 @@ const user = auth.user;
 const userRole = user.Role
 
 const errors = reactive({
-  apiError: ""
+  apiError: "",
+  oldPassword: "",
+  newPassword: "",
+  confirmNewPassword: ""
 })
 
 const isUserImage = computed(() => {
@@ -27,11 +30,13 @@ const isUserImage = computed(() => {
 const isImageUploaded = ref(false)
 const uploadedImage = ref({})
 
-
 const customerData = ref({
   Name: user.FirstName,
   LastName: user.LastName,
   Email: user.Email,
+  OldPassword: '',
+  NewPassword: '',
+  ConfirmNewPassword: '',
 })
 
 const hostData = ref({
@@ -44,7 +49,9 @@ const currentCustomerData = ref({
   Name: user.FirstName,
   LastName: user.LastName,
   Email: user.Email,
+  Password: user.Password
 })
+
 const currentHostData = ref({
   Description: user.Description ? user.Description : '',
   PhoneNumber: user.PhoneNumber ? user.PhoneNumber : '',
@@ -89,9 +96,17 @@ async function onSubmit() {
       await fetchWrapper.put(`/api/customer/${user.ID}/change/email`, {
         email: customerData.value.Email.trim()
       })
-    user.FirstName = hostData.value.FirstName
-    user.LastName = hostData.value.LastName
-    user.Email = hostData.value.Email
+    if (customerData.value.OldPassword) {
+      await fetchWrapper.put(`/api/customer/${user.ID}/change/password`, {
+        old_password: customerData.value.OldPassword.trim(),
+        new_password: customerData.value.NewPassword.trim(),
+        confirm_password: customerData.value.ConfirmNewPassword.trim(),
+      });
+    }
+    user.FirstName = customerData.value.Name
+    user.LastName = customerData.value.LastName
+    user.Email = customerData.value.Email
+    user.Password = customerData.value.NewPassword
 
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
@@ -141,8 +156,16 @@ const isSubmitMode = ref(false)
 
 const schemaCustomer = Yup.object().shape({
   Name: Yup.string().min(2).required('Name is required'),
-  LastName: Yup.string().min(2).required('Last name is required'),
+  LastName: Yup.string().min(2),
   Email: Yup.string().email().required('Email is required'),
+  OldPassword: Yup.string(),
+  NewPassword: Yup.string()
+      .min(8, 'Password must be at least 8 characters')
+      .notOneOf([Yup.ref('OldPassword'), null], 'New Password must be different from Old Password')
+      .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
+      .matches(/\d/, 'Password must contain at least one digit')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
+  ConfirmNewPassword: Yup.string().oneOf([Yup.ref('NewPassword'), null], 'Passwords must match'),
 });
 
 const schemaHost = Yup.object().shape({
@@ -172,8 +195,6 @@ function dataURLtoFile(dataURL, fileName) {
   }
   return new File([u8arr], fileName, {type: mime});
 }
-
-
 </script>
 
 <template>
@@ -185,6 +206,12 @@ function dataURLtoFile(dataURL, fileName) {
           <TextInput label-text="Name" :is-active="isSubmitMode" v-model="customerData.Name" width="100%"/>
           <TextInput label-text="Last Name" :is-active="isSubmitMode" v-model="customerData.LastName" width="100%"/>
           <TextInput label-text="Email" :is-active="isSubmitMode" v-model="customerData.Email" width="100%"/>
+          <TextInput label-text="Old Password" :is-active="isSubmitMode" v-model="customerData.OldPassword" type="password" width="100%"/>
+          <TextInput label-text="New Password" :is-active="isSubmitMode" v-model="customerData.NewPassword" type="password" width="100%"/>
+          <TextInput label-text="Confirm New Password" :is-active="isSubmitMode" v-model="customerData.ConfirmNewPassword" type="password" width="100%"/>
+          <p class="error-message" v-if="errors.oldPassword">{{ errors.oldPassword }}</p>
+          <p class="error-message" v-if="errors.newPassword">{{ errors.newPassword }}</p>
+          <p class="error-message" v-if="errors.confirmNewPassword">{{ errors.confirmNewPassword }}</p>
         </div>
         <div class="host_fields" v-if="userRole === 'host'">
           <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.Description" width="100%"/>

@@ -102,7 +102,7 @@ func LoginCheck(email, password string) (string, *User, error) {
 	return t, user, nil
 }
 
-func (u *User) BeforeCreate(*gorm.DB) error {
+func (u *User) HashPassword() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)

@@ -38,7 +38,7 @@ type registerInput struct {
 func Register(c *gin.Context) {
 	var user models.User
 	var input registerInput
-	
+
 	if err := c.ShouldBind(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
 		return
@@ -47,6 +47,11 @@ func Register(c *gin.Context) {
 	user.FirstName = input.FirstName
 	user.Email = input.Email
 	user.Password = input.Password
+
+	if err := user.HashPassword(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"user.HashPassword error": err.Error()})
+		return
+	}
 
 	if err := user.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"user.SaveCustomer error": err.Error()})
