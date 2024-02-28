@@ -38,8 +38,7 @@ type registerInput struct {
 func Register(c *gin.Context) {
 	var user models.User
 	var input registerInput
-	user.Role = "customer"
-
+	
 	if err := c.ShouldBind(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
 		return
