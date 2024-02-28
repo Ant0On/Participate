@@ -49,8 +49,7 @@ const hostData = ref({
 const currentCustomerData = ref({
   Name: user.FirstName,
   LastName: user.LastName,
-  Email: user.Email,
-  Password: user.Password
+  Email: user.Email
 })
 
 const currentHostData = ref({
