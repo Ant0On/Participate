@@ -39,6 +39,7 @@ export const useAuthStore = defineStore({
             if (request.message === "registration success!") {
                 const user = await fetchWrapper.post('/api/login', {email, password});
                 localStorage.setItem('user', JSON.stringify(user));
+                alert('Registration successful! You will now be redirected to the homepage.');
                 router.push('/')
             }
         }
