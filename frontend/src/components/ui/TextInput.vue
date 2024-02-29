@@ -17,8 +17,6 @@ const props = defineProps({
 })
 
 const emits = defineEmits(['update:modelValue'])
-
-
 </script>
 
 <template>
@@ -28,7 +26,6 @@ const emits = defineEmits(['update:modelValue'])
            @input="$emit('update:modelValue', $event.target.value)" :disabled="!isActive" :class="{'disabled': !isActive}"/>
   </div>
 </template>
-
 
 <style scoped>
 .text_input {

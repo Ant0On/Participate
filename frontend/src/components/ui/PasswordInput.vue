@@ -1,7 +1,15 @@
 <script setup>
 import {computed, ref, defineProps, defineEmits} from "vue";
 
-const { modelValue, labelText } = defineProps(['modelValue', 'labelText']);
+const { modelValue, labelText, isActive } = defineProps({
+  modelValue: String,
+  labelText: String,
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+});
+
 const emits = defineEmits(['update:modelValue']);
 
 const hidePassword = ref(true);
@@ -17,7 +25,7 @@ const passwordPlaceholder = computed(() => hidePassword.value ? "**********" : "
     <label :for="labelText">{{ labelText }}<span>*</span></label>
     <div class="password_input_field">
       <input :type="passwordFieldType" :id="labelText" :value="modelValue" :placeholder="passwordPlaceholder"
-             @input="$emit('update:modelValue', $event.target.value)">
+             @input="$emit('update:modelValue', $event.target.value)" :disabled="!isActive">
       <i class="fas" :class="[passwordFieldIcon]" @click="hidePassword = !hidePassword"></i>
     </div>
   </div>

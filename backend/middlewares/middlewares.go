@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func JwtAuthMiddleware(role string) gin.HandlerFunc {
+func JwtAuthMiddleware(requiredRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		getToken, err := token.GetToken(c)
 		if err != nil {
@@ -27,8 +27,16 @@ func JwtAuthMiddleware(role string) gin.HandlerFunc {
 		}
 
 		userID := claims["user_id"].(float64)
-		if err := token.IsTokenValid(c, role); err != nil {
+		userRole := claims["role"].(string)
+
+		if userRole != requiredRole && requiredRole != "customer" {
 			c.String(http.StatusUnauthorized, "Unauthorized, wrong role")
+			c.Abort()
+			return
+		}
+
+		if requiredRole != "customer" && c.FullPath() == "/api/customer/:id/promote" {
+			c.String(http.StatusUnauthorized, "Unauthorized for promotion, wrong role")
 			c.Abort()
 			return
 		}
@@ -41,7 +49,7 @@ func JwtAuthMiddleware(role string) gin.HandlerFunc {
 			return
 		}
 		c.Set("user", &user)
-		c.Set("role", role)
+		c.Set("role", userRole)
 		c.Next()
 	}
 }

@@ -24,6 +24,12 @@ type emailRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+type passwordRequest struct {
+	OldPassword     string `json:"old_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=8,nefield=OldPassword"`
+	ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=NewPassword"`
+}
+
 type promoteRequest struct {
 	Password    string `json:"password" binding:"required,min=8"`
 	Description string `json:"description" binding:"required,min=15,max=255"`
@@ -140,6 +146,47 @@ func ChangeEmail(c *gin.Context) {
 
 	user.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
+}
+
+func ChangePassword(c *gin.Context) {
+	var passwordReq passwordRequest
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	user, err := models.GetUserById(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&passwordReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := passHelper.VerifyPassword(passwordReq.OldPassword, user.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Old password is incorrect!"})
+		return
+	}
+
+	user.Password = passwordReq.NewPassword
+
+	if err := user.HashPassword(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"user.HashPassword": err.Error()})
+		return
+	}
+
+	if err := user.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
+		return
+	}
+
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
 func ChangeImage(c *gin.Context) {
