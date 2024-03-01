@@ -1,9 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
-
 	"strconv"
+	"strings"
 
 	"backend/models"
 	"backend/models/DTO"
@@ -12,22 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type firstNameRequest struct {
-	FirstName string `json:"first_name" binding:"required"`
-}
-
-type lastNameRequest struct {
-	LastName string `json:"last_name" binding:"required,min=2,max=100"`
-}
-
-type emailRequest struct {
-	Email string `json:"email" binding:"required,email"`
-}
-
-type passwordRequest struct {
-	OldPassword     string `json:"old_password" binding:"required"`
-	NewPassword     string `json:"new_password" binding:"required,min=8,nefield=OldPassword"`
-	ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=NewPassword"`
+type fieldChangeRequest struct {
+	Value string `json:"value" binding:"required"`
 }
 
 type promoteRequest struct {
@@ -35,6 +22,12 @@ type promoteRequest struct {
 	Description string `json:"description" binding:"required,min=15,max=255"`
 	PhoneNumber string `json:"phone_number" binding:"required,numeric,min=9,max=15"`
 	BankAccount string `json:"bank_account" binding:"required,numeric,min=16,max=40"`
+}
+
+type passwordRequest struct {
+	OldPassword     string `json:"old_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=8,nefield=OldPassword"`
+	ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=NewPassword"`
 }
 
 func GetHostByID(c *gin.Context) {
@@ -57,68 +50,115 @@ func GetHostByID(c *gin.Context) {
 	c.JSON(http.StatusOK, host)
 }
 
+func getFieldChangeResponse(c *gin.Context, id, fieldName string, updateFunc func(*models.User, string) error) {
+	var req fieldChangeRequest
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	user, err := models.GetUserById(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := updateFunc(user, req.Value); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := user.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
+		return
+	}
+
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
+}
+
+func ChangeField(c *gin.Context, fieldName string, updateFunc func(*models.User, string) error) {
+	id := c.Param("id")
+	getFieldChangeResponse(c, id, fieldName, updateFunc)
+}
+
 func ChangeFirstName(c *gin.Context) {
-	var firstNameReq firstNameRequest
-	id := c.Param("id")
-
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
-		return
-	}
-
-	user, err := models.GetUserById(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	if err := c.ShouldBindJSON(&firstNameReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	user.FirstName = firstNameReq.FirstName
-
-	if err := user.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
-		return
-	}
-
-	user.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
+	ChangeField(c, "first_name", func(user *models.User, value string) error {
+		if len(value) < 2 || len(value) > 100 {
+			return fmt.Errorf("first name must be between 2 and 100 characters")
+		}
+		user.FirstName = value
+		return nil
+	})
 }
+
 func ChangeLastName(c *gin.Context) {
-	var lastNameReq lastNameRequest
-	id := c.Param("id")
-
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
-		return
-	}
-
-	user, err := models.GetUserById(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	if err := c.ShouldBindJSON(&lastNameReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	user.LastName = lastNameReq.LastName
-
-	if err := user.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
-		return
-	}
-
-	user.Password = ""
-	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
+	ChangeField(c, "last_name", func(user *models.User, value string) error {
+		if len(value) < 2 || len(value) > 100 {
+			return fmt.Errorf("last name must be between 2 and 100 characters")
+		}
+		user.LastName = value
+		return nil
+	})
 }
+
 func ChangeEmail(c *gin.Context) {
-	var emailReq emailRequest
+	ChangeField(c, "email", func(user *models.User, value string) error {
+		if !isValidEmail(value) {
+			return fmt.Errorf("invalid email address")
+		}
+		user.Email = value
+		return nil
+	})
+}
+
+func ChangeDescription(c *gin.Context) {
+	ChangeField(c, "description", func(user *models.User, value string) error {
+		if user.Role != "customer" {
+			return fmt.Errorf("invalid role! User is a customer")
+		}
+		user.Description = value
+		return nil
+	})
+}
+
+func ChangePhoneNumber(c *gin.Context) {
+	ChangeField(c, "phone_number", func(user *models.User, value string) error {
+		if user.Role != "customer" {
+			return fmt.Errorf("invalid role! User is a customer")
+		}
+		if len(value) < 9 || len(value) > 15 {
+			return fmt.Errorf("phone number must be between 9 and 15 digits")
+		}
+		user.PhoneNumber = value
+		return nil
+	})
+}
+
+func ChangeBankAccount(c *gin.Context) {
+	ChangeField(c, "bank_account", func(user *models.User, value string) error {
+		if user.Role != "customer" {
+			return fmt.Errorf("invalid role! User is a customer")
+		}
+		if len(value) < 16 || len(value) > 40 {
+			return fmt.Errorf("bank account must be between 16 and 40 digits")
+		}
+		user.BankAccount = value
+		return nil
+	})
+}
+
+func isValidEmail(email string) bool {
+	return strings.Contains(email, "@") && strings.Contains(email, ".")
+}
+
+func ChangeImage(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
@@ -132,19 +172,25 @@ func ChangeEmail(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBindJSON(&emailReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	dst, wasImageUploaded, err := user.HandleUserImageUploads(c, user.ID, user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return
 	}
 
-	user.Email = emailReq.Email
+	if wasImageUploaded {
+		user.ImagePath = dst
+		if err := user.Update(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"user.Update error": err.Error()})
+			return
+		}
+	}
 
 	if err := user.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
 		return
 	}
 
-	user.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
 }
 
@@ -187,42 +233,6 @@ func ChangePassword(c *gin.Context) {
 
 	user.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
-}
-
-func ChangeImage(c *gin.Context) {
-	id := c.Param("id")
-
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
-		return
-	}
-
-	user, err := models.GetUserById(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	dst, wasImageUploaded, err := user.HandleUserImageUploads(c, user.ID, user.Role)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
-		return
-	}
-
-	if wasImageUploaded {
-		user.ImagePath = dst
-		if err := user.Update(); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"user.Update error": err.Error()})
-			return
-		}
-	}
-
-	if err := user.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
 }
 
 func GradeReservation(c *gin.Context) {
