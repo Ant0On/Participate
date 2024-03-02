@@ -50,7 +50,7 @@ func GetHostByID(c *gin.Context) {
 	c.JSON(http.StatusOK, host)
 }
 
-func getFieldChangeResponse(c *gin.Context, id, fieldName string, updateFunc func(*models.User, string) error) {
+func getFieldChangeResponse(c *gin.Context, id string, updateFunc func(*models.User, string) error) {
 	var req fieldChangeRequest
 
 	if id == "" {
@@ -83,13 +83,13 @@ func getFieldChangeResponse(c *gin.Context, id, fieldName string, updateFunc fun
 	c.JSON(http.StatusOK, gin.H{"message": "success", "user": user})
 }
 
-func ChangeField(c *gin.Context, fieldName string, updateFunc func(*models.User, string) error) {
+func ChangeField(c *gin.Context, updateFunc func(*models.User, string) error) {
 	id := c.Param("id")
-	getFieldChangeResponse(c, id, fieldName, updateFunc)
+	getFieldChangeResponse(c, id, updateFunc)
 }
 
 func ChangeFirstName(c *gin.Context) {
-	ChangeField(c, "first_name", func(user *models.User, value string) error {
+	ChangeField(c, func(user *models.User, value string) error {
 		if len(value) < 2 || len(value) > 100 {
 			return fmt.Errorf("first name must be between 2 and 100 characters")
 		}
@@ -99,7 +99,7 @@ func ChangeFirstName(c *gin.Context) {
 }
 
 func ChangeLastName(c *gin.Context) {
-	ChangeField(c, "last_name", func(user *models.User, value string) error {
+	ChangeField(c, func(user *models.User, value string) error {
 		if len(value) < 2 || len(value) > 100 {
 			return fmt.Errorf("last name must be between 2 and 100 characters")
 		}
@@ -109,7 +109,7 @@ func ChangeLastName(c *gin.Context) {
 }
 
 func ChangeEmail(c *gin.Context) {
-	ChangeField(c, "email", func(user *models.User, value string) error {
+	ChangeField(c, func(user *models.User, value string) error {
 		if !isValidEmail(value) {
 			return fmt.Errorf("invalid email address")
 		}
@@ -119,7 +119,7 @@ func ChangeEmail(c *gin.Context) {
 }
 
 func ChangeDescription(c *gin.Context) {
-	ChangeField(c, "description", func(user *models.User, value string) error {
+	ChangeField(c, func(user *models.User, value string) error {
 		if user.Role != "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
@@ -129,7 +129,7 @@ func ChangeDescription(c *gin.Context) {
 }
 
 func ChangePhoneNumber(c *gin.Context) {
-	ChangeField(c, "phone_number", func(user *models.User, value string) error {
+	ChangeField(c, func(user *models.User, value string) error {
 		if user.Role != "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
@@ -142,7 +142,7 @@ func ChangePhoneNumber(c *gin.Context) {
 }
 
 func ChangeBankAccount(c *gin.Context) {
-	ChangeField(c, "bank_account", func(user *models.User, value string) error {
+	ChangeField(c, func(user *models.User, value string) error {
 		if user.Role != "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
