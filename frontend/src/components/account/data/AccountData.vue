@@ -64,15 +64,15 @@ async function onSubmit() {
       await schemaHost.validate(hostData.value).then(async () => {
         if (hostData.value.Description !== currentHostData.value.Description)
           await fetchWrapper.put(`/api/host/${user.ID}/change/description`, {
-            description: hostData.value.Description
+            value: hostData.value.Description
           })
         if (hostData.value.PhoneNumber !== currentHostData.value.PhoneNumber)
           await fetchWrapper.put(`/api/host/${user.ID}/change/phone_number`, {
-            phone_number: hostData.value.PhoneNumber
+            value: hostData.value.PhoneNumber
           })
         if (hostData.value.BankAccount !== currentHostData.value.BankAccount)
           await fetchWrapper.put(`/api/host/${user.ID}/change/bank_account`, {
-            bank_account: hostData.value.BankAccount
+            value: hostData.value.BankAccount
           })
 
         user.Description = hostData.value.Description
@@ -86,15 +86,15 @@ async function onSubmit() {
     isSubmitMode.value = false;
     if (customerData.value.Name !== currentCustomerData.value.Name)
       await fetchWrapper.put(`/api/customer/${user.ID}/change/first_name`, {
-        first_name: customerData.value.Name.trim()
+        value: customerData.value.Name.trim()
       })
     if (customerData.value.LastName !== currentCustomerData.value.LastName)
       await fetchWrapper.put(`/api/customer/${user.ID}/change/last_name`, {
-        last_name: customerData.value.LastName.trim()
+        value: customerData.value.LastName.trim()
       })
     if (customerData.value.Email !== currentCustomerData.value.Email)
       await fetchWrapper.put(`/api/customer/${user.ID}/change/email`, {
-        email: customerData.value.Email.trim()
+        value: customerData.value.Email.trim()
       })
     if (customerData.value.OldPassword) {
       await fetchWrapper.put(`/api/customer/${user.ID}/change/password`, {
@@ -116,15 +116,9 @@ async function onSubmit() {
       const imageFile = dataURLtoFile(uploadedImage.value, 'image.jpeg');
       uploadedImage.value = null
       isImageUploaded.value = false
-      if (user.Role === "customer") {
         await fetchWrapper.put(`/api/customer/${user.ID}/change/picture`, {
           image: imageFile
         }, "multipart/form-data")
-      } else if (user.Role === "host") {
-        await fetchWrapper.put(`/api/host/${user.ID}/change/picture`, {
-          image: imageFile
-        }, "multipart/form-data")
-      }
     }
   }).catch((customerErrors) => {
     errors.apiError = formatErrors(customerErrors.errors);
