@@ -30,6 +30,7 @@ func CurrentUser(c *gin.Context) {
 
 type registerInput struct {
 	FirstName            string `form:"first_name" binding:"required,min=2,max=30"`
+	LastName             string `form:"last_name" binding:"required,min=2,max=30"`
 	Email                string `form:"email" binding:"required,email"`
 	Password             string `form:"password" binding:"required,min=8"`
 	PasswordConfirmation string `form:"password_confirmation" binding:"required,eqfield=Password"`
@@ -45,6 +46,7 @@ func Register(c *gin.Context) {
 	}
 
 	user.FirstName = input.FirstName
+	user.LastName = input.LastName
 	user.Email = input.Email
 	user.Password = input.Password
 

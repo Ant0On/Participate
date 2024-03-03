@@ -9,7 +9,8 @@ import LoginButton from "@/components/login/LoginButton.vue";
 
 
 const signUpData = ref({
-  Name: '',
+  FirstName: '',
+  LastName: '',
   Login: '',
   Password: '',
   ConfirmPassword: ''
@@ -22,7 +23,7 @@ const errors = reactive({
 async function onSubmit() {
   const authStore = useAuthStore();
   await schema.validate(signUpData.value).then(() => {
-    return authStore.signUp(signUpData.value.Name, signUpData.value.Login, signUpData.value.Password, signUpData.value.ConfirmPassword)
+    return authStore.signUp(signUpData.value.FirstName, signUpData.value.LastName, signUpData.value.Login, signUpData.value.Password, signUpData.value.ConfirmPassword)
   }).catch(error => {
           errors.apiError = "Incorrect sign up data! " + error
       }
@@ -30,7 +31,14 @@ async function onSubmit() {
 }
 
 const schema = Yup.object().shape({
-  Name: Yup.string().min(2).required('Name is required'),
+  FirstName: Yup.string()
+      .min(2, "First name must be at least 2 characters")
+      .max(50, "First name must be maximum 50 characters")
+      .required('First name is required'),
+  LastName: Yup.string()
+      .min(2, "Last name must be at least 2 characters")
+      .max(50, "Last name must be maximum 50 characters")
+      .required('Last name is required'),
   Login: Yup.string().email("This is not a valid email address").required('Email is required'),
   Password: Yup.string()
       .required('Password is required')
@@ -49,8 +57,10 @@ const schema = Yup.object().shape({
     <p>Create new account</p>
     <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <form class="signup_form" @submit.prevent>
-      <TextInput width="440px" labelText="Your name" placeholder="Type your name" :isRequired="true"
-                 v-model="signUpData.Name"/>
+      <TextInput width="440px" labelText="Your first name" placeholder="Type your first name" :isRequired="true"
+                 v-model="signUpData.FirstName"/>
+      <TextInput width="440px" labelText="Your last name" placeholder="Type your last name" :isRequired="true"
+                 v-model="signUpData.LastName"/>
       <TextInput width="440px" labelText="Your email" placeholder="Type your email" :isRequired="true"
                  v-model="signUpData.Login"/>
       <PasswordInput v-model="signUpData.Password" :labelText="'Your password'" @keyup.enter="onSubmit" :isRequired="true"/>
