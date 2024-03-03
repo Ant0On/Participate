@@ -12,6 +12,7 @@ import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue"
 import AccountCurrentOffer from "@/components/account/current_offer/CurrentOffer.vue";
 import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
 import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
+import AccountChangePassword from "@/components/account/change_password/ChangePassword.vue";
 
 const loginPage = ref(true)
 
@@ -48,6 +49,7 @@ function onPageChange(page){
         <AccountNav @page-changed="onPageChange"/>
         <div class="data">
           <AccountData v-if="currentPage === 'Account Information'"/>
+          <AccountChangePassword v-else-if="currentPage === 'Change Password'"/>
           <AccountMyOffers v-else-if="currentPage === 'My Offers'"/>
           <AccountHistory v-else-if="currentPage === 'History'"/>
           <AccountNewOffer v-else-if="currentPage === 'New Offer'"/>

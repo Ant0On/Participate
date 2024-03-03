@@ -1,15 +1,16 @@
 <script setup>
-import { defineEmits, ref} from 'vue';
+import {defineEmits, ref} from 'vue';
 import AccountNavItem from "@/components/account/AccountNavItem.vue";
 import {useAuthStore} from "@/stores/auth.store";
 
 const emits = defineEmits(['pageChanged'])
 const activeItem = ref('Account Information');
 
-function onItemClicked(navItem){
-  activeItem.value = navItem
-  emits('pageChanged', navItem)
+function onItemClicked(navItem) {
+  activeItem.value = navItem;
+  emits('pageChanged', navItem);
 }
+
 const auth = useAuthStore();
 const user = auth.user;
 
@@ -18,18 +19,25 @@ const userRole = user.Role
 </script>
 
 <template>
-<div class="account_nav">
-  <AccountNavItem text="Account Information" :is-active="activeItem === 'Account Information'" @item-clicked="onItemClicked" style="margin-top: 20px"/>
-  <AccountNavItem v-if="userRole === 'customer'" text="History" :is-active="activeItem === 'History'" @item-clicked="onItemClicked"/>
-  <AccountNavItem v-if="userRole === 'host'" text="My Offers" :is-active="activeItem === 'My Offers'" @item-clicked="onItemClicked"/>
-  <AccountNavItem v-if="userRole === 'host'" text="New Offer" :is-active="activeItem === 'New Offer'" @item-clicked="onItemClicked"/>
-  <AccountNavItem v-if="userRole === 'host'" text="Current Offers" :is-active="activeItem === 'Current Offers'" @item-clicked="onItemClicked"/>
-  <AccountNavItem v-if="userRole === 'customer'" text="Become a host" :is-active="activeItem === 'Become a host'" @item-clicked="onItemClicked"/>
-</div>
+  <div class="account_nav">
+    <AccountNavItem text="Account Information" :is-active="activeItem === 'Account Information'"
+                    @item-clicked="onItemClicked" style="margin-top: 20px"/>
+    <AccountNavItem text="Change Password" :is-active="activeItem === 'Change Password'" @item-clicked="onItemClicked"/>
+    <AccountNavItem v-if="userRole === 'customer'" text="History" :is-active="activeItem === 'History'"
+                    @item-clicked="onItemClicked"/>
+    <AccountNavItem v-if="userRole === 'host'" text="My Offers" :is-active="activeItem === 'My Offers'"
+                    @item-clicked="onItemClicked"/>
+    <AccountNavItem v-if="userRole === 'host'" text="New Offer" :is-active="activeItem === 'New Offer'"
+                    @item-clicked="onItemClicked"/>
+    <AccountNavItem v-if="userRole === 'host'" text="Current Offers" :is-active="activeItem === 'Current Offers'"
+                    @item-clicked="onItemClicked"/>
+    <AccountNavItem v-if="userRole === 'customer'" text="Become a host" :is-active="activeItem === 'Become a host'"
+                    @item-clicked="onItemClicked"/>
+  </div>
 </template>
 
 <style scoped>
-div.account_nav{
+div.account_nav {
   display: flex;
   flex-direction: column;
   margin-left: 5%;

@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import {useAuthStore} from "@/stores/auth.store";
 import TextInput from "@/components/ui/TextInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
-import PasswordInput from "@/components/ui/PasswordInput.vue";
 
 const auth = useAuthStore();
 const user = auth.user;
@@ -14,9 +13,7 @@ const userRole = user.Role
 
 const errors = reactive({
   apiError: "",
-  oldPassword: "",
-  newPassword: "",
-  confirmNewPassword: ""
+  oldPassword: ""
 })
 
 const isUserImage = computed(() => {
@@ -34,10 +31,7 @@ const uploadedImage = ref({})
 const customerData = ref({
   Name: user.FirstName,
   LastName: user.LastName,
-  Email: user.Email,
-  OldPassword: '',
-  NewPassword: '',
-  ConfirmNewPassword: '',
+  Email: user.Email
 })
 
 const hostData = ref({
@@ -96,17 +90,9 @@ async function onSubmit() {
       await fetchWrapper.put(`/api/customer/${user.ID}/change/email`, {
         value: customerData.value.Email.trim()
       })
-    if (customerData.value.OldPassword) {
-      await fetchWrapper.put(`/api/customer/${user.ID}/change/password`, {
-        old_password: customerData.value.OldPassword.trim(),
-        new_password: customerData.value.NewPassword.trim(),
-        confirm_password: customerData.value.ConfirmNewPassword.trim(),
-      });
-    }
     user.FirstName = customerData.value.Name
     user.LastName = customerData.value.LastName
     user.Email = customerData.value.Email
-    user.Password = customerData.value.NewPassword
 
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
@@ -151,15 +137,7 @@ const isSubmitMode = ref(false)
 const schemaCustomer = Yup.object().shape({
   Name: Yup.string().min(2).required('Name is required'),
   LastName: Yup.string().min(2),
-  Email: Yup.string().email().required('Email is required'),
-  OldPassword: Yup.string(),
-  NewPassword: Yup.string()
-      .min(8, 'Password must be at least 8 characters')
-      .notOneOf([Yup.ref('OldPassword'), null], 'New Password must be different from Old Password')
-      .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
-      .matches(/\d/, 'Password must contain at least one digit')
-      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
-  ConfirmNewPassword: Yup.string().oneOf([Yup.ref('NewPassword'), null], 'Passwords must match'),
+  Email: Yup.string().email().required('Email is required')
 });
 
 const schemaHost = Yup.object().shape({
@@ -200,15 +178,6 @@ function dataURLtoFile(dataURL, fileName) {
           <TextInput label-text="Name" :isActive="isSubmitMode" v-model="customerData.Name" width="100%"/>
           <TextInput label-text="Last Name" :isActive="isSubmitMode" v-model="customerData.LastName" width="100%"/>
           <TextInput label-text="Email" :isActive="isSubmitMode" v-model="customerData.Email" width="100%"/>
-          <PasswordInput :label-text="'Old Password'" :isActive="isSubmitMode" v-model="customerData.OldPassword"
-                     type="password" width="100%"/>
-          <PasswordInput :label-text="'New Password'" :isActive="isSubmitMode" v-model="customerData.NewPassword"
-                     type="password" width="100%"/>
-          <PasswordInput :label-text="'Confirm New Password'" :isActive="isSubmitMode"
-                     v-model="customerData.ConfirmNewPassword" type="password" width="100%"/>
-          <p class="error-message" v-if="errors.oldPassword">{{ errors.oldPassword }}</p>
-          <p class="error-message" v-if="errors.newPassword">{{ errors.newPassword }}</p>
-          <p class="error-message" v-if="errors.confirmNewPassword">{{ errors.confirmNewPassword }}</p>
         </div>
         <div class="host_fields" v-if="userRole === 'host'">
           <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.Description" width="100%"/>

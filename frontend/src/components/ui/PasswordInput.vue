@@ -17,7 +17,7 @@ const password = ref("");
 
 const passwordFieldIcon = computed(() => hidePassword.value ? "fa-eye" : "fa-eye-slash");
 const passwordFieldType = computed(() => hidePassword.value ? "password" : "text");
-const passwordPlaceholder = computed(() => hidePassword.value ? "**********" : "Type your password")
+const passwordPlaceholder = computed(() => hidePassword.value ? "**********" : "")
 </script>
 
 <template>
