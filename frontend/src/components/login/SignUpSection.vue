@@ -59,7 +59,7 @@ const schema = Yup.object().shape({
     <form class="signup_form" @submit.prevent>
       <TextInput width="440px" labelText="Your first name" placeholder="Type your first name" :isRequired="true"
                  v-model="signUpData.FirstName"/>
-      <TextInput width="440px" labelText="Your last name" placeholder="Type your name" :isRequired="true"
+      <TextInput width="440px" labelText="Your last name" placeholder="Type your last name" :isRequired="true"
                  v-model="signUpData.LastName"/>
       <TextInput width="440px" labelText="Your email" placeholder="Type your email" :isRequired="true"
                  v-model="signUpData.Login"/>
