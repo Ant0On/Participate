@@ -136,7 +136,7 @@ const isSubmitMode = ref(false)
 
 const schemaCustomer = Yup.object().shape({
   Name: Yup.string().min(2).required('Name is required'),
-  LastName: Yup.string().min(2),
+  LastName: Yup.string().min(2).required('Last name is required'),
   Email: Yup.string().email().required('Email is required')
 });
 
