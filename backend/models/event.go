@@ -20,5 +20,5 @@ type Event struct {
 	Offer
 	Date         time.Time
 	Type         EventType
-	Reservations []Reservation
+	Reservations []ReservationEvent
 }

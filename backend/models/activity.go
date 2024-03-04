@@ -28,5 +28,5 @@ type Activity struct {
 	Type         ActivityType
 	Equipment    []string
 	Duration     time.Duration
-	Reservations []Reservation
+	Reservations []ReservationActivity
 }

@@ -21,5 +21,5 @@ type Accommodation struct {
 	IsAnimalFriendly  bool
 	RatingID          Grade
 	Rooms             []Room
-	Reservations      []Reservation
+	Reservations      []ReservationAccommodation
 }
