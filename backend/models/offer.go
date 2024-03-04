@@ -12,26 +12,21 @@ import (
 
 type OfferType string
 
-const (
-	Activity      OfferType = "activity"
-	Event         OfferType = "event"
-	Accommodation OfferType = "accommodation"
-)
+//const (
+//	Activity      OfferType = "activity"
+//	Event         OfferType = "event"
+//	Accommodation OfferType = "accommodation"
+//)
 
 type Offer struct {
 	gorm.Model
-	Name             string    `gorm:"size:100;not null" form:"name" binding:"required,min=2,max=100"`
-	Description      string    `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
-	Price            float64   `gorm:"not null" form:"price" binding:"required,gt=0"`
-	MaxPeople        int       `gorm:"not null" form:"max_people" binding:"required,gt=0"`
-	IsAnimalFriendly bool      `gorm:"not null" form:"is_animal_friendly"`
-	IsRecommended    bool      `gorm:"not null" form:"is_recommended"`
-	OfferType        OfferType `gorm:"type:varchar(255);check:offer_type IN ('activity', 'event', 'accommodation'); column:offer_type; not null" form:"offer_type" binding:"required,oneof=activity event accommodation"`
-	Discount         float64   `gorm:"not null;default: 0.00" form:"discount"`
-	UserID           uint      `gorm:"not null" form:"user_id" binding:"required"`
-	TownID           uint      `gorm:"not null" form:"town_id" binding:"required"`
-	ChatID           uint      `form:"chat_id"`
-	Reservations     []Reservation
+	Title         string  `gorm:"size:100;not null" form:"name" binding:"required,min=2,max=100"`
+	Description   string  `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
+	Price         float64 `gorm:"not null" form:"price" binding:"required,gt=0"`
+	Capacity      int     `gorm:"not null" form:"max_people" binding:"required,gt=0"`
+	IsRecommended bool    `gorm:"not null" form:"is_recommended"`
+	Discount      float64 `gorm:"not null;default: 0.00" form:"discount"`
+	TownID        uint    `gorm:"not null" form:"town_id" binding:"required"`
 }
 
 func (o *Offer) Save() error {
