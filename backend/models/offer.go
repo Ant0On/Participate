@@ -7,56 +7,15 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-type OfferType string
-
-//const (
-//	Activity      OfferType = "activity"
-//	Event         OfferType = "event"
-//	Accommodation OfferType = "accommodation"
-//)
-
 type Offer struct {
-	gorm.Model
 	Title         string  `gorm:"size:100;not null" form:"name" binding:"required,min=2,max=100"`
 	Description   string  `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
-	Price         float64 `gorm:"not null" form:"price" binding:"required,gt=0"`
 	Capacity      int     `gorm:"not null" form:"max_people" binding:"required,gt=0"`
 	IsRecommended bool    `gorm:"not null" form:"is_recommended"`
 	Discount      float64 `gorm:"not null;default: 0.00" form:"discount"`
 	TownID        uint    `gorm:"not null" form:"town_id" binding:"required"`
-}
-
-func (o *Offer) Save() error {
-	if err := DB.Create(&o).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
-	}
-
-	return nil
-}
-
-func (o *Offer) Delete() error {
-	if err := DB.Delete(&o).Error; err != nil {
-		return fmt.Errorf("DB.Delete: %w", err)
-	}
-	return nil
-}
-
-func GetOfferByID(id string) (*Offer, error) {
-	var o *Offer
-	if err := DB.First(&o, id).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
-	}
-	return o, nil
-}
-
-func (o *Offer) Update() error {
-	if err := DB.Save(&o).Error; err != nil {
-		return err
-	}
-	return nil
 }
 
 func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {

@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type ReservationState string
@@ -18,20 +16,11 @@ const (
 )
 
 type Reservation struct {
-	gorm.Model
 	ReservationState ReservationState `gorm:"type:varchar(255);check:reservation_state IN ('pending', 'accepted', 'ongoing', 'finished', 'rejected'); column:reservation_state; not null" json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
 	NumberOfPeople   int              `gorm:"not null" json:"number_of_people" binding:"required,gt=0"`
 	UserID           uint             `gorm:"not null" json:"user_id" binding:"required"`
 	OfferID          uint             `gorm:"not null" json:"offer_id" binding:"required"`
 	PaymentID        uint             `gorm:"not null" json:"payment_id" binding:"required"`
-}
-
-func (r *Reservation) ValidateDates() error {
-	if r.DateFrom.Before(time.Now()) || r.DateTo.Before(time.Now()) {
-		return fmt.Errorf("reservation dates cannot be in the past")
-	}
-
-	return nil
 }
 
 func (r *Reservation) Validate() error {

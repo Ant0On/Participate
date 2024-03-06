@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -9,16 +10,48 @@ import (
 type EventType string
 
 const (
-	Conference  EventType = "Conference"
-	Concert     EventType = "Concert"
-	Festival    EventType = "Festival"
-	SportsEvent EventType = "Sports event"
+	Conference  EventType = "conference"
+	Concert     EventType = "concert"
+	Festival    EventType = "festival"
+	SportsEvent EventType = "sports event"
 )
 
 type Event struct {
 	gorm.Model
 	Offer
-	Date         time.Time
-	Type         EventType
+	DateFrom     time.Time `gorm:"not null" form:"date_from" binding:"required"`
+	DateTo       time.Time `gorm:"not null" form:"date_to" binding:"required"`
+	Price        float64   `gorm:"not null" form:"price" binding:"required,gt=0"`
+	Type         EventType `gorm:"type:varchar(255);check:event_type IN ('conference', 'concert', 'festival', 'sports event'); column:event_type; not null" form:"event_type" binding:"required,oneof=conference concert festival 'sports event'"`
 	Reservations []ReservationEvent
+}
+
+func (e *Event) Save() error {
+	if err := DB.Create(&e).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
+	}
+
+	return nil
+}
+
+func (e *Event) Update() error {
+	if err := DB.Save(&e).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *Event) Delete() error {
+	if err := DB.Delete(&e).Error; err != nil {
+		return fmt.Errorf("DB.Delete: %w", err)
+	}
+	return nil
+}
+
+func GetEventByID(id string) (*Event, error) {
+	var e *Event
+	if err := DB.First(&e, id).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return e, nil
 }

@@ -266,7 +266,7 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	var request models.Grade
+	var request models.Rating
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

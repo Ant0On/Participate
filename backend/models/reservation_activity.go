@@ -9,6 +9,6 @@ import (
 type ReservationActivity struct {
 	gorm.Model
 	Reservation
-	Date       time.Time
-	ActivityID uint
+	Date       time.Time `gorm:"not null" json:"date" binding:"required"`
+	ActivityID uint      `json:"activity_id"`
 }

@@ -6,14 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type Grade struct {
+type Rating struct {
 	gorm.Model
 	Count        int
 	Description  string
 	Reservations []Reservation
 }
 
-var GradesList = []Grade{
+var GradesList = []Rating{
 	{Count: 1, Description: "Terrible"},
 	{Count: 2, Description: "Bad"},
 	{Count: 3, Description: "Mediocre"},
@@ -21,7 +21,7 @@ var GradesList = []Grade{
 	{Count: 5, Description: "Excellent"},
 }
 
-func (g *Grade) save() error {
+func (g *Rating) save() error {
 	if err := DB.Create(&g).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
@@ -37,17 +37,17 @@ func AddGrades() error {
 	return nil
 }
 
-func GetGrades() ([]Grade, error) {
-	var grade []Grade
+func GetGrades() ([]Rating, error) {
+	var grade []Rating
 
-	if err := DB.Model(&[]Grade{}).Scan(&grade).Error; err != nil {
-		return grade, fmt.Errorf("DB.Model(&[]Grade{}).Scan: %w", err)
+	if err := DB.Model([]Rating{}).Scan(&grade).Error; err != nil {
+		return grade, fmt.Errorf("DB.Model(&[]Rating{}).Scan: %w", err)
 	}
 	return grade, nil
 }
 
-func GetGradeByCount(count string) (*Grade, error) {
-	var g *Grade
+func GetGradeByCount(count string) (*Rating, error) {
+	var g *Rating
 	if err := DB.Where("count = ?", count).First(&g).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
