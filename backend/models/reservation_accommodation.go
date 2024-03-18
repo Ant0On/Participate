@@ -24,3 +24,40 @@ func (r *ReservationAccommodation) ValidateDates() error {
 
 	return nil
 }
+func (r *ReservationAccommodation) Save() error {
+	if err := r.Validate(); err != nil {
+		return fmt.Errorf("r.Validate: %v", err)
+	}
+
+	if err := DB.Create(r).Error; err != nil {
+		return fmt.Errorf("DB.Create: %w", err)
+	}
+
+	return nil
+}
+
+func (r *ReservationAccommodation) Update() error {
+	if err := r.Validate(); err != nil {
+		return fmt.Errorf("r.Validate: %v", err)
+	}
+	if err := DB.Save(r).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetAccommodationReservationById(id string) (*ReservationAccommodation, error) {
+	var r ReservationAccommodation
+	if err := DB.Model(&ReservationAccommodation{}).Where("id = ?", id).Scan(&r).Error; err != nil {
+		return nil, fmt.Errorf("reservation not found: %w", err)
+	}
+	return &r, nil
+}
+
+func GetAccommodationReservationsByState(state string) ([]ReservationAccommodation, error) {
+	var reservations []ReservationAccommodation
+	if err := DB.Model(&ReservationAccommodation{}).Where("reservation_state = ?", state).Scan(reservations).Error; err != nil {
+		return nil, fmt.Errorf("reservation not found: %w", err)
+	}
+	return reservations, nil
+}

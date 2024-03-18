@@ -12,10 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type discountRequest struct {
-	Discount float64 `json:"discount" binding:"required,gte=0,lte=100"`
-}
-
 func GetOffers(c *gin.Context) {
 	var offersWithLocation []DTO.OfferWithLocation
 	var result *gorm.DB

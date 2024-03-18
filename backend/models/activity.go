@@ -34,7 +34,7 @@ type Activity struct {
 }
 
 func (a *Activity) Save() error {
-	if err := DB.Create(&a).Error; err != nil {
+	if err := DB.Create(a).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
 
@@ -42,14 +42,14 @@ func (a *Activity) Save() error {
 }
 
 func (a *Activity) Update() error {
-	if err := DB.Save(&a).Error; err != nil {
+	if err := DB.Save(a).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (a *Activity) Delete() error {
-	if err := DB.Delete(&a).Error; err != nil {
+	if err := DB.Delete(a).Error; err != nil {
 		return fmt.Errorf("DB.Delete: %w", err)
 	}
 	return nil
@@ -57,7 +57,7 @@ func (a *Activity) Delete() error {
 
 func GetActivityByID(id string) (*Activity, error) {
 	var a *Activity
-	if err := DB.First(&a, id).Error; err != nil {
+	if err := DB.First(a, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
 	return a, nil

@@ -27,7 +27,7 @@ type Event struct {
 }
 
 func (e *Event) Save() error {
-	if err := DB.Create(&e).Error; err != nil {
+	if err := DB.Create(e).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
 
@@ -35,14 +35,14 @@ func (e *Event) Save() error {
 }
 
 func (e *Event) Update() error {
-	if err := DB.Save(&e).Error; err != nil {
+	if err := DB.Save(e).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (e *Event) Delete() error {
-	if err := DB.Delete(&e).Error; err != nil {
+	if err := DB.Delete(e).Error; err != nil {
 		return fmt.Errorf("DB.Delete: %w", err)
 	}
 	return nil
@@ -50,7 +50,7 @@ func (e *Event) Delete() error {
 
 func GetEventByID(id string) (*Event, error) {
 	var e *Event
-	if err := DB.First(&e, id).Error; err != nil {
+	if err := DB.First(e, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
 	return e, nil

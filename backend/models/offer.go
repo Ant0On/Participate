@@ -12,7 +12,7 @@ import (
 type Offer struct {
 	Title         string  `gorm:"size:100;not null" form:"name" binding:"required,min=2,max=100"`
 	Description   string  `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
-	Capacity      int     `gorm:"not null" form:"max_people" binding:"required,gt=0"`
+	Capacity      int     `gorm:"not null" form:"capacity" binding:"required,gt=0"`
 	IsRecommended bool    `gorm:"not null" form:"is_recommended"`
 	Discount      float64 `gorm:"not null;default: 0.00" form:"discount"`
 	TownID        uint    `gorm:"not null" form:"town_id" binding:"required"`
@@ -46,6 +46,7 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 	return nil
 }
 
+/*
 func AddRecommendedOffers() ([]Offer, error) {
 	var offers []Offer
 
@@ -67,3 +68,4 @@ func AddRecommendedOffers() ([]Offer, error) {
 
 	return offers, nil
 }
+*/
