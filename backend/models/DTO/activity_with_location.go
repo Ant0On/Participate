@@ -8,7 +8,8 @@ import (
 
 type ActivityWithLocation struct {
 	OfferWithLocation
+	Price    float64             `json:"price" binding:"required,gt=0"`
 	Skill    models.SkillLevel   `json:"skill_level" binding:"required,oneof=beginner intermediate advanced"`
-	Type     models.ActivityType `json:"activity_type" binding:"required,oneof=indoor outdoor"`
+	Type     models.ActivityType `json:"type" binding:"required,oneof=indoor outdoor"`
 	Duration time.Duration       `json:"duration" binding:"required"`
 }

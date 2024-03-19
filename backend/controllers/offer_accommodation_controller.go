@@ -36,7 +36,7 @@ func CreateAccommodationOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func GetAccommodation(c *gin.Context) {
+func GetAccommodations(c *gin.Context) {
 	var accommodationWithLocation []DTO.AccommodationWithLocation
 	var result *gorm.DB
 
@@ -169,6 +169,69 @@ func DiscountAccommodation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
+}
+
+func GetAccommodationForHost(c *gin.Context) {
+	hostID := c.Param("id")
+
+	var accommodationWithLocation []DTO.AccommodationWithLocation
+	result := models.DB.
+		Model(&models.Offer{}).
+		Joins("JOIN town ON offer.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Where("offer.user_id = ?", hostID).
+		Select("accommodation.id as offer_id, accommodation.title, accommodation.description, " +
+			"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
+			"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+			"accommodation.user_id, town.name as town_name, country.name as country_name").
+		Find(&accommodationWithLocation)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": accommodationWithLocation})
+
+}
+
+type ChangeAccommodationPriceReq struct {
+	PricePerDay float64 `json:"price_per_day" binding:"required,gt=0"`
+}
+
+func ChangeAccommodationPrice(c *gin.Context) {
+	offerId := c.Param("id")
+	var req changePriceReq
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offer, err := models.GetAccommodationByID(offerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if offer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
+		return
+	}
+
+	offer.PricePerDay = req.Price
+
+	if err := offer.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }
 
 /*

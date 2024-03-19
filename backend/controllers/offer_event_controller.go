@@ -12,8 +12,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateActivityOffer(c *gin.Context) {
-	var offer models.Activity
+func CreateEventOffer(c *gin.Context) {
+	var offer models.Event
 
 	if err := c.ShouldBind(&offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
@@ -32,8 +32,8 @@ func CreateActivityOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func GetActivity(c *gin.Context) {
-	var activityWithLocation []DTO.ActivityWithLocation
+func GetEvent(c *gin.Context) {
+	var eventWithLocation []DTO.EventWithLocation
 	var result *gorm.DB
 
 	page, err := strconv.Atoi(c.Query("page"))
@@ -43,7 +43,7 @@ func GetActivity(c *gin.Context) {
 	limit := 10
 	offset := (page - 1) * limit
 
-	query := models.DB.Model(&models.Activity{})
+	query := models.DB.Model(&models.Event{})
 
 	var totalRecords int64
 	query.Count(&totalRecords)
@@ -52,12 +52,11 @@ func GetActivity(c *gin.Context) {
 	result = query.
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Select("activity.id as offer_id, activity.title, activity.description, " +
-			"activity.price, activity.capacity, activity.skill_level," +
-			"activity.is_recommended, activity.duration, activity.type, activity.discount, " +
-			"activity.user_id, town.name as town_name, country.name as country_name").
+		Select("event.id as offer_id, event.title, event.description, " +
+			"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
+			"event.user_id, town.name as town_name, country.name as country_name").
 		Offset(offset).Limit(limit).
-		Find(&activityWithLocation)
+		Find(&eventWithLocation)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -66,7 +65,7 @@ func GetActivity(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":      "offers fetched successfully",
-		"data":         activityWithLocation,
+		"data":         eventWithLocation,
 		"page":         page,
 		"limit":        limit,
 		"totalPages":   totalPages,
@@ -74,21 +73,20 @@ func GetActivity(c *gin.Context) {
 	})
 }
 
-func GetActivityByID(c *gin.Context) {
+func GetEventByID(c *gin.Context) {
 	offerID := c.Param("id")
 
-	var activityWithLocation DTO.ActivityWithLocation
+	var eventWithLocation DTO.EventWithLocation
 
 	result := models.DB.
-		Model(&models.Activity{}).
+		Model(&models.Event{}).
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Where("activity.id = ?", offerID).
-		Select("activity.id as offer_id, activity.title, activity.description, " +
-			"activity.price, activity.capacity, activity.skill_level," +
-			"activity.is_recommended, activity.duration, activity.type, activity.discount, " +
-			"activity.user_id, town.name as town_name, country.name as country_name").
-		Find(&activityWithLocation)
+		Where("Event.id = ?", offerID).
+		Select("event.id as offer_id, event.title, event.description, " +
+			"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
+			"event.user_id, town.name as town_name, country.name as country_name").
+		Find(&eventWithLocation)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"result.Error: ": err.Error()})
@@ -100,15 +98,15 @@ func GetActivityByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": activityWithLocation})
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": eventWithLocation})
 }
 
-func DeleteActivity(c *gin.Context) {
+func DeleteEvent(c *gin.Context) {
 	id := c.Params.ByName("id")
 
-	offer, err := models.GetActivityByID(id)
+	offer, err := models.GetEventByID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetActivityByID: ": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"models.GetEventByID: ": err.Error()})
 		return
 	}
 
@@ -119,12 +117,12 @@ func DeleteActivity(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
 }
 
-func UpdateActivity(c *gin.Context) {
+func UpdateEvent(c *gin.Context) {
 	id := c.Params.ByName("id")
 
-	offer, err := models.GetActivityByID(id)
+	offer, err := models.GetEventByID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetActivityByID: ": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"models.GetEventByID: ": err.Error()})
 		return
 	}
 
@@ -141,10 +139,10 @@ func UpdateActivity(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
 }
 
-func DiscountActivity(c *gin.Context) {
+func DiscountEvent(c *gin.Context) {
 	offerID := c.Param("id")
 
-	var offer models.Activity
+	var offer models.Event
 	var discountReq DiscountRequest
 
 	if err := models.DB.First(&offer, offerID).Error; err != nil {
@@ -167,20 +165,19 @@ func DiscountActivity(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
 }
 
-func GetActivityForHost(c *gin.Context) {
+func GetEventForHost(c *gin.Context) {
 	hostID := c.Param("id")
 
-	var activityWithLocation []DTO.ActivityWithLocation
+	var eventWithLocation []DTO.EventWithLocation
 	result := models.DB.
 		Model(&models.Offer{}).
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("offer.user_id = ?", hostID).
-		Select("activity.id as offer_id, activity.title, activity.description, " +
-			"activity.price, activity.capacity, activity.skill_level," +
-			"activity.is_recommended, activity.duration, activity.type, activity.discount, " +
-			"activity.user_id, town.name as town_name, country.name as country_name").
-		Find(&activityWithLocation)
+		Select("event.id as offer_id, event.title, event.description, " +
+			"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
+			"event.user_id, town.name as town_name, country.name as country_name").
+		Find(&eventWithLocation)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -192,11 +189,15 @@ func GetActivityForHost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": activityWithLocation})
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": eventWithLocation})
 
 }
 
-func ChangeActivityPrice(c *gin.Context) {
+type changePriceReq struct {
+	Price float64 `json:"price" binding:"required,gt=1"`
+}
+
+func ChangeEventPrice(c *gin.Context) {
 	offerId := c.Param("id")
 	var req changePriceReq
 
@@ -205,7 +206,7 @@ func ChangeActivityPrice(c *gin.Context) {
 		return
 	}
 
-	offer, err := models.GetActivityByID(offerId)
+	offer, err := models.GetEventByID(offerId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -227,21 +228,21 @@ func ChangeActivityPrice(c *gin.Context) {
 }
 
 /*
-func GetRecommendedActivity(c *gin.Context) {
-	var recommendedOffers []DTO.ActivityWithLocation
+func GetRecommendedEvent(c *gin.Context) {
+	var recommendedOffers []DTO.EventWithLocation
 	var result *gorm.DB
 
-	query := models.DB.Model(&models.Activity{})
+	query := models.DB.Model(&models.Event{})
 
 	result = query.
-		Model(&models.Activity{}).
+		Model(&models.Event{}).
 		Joins("JOIN town ON offer.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Where("is_recommended = ?", true).
-		Select("Activity.id as offer_id, Activity.title, Activity.description, " +
-			"Activity.price_per_day, Activity.capacity, Activity.is_animal_friendly," +
-			"Activity.is_recommended, Activity.rating, Activity.type, Activity.discount, " +
-			"Activity.user_id, town.name as town_name, country.name as country_name").
+		Select("Event.id as offer_id, Event.title, Event.description, " +
+			"Event.price_per_day, Event.capacity, Event.is_animal_friendly," +
+			"Event.is_recommended, Event.rating, Event.type, Event.discount, " +
+			"Event.user_id, town.name as town_name, country.name as country_name").
 		Find(&recommendedOffers)
 
 	if err := result.Error; err != nil {
@@ -250,5 +251,24 @@ func GetRecommendedActivity(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": recommendedOffers})
+}
+*/
+
+/*
+func AddRecommendedOffers(c *gin.Context) {
+	offers, err := models.AddRecommendedOffers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	for _, offer := range offers {
+		offer.IsRecommended = true
+		if err := offer.Update(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offers})
 }
 */
