@@ -7,6 +7,7 @@ import (
 
 	"backend/models"
 	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -32,7 +33,7 @@ func CreateEventOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func GetEvent(c *gin.Context) {
+func GetEvents(c *gin.Context) {
 	var eventWithLocation []DTO.EventWithLocation
 	var result *gorm.DB
 
@@ -193,13 +194,9 @@ func GetEventForHost(c *gin.Context) {
 
 }
 
-type changePriceReq struct {
-	Price float64 `json:"price" binding:"required,gt=1"`
-}
-
 func ChangeEventPrice(c *gin.Context) {
 	offerId := c.Param("id")
-	var req changePriceReq
+	var req utils.ChangePriceReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

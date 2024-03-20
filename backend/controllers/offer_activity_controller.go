@@ -7,6 +7,7 @@ import (
 
 	"backend/models"
 	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -32,7 +33,7 @@ func CreateActivityOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func GetActivity(c *gin.Context) {
+func GetActivities(c *gin.Context) {
 	var activityWithLocation []DTO.ActivityWithLocation
 	var result *gorm.DB
 
@@ -198,7 +199,7 @@ func GetActivityForHost(c *gin.Context) {
 
 func ChangeActivityPrice(c *gin.Context) {
 	offerId := c.Param("id")
-	var req changePriceReq
+	var req utils.ChangePriceReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

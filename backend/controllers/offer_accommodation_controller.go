@@ -7,6 +7,7 @@ import (
 
 	"backend/models"
 	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -206,7 +207,7 @@ type ChangeAccommodationPriceReq struct {
 
 func ChangeAccommodationPrice(c *gin.Context) {
 	offerId := c.Param("id")
-	var req changePriceReq
+	var req utils.ChangePriceReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
