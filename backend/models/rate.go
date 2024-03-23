@@ -13,7 +13,7 @@ type Rating struct {
 	Reservations []Reservation
 }
 
-var GradesList = []Rating{
+var RatingList = []Rating{
 	{Count: 1, Description: "Terrible"},
 	{Count: 2, Description: "Bad"},
 	{Count: 3, Description: "Mediocre"},
@@ -21,16 +21,16 @@ var GradesList = []Rating{
 	{Count: 5, Description: "Excellent"},
 }
 
-func (g *Rating) save() error {
-	if err := DB.Create(&g).Error; err != nil {
+func (r *Rating) save() error {
+	if err := DB.Create(&r).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
 	return nil
 }
 
 func AddGrades() error {
-	for _, grade := range GradesList {
-		if err := grade.save(); err != nil {
+	for _, rating := range RatingList {
+		if err := rating.save(); err != nil {
 			return fmt.Errorf("grades.Save: %w", err)
 		}
 	}
@@ -38,18 +38,18 @@ func AddGrades() error {
 }
 
 func GetGrades() ([]Rating, error) {
-	var grade []Rating
+	var rating []Rating
 
-	if err := DB.Model([]Rating{}).Scan(&grade).Error; err != nil {
-		return grade, fmt.Errorf("DB.Model(&[]Rating{}).Scan: %w", err)
+	if err := DB.Model([]Rating{}).Scan(&rating).Error; err != nil {
+		return rating, fmt.Errorf("DB.Model(&[]Rating{}).Scan: %w", err)
 	}
-	return grade, nil
+	return rating, nil
 }
 
 func GetGradeByCount(count string) (*Rating, error) {
-	var g *Rating
-	if err := DB.Where("count = ?", count).First(&g).Error; err != nil {
+	var r *Rating
+	if err := DB.Where("count = ?", count).First(&r).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return g, nil
+	return r, nil
 }

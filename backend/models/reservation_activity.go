@@ -11,6 +11,7 @@ type ReservationActivity struct {
 	gorm.Model
 	Reservation
 	Date       time.Time `gorm:"not null" json:"date" binding:"required"`
+	RatingID   uint      `json:"rating_id"`
 	ActivityID uint      `json:"activity_id"`
 }
 

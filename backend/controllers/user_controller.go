@@ -235,7 +235,7 @@ func ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
-func GradeReservation(c *gin.Context) {
+func GradeAccommodationReservation(c *gin.Context) {
 	reservationId := c.Param("id")
 	if reservationId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID"})
@@ -254,7 +254,7 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	var reservation models.Reservation
+	var reservation models.ReservationAccommodation
 	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
@@ -272,12 +272,64 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	grade, err := models.GetGradeByCount(strconv.Itoa(request.Count))
+	rate, err := models.GetGradeByCount(strconv.Itoa(request.Count))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	reservation.GradeID = grade.ID
+	reservation.GradeID = rate.ID
+
+	if err := reservation.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})
+}
+
+func GradeActivityReservation(c *gin.Context) {
+	reservationId := c.Param("id")
+	if reservationId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID"})
+		return
+	}
+
+	customer, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	customerObj, ok := customer.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	var reservation models.ReservationActivity
+	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
+		return
+	}
+
+	if reservation.ReservationState != models.Finished {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
+		return
+	}
+
+	var request models.Rating
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	rate, err := models.GetGradeByCount(strconv.Itoa(request.Count))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	reservation.RatingID = rate.ID
 
 	if err := reservation.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -326,24 +378,23 @@ func PromoteToHost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User upgraded to Host successfully", "host": user})
 }
 
-func GetReservationsHistory(c *gin.Context) {
+func GetReservationsAccommodationHistory(c *gin.Context) {
 	userID := c.Param("id")
-
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return
 	}
 
-	var finishedReservations []DTO.ReservationWithOffer
+	var finishedReservations []DTO.ReservationAccommodationWithOffer
 	result := models.DB.
-		Model(&models.Reservation{}).
-		Joins("JOIN offer ON reservation.offer_id = offer.id").
-		Joins("JOIN town ON offer.town_id = town.id").
+		Model(&models.ReservationAccommodation{}).
+		Joins("JOIN accommodation ON reservation_accommodation.offer_id = accommodation.id").
+		Joins("JOIN town ON accommodation.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN app_user ON reservation.user_id = app_user.id").
+		Joins("JOIN app_user ON reservation_accommodation.user_id = app_user.id").
 		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
-		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, reservation.grade_id, offer.name," + "" +
-			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
+		Select("reservation_accommodation.id as reservation_id, reservation_accommodation.date_from, reservation_accommodation.date_to, reservation_accommodation.capacity," +
+			" reservation_accommodation.rating_id, accommodation.title, accommodation.price_per_day, accommodation.is_animal_friendly, accommodation.accommodation_type, town.name as town_name, country.name as country_name, reservation_accommodation.reservation_state, accommodation.id as offer_id").
 		Find(&finishedReservations)
 
 	if err := result.Error; err != nil {
