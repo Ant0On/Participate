@@ -277,7 +277,7 @@ func GradeAccommodationReservation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	reservation.GradeID = rate.ID
+	reservation.RatingID = rate.ID
 
 	if err := reservation.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -388,13 +388,13 @@ func GetReservationsAccommodationHistory(c *gin.Context) {
 	var finishedReservations []DTO.ReservationAccommodationWithOffer
 	result := models.DB.
 		Model(&models.ReservationAccommodation{}).
-		Joins("JOIN accommodation ON reservation_accommodation.offer_id = accommodation.id").
+		Joins("JOIN accommodation ON reservation_accommodation.accommodation_id = accommodation.id").
 		Joins("JOIN town ON accommodation.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
 		Joins("JOIN app_user ON reservation_accommodation.user_id = app_user.id").
 		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
-		Select("reservation_accommodation.id as reservation_id, reservation_accommodation.date_from, reservation_accommodation.date_to, reservation_accommodation.capacity," +
-			" reservation_accommodation.rating_id, accommodation.title, accommodation.price_per_day, accommodation.is_animal_friendly, accommodation.accommodation_type, town.name as town_name, country.name as country_name, reservation_accommodation.reservation_state, accommodation.id as offer_id").
+		Select("reservation_accommodation.id as reservation_accommodation_id, reservation_accommodation.date_from, reservation_accommodation.date_to, reservation_accommodation.capacity," +
+			" reservation_accommodation.rating_id, accommodation.title, accommodation.price_per_day, accommodation.is_animal_friendly, accommodation.accommodation_type, town.name as town_name, country.name as country_name, reservation_accommodation.reservation_state, accommodation.id as accommodation_id").
 		Find(&finishedReservations)
 
 	if err := result.Error; err != nil {
@@ -410,7 +410,71 @@ func GetReservationsAccommodationHistory(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "finished reservations fetched successfully", "data": finishedReservations})
 }
 
-func GetPendingReservations(c *gin.Context) {
+func GetReservationsActivityHistory(c *gin.Context) {
+	userID := c.Param("id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	var finishedReservations []DTO.ReservationActivityWithOffer
+	result := models.DB.
+		Model(&models.ReservationActivity{}).
+		Joins("JOIN activity ON reservation_activity.activity_id = activity.id").
+		Joins("JOIN town ON activity.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Joins("JOIN app_user ON reservation_activity.user_id = app_user.id").
+		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
+		Select("reservation_activity.id as reservation_activity_id, reservation_activity.date, reservation_activity.capacity," +
+			" reservation_activity.rating_id, activity.title, activity.price, activity.skill, activity.activity_type, town.name as town_name, country.name as country_name, reservation_activity.reservation_state, activity.id as activity_id").
+		Find(&finishedReservations)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNoContent, gin.H{"warning": "No finished reservations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "finished reservations fetched successfully", "data": finishedReservations})
+}
+
+func GetReservationsEventHistory(c *gin.Context) {
+	userID := c.Param("id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	var finishedReservations []DTO.ReservationEventWithOffer
+	result := models.DB.
+		Model(&models.ReservationEvent{}).
+		Joins("JOIN event ON reservation_event.event_id = event.id").
+		Joins("JOIN town ON event.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Joins("JOIN app_user ON reservation_event.user_id = app_user.id").
+		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
+		Select("reservation_event.id as reservation_event_id, reservation_event.date_from, reservation_event.date_to, reservation_event.capacity," +
+			" reservation_event.rating_id, event.title, event.price, event.skill, event.event_type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id").
+		Find(&finishedReservations)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNoContent, gin.H{"warning": "No finished reservations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "finished reservations fetched successfully", "data": finishedReservations})
+}
+
+func GetPendingAccommodationReservations(c *gin.Context) {
 	userID := c.Param("id")
 
 	if userID == "" {
@@ -418,16 +482,82 @@ func GetPendingReservations(c *gin.Context) {
 		return
 	}
 
-	var pendingReservations []DTO.ReservationWithOffer
+	var pendingReservations []DTO.ReservationAccommodationWithOffer
 	result := models.DB.
-		Model(&models.Reservation{}).
-		Joins("JOIN offer ON reservation.offer_id = offer.id").
-		Joins("JOIN town ON offer.town_id = town.id").
+		Model(&models.ReservationAccommodation{}).
+		Joins("JOIN event ON reservation_event.event_id = event.id").
+		Joins("JOIN town ON event.town_id = town.id").
 		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN app_user ON offer.user_id = app_user.id").
-		Where("app_user.id = ? AND reservation_state = 'pending'", userID).
-		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, offer.name," + "" +
-			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, offer.id as offer_id").
+		Joins("JOIN app_user ON reservation_event.user_id = app_user.id").
+		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
+		Select("reservation_event.id as reservation_event_id, reservation_event.date_from, reservation_event.date_to, reservation_event.capacity," +
+			" reservation_event.rating_id, event.title, event.price, event.skill, event.event_type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id").
+		Find(&pendingReservations)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNoContent, gin.H{"error": "No pending reservations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "pending reservations fetched successfully", "data": pendingReservations})
+}
+
+func GetPendingActivityReservations(c *gin.Context) {
+	userID := c.Param("id")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "app_user ID is required"})
+		return
+	}
+
+	var pendingReservations []DTO.ReservationActivityWithOffer
+	result := models.DB.
+		Model(&models.ReservationActivity{}).
+		Joins("JOIN activity ON reservation_activity.activity_id = activity.id").
+		Joins("JOIN town ON activity.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Joins("JOIN app_user ON reservation_activity.user_id = app_user.id").
+		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
+		Select("reservation_activity.id as reservation_activity_id, reservation_activity.date, reservation_activity.capacity," +
+			" reservation_activity.rating_id, activity.title, activity.price, activity.skill, activity.activity_type, town.name as town_name, country.name as country_name, reservation_activity.reservation_state, activity.id as activity_id").
+		Find(&pendingReservations)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNoContent, gin.H{"error": "No pending reservations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "pending reservations fetched successfully", "data": pendingReservations})
+}
+
+func GetPendingEventReservations(c *gin.Context) {
+	userID := c.Param("id")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "app_user ID is required"})
+		return
+	}
+
+	var pendingReservations []DTO.ReservationEventWithOffer
+	result := models.DB.
+		Model(&models.ReservationEvent{}).
+		Joins("JOIN event ON reservation_event.event_id = event.id").
+		Joins("JOIN town ON event.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Joins("JOIN app_user ON reservation_event.user_id = app_user.id").
+		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
+		Select("reservation_event.id as reservation_event_id, reservation_event.date_from, reservation_event.date_to, reservation_event.capacity," +
+			" reservation_event.rating_id, event.title, event.price, event.skill, event.event_type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id").
 		Find(&pendingReservations)
 
 	if err := result.Error; err != nil {
