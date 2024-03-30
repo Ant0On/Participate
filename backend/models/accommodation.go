@@ -19,7 +19,7 @@ const (
 type Accommodation struct {
 	gorm.Model
 	Offer
-	GeneralFacilities []string          `gorm:"not null" form:"general_facilities" binding:"required"`
+	GeneralFacilities []string          `gorm:"not null; type:text" form:"general_facilities" binding:"required"`
 	NumberOfRooms     int               `gorm:"not null" form:"number_of_rooms" binding:"required,min=1"`
 	Type              AccommodationType `gorm:"type:varchar(255);check:accommodation_type IN ('hotel', 'hostel', 'apartment', 'villa', 'guesthouse'); column:accommodation_type; not null" form:"accommodation_type" binding:"required,oneof=hotel hostel apartment villa guesthouse"`
 	IsAnimalFriendly  bool              `gorm:"not null" form:"is_animal_friendly"`

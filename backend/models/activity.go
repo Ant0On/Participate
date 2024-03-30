@@ -28,7 +28,7 @@ type Activity struct {
 	Skill        SkillLevel    `gorm:"type:varchar(255);check:skill_level IN ('beginner', 'intermediate', 'advanced'); column:skill_level; not null" form:"skill_level" binding:"required,oneof=beginner intermediate advanced"`
 	Type         ActivityType  `gorm:"type:varchar(255);check:activity_type IN ('indoor', 'outdoor'); column:activity_type; not null" form:"activity_type" binding:"required,oneof=indoor outdoor"`
 	Price        float64       `gorm:"not null" form:"price" binding:"required,gt=0"`
-	Equipment    []string      `gorm:"not null" form:"equipment" binding:"required"`
+	Equipment    []string      `gorm:"not null; type:text; type:text" form:"equipment" binding:"required"`
 	Duration     time.Duration `gorm:"not null" form:"duration" binding:"required"`
 	TownID       uint          `gorm:"not null" form:"town_id" binding:"required"`
 	UserID       uint          `gorm:"not null" form:"user_id" binding:"required"`

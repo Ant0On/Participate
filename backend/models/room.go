@@ -9,6 +9,6 @@ type Room struct {
 	RoomDescription string
 	Capacity        int
 	Area            int
-	RoomFacilities  []string
+	RoomFacilities  []string `gorm:"type:text"`
 	AccommodationID uint
 }
