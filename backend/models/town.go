@@ -8,9 +8,11 @@ import (
 
 type Town struct {
 	gorm.Model
-	Name      string `gorm:"size:50;not null" json:"name" binding:"required,min=2,max=50"`
-	Offers    []Offer
-	CountryID uint `gorm:"not null" json:"country_id" binding:"required"`
+	Name           string `gorm:"size:50;not null" json:"name" binding:"required,min=2,max=50"`
+	Accommodations []Accommodation
+	Activities     []Activity
+	Events         []Event
+	CountryID      uint `gorm:"not null" json:"country_id" binding:"required"`
 }
 
 func (t *Town) Save() error {

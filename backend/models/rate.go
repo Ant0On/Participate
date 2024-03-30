@@ -8,9 +8,10 @@ import (
 
 type Rating struct {
 	gorm.Model
-	Count        int
-	Description  string
-	Reservations []Reservation
+	Count                     int
+	Description               string
+	ReservationsAccommodation []ReservationAccommodation
+	ReservationActivity       []ReservationActivity
 }
 
 var RatingList = []Rating{
@@ -41,7 +42,7 @@ func GetGrades() ([]Rating, error) {
 	var rating []Rating
 
 	if err := DB.Model([]Rating{}).Scan(&rating).Error; err != nil {
-		return rating, fmt.Errorf("DB.Model(&[]Rating{}).Scan: %w", err)
+		return rating, fmt.Errorf("DB.Model([]Rating{}).Scan: %w", err)
 	}
 	return rating, nil
 }

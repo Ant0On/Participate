@@ -24,7 +24,7 @@ func RegisterRoutes(r *gin.Engine) {
 	host.PUT("/:id/change/description", ChangeDescription)
 	host.PUT("/:id/change/phone_number", ChangePhoneNumber)
 	host.PUT("/:id/change/bank_account", ChangeBankAccount)
-	host.POST("/:offerID/chat/create", CreateChat)
+	//	host.POST("/:offerID/chat/create", CreateChat)
 
 	activity := r.Group("api/host/activity")
 	activity.Use(middlewares.JwtAuthMiddleware("host"))
@@ -105,5 +105,5 @@ func RegisterRoutes(r *gin.Engine) {
 
 	chat := r.Group("api/chat")
 	chat.GET("/:offerID/messages", GetAllMessages)
-	chat.GET("/offer/:offerID", GetChatByOfferID)
+	//chat.GET("/offer/:offerID", GetChatByOfferID)
 }

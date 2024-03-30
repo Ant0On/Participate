@@ -24,6 +24,8 @@ type Event struct {
 	Price        float64   `gorm:"not null" form:"price" binding:"required,gt=0"`
 	Type         EventType `gorm:"type:varchar(255);check:event_type IN ('conference', 'concert', 'festival', 'sports event'); column:event_type; not null" form:"event_type" binding:"required,oneof=conference concert festival 'sports event'"`
 	Reservations []ReservationEvent
+	TownID       uint `gorm:"not null" form:"town_id" binding:"required"`
+	UserID       uint `gorm:"not null" form:"user_id" binding:"required"`
 }
 
 func (e *Event) Save() error {
