@@ -10,7 +10,7 @@ import (
 )
 
 type Offer struct {
-	Title         string  `gorm:"size:100;not null" form:"name" binding:"required,min=2,max=100"`
+	Title         string  `gorm:"size:100;not null" form:"title" binding:"required,min=2,max=100"`
 	Description   string  `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
 	Capacity      int     `gorm:"not null" form:"capacity" binding:"required,gt=0"`
 	IsRecommended bool    `gorm:"not null" form:"is_recommended"`
