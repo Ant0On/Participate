@@ -15,22 +15,7 @@ import (
 
 func CreateActivityOffer(c *gin.Context) {
 	var offer models.Activity
-
-	if err := c.ShouldBind(&offer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
-		return
-	}
-
-	if err := offer.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Save: ": err.Error()})
-		return
-	}
-	if err := offer.HandleOfferImageUploads(c, offer.ID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"offer.HandleOfferImageUploads: ": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
+	CreateOffer(c, &offer)
 }
 
 func GetActivities(c *gin.Context) {

@@ -7,7 +7,6 @@ import (
 )
 
 func CreateOffer(c *gin.Context, offer interface{}) {
-
 	if err := c.ShouldBind(offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
