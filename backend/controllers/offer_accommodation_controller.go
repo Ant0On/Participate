@@ -25,7 +25,12 @@ func GetAccommodations(c *gin.Context) {
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
 		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
 		"accommodation.user_id, town.name as town_name, country.name as country_name"
-	GetOffers(c, "accommodation", &models.Accommodation{}, &accommodationWithLocation, selectQuery)
+	GetOffers(c, OfferQueryParameters{
+		tableName:   "accommodation",
+		model:       &models.Accommodation{},
+		dto:         &accommodationWithLocation,
+		selectQuery: selectQuery,
+	})
 }
 
 func GetAccommodationByID(c *gin.Context) {
@@ -34,45 +39,34 @@ func GetAccommodationByID(c *gin.Context) {
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
 		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
 		"accommodation.user_id, town.name as town_name, country.name as country_name"
-	GetOfferByID(c, "accommodation", &models.Accommodation{}, &accommodationWithLocation, selectQuery)
+	GetOfferByID(c, OfferQueryParameters{
+		tableName:   "accommodation",
+		model:       &models.Accommodation{},
+		dto:         &accommodationWithLocation,
+		selectQuery: selectQuery,
+	})
+}
+
+func GetAccommodationsForHost(c *gin.Context) {
+	var accommodationWithLocation DTO.AccommodationWithLocation
+	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
+		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
+		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+		"accommodation.user_id, town.name as town_name, country.name as country_name"
+	GetOffersForHost(c, OfferQueryParameters{
+		tableName:   "accommodation",
+		model:       &models.Accommodation{},
+		dto:         &accommodationWithLocation,
+		selectQuery: selectQuery,
+	})
 }
 
 func DeleteAccommodation(c *gin.Context) {
-	id := c.Params.ByName("id")
-
-	offer, err := models.GetAccommodationByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetAccommodationByID: ": err.Error()})
-		return
-	}
-
-	if err = offer.Delete(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
+	DeleteOffer(c, models.GetAccommodationByID)
 }
 
 func UpdateAccommodation(c *gin.Context) {
-	id := c.Params.ByName("id")
-
-	offer, err := models.GetAccommodationByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetAccommodationByID: ": err.Error()})
-		return
-	}
-
-	if err = c.ShouldBindJSON(&offer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBindJSON: ": err.Error()})
-		return
-	}
-
-	if err = offer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"offer.Update: ": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
+	UpdateOffer(c, models.GetAccommodationByID)
 }
 
 func DiscountAccommodation(c *gin.Context) {
@@ -101,35 +95,6 @@ func DiscountAccommodation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
 }
 
-func GetAccommodationForHost(c *gin.Context) {
-	hostID := c.Param("id")
-
-	var accommodationWithLocation []DTO.AccommodationWithLocation
-	result := models.DB.
-		Model(&models.Offer{}).
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("offer.user_id = ?", hostID).
-		Select("accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-			"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-			"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
-			"accommodation.user_id, town.name as town_name, country.name as country_name").
-		Find(&accommodationWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": accommodationWithLocation})
-
-}
-
 type ChangeAccommodationPriceReq struct {
 	PricePerDay float64 `json:"price_per_day" binding:"required,gt=0"`
 }
@@ -154,7 +119,12 @@ func ChangeAccommodationPrice(c *gin.Context) {
 		return
 	}
 
-	offer.PricePerDay = req.Price
+	if a, ok := offer.(*models.Accommodation); ok {
+		if err := a.UpdatePrice(req.Price); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
 
 	if err := offer.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

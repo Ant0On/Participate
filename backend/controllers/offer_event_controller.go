@@ -21,53 +21,46 @@ func GetEvents(c *gin.Context) {
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
 		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
 		"accommodation.user_id, town.name as town_name, country.name as country_name"
-	GetOffers(c, "event", &models.Event{}, &eventsWithLocation, selectQuery)
+	GetOffers(c, OfferQueryParameters{
+		tableName:   "event",
+		model:       &models.Event{},
+		dto:         &eventsWithLocation,
+		selectQuery: selectQuery,
+	})
 }
 
 func GetEventByID(c *gin.Context) {
-	var eventWithLocation DTO.EventWithLocation
+	var eventsWithLocation DTO.EventWithLocation
 	selectQuery := "event.id as offer_id, event.title, event.description, " +
 		"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
 		"event.user_id, town.name as town_name, country.name as country_name"
-	GetOfferByID(c, "event", &models.Event{}, &eventWithLocation, selectQuery)
+	GetOfferByID(c, OfferQueryParameters{
+		tableName:   "event",
+		model:       &models.Event{},
+		dto:         &eventsWithLocation,
+		selectQuery: selectQuery,
+	})
+}
+
+func GetEventsForHost(c *gin.Context) {
+	var eventsWithLocation DTO.EventWithLocation
+	selectQuery := "event.id as offer_id, event.title, event.description, " +
+		"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
+		"event.user_id, town.name as town_name, country.name as country_name"
+	GetOfferByID(c, OfferQueryParameters{
+		tableName:   "event",
+		model:       &models.Event{},
+		dto:         &eventsWithLocation,
+		selectQuery: selectQuery,
+	})
 }
 
 func DeleteEvent(c *gin.Context) {
-	id := c.Params.ByName("id")
-
-	offer, err := models.GetEventByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetEventByID: ": err.Error()})
-		return
-	}
-
-	if err = offer.Delete(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
+	DeleteOffer(c, models.GetEventByID)
 }
 
 func UpdateEvent(c *gin.Context) {
-	id := c.Params.ByName("id")
-
-	offer, err := models.GetEventByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetEventByID: ": err.Error()})
-		return
-	}
-
-	if err = c.ShouldBindJSON(&offer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBindJSON: ": err.Error()})
-		return
-	}
-
-	if err = offer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"offer.Update: ": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
+	UpdateOffer(c, models.GetEventByID)
 }
 
 func DiscountEvent(c *gin.Context) {
@@ -96,34 +89,6 @@ func DiscountEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
 }
 
-func GetEventForHost(c *gin.Context) {
-	hostID := c.Param("id")
-
-	var eventWithLocation []DTO.EventWithLocation
-	result := models.DB.
-		Model(&models.Offer{}).
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("offer.user_id = ?", hostID).
-		Select("event.id as offer_id, event.title, event.description, " +
-			"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
-			"event.user_id, town.name as town_name, country.name as country_name").
-		Find(&eventWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": eventWithLocation})
-
-}
-
 func ChangeEventPrice(c *gin.Context) {
 	offerId := c.Param("id")
 	var req utils.ChangePriceReq
@@ -144,7 +109,12 @@ func ChangeEventPrice(c *gin.Context) {
 		return
 	}
 
-	offer.Price = req.Price
+	if a, ok := offer.(*models.Event); ok {
+		if err := a.UpdatePrice(req.Price); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
 
 	if err := offer.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

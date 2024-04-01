@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"backend/controllers"
+
 	"gorm.io/gorm"
 )
 
@@ -36,6 +38,13 @@ func (e *Event) Save() error {
 	return nil
 }
 
+func (e *Event) GetID() (uint, error) {
+	if err := DB.First(&e).Error; err != nil {
+		return 0, fmt.Errorf("DB.First: %w", err)
+	}
+	return e.ID, nil
+}
+
 func (e *Event) Update() error {
 	if err := DB.Save(e).Error; err != nil {
 		return err
@@ -50,10 +59,15 @@ func (e *Event) Delete() error {
 	return nil
 }
 
-func GetEventByID(id string) (*Event, error) {
-	var e *Event
+func (e *Event) UpdatePrice(price float64) error {
+	e.Price = price
+	return e.Update()
+}
+
+func GetEventByID(id string) (controllers.OfferSaver, error) {
+	var e Event
 	if err := DB.First(e, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return e, nil
+	return controllers.OfferSaver(&e), nil
 }

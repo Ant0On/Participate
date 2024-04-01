@@ -36,8 +36,14 @@ func CreateOffer(c *gin.Context, offer interface{}) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-// TODO za duzo parametrów, dać do structa
-func GetOffers(c *gin.Context, tableName string, model interface{}, dto interface{}, selectQuery string) {
+type OfferQueryParameters struct {
+	tableName   string
+	model       interface{}
+	dto         interface{}
+	selectQuery string
+}
+
+func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 	var result *gorm.DB
 
 	page, err := strconv.Atoi(c.Query("page"))
@@ -47,20 +53,20 @@ func GetOffers(c *gin.Context, tableName string, model interface{}, dto interfac
 	limit := 10
 	offset := (page - 1) * limit
 
-	query := models.DB.Model(model)
+	query := models.DB.Model(parameters.model)
 
 	var totalRecords int64
 	query.Count(&totalRecords)
 	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
 
-	joinCondition := "JOIN town ON " + tableName + ".town_id = town.id"
+	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
 
 	result = query.
 		Joins(joinCondition).
-		Select(selectQuery).
+		Select(parameters.selectQuery).
 		Offset(offset).Limit(limit).
-		Find(dto)
+		Find(parameters.dto)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -69,7 +75,7 @@ func GetOffers(c *gin.Context, tableName string, model interface{}, dto interfac
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":      "offers fetched successfully",
-		"data":         dto,
+		"data":         parameters.dto,
 		"page":         page,
 		"limit":        limit,
 		"totalPages":   totalPages,
@@ -77,21 +83,20 @@ func GetOffers(c *gin.Context, tableName string, model interface{}, dto interfac
 	})
 }
 
-// TODO za duzo parametrów, dać do structa
-func GetOfferByID(c *gin.Context, tableName string, model interface{}, dto interface{}, selectQuery string) {
+func GetOfferByID(c *gin.Context, parameters OfferQueryParameters) {
 	offerID := c.Param("id")
 
 	var result *gorm.DB
 
-	joinCondition := "JOIN town ON " + tableName + ".town_id = town.id"
+	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
 
 	result = models.DB.
-		Model(model).
+		Model(parameters.model).
 		Joins(joinCondition).
-		Where(tableName+".id = ?", offerID).
-		Select(selectQuery).
-		Find(dto)
+		Where(parameters.tableName+".id = ?", offerID).
+		Select(parameters.selectQuery).
+		Find(parameters.dto)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -103,13 +108,75 @@ func GetOfferByID(c *gin.Context, tableName string, model interface{}, dto inter
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": dto})
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": parameters.dto})
+}
+
+func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
+	var result *gorm.DB
+	hostID := c.Param("id")
+
+	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
+	joinCondition += " JOIN country ON town.country_id = country.id"
+
+	result = models.DB.
+		Model(parameters.model).
+		Joins(joinCondition).
+		Where(parameters.tableName+".user_id = ?", hostID).
+		Select(parameters.selectQuery).
+		Find(parameters.dto)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": parameters.dto})
+}
+
+func DeleteOffer(c *gin.Context, getByID func(string) (OfferSaver, error)) {
+	id := c.Params.ByName("id")
+
+	offer, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"models.OfferByID:": err.Error()})
+		return
+	}
+
+	if err = offer.Delete(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
+}
+
+func UpdateOffer(c *gin.Context, getByID func(string) (OfferSaver, error)) {
+	id := c.Params.ByName("id")
+
+	offer, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"models.OfferByID:": err.Error()})
+		return
+	}
+
+	if err = offer.Update(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
 }
 
 type OfferSaver interface {
 	Save() error
 	Update() error
 	Delete() error
+	UpdatePrice(price float64) error
 }
 
 type OfferUploader interface {

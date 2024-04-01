@@ -33,7 +33,7 @@ func RegisterRoutes(r *gin.Engine) {
 	activity.PUT("/update/:id", UpdateActivity)
 	activity.PUT("/discount/:offerID", DiscountActivity)
 	activity.GET("/:id/reservations/pending", GetPendingActivityReservations)
-	activity.GET("/:id/offers", GetActivityForHost)
+	activity.GET("/:id/offers", GetActivitiesForHost)
 	activity.PUT("/price/:id", ChangeActivityPrice)
 
 	accommodation := r.Group("api/host/accommodation")
@@ -43,7 +43,7 @@ func RegisterRoutes(r *gin.Engine) {
 	accommodation.PUT("/update/:id", UpdateAccommodation)
 	accommodation.PUT("/discount/:offerID", DiscountAccommodation)
 	accommodation.GET("/:id/reservations/pending", GetPendingAccommodationReservations)
-	accommodation.GET("/:id/offers", GetAccommodationForHost)
+	accommodation.GET("/:id/offers", GetAccommodationsForHost)
 	accommodation.PUT("/price/:id", ChangeAccommodationPrice)
 
 	event := r.Group("api/host/event")
@@ -53,7 +53,7 @@ func RegisterRoutes(r *gin.Engine) {
 	event.PUT("/update/:id", UpdateEvent)
 	event.PUT("/discount/:offerID", DiscountEvent)
 	event.GET("/:id/reservations/pending", GetPendingEventReservations)
-	event.GET("/:id/offers", GetEventForHost)
+	event.GET("/:id/offers", GetEventsForHost)
 	event.PUT("/price/:id", ChangeEventPrice)
 
 	customer := r.Group("api/customer")

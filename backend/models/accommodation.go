@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 
+	"backend/controllers"
+
 	"gorm.io/gorm"
 )
 
@@ -59,10 +61,15 @@ func (a *Accommodation) Delete() error {
 	return nil
 }
 
-func GetAccommodationByID(id string) (*Accommodation, error) {
-	var a *Accommodation
+func (a *Accommodation) UpdatePrice(price float64) error {
+	a.PricePerDay = price
+	return a.Update()
+}
+
+func GetAccommodationByID(id string) (controllers.OfferSaver, error) {
+	var a Accommodation
 	if err := DB.First(&a, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return a, nil
+	return controllers.OfferSaver(&a), nil
 }
