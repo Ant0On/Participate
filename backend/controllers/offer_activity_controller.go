@@ -1,16 +1,13 @@
 package controllers
 
 import (
-	"math"
 	"net/http"
-	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func CreateActivityOffer(c *gin.Context) {
@@ -20,73 +17,20 @@ func CreateActivityOffer(c *gin.Context) {
 
 func GetActivities(c *gin.Context) {
 	var activityWithLocation []DTO.ActivityWithLocation
-	var result *gorm.DB
-
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-	limit := 10
-	offset := (page - 1) * limit
-
-	query := models.DB.Model(&models.Activity{})
-
-	var totalRecords int64
-	query.Count(&totalRecords)
-	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
-
-	result = query.
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Select("activity.id as offer_id, activity.title, activity.description, " +
-			"activity.price, activity.capacity, activity.skill_level," +
-			"activity.is_recommended, activity.duration, activity.type, activity.discount, " +
-			"activity.user_id, town.name as town_name, country.name as country_name").
-		Offset(offset).Limit(limit).
-		Find(&activityWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":      "offers fetched successfully",
-		"data":         activityWithLocation,
-		"page":         page,
-		"limit":        limit,
-		"totalPages":   totalPages,
-		"totalRecords": totalRecords,
-	})
+	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
+		"activity.price, activity.capacity, activity.skill_level," +
+		"activity.is_recommended, activity.duration, activity.type, activity.discount, " +
+		"activity.user_id, town.name as town_name, country.name as country_name"
+	GetOffers(c, "activity", &models.Activity{}, &activityWithLocation, selectQuery)
 }
 
 func GetActivityByID(c *gin.Context) {
-	offerID := c.Param("id")
-
 	var activityWithLocation DTO.ActivityWithLocation
-
-	result := models.DB.
-		Model(&models.Activity{}).
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("activity.id = ?", offerID).
-		Select("activity.id as offer_id, activity.title, activity.description, " +
-			"activity.price, activity.capacity, activity.skill_level," +
-			"activity.is_recommended, activity.duration, activity.type, activity.discount, " +
-			"activity.user_id, town.name as town_name, country.name as country_name").
-		Find(&activityWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"result.Error: ": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": activityWithLocation})
+	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
+		"activity.price, activity.capacity, activity.skill_level," +
+		"activity.is_recommended, activity.duration, activity.type, activity.discount, " +
+		"activity.user_id, town.name as town_name, country.name as country_name"
+	GetOfferByID(c, "activity", &models.Activity{}, &activityWithLocation, selectQuery)
 }
 
 func DeleteActivity(c *gin.Context) {

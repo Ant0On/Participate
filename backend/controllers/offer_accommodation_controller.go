@@ -1,16 +1,13 @@
 package controllers
 
 import (
-	"math"
 	"net/http"
-	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type DiscountRequest struct {
@@ -24,73 +21,20 @@ func CreateAccommodationOffer(c *gin.Context) {
 
 func GetAccommodations(c *gin.Context) {
 	var accommodationWithLocation []DTO.AccommodationWithLocation
-	var result *gorm.DB
-
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-	limit := 10
-	offset := (page - 1) * limit
-
-	query := models.DB.Model(&models.Accommodation{})
-
-	var totalRecords int64
-	query.Count(&totalRecords)
-	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
-
-	result = query.
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Select("accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-			"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-			"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
-			"accommodation.user_id, town.name as town_name, country.name as country_name").
-		Offset(offset).Limit(limit).
-		Find(&accommodationWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":      "offers fetched successfully",
-		"data":         accommodationWithLocation,
-		"page":         page,
-		"limit":        limit,
-		"totalPages":   totalPages,
-		"totalRecords": totalRecords,
-	})
+	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
+		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
+		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+		"accommodation.user_id, town.name as town_name, country.name as country_name"
+	GetOffers(c, "accommodation", &models.Accommodation{}, &accommodationWithLocation, selectQuery)
 }
 
 func GetAccommodationByID(c *gin.Context) {
-	offerID := c.Param("id")
-
 	var accommodationWithLocation DTO.AccommodationWithLocation
-
-	result := models.DB.
-		Model(&models.Accommodation{}).
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("accommodation.id = ?", offerID).
-		Select("accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-			"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-			"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
-			"accommodation.user_id, town.name as town_name, country.name as country_name").
-		Find(&accommodationWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"result.Error: ": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": accommodationWithLocation})
+	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
+		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
+		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+		"accommodation.user_id, town.name as town_name, country.name as country_name"
+	GetOfferByID(c, "accommodation", &models.Accommodation{}, &accommodationWithLocation, selectQuery)
 }
 
 func DeleteAccommodation(c *gin.Context) {

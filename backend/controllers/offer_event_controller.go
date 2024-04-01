@@ -1,16 +1,13 @@
 package controllers
 
 import (
-	"math"
 	"net/http"
-	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func CreateEventOffer(c *gin.Context) {
@@ -19,72 +16,20 @@ func CreateEventOffer(c *gin.Context) {
 }
 
 func GetEvents(c *gin.Context) {
-	var eventWithLocation []DTO.EventWithLocation
-	var result *gorm.DB
-
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-	limit := 10
-	offset := (page - 1) * limit
-
-	query := models.DB.Model(&models.Event{})
-
-	var totalRecords int64
-	query.Count(&totalRecords)
-	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
-
-	result = query.
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Select("event.id as offer_id, event.title, event.description, " +
-			"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
-			"event.user_id, town.name as town_name, country.name as country_name").
-		Offset(offset).Limit(limit).
-		Find(&eventWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":      "offers fetched successfully",
-		"data":         eventWithLocation,
-		"page":         page,
-		"limit":        limit,
-		"totalPages":   totalPages,
-		"totalRecords": totalRecords,
-	})
+	var eventsWithLocation []DTO.EventWithLocation
+	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
+		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
+		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+		"accommodation.user_id, town.name as town_name, country.name as country_name"
+	GetOffers(c, "event", &models.Event{}, &eventsWithLocation, selectQuery)
 }
 
 func GetEventByID(c *gin.Context) {
-	offerID := c.Param("id")
-
 	var eventWithLocation DTO.EventWithLocation
-
-	result := models.DB.
-		Model(&models.Event{}).
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("Event.id = ?", offerID).
-		Select("event.id as offer_id, event.title, event.description, " +
-			"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
-			"event.user_id, town.name as town_name, country.name as country_name").
-		Find(&eventWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"result.Error: ": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": eventWithLocation})
+	selectQuery := "event.id as offer_id, event.title, event.description, " +
+		"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
+		"event.user_id, town.name as town_name, country.name as country_name"
+	GetOfferByID(c, "event", &models.Event{}, &eventWithLocation, selectQuery)
 }
 
 func DeleteEvent(c *gin.Context) {
