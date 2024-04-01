@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"backend/controllers"
-
 	"gorm.io/gorm"
 )
 
@@ -64,10 +62,15 @@ func (e *Event) UpdatePrice(price float64) error {
 	return e.Update()
 }
 
-func GetEventByID(id string) (controllers.OfferSaver, error) {
+func (e *Event) AddDiscount(discount float64) error {
+	e.Discount = discount
+	return e.Update()
+}
+
+func GetEventByID(id string) (OfferOperations, error) {
 	var e Event
 	if err := DB.First(e, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return controllers.OfferSaver(&e), nil
+	return OfferOperations(&e), nil
 }

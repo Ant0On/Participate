@@ -6,29 +6,30 @@ import (
 	"strconv"
 
 	"backend/models"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func CreateOffer(c *gin.Context, offer interface{}) {
+func CreateOffer(c *gin.Context, offer models.OfferOperations) {
 	if err := c.ShouldBind(offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
 	}
 
-	if err := offer.(OfferSaver).Save(); err != nil {
+	if err := offer.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"offer.Save: ": err.Error()})
 		return
 	}
 
-	id, err := offer.(OfferIdentifier).GetID()
+	id, err := offer.GetID()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"GetID error": err.Error()})
 		return
 	}
 
-	if err := offer.(OfferUploader).HandleOfferImageUploads(c, id); err != nil {
+	if err := offer.HandleOfferImageUploads(c, id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"offer.HandleOfferImageUploads: ": err.Error()})
 		return
 	}
@@ -138,7 +139,7 @@ func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
 	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": parameters.dto})
 }
 
-func DeleteOffer(c *gin.Context, getByID func(string) (OfferSaver, error)) {
+func DeleteOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
 	id := c.Params.ByName("id")
 
 	offer, err := getByID(id)
@@ -155,7 +156,7 @@ func DeleteOffer(c *gin.Context, getByID func(string) (OfferSaver, error)) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
 }
 
-func UpdateOffer(c *gin.Context, getByID func(string) (OfferSaver, error)) {
+func UpdateOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
 	id := c.Params.ByName("id")
 
 	offer, err := getByID(id)
@@ -172,17 +173,58 @@ func UpdateOffer(c *gin.Context, getByID func(string) (OfferSaver, error)) {
 	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
 }
 
-type OfferSaver interface {
-	Save() error
-	Update() error
-	Delete() error
-	UpdatePrice(price float64) error
+func DiscountOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
+	id := c.Params.ByName("id")
+	var req utils.DiscountRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offer, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if offer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
+		return
+	}
+
+	if err := offer.AddDiscount(req.Discount); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }
 
-type OfferUploader interface {
-	HandleOfferImageUploads(c *gin.Context, id uint) error
-}
+func ChangeOfferPrice(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
+	id := c.Params.ByName("id")
+	var req utils.ChangePriceReq
 
-type OfferIdentifier interface {
-	GetID() (uint, error)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offer, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if offer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
+		return
+	}
+
+	if err := offer.UpdatePrice(req.Price); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }

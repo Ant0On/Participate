@@ -10,5 +10,5 @@ type Room struct {
 	Capacity        int
 	Area            int
 	AccommodationID uint
-	RoomFacilities  []RoomFacility
+	RoomFacilities  []RoomFacility `gorm:"many2many:room_room_facilities;"`
 }

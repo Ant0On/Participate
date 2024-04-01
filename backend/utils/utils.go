@@ -20,3 +20,7 @@ func CheckState(state string) bool {
 type ChangePriceReq struct {
 	Price float64 `json:"price" binding:"required,gt=1"`
 }
+
+type DiscountRequest struct {
+	Discount float64 `json:"discount" binding:"required,gte=0,lte=100"`
+}

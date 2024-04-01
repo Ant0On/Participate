@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"backend/controllers"
-
 	"gorm.io/gorm"
 )
 
@@ -33,7 +31,7 @@ type Activity struct {
 	Duration     time.Duration `gorm:"not null" form:"duration" binding:"required"`
 	TownID       uint          `gorm:"not null" form:"town_id" binding:"required"`
 	UserID       uint          `gorm:"not null" form:"user_id" binding:"required"`
-	Equipment    []Equipment   `form:"equipment"`
+	Equipment    []Equipment   `gorm:"many2many:activity_equipment;"`
 	Reservations []ReservationActivity
 }
 
@@ -71,10 +69,15 @@ func (a *Activity) UpdatePrice(price float64) error {
 	return a.Update()
 }
 
-func GetActivityByID(id string) (controllers.OfferSaver, error) {
+func (a *Activity) AddDiscount(discount float64) error {
+	a.Discount = discount
+	return a.Update()
+}
+
+func GetActivityByID(id string) (OfferOperations, error) {
 	var a Activity
 	if err := DB.First(&a, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return controllers.OfferSaver(&a), nil
+	return OfferOperations(&a), nil
 }

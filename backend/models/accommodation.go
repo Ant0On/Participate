@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 
-	"backend/controllers"
-
 	"gorm.io/gorm"
 )
 
@@ -27,7 +25,7 @@ type Accommodation struct {
 	PricePerDay       float64           `gorm:"not null" form:"price_per_day" binding:"required,min=1"`
 	TownID            uint              `gorm:"not null" form:"town_id" binding:"required"`
 	UserID            uint              `gorm:"not null" form:"user_id" binding:"required"`
-	GeneralFacilities []GeneralFacility `form:"general_facilities"`
+	GeneralFacilities []GeneralFacility `gorm:"many2many:accommodation_general_facilities;"`
 	Rooms             []Room
 	Reservations      []ReservationAccommodation
 }
@@ -66,10 +64,15 @@ func (a *Accommodation) UpdatePrice(price float64) error {
 	return a.Update()
 }
 
-func GetAccommodationByID(id string) (controllers.OfferSaver, error) {
+func (a *Accommodation) AddDiscount(discount float64) error {
+	a.Discount = discount
+	return a.Update()
+}
+
+func GetAccommodationByID(id string) (OfferOperations, error) {
 	var a Accommodation
 	if err := DB.First(&a, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return controllers.OfferSaver(&a), nil
+	return OfferOperations(&a), nil
 }

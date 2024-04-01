@@ -8,8 +8,7 @@ import (
 
 type RoomFacility struct {
 	gorm.Model
-	Name   string
-	RoomID uint
+	Name string
 }
 
 var RoomFacilitiesList = []RoomFacility{

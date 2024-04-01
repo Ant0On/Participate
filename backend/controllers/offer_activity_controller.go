@@ -1,11 +1,8 @@
 package controllers
 
 import (
-	"net/http"
-
 	"backend/models"
 	"backend/models/DTO"
-	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -66,59 +63,11 @@ func UpdateActivity(c *gin.Context) {
 }
 
 func DiscountActivity(c *gin.Context) {
-	offerID := c.Param("id")
-
-	var offer models.Activity
-	var discountReq DiscountRequest
-
-	if err := models.DB.First(&offer, offerID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	if err := c.ShouldBindJSON(&discountReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	offer.Discount = discountReq.Discount
-
-	if err := offer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"offer.Update: ": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
+	DiscountOffer(c, models.GetActivityByID)
 }
 
 func ChangeActivityPrice(c *gin.Context) {
-	offerID := c.Param("id")
-	var req utils.ChangePriceReq
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	offer, err := models.GetActivityByID(offerID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if offer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
-		return
-	}
-
-	if a, ok := offer.(*models.Activity); ok {
-		if err := a.UpdatePrice(req.Price); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
+	ChangeOfferPrice(c, models.GetActivityByID)
 }
 
 /*

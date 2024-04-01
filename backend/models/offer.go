@@ -9,6 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type OfferOperations interface {
+	Save() error
+	Update() error
+	Delete() error
+	UpdatePrice(price float64) error
+	AddDiscount(discount float64) error
+	GetID() (uint, error)
+	HandleOfferImageUploads(c *gin.Context, id uint) error
+}
+
 type Offer struct {
 	Title         string  `gorm:"size:100;not null" form:"title" binding:"required,min=2,max=100"`
 	Description   string  `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
