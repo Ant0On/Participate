@@ -46,18 +46,35 @@ func (r *ReservationAccommodation) Update() error {
 	return nil
 }
 
-func GetAccommodationReservationById(id string) (*ReservationAccommodation, error) {
-	var r ReservationAccommodation
-	if err := DB.Model(&ReservationAccommodation{}).Where("id = ?", id).Scan(&r).Error; err != nil {
-		return nil, fmt.Errorf("reservation not found: %w", err)
+func (r *ReservationAccommodation) Delete() error {
+	if err := DB.Delete(&r).Error; err != nil {
+		return fmt.Errorf("DB.Delete: %w", err)
 	}
-	return &r, nil
+	return nil
 }
 
-func GetAccommodationReservationsByState(state string) ([]ReservationAccommodation, error) {
+func GetAccommodationReservationById(id string) (ReservationOperations, error) {
+	var r ReservationAccommodation
+	if err := DB.First(&r, id).Error; err != nil {
+		return nil, fmt.Errorf("reservation not found: %w", err)
+	}
+	return ReservationOperations(&r), nil
+}
+
+func GetAccommodationReservationsByState(state string) ([]ReservationOperations, error) {
 	var reservations []ReservationAccommodation
 	if err := DB.Model(&ReservationAccommodation{}).Where("reservation_state = ?", state).Scan(reservations).Error; err != nil {
 		return nil, fmt.Errorf("reservation not found: %w", err)
 	}
-	return reservations, nil
+	var ops []ReservationOperations
+	for _, r := range reservations {
+		ops = append(ops, ReservationOperations(&r))
+	}
+
+	return ops, nil
+}
+
+func (r *ReservationAccommodation) ChangeState(state string) error {
+	r.ReservationState = ReservationState(state)
+	return r.Update()
 }

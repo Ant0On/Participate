@@ -37,18 +37,35 @@ func (r *ReservationActivity) Update() error {
 	return nil
 }
 
-func GetActivityReservationById(id string) (*ReservationActivity, error) {
-	var r *ReservationActivity
-	if err := DB.Model(&ReservationActivity{}).Where("id = ?", id).Scan(r).Error; err != nil {
-		return nil, fmt.Errorf("reservation not found: %w", err)
+func (r *ReservationActivity) Delete() error {
+	if err := DB.Delete(&r).Error; err != nil {
+		return fmt.Errorf("DB.Delete: %w", err)
 	}
-	return r, nil
+	return nil
 }
 
-func GetActivityReservationsByState(state string) ([]ReservationActivity, error) {
+func GetActivityReservationById(id string) (ReservationOperations, error) {
+	var r ReservationActivity
+	if err := DB.First(&r, id).Error; err != nil {
+		return nil, fmt.Errorf("reservation not found: %w", err)
+	}
+	return ReservationOperations(&r), nil
+}
+
+func GetActivityReservationsByState(state string) ([]ReservationOperations, error) {
 	var reservations []ReservationActivity
 	if err := DB.Model(&ReservationActivity{}).Where("reservation_state = ?", state).Scan(reservations).Error; err != nil {
 		return nil, fmt.Errorf("reservation not found: %w", err)
 	}
-	return reservations, nil
+	var ops []ReservationOperations
+	for _, r := range reservations {
+		ops = append(ops, ReservationOperations(&r))
+	}
+
+	return ops, nil
+}
+
+func (r *ReservationActivity) ChangeState(state string) error {
+	r.ReservationState = ReservationState(state)
+	return r.Update()
 }

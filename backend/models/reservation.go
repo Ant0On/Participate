@@ -7,6 +7,13 @@ import (
 
 type ReservationState string
 
+type ReservationOperations interface {
+	Save() error
+	Update() error
+	Delete() error
+	ChangeState(state string) error
+}
+
 const (
 	Pending  ReservationState = "pending"
 	Accepted ReservationState = "accepted"
