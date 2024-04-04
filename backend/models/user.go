@@ -57,7 +57,7 @@ func GetUserByEmail(email string) (*User, error) {
 
 func GetUserById(id string) (*User, error) {
 	var u User
-	if err := DB.Model(&User{}).Where("id = ?", id).Scan(&u).Error; err != nil {
+	if err := DB.Model(&User{}).Where("id = ? AND role = host", id).Scan(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("user not found: %w", err)
 		}

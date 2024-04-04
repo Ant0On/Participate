@@ -120,7 +120,7 @@ func ChangeEmail(c *gin.Context) {
 
 func ChangeDescription(c *gin.Context) {
 	ChangeField(c, func(user *models.User, value string) error {
-		if user.Role != "customer" {
+		if user.Role == "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
 		user.Description = value
@@ -130,7 +130,7 @@ func ChangeDescription(c *gin.Context) {
 
 func ChangePhoneNumber(c *gin.Context) {
 	ChangeField(c, func(user *models.User, value string) error {
-		if user.Role != "customer" {
+		if user.Role == "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
 		if len(value) < 9 || len(value) > 15 {
@@ -143,7 +143,7 @@ func ChangePhoneNumber(c *gin.Context) {
 
 func ChangeBankAccount(c *gin.Context) {
 	ChangeField(c, func(user *models.User, value string) error {
-		if user.Role != "customer" {
+		if user.Role == "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
 		if len(value) < 16 || len(value) > 40 {
