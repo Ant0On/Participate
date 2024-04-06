@@ -9,14 +9,14 @@ import (
 
 func CreateAccommodationOffer(c *gin.Context) {
 	var offer models.Accommodation
-	CreateOffer(c, &offer)
+	CreateOffer(c, "accommodation", &offer)
 }
 
 func GetAccommodations(c *gin.Context) {
 	var accommodationWithLocation []DTO.AccommodationWithLocation
 	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+		"accommodation.is_recommended, accommodation.accommodation_type, accommodation.discount, " +
 		"accommodation.user_id, town.name as town_name, country.name as country_name"
 	GetOffers(c, OfferQueryParameters{
 		tableName:   "accommodation",
@@ -30,7 +30,7 @@ func GetAccommodationByID(c *gin.Context) {
 	var accommodationWithLocation DTO.AccommodationWithLocation
 	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+		"accommodation.is_recommended, accommodation.accommodation_type, accommodation.discount, " +
 		"accommodation.user_id, town.name as town_name, country.name as country_name"
 	GetOfferByID(c, OfferQueryParameters{
 		tableName:   "accommodation",
@@ -44,7 +44,7 @@ func GetAccommodationsForHost(c *gin.Context) {
 	var accommodationWithLocation DTO.AccommodationWithLocation
 	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
+		"accommodation.is_recommended, accommodation.accommodation_type, accommodation.discount, " +
 		"accommodation.user_id, town.name as town_name, country.name as country_name"
 	GetOffersForHost(c, OfferQueryParameters{
 		tableName:   "accommodation",

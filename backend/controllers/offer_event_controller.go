@@ -9,15 +9,14 @@ import (
 
 func CreateEventOffer(c *gin.Context) {
 	var offer models.Event
-	CreateOffer(c, &offer)
+	CreateOffer(c, "event", &offer)
 }
 
 func GetEvents(c *gin.Context) {
 	var eventsWithLocation []DTO.EventWithLocation
-	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.is_recommended, accommodation.rating, accommodation.type, accommodation.discount, " +
-		"accommodation.user_id, town.name as town_name, country.name as country_name"
+	selectQuery := "event.id as offer_id, event.title, event.description, " +
+		"event.price, event.capacity, event.is_recommended, event.event_type, event.discount, " +
+		"event.user_id, town.name as town_name, country.name as country_name"
 	GetOffers(c, OfferQueryParameters{
 		tableName:   "event",
 		model:       &models.Event{},
@@ -29,7 +28,7 @@ func GetEvents(c *gin.Context) {
 func GetEventByID(c *gin.Context) {
 	var eventsWithLocation DTO.EventWithLocation
 	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
+		"event.price, event.capacity, event.is_recommended, event.event_type, event.discount, " +
 		"event.user_id, town.name as town_name, country.name as country_name"
 	GetOfferByID(c, OfferQueryParameters{
 		tableName:   "event",
@@ -42,7 +41,7 @@ func GetEventByID(c *gin.Context) {
 func GetEventsForHost(c *gin.Context) {
 	var eventsWithLocation DTO.EventWithLocation
 	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.is_recommended, event.type, event.discount, " +
+		"event.price, event.capacity, event.is_recommended, event.event_type, event.discount, " +
 		"event.user_id, town.name as town_name, country.name as country_name"
 	GetOfferByID(c, OfferQueryParameters{
 		tableName:   "event",

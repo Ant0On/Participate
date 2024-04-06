@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateOffer(c *gin.Context, offer models.OfferOperations) {
+func CreateOffer(c *gin.Context, tableName string, offer models.OfferOperations) {
 	if err := c.ShouldBind(offer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
@@ -29,7 +29,7 @@ func CreateOffer(c *gin.Context, offer models.OfferOperations) {
 		return
 	}
 
-	if err := offer.HandleOfferImageUploads(c, id); err != nil {
+	if err := offer.HandleOfferImageUploads(c, tableName, id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"offer.HandleOfferImageUploads: ": err.Error()})
 		return
 	}

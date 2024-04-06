@@ -16,7 +16,7 @@ type OfferOperations interface {
 	UpdatePrice(price float64) error
 	AddDiscount(discount float64) error
 	GetID() (uint, error)
-	HandleOfferImageUploads(c *gin.Context, id uint) error
+	HandleOfferImageUploads(c *gin.Context, tableName string, id uint) error
 }
 
 type Offer struct {
@@ -27,7 +27,7 @@ type Offer struct {
 	Discount      float64 `gorm:"not null;default: 0.00" form:"discount"`
 }
 
-func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
+func (o *Offer) HandleOfferImageUploads(c *gin.Context, tableName string, offerID uint) error {
 	form, err := c.MultipartForm()
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, offerID uint) error {
 		return fmt.Errorf("no images were uploaded for the offer")
 	}
 
-	offerFolder := filepath.Join("images/offers", fmt.Sprintf("%d", offerID))
+	offerFolder := filepath.Join(fmt.Sprintf("images/offers/%s/%d", tableName, offerID))
 	if err := os.MkdirAll(offerFolder, os.ModePerm); err != nil {
 		return err
 	}
