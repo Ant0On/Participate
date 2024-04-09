@@ -45,6 +45,11 @@ func GetHostByID(c *gin.Context) {
 		return
 	}
 
+	if host.Role != "host" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User's role should be host"})
+		return
+	}
+
 	host.Password = ""
 
 	c.JSON(http.StatusOK, host)
@@ -349,8 +354,14 @@ func PromoteToHost(c *gin.Context) {
 	}
 
 	user, err := models.GetUserById(id)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if user.Role != "customer" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only customer can be promoted to host"})
 		return
 	}
 
