@@ -31,11 +31,13 @@ func GetPendingActivityReservations(c *gin.Context) {
 		" town.name as town_name, country.name as country_name, reservation_activity.reservation_state, activity.id as activity_id"
 
 	GetDTOReservation(c, ReservationQueryParameters{
-		tableName:   []string{"activity", "reservation_activity", "activity_id"},
-		model:       &models.ReservationActivity{},
-		dto:         &pendingReservations,
-		selectQuery: selectQuery,
-		condition:   PendingWhereCondition,
+		offerTableName:       "activity",
+		reservationTableName: "reservation_activity",
+		offerID:              "activity_id",
+		model:                &models.ReservationActivity{},
+		dto:                  &pendingReservations,
+		selectQuery:          selectQuery,
+		condition:            PendingWhereCondition,
 	})
 }
 func GetReservationsActivityHistory(c *gin.Context) {
@@ -45,10 +47,12 @@ func GetReservationsActivityHistory(c *gin.Context) {
 		" town.name as town_name, country.name as country_name, reservation_activity.reservation_state, activity.id as activity_id"
 
 	GetDTOReservation(c, ReservationQueryParameters{
-		tableName:   []string{"activity", "reservation_activity", "activity_id"},
-		model:       &models.ReservationActivity{},
-		dto:         &pendingReservations,
-		selectQuery: selectQuery,
-		condition:   HistoryWhereCondition,
+		offerTableName:       "activity",
+		reservationTableName: "reservation_activity",
+		offerID:              "activity_id",
+		model:                &models.ReservationActivity{},
+		dto:                  &pendingReservations,
+		selectQuery:          selectQuery,
+		condition:            HistoryWhereCondition,
 	})
 }

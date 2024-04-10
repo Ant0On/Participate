@@ -30,11 +30,13 @@ func GetPendingEventReservations(c *gin.Context) {
 		" event.capacity, event.title, event.price, " +
 		"event.event_type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
 	GetDTOReservation(c, ReservationQueryParameters{
-		tableName:   []string{"event", "reservation_event", "event_id"},
-		model:       &models.ReservationEvent{},
-		dto:         &pendingReservations,
-		selectQuery: selectQuery,
-		condition:   PendingWhereCondition,
+		offerTableName:       "event",
+		reservationTableName: "reservation_event",
+		offerID:              "event_id",
+		model:                &models.ReservationEvent{},
+		dto:                  &pendingReservations,
+		selectQuery:          selectQuery,
+		condition:            PendingWhereCondition,
 	})
 }
 
@@ -44,10 +46,12 @@ func GetReservationsEventHistory(c *gin.Context) {
 		" event.capacity, event.title, event.price, " +
 		"event.event_type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
 	GetDTOReservation(c, ReservationQueryParameters{
-		tableName:   []string{"event", "reservation_event", "event_id"},
-		model:       &models.ReservationEvent{},
-		dto:         &pendingReservations,
-		selectQuery: selectQuery,
-		condition:   HistoryWhereCondition,
+		offerTableName:       "event",
+		reservationTableName: "reservation_event",
+		offerID:              "event_id",
+		model:                &models.ReservationEvent{},
+		dto:                  &pendingReservations,
+		selectQuery:          selectQuery,
+		condition:            HistoryWhereCondition,
 	})
 }

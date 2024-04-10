@@ -81,11 +81,13 @@ func ChangeReservationState(c *gin.Context, getByID func(string) (models.Reserva
 }
 
 type ReservationQueryParameters struct {
-	tableName   []string
-	model       interface{}
-	dto         interface{}
-	selectQuery string
-	condition   func(userID string) string
+	offerTableName       string
+	reservationTableName string
+	offerID              string
+	model                interface{}
+	dto                  interface{}
+	selectQuery          string
+	condition            func(userID string) string
 }
 
 func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
@@ -100,10 +102,10 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 
 	query := models.DB.Model(parameters.model)
 
-	joinCondition := fmt.Sprintf("JOIN %s ON %s.%s = %s.id", parameters.tableName[0], parameters.tableName[1], parameters.tableName[2], parameters.tableName[0])
-	joinCondition += fmt.Sprintf(" JOIN town ON %s.town_id = town.id", parameters.tableName[0])
+	joinCondition := fmt.Sprintf("JOIN %s ON %s.%s = %s.id", parameters.offerTableName, parameters.reservationTableName, parameters.offerID, parameters.reservationTableName)
+	joinCondition += fmt.Sprintf(" JOIN town ON %s.town_id = town.id", parameters.offerTableName)
 	joinCondition += " JOIN country ON town.country_id = country.id"
-	joinCondition += fmt.Sprintf(" JOIN app_user ON %s.user_id = app_user.id", parameters.tableName[1])
+	joinCondition += fmt.Sprintf(" JOIN app_user ON %s.user_id = app_user.id", parameters.reservationTableName)
 
 	result = query.
 		Joins(joinCondition).

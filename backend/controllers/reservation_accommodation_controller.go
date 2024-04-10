@@ -41,11 +41,13 @@ func GetPendingAccommodationReservations(c *gin.Context) {
 		" accommodation.title, accommodation.price_per_day, accommodation.is_animal_friendly, town.name as town_name," +
 		" country.name as country_name, accommodation.accommodation_type, reservation_accommodation.reservation_state, accommodation.id as accommodation_id"
 	GetDTOReservation(c, ReservationQueryParameters{
-		tableName:   []string{"accommodation", "reservation_accommodation", "accommodation_id"},
-		model:       &models.ReservationAccommodation{},
-		dto:         &pendingReservations,
-		selectQuery: selectQuery,
-		condition:   PendingWhereCondition,
+		offerTableName:       "accommodation",
+		reservationTableName: "reservation_accommodation",
+		offerID:              "accommodation_id",
+		model:                &models.ReservationAccommodation{},
+		dto:                  &pendingReservations,
+		selectQuery:          selectQuery,
+		condition:            PendingWhereCondition,
 	})
 }
 
@@ -56,10 +58,12 @@ func GetReservationsAccommodationHistory(c *gin.Context) {
 		" accommodation.title, accommodation.price_per_day, accommodation.is_animal_friendly, town.name as town_name," +
 		" country.name as country_name, accommodation.accommodation_type, reservation_accommodation.reservation_state, accommodation.id as accommodation_id"
 	GetDTOReservation(c, ReservationQueryParameters{
-		tableName:   []string{"accommodation", "reservation_accommodation", "accommodation_id"},
-		model:       &models.ReservationAccommodation{},
-		dto:         &reservationsHistory,
-		selectQuery: selectQuery,
-		condition:   HistoryWhereCondition,
+		offerTableName:       "accommodation",
+		reservationTableName: "reservation_accommodation",
+		offerID:              "accommodation_id",
+		model:                &models.ReservationAccommodation{},
+		dto:                  &reservationsHistory,
+		selectQuery:          selectQuery,
+		condition:            HistoryWhereCondition,
 	})
 }
