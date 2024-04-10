@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"backend/models"
-	"backend/models/DTO"
 	"backend/pkg/passHelper"
 
 	"github.com/gin-gonic/gin"
@@ -42,6 +41,11 @@ func GetHostByID(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Host not found"})
+		return
+	}
+
+	if host.Role != "host" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User's role should be host"})
 		return
 	}
 
@@ -120,7 +124,7 @@ func ChangeEmail(c *gin.Context) {
 
 func ChangeDescription(c *gin.Context) {
 	ChangeField(c, func(user *models.User, value string) error {
-		if user.Role != "customer" {
+		if user.Role == "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
 		user.Description = value
@@ -130,7 +134,7 @@ func ChangeDescription(c *gin.Context) {
 
 func ChangePhoneNumber(c *gin.Context) {
 	ChangeField(c, func(user *models.User, value string) error {
-		if user.Role != "customer" {
+		if user.Role == "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
 		if len(value) < 9 || len(value) > 15 {
@@ -143,7 +147,7 @@ func ChangePhoneNumber(c *gin.Context) {
 
 func ChangeBankAccount(c *gin.Context) {
 	ChangeField(c, func(user *models.User, value string) error {
-		if user.Role != "customer" {
+		if user.Role == "customer" {
 			return fmt.Errorf("invalid role! User is a customer")
 		}
 		if len(value) < 16 || len(value) > 40 {
@@ -235,7 +239,7 @@ func ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
-func GradeReservation(c *gin.Context) {
+func GradeAccommodationReservation(c *gin.Context) {
 	reservationId := c.Param("id")
 	if reservationId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID"})
@@ -254,7 +258,7 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	var reservation models.Reservation
+	var reservation models.ReservationAccommodation
 	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
@@ -266,18 +270,70 @@ func GradeReservation(c *gin.Context) {
 		return
 	}
 
-	var request models.Grade
+	var request models.Rating
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	grade, err := models.GetGradeByCount(strconv.Itoa(request.Count))
+	rate, err := models.GetGradeByCount(strconv.Itoa(request.Count))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	reservation.GradeID = grade.ID
+	reservation.RatingID = rate.ID
+
+	if err := reservation.Update(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})
+}
+
+func GradeActivityReservation(c *gin.Context) {
+	reservationId := c.Param("id")
+	if reservationId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID"})
+		return
+	}
+
+	customer, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	customerObj, ok := customer.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	var reservation models.ReservationActivity
+	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
+		return
+	}
+
+	if reservation.ReservationState != models.Finished {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
+		return
+	}
+
+	var request models.Rating
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	rate, err := models.GetGradeByCount(strconv.Itoa(request.Count))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	reservation.RatingID = rate.ID
 
 	if err := reservation.Update(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -297,8 +353,14 @@ func PromoteToHost(c *gin.Context) {
 	}
 
 	user, err := models.GetUserById(id)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if user.Role != "customer" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only customer can be promoted to host"})
 		return
 	}
 
@@ -324,70 +386,4 @@ func PromoteToHost(c *gin.Context) {
 
 	user.Password = ""
 	c.JSON(http.StatusOK, gin.H{"message": "User upgraded to Host successfully", "host": user})
-}
-
-func GetReservationsHistory(c *gin.Context) {
-	userID := c.Param("id")
-
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
-		return
-	}
-
-	var finishedReservations []DTO.ReservationWithOffer
-	result := models.DB.
-		Model(&models.Reservation{}).
-		Joins("JOIN offer ON reservation.offer_id = offer.id").
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN app_user ON reservation.user_id = app_user.id").
-		Where("app_user.id = ? AND reservation_state in ('finished', 'accepted', 'rejected')", userID).
-		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, reservation.grade_id, offer.name," + "" +
-			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, reservation.reservation_state, offer.id as offer_id").
-		Find(&finishedReservations)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNoContent, gin.H{"warning": "No finished reservations"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "finished reservations fetched successfully", "data": finishedReservations})
-}
-
-func GetPendingReservations(c *gin.Context) {
-	userID := c.Param("id")
-
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "app_user ID is required"})
-		return
-	}
-
-	var pendingReservations []DTO.ReservationWithOffer
-	result := models.DB.
-		Model(&models.Reservation{}).
-		Joins("JOIN offer ON reservation.offer_id = offer.id").
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Joins("JOIN app_user ON offer.user_id = app_user.id").
-		Where("app_user.id = ? AND reservation_state = 'pending'", userID).
-		Select("reservation.id as reservation_id, reservation.date_from, reservation.date_to, reservation.number_of_people, offer.name," + "" +
-			"offer.price, offer.is_animal_friendly, offer.offer_type, town.name as town_name, country.name as country_name, offer.id as offer_id").
-		Find(&pendingReservations)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNoContent, gin.H{"error": "No pending reservations"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "pending reservations fetched successfully", "data": pendingReservations})
 }

@@ -9,10 +9,10 @@ import (
 )
 
 func GetAllCountries(c *gin.Context) {
-	country, err := models.GetAllCountries()
+	countries, err := models.GetAllCountries()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"GetAllCountries error:": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": country})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": countries})
 }

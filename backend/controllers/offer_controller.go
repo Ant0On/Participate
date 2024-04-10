@@ -6,20 +6,46 @@ import (
 	"strconv"
 
 	"backend/models"
-	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-type discountRequest struct {
-	Discount float64 `json:"discount" binding:"required,gte=0,lte=100"`
+func CreateOffer(c *gin.Context, tableName string, offer models.OfferOperations) {
+	if err := c.ShouldBind(offer); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
+		return
+	}
+
+	if err := offer.Save(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"offer.Save: ": err.Error()})
+		return
+	}
+
+	id, err := offer.GetID()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"GetID error": err.Error()})
+		return
+	}
+
+	if err := offer.HandleOfferImageUploads(c, tableName, id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"offer.HandleOfferImageUploads: ": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
 }
 
-func GetOffers(c *gin.Context) {
-	var offersWithLocation []DTO.OfferWithLocation
+type OfferQueryParameters struct {
+	tableName   string
+	model       interface{}
+	dto         interface{}
+	selectQuery string
+}
+
+func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 	var result *gorm.DB
-	offerType := c.Query("type")
 
 	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil || page < 1 {
@@ -28,23 +54,20 @@ func GetOffers(c *gin.Context) {
 	limit := 10
 	offset := (page - 1) * limit
 
-	query := models.DB.Model(&models.Offer{})
+	query := models.DB.Model(parameters.model)
 
 	var totalRecords int64
 	query.Count(&totalRecords)
 	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
 
-	if offerType != "" {
-		query = query.Where("offer_type = ?", offerType)
-	}
+	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
+	joinCondition += " JOIN country ON town.country_id = country.id"
 
 	result = query.
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, offer.user_id, town.name as town_name, country.name as country_name").
+		Joins(joinCondition).
+		Select(parameters.selectQuery).
 		Offset(offset).Limit(limit).
-		Find(&offersWithLocation)
+		Find(parameters.dto)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -53,7 +76,7 @@ func GetOffers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":      "offers fetched successfully",
-		"data":         offersWithLocation,
+		"data":         parameters.dto,
 		"page":         page,
 		"limit":        limit,
 		"totalPages":   totalPages,
@@ -61,18 +84,20 @@ func GetOffers(c *gin.Context) {
 	})
 }
 
-func GetOfferByID(c *gin.Context) {
+func GetOfferByID(c *gin.Context, parameters OfferQueryParameters) {
 	offerID := c.Param("id")
 
-	var offerWithLocation DTO.OfferWithLocation
-	result := models.DB.
-		Model(&models.Offer{}).
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("offer.id = ?", offerID).
-		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, offer.user_id, town.name as town_name, country.name as country_name").
-		Find(&offerWithLocation)
+	var result *gorm.DB
+
+	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
+	joinCondition += " JOIN country ON town.country_id = country.id"
+
+	result = models.DB.
+		Model(parameters.model).
+		Joins(joinCondition).
+		Where(parameters.tableName+".id = ?", offerID).
+		Select(parameters.selectQuery).
+		Find(parameters.dto)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -84,178 +109,80 @@ func GetOfferByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": offerWithLocation})
+	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": parameters.dto})
 }
 
-func CreateOffer(c *gin.Context) {
-	var offer models.Offer
+func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
+	var result *gorm.DB
+	hostID := c.Param("id")
 
-	if err := c.ShouldBind(&offer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error with createOffer": err.Error()})
+	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
+	joinCondition += " JOIN country ON town.country_id = country.id"
+
+	result = models.DB.
+		Model(parameters.model).
+		Joins(joinCondition).
+		Where(parameters.tableName+".user_id = ?", hostID).
+		Select(parameters.selectQuery).
+		Find(parameters.dto)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := offer.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.CreateOffer.Save error": err.Error()})
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
 		return
 	}
 
-	if err := offer.HandleOfferImageUploads(c, offer.ID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
+	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": parameters.dto})
 }
 
-func DeleteOffer(c *gin.Context) {
+func DeleteOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
 	id := c.Params.ByName("id")
 
-	var offer *models.Offer
-	var err error
-
-	if offer, err = models.GetOfferByID(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.DeleteOffer.First error": err.Error()})
+	offer, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"models.OfferByID:": err.Error()})
 		return
 	}
 
 	if err = offer.Delete(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.DeleteOffer.Delete error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
 }
 
-func UpdateOffer(c *gin.Context) {
+func UpdateOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
 	id := c.Params.ByName("id")
 
-	var offer *models.Offer
-	var err error
-
-	if offer, err = models.GetOfferByID(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.UpdateOffer.First error": err.Error()})
-		return
-	}
-
-	if err = c.ShouldBindJSON(&offer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error with UpdateOffer": err.Error()})
+	offer, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"models.OfferByID:": err.Error()})
 		return
 	}
 
 	if err = offer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error with UpdateOffer.Update": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Offer updated successfully", "offer": offer})
+	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
 }
 
-func DiscountOffer(c *gin.Context) {
-	offerID := c.Param("offerID")
+func DiscountOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
+	id := c.Params.ByName("id")
+	var req utils.DiscountRequest
 
-	var offer models.Offer
-	var discountReq discountRequest
-
-	if err := models.DB.First(&offer, offerID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	if err := c.ShouldBindJSON(&discountReq); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	offer.Discount = discountReq.Discount
-
-	if err := offer.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign discount"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Discount assigned successfully"})
-}
-
-func GetRecommendedOffers(c *gin.Context) {
-	var recommendedOffers []DTO.OfferWithLocation
-	var result *gorm.DB
-
-	query := models.DB.Model(&models.Offer{})
-
-	result = query.
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("is_recommended = ?", true).
-		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, town.name as town_name, country.name as country_name").
-		Find(&recommendedOffers)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offers fetched successfully", "data": recommendedOffers})
-}
-
-func AddRecommendedOffers(c *gin.Context) {
-	offers, err := models.AddRecommendedOffers()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	for _, offer := range offers {
-		offer.IsRecommended = true
-		if err := offer.Update(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offers})
-}
-
-func GetOffersForHost(c *gin.Context) {
-	hostID := c.Param("id")
-
-	var offerWithLocation []DTO.OfferWithLocation
-	result := models.DB.
-		Model(&models.Offer{}).
-		Joins("JOIN town ON offer.town_id = town.id").
-		Joins("JOIN country ON town.country_id = country.id").
-		Where("offer.user_id = ?", hostID).
-		Select("offer.id as offer_id, offer.name, offer.description, offer.price, offer.max_people, offer.is_animal_friendly," +
-			"offer.is_recommended, offer.offer_type, offer.discount, town.name as town_name, country.name as country_name").
-		Find(&offerWithLocation)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": offerWithLocation})
-
-}
-
-type ChangePriceReq struct {
-	Price float64 `json:"price" binding:"required,min=1"`
-}
-
-func ChangePrice(c *gin.Context) {
-	offerId := c.Param("id")
-	var changePriceReq ChangePriceReq
-
-	if err := c.ShouldBindJSON(&changePriceReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	offer, err := models.GetOfferByID(offerId)
+	offer, err := getByID(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -266,9 +193,35 @@ func ChangePrice(c *gin.Context) {
 		return
 	}
 
-	offer.Price = changePriceReq.Price
+	if err := offer.AddDiscount(req.Discount); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	if err := offer.Update(); err != nil {
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
+}
+
+func ChangeOfferPrice(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
+	id := c.Params.ByName("id")
+	var req utils.ChangePriceReq
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offer, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if offer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
+		return
+	}
+
+	if err := offer.UpdatePrice(req.Price); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

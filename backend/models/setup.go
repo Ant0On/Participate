@@ -37,8 +37,9 @@ func ConnectDatabase() {
 	}
 	fmt.Println("We are connected to the database")
 
-	if err = DB.AutoMigrate(&Country{}, &Grade{}, &Payment{}, &User{},
-		&Town{}, &Offer{}, &Reservation{}, &Message{}, Chat{}); err != nil {
+	if err = DB.AutoMigrate(&Country{}, &Town{}, &Accommodation{}, &Activity{}, &Event{}, &Rating{}, &Payment{},
+		&ReservationAccommodation{}, &ReservationEvent{}, &ReservationActivity{}, &GeneralFacility{}, &RoomFacility{},
+		&Equipment{}, &User{}, &Message{}, Chat{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}
 
@@ -49,6 +50,36 @@ func ConnectDatabase() {
 	if len(allCountries) == 0 {
 		if err := AddCountries(); err != nil {
 			log.Fatal("AddCountries:", err)
+		}
+	}
+
+	allGeneralFacilities, err := GetAllGeneralFacilities()
+	if err != nil {
+		log.Fatal("GetAllGeneralFacilities", err)
+	}
+	if len(allGeneralFacilities) == 0 {
+		if err := AddGeneralFacilities(); err != nil {
+			log.Fatal("AddGeneralFacilities:", err)
+		}
+	}
+
+	allRoomFacilities, err := GetAllRoomFacilities()
+	if err != nil {
+		log.Fatal("GetAllRoomFacilities", err)
+	}
+	if len(allRoomFacilities) == 0 {
+		if err := AddRoomFacilities(); err != nil {
+			log.Fatal("AddRoomFacilities:", err)
+		}
+	}
+
+	allEquipment, err := GetAllEquipment()
+	if err != nil {
+		log.Fatal("GetAllEquipment", err)
+	}
+	if len(allEquipment) == 0 {
+		if err := AddEquipment(); err != nil {
+			log.Fatal("AddEquipment:", err)
 		}
 	}
 

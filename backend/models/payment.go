@@ -37,8 +37,8 @@ func AddPayments() error {
 func GetAllPayments() ([]Payment, error) {
 	var p []Payment
 
-	if err := DB.Model(&[]Payment{}).Scan(&p).Error; err != nil {
-		return p, fmt.Errorf("DB.Model(&[]Payment{}).Scan: %w", err)
+	if err := DB.Model([]Payment{}).Scan(&p).Error; err != nil {
+		return p, fmt.Errorf("DB.Model([]Payment{}).Scan: %w", err)
 	}
 	return p, nil
 }

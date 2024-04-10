@@ -19,19 +19,23 @@ type Tabler interface {
 
 type User struct {
 	gorm.Model
-	FirstName            string `gorm:"size:30;not null" form:"first_name" binding:"required,min=2,max=30"`
-	LastName             string `gorm:"size:100" form:"last_name"`
-	Email                string `gorm:"size:100;not null;unique" form:"email" binding:"required,email"`
-	ImagePath            string `gorm:"default:images/customers/default_image.png" form:"image_path" binding:"omitempty,url"`
-	Password             string `gorm:"size:100;not null" form:"password" binding:"required,min=8"`
-	PasswordConfirmation string `gorm:"-" form:"password_confirmation" binding:"required,eqfield=Password"`
-	Role                 string `gorm:"size:20;not null;default:'customer'" form:"-" validate:"required,oneof=customer host"`
-	Description          string `gorm:"not null;" form:"description"`
-	PhoneNumber          string `gorm:"size:12;not null" form:"phone_number"`
-	BankAccount          string `gorm:"size:31;not null" form:"bank_account"`
-	Offers               []Offer
-	Reservations         []Reservation
-	Messages             []Message
+	FirstName                 string `gorm:"size:30;not null" form:"first_name" binding:"required,min=2,max=30"`
+	LastName                  string `gorm:"size:100" form:"last_name"`
+	Email                     string `gorm:"size:100;not null;unique" form:"email" binding:"required,email"`
+	ImagePath                 string `gorm:"default:images/customers/default_image.png" form:"image_path" binding:"omitempty,url"`
+	Password                  string `gorm:"size:100;not null" form:"password" binding:"required,min=8"`
+	PasswordConfirmation      string `gorm:"-" form:"password_confirmation" binding:"required,eqfield=Password"`
+	Role                      string `gorm:"size:20;not null;default:'customer'" form:"-" validate:"required,oneof=customer host"`
+	Description               string `gorm:"not null;" form:"description"`
+	PhoneNumber               string `gorm:"size:12;not null" form:"phone_number"`
+	BankAccount               string `gorm:"size:31;not null" form:"bank_account"`
+	Accommodations            []Accommodation
+	Activities                []Activity
+	Events                    []Event
+	ReservationsAccommodation []ReservationAccommodation
+	ReservationsActivity      []ReservationActivity
+	ReservationsEvent         []ReservationEvent
+	Messages                  []Message
 }
 
 func (User) TableName() string {
