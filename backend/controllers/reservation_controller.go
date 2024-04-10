@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"backend/models"
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func CreateReservation(c *gin.Context, reservation models.ReservationOperations) {
@@ -76,4 +78,48 @@ func ChangeReservationState(c *gin.Context, getByID func(string) (models.Reserva
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "reservation": reservation})
+}
+
+type ReservationQueryParameters struct {
+	tableName   []string
+	model       interface{}
+	dto         interface{}
+	selectQuery string
+	condition   func(userID string) string
+}
+
+func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
+	userID := c.Param("id")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "app_user ID is required"})
+		return
+	}
+
+	var result *gorm.DB
+
+	query := models.DB.Model(parameters.model)
+
+	joinCondition := fmt.Sprintf("JOIN %s ON %s.%s = %s.id", parameters.tableName[0], parameters.tableName[1], parameters.tableName[2], parameters.tableName[0])
+	joinCondition += fmt.Sprintf(" JOIN town ON %s.town_id = town.id", parameters.tableName[0])
+	joinCondition += " JOIN country ON town.country_id = country.id"
+	joinCondition += fmt.Sprintf(" JOIN app_user ON %s.user_id = app_user.id", parameters.tableName[1])
+
+	result = query.
+		Joins(joinCondition).
+		Where(parameters.condition(userID)).
+		Select(parameters.selectQuery).
+		Find(parameters.dto)
+
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNoContent, gin.H{"message": "No pending reservations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "pending reservations fetched successfully", "data": parameters.dto})
 }
