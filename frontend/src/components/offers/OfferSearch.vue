@@ -16,12 +16,9 @@ const emit = defineEmits(['update:location', 'update:dateFrom', 'update:dateTo',
 
 let inputWidth = window.innerWidth / 5;
 
-
 window.addEventListener("resize", () => {
     inputWidth = window.innerWidth / 5;
 });
-
-
 
 </script>
 
@@ -52,6 +49,5 @@ div.offer_search {
   margin-right: 5%;
   border-radius: 25px;
 }
-
 
 </style>

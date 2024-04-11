@@ -17,7 +17,7 @@ const currentPage = ref(1);
 const totalPages = ref(0);
 
 async function getCurrentActivities(page) {
-  const response = await fetchWrapper.get(`/api/offers?type=activity&page=${page}`)
+  const response = await fetchWrapper.get(`/api/offers/activities?page=${page}`)
   const responseData = response?.data || [] ;
 
   if(responseData){
@@ -28,9 +28,9 @@ async function getCurrentActivities(page) {
         'offerId': data["offer_id"],
         'location': data["country_name"] + ', ' + data["town_name"],
         'description': data["description"],
-        'name': data["name"],
+        'title': data["title"],
         'price': priceAfterDiscount,
-        'maxPeople': data["max_people"]
+        'capacity': data["capacity"]
       }
     })
 
@@ -86,16 +86,16 @@ watch(currentPage, (newPage) => {
   <div class="activities_page">
     <NavBar currentPage="activities"/>
     <p>Inspiring activities</p>
-    <OfferSearch offer_type="Activities" v-model:location="location"
+    <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div v-if="activities.length > 0" class="offer_items">
       <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                     :name="activity.name" :price="activity.price"
-                     :max_people="activity.maxPeople" type="activities" :id="activity.offerId"/>
+                     :title="activity.title" :price="activity.price"
+                     :capacity="activity.capacity" type="activity" :id="activity.offerId"/>
     </div>
     <div v-else class="no_offers">
-      <p class="no_offer_placeholder"> Currently there are no offers of given type!  </p>
+      <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
     </div>
     <div v-if="totalPages > 1" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
@@ -112,9 +112,11 @@ div.no_offers{
   justify-content: center;
   padding-top: 10%;
 }
+
 p.no_offer_placeholder{
   text-align: center;
 }
+
 div.activities_page {
   display: flex;
   flex-direction: column;

@@ -6,18 +6,18 @@ const props = defineProps({
   type: String,
   id: String,
   location: String,
-  name: String,
+  title: String,
   price: String,
-  max_people: String,
+  capacity: String,
 })
 
 function onItemClicked() {
-  router.push({name: 'Offers', params:{type: props.type, id: props.id}})
+  router.push({title: 'Offers', params:{type: props.type, id: props.id}})
 }
 
 const isImageSource = computed(() =>{
   try{
-    require(`@/../images/offers/${props.id}/${props.id}_0.jpeg`)
+    require(`@/../images/offers/${props.type}/${props.id}/${props.id}_0.jpeg`)
     return true
   }
   catch{
@@ -26,15 +26,14 @@ const isImageSource = computed(() =>{
 })
 </script>
 
-
 <template>
   <div class="offer_item" @click="onItemClicked">
-    <img v-if="isImageSource" :src="require(`@/../images/offers/${id}/${id}_0.jpeg`)" alt="Image">
+    <img v-if="isImageSource" :src="require(`@/../images/offers/${type}/${id}/${id}_0.jpeg`)" alt="Image">
     <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="item_details">
-      <div class="title">{{ name }}</div>
+      <div class="title">{{ title }}</div>
       <div class="price">Price: {{ price }} $</div>
-      <div class="number_of_people">Max number of people: {{ max_people }}</div>
+      <div class="capacity">Capacity: {{ capacity }} people</div>
       <div class="location">Location: {{ location }}</div>
     </div>
 
@@ -78,7 +77,7 @@ div.price {
   padding: 1%;
 }
 
-div.number_of_people {
+div.capacity {
   color: #7a7a7a;
   font-family: "Poppins", Helvetica;
   font-size: 1.2rem;

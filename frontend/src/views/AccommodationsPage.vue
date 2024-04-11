@@ -17,20 +17,20 @@ const currentPage = ref(1);
 const totalPages = ref(0);
 
 async function getCurrentAccommodations(page) {
-  const response = await fetchWrapper.get(`/api/offers?type=accommodation&page=${page}`);
+  const response = await fetchWrapper.get(`/api/offers/accommodations?page=${page}`);
   const responseData = response?.data || [] ;
 
   if(responseData){
     accommodations.value = responseData.map((data) => {
-      const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
+      const priceAfterDiscount = calculatePriceAfterDiscount(data['price_per_day'], data['discount'])
 
       return {
         'offerId': data["offer_id"],
         'location': data["country_name"] + ', ' + data["town_name"],
         'description': data["description"],
-        'name': data["name"],
+        'title': data["title"],
         'price': priceAfterDiscount,
-        'maxPeople': data["max_people"]
+        'capacity': data["capacity"]
       };
     });
 
@@ -86,17 +86,17 @@ watch(currentPage, (newPage) => {
   <div class="accommodation_page">
     <NavBar currentPage="accommodations"/>
     <p>Climatic places</p>
-    <OfferSearch offer_type="Accommodation" v-model:location="location"
+    <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div v-if="accommodations.length > 0" class="offer_items">
       <OfferListItem v-for="accommodation in accommodations"
                      :location="accommodation.location"
-                     :description="accommodation.description" :name="accommodation.name"
-                     :price="accommodation.price" :max_people="accommodation.maxPeople" type="accommodations" :id="accommodation.offerId"/>
+                     :description="accommodation.description" :title="accommodation.title"
+                     :price="accommodation.price" :capacity="accommodation.capacity" type="accommodation" :id="accommodation.offerId"/>
     </div>
     <div v-else class="no_offers">
-      <p class="no_offer_placeholder"> Currently there are no offers of given type!  </p>
+      <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
     </div>
     <div v-if="totalPages > 1" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
