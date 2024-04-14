@@ -24,7 +24,6 @@ func RegisterRoutes(r *gin.Engine) {
 	host.PUT("/:id/change/description", ChangeDescription)
 	host.PUT("/:id/change/phone_number", ChangePhoneNumber)
 	host.PUT("/:id/change/bank_account", ChangeBankAccount)
-	//	host.POST("/:offerID/chat/create", CreateChat)
 
 	activity := r.Group("api/host/activity")
 	activity.Use(middlewares.JwtAuthMiddleware("host"))
@@ -69,7 +68,6 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.POST("/offer/accommodation/:id/rate", GradeAccommodationReservation)
 	customer.POST("/offer/activity/:id/rate", GradeActivityReservation)
 	customer.POST(":id/promote", PromoteToHost)
-	customer.POST(":id/:chatId/message/send", SendMessage)
 
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)
@@ -112,7 +110,7 @@ func RegisterRoutes(r *gin.Engine) {
 	protected.GET("/user", CurrentUser)
 	//protected.PUT("/offer/:id/recommend", RecommendOffer)
 
-	chat := r.Group("api/chat")
-	chat.GET("/:offerID/messages", GetAllMessages)
-	//chat.GET("/offer/:offerID", GetChatByOfferID)
+	room := r.Group("/api/room")
+	room.POST("/create", CreateRoom)
+	room.GET("/:id/get", GetRooms)
 }

@@ -35,10 +35,9 @@ type User struct {
 	ReservationsAccommodation []ReservationAccommodation
 	ReservationsActivity      []ReservationActivity
 	ReservationsEvent         []ReservationEvent
-	Messages                  []Message
 }
 
-func (User) TableName() string {
+func (*User) TableName() string {
 	return "app_user"
 }
 
