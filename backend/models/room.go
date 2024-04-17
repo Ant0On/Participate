@@ -8,12 +8,12 @@ import (
 
 type Room struct {
 	gorm.Model
-	RoomNumber      int
-	RoomName        string
-	RoomDescription string
-	Capacity        int
-	Area            int
-	AccommodationID uint
+	RoomNumber      int            `gorm:"not null" json:"room_number" binding:"required,gt=0"`
+	RoomName        string         `gorm:"not null" json:"room_name" binding:"required,min=3"`
+	RoomDescription string         `gorm:"not null" json:"room_description" binding:"required,min=10"`
+	Capacity        int            `gorm:"not null" json:"room_capacity" binding:"required,gt=0"`
+	Area            int            `gorm:"not null" json:"room_area" binding:"required,gt=0"`
+	AccommodationID uint           `gorm:"not null" json:"accommodation_id" binding:"required"`
 	RoomFacilities  []RoomFacility `gorm:"many2many:room_room_facilities;"`
 }
 

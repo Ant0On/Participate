@@ -22,7 +22,7 @@ func CreateReservation(c *gin.Context, reservation models.ReservationOperations)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": reservation})
+	c.JSON(http.StatusOK, gin.H{"message": "reservation created successfully!", "reservation": reservation})
 }
 
 func GetReservationById(c *gin.Context, getByID func(string) (models.ReservationOperations, error)) {
