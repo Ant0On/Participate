@@ -10,6 +10,7 @@ import (
 func AddEventReservation(c *gin.Context) {
 	var reservation *models.ReservationEvent
 	CreateReservation(c, reservation)
+
 }
 
 func GetEventReservationById(c *gin.Context) {

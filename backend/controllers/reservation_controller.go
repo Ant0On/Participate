@@ -12,13 +12,18 @@ import (
 )
 
 func CreateReservation(c *gin.Context, reservation models.ReservationOperations) {
-	if err := c.ShouldBind(reservation); err != nil {
+	if err := c.ShouldBindJSON(reservation); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
 	}
 
+	if err := reservation.ChangeCapacity(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"reservation.ChangeCapacity: ": err.Error()})
+		return
+	}
+
 	if err := reservation.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Save: ": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"offer.Save: ": err.Error()})
 		return
 	}
 
@@ -30,7 +35,7 @@ func GetReservationById(c *gin.Context, getByID func(string) (models.Reservation
 
 	reservation, err := getByID(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.getReservationByID:": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"models.getReservationByID:": err.Error()})
 		return
 	}
 
