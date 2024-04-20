@@ -17,7 +17,7 @@ const currentPage = ref(1);
 const totalPages = ref(0);
 
 async function getCurrentEvents(page) {
-  const response = await fetchWrapper.get(`/api/offers?type=event&page=${page}`);
+  const response = await fetchWrapper.get(`/api/offers/events?page=${page}`);
   const responseData = response?.data || [] ;
   if (responseData){
     events.value = responseData.map((data) => {
@@ -26,9 +26,9 @@ async function getCurrentEvents(page) {
         'offerId': data["offer_id"],
         'location': data["country_name"] + ', ' + data["town_name"],
         'description': data["description"],
-        'name': data["name"],
+        'title': data["title"],
         'price': priceAfterDiscount,
-        'maxPeople': data["max_people"]
+        'capacity': data["capacity"]
       };
     });
 
@@ -84,16 +84,16 @@ watch(currentPage, (newPage) => {
   <div class="event_page">
     <NavBar currentPage="events"/>
     <p>Unforgettable events</p>
-    <OfferSearch offer_type="Events" v-model:location="location"
+    <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div v-if="events.length > 0" class="offer_items">
       <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
-                     :name="event.name" :price="event.price"
-                     :max_people="event.maxPeople" type="events" :id="event.offerId"/>
+                     :title="event.title" :price="event.price"
+                     :capacity="event.capacity" type="event" :id="event.offerId"/>
     </div>
     <div v-else class="no_offers">
-      <p class="no_offer_placeholder"> Currently there are no offers of given type!  </p>
+      <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
     </div>
     <div v-if="totalPages > 1" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
