@@ -24,7 +24,7 @@ window.addEventListener("resize", () => {
 
 <template>
   <div class="offer_search">
-    <TextInput :model-value="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth+'px'"
+    <TextInput :model-value="location" @input="$emit('update:location', $event.target.value)"
                label-text="Location" placeholder="Location" :is-required="true"/>
     <DateInput :model-value="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
                :is-required="true" :width="inputWidth+'px'"/>

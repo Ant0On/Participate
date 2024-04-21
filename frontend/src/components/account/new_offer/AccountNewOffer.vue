@@ -175,8 +175,8 @@ onMounted(async () => {
     </Transition>
     <Transition name="bounce">
       <div v-if="isOfferTypeFilled" class="new_offer_info">
-        <TextInput v-model="newOffer.name" label-text="Name" width="100%"/>
-        <TextInput v-model="newOffer.description" label-text="Description" width="100%"/>
+        <TextInput v-model="newOffer.name" label-text="Name" />
+        <TextInput v-model="newOffer.description" label-text="Description"/>
         <NumberInput v-model="newOffer.price" label-text="Price"/>
         <NumberInput v-model="newOffer.maxPeople" label-text="Max number of people" width="100%"/>
         <CheckButtonInput :model-value="newOffer.isAnimalFriendly"
@@ -187,7 +187,7 @@ onMounted(async () => {
     <Transition name="bounce">
       <div v-if="isOfferInfoFilled" class="new_offer_info">
         <SelectionInput v-model="newOffer.country" label-text="Country" :items="countries" width="100%"/>
-        <TextInput v-model="newOffer.city" label-text="City" width="100%"/>
+        <TextInput v-model="newOffer.city" label-text="City"/>
       </div>
     </Transition>
     <Transition name="bounce">

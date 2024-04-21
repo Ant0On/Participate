@@ -175,14 +175,14 @@ function dataURLtoFile(dataURL, fileName) {
       <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
       <div class="user_fields">
         <div class="customer_fields">
-          <TextInput label-text="Name" :isActive="isSubmitMode" v-model="customerData.Name" width="100%"/>
-          <TextInput label-text="Last Name" :isActive="isSubmitMode" v-model="customerData.LastName" width="100%"/>
-          <TextInput label-text="Email" :isActive="isSubmitMode" v-model="customerData.Email" width="100%"/>
+          <TextInput label-text="Name" :isActive="isSubmitMode" v-model="customerData.Name"/>
+          <TextInput label-text="Last Name" :isActive="isSubmitMode" v-model="customerData.LastName" />
+          <TextInput label-text="Email" :isActive="isSubmitMode" v-model="customerData.Email"/>
         </div>
         <div class="host_fields" v-if="userRole === 'host'">
-          <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.Description" width="100%"/>
-          <TextInput label-text="Phone number" :is-active="isSubmitMode" v-model="hostData.PhoneNumber" width="100%"/>
-          <TextInput label-text="Bank account" :is-active="isSubmitMode" v-model="hostData.BankAccount" width="100%"/>
+          <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.Description" />
+          <TextInput label-text="Phone number" :is-active="isSubmitMode" v-model="hostData.PhoneNumber"/>
+          <TextInput label-text="Bank account" :is-active="isSubmitMode" v-model="hostData.BankAccount" />
         </div>
       </div>
       <div id="upload_image" class="customer_fields">
