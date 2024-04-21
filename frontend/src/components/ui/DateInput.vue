@@ -16,8 +16,8 @@ const emits = defineEmits(['update:modelValue'])
 const required = value => !!value || 'Required.'
 const rules = ref({
   required: value => !!value || 'Required.',
-  min: v => v.length >= 8 || 'Date must ',
-  max: v => v.length >= 8 || 'Date must ',
+  min: v => v > props.min || `Date must be grater than ${props.min} `,
+  max: v => v < props.max || `Date must be smaller than ${props.max}`,
 })
 
 </script>
@@ -31,9 +31,11 @@ const rules = ref({
       v-model="modelValue"
       class="w-100"
       clearable
-      :rules="[isRequired && rules.required, min && rules.min, max && rules.max]"
       type="date"
+      :rules="[isRequired && rules.required]"
   ></v-text-field>
+<!--  :rules="[isRequired && rules.required, min && rules.min, max && rules.max]"-->
+<!--  TODO: Create proper validation -->
 </template>
 
 <style scoped>

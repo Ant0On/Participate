@@ -44,8 +44,8 @@ function moveToSummary() {
     <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <div class="offer_detail_reserve_fields">
       <NumberInput v-model="numberOfPeople" label-text="Number of people"/>
-      <DateInput v-model="dateFrom" label-text="Arrival date"/>
-      <DateInput v-model="dateTo" label-text="Departure date"/>
+      <DateInput v-model="dateFrom" label-text="Arrival date" :max="dateTo"/>
+      <DateInput v-model="dateTo" label-text="Departure date" :min="dateFrom"/>
     </div>
     <div class="reserve_button">
       <button class="reserve" @click="moveToSummary()">

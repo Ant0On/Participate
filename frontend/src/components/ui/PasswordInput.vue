@@ -35,5 +35,4 @@ const rules = ref({
 </template>
 
 <style scoped>
-
 </style>

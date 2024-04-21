@@ -33,37 +33,4 @@ const rules = ref({
 </template>
 
 <style scoped>
-select, option{
-  width: v-bind(width);
-  height: 40px;
-  background-color: var(--surfacelight);
-  border: 1px;
-  resize: vertical;
-}
-.text_input {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-}
-
-label {
-  font-family: "IBMPlex Sans-Regular", Helvetica;
-  font-style: normal;
-  font-weight: 500;
-  color: var(--text-secondary-grey2);
-  line-height: 150%;
-}
-
-span {
-  font-family: "IBMPlex Sans-Regular", Helvetica;
-  font-style: normal;
-  color: var(--systemred);
-}
-
-input:focus {
-  border: 1px;
-  color: var(--text-link)
-}
 </style>
