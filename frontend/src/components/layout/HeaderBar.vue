@@ -4,7 +4,7 @@
 <template>
   <v-app-bar class="px-4">
       <router-link to="/">
-          <v-img width="150" height="40" :src="require('@/assets/img/logo.png')"></v-img>
+          <v-img width="250" height="60" :src="require('@/assets/img/logo.png')"></v-img>
       </router-link>
 
 
