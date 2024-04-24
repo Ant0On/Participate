@@ -11,7 +11,6 @@ const icons = ref([
 </script>
 
 <template>
-  <v-layout>
     <v-footer class="d-flex flex-column" style="background-color: #efefef; padding: 16px 0 0 0">
       <div class="d-flex w-100 align-center px-4">
         <strong>Get connected with us on social networks!</strong>
@@ -32,7 +31,6 @@ const icons = ref([
         {{ new Date().getFullYear() }} — <strong>Participate</strong>
       </div>
     </v-footer>
-  </v-layout>
 </template>
 
 <style scoped>

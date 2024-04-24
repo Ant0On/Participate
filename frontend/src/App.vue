@@ -4,15 +4,16 @@ import FooterBar from "@/components/layout/FooterBar.vue";
 </script>
 
 <template>
-  <div id="app_main">
+  <v-app id="app_main">
     <router-view/>
     <FooterBar/>
-  </div>
+  </v-app>
 </template>
 
 <style scoped>
 #app_main{
-  height: 100%;
+  min-height: 100%;
+  background-color: #efefef;
 
 }
 </style>
