@@ -107,6 +107,7 @@ watch(currentPage, (newPage) => {
 </template>
 
 <style scoped>
+
 div.no_offers{
   display: flex;
   align-items: center;
@@ -120,6 +121,8 @@ div.accommodation_page {
   display: flex;
   flex-direction: column;
   overflow: scroll;
+  height: 100%;
+
 }
 
 p {

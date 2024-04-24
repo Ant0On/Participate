@@ -58,7 +58,6 @@ function onPageChange(page){
         </div>
       </div>
     </div>
-    <Footer/>
   </div>
 </template>
 

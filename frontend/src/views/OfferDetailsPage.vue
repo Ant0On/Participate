@@ -129,6 +129,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+
 div.item_detail {
   margin: 5% 5% 1% 5%;
   background-color: rgba(255, 255, 255, 0.7);

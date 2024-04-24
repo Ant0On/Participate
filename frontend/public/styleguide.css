@@ -32,4 +32,11 @@
 }
 body{
   background-color: #efefef;
+  height: 100%;
+}
+html{
+  height: 99%;
+}
+#app{
+  height: 100%;
 }

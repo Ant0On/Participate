@@ -104,6 +104,9 @@ watch(currentPage, (newPage) => {
 </template>
 
 <style scoped>
+.event_page{
+  height: 100%;
+}
 div.no_offers{
   display: flex;
   align-items: center;

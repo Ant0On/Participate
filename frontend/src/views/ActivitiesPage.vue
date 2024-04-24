@@ -121,6 +121,7 @@ div.activities_page {
   display: flex;
   flex-direction: column;
   overflow: scroll;
+  height: 100%;
 }
 
 p {
