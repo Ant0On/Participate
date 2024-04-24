@@ -1,12 +1,10 @@
 <script setup>
-import NavBar from "@/components/nav/NavBar.vue";
 import HomeOfferSearch from "@/components/home/HomeOfferSearch.vue";
 import HomeWelcomeText from "@/components/home/HomeWelcomeText.vue";
 </script>
 
 <template>
   <div class="home_page">
-    <NavBar currentPage="home"/>
     <div class="search_and_welcome">
       <div class="welcome">
         <HomeWelcomeText/>
@@ -103,6 +101,8 @@ export default {
 .home_page {
   display: flex;
   flex-direction: column;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 .search_and_welcome {

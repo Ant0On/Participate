@@ -30,7 +30,6 @@ function onPageChange(page){
 <template>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <div class="logging">
-    <NavBar currentPage="login"/>
     <div class="login_container" v-if="user === null">
       <Transition name="slide-fade">
         <div class="login" v-if="loginPage">
@@ -67,7 +66,6 @@ div.account_container{
   flex-direction: column;
   margin-top: 3%;
   row-gap: 30px;
-  height: 450px;
 }
 div.account_data{
   display: flex;

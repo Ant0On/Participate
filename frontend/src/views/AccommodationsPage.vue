@@ -2,7 +2,6 @@
 import { ref, watch, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
-import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import { useSearchStore } from "@/stores/search.store";
@@ -84,7 +83,6 @@ watch(currentPage, (newPage) => {
 
 <template>
   <div class="accommodation_page">
-    <NavBar currentPage="accommodations"/>
     <p>Climatic places</p>
     <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
@@ -96,7 +94,9 @@ watch(currentPage, (newPage) => {
                      :price="accommodation.price" :capacity="accommodation.capacity" type="accommodation" :id="accommodation.offerId"/>
     </div>
     <div v-else class="no_offers">
+      <v-spacer></v-spacer>
       <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
+      <v-spacer></v-spacer>
     </div>
     <div v-if="totalPages > 1" class="pagination">
       <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
@@ -110,9 +110,9 @@ watch(currentPage, (newPage) => {
 
 div.no_offers{
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 10%;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }
 p.no_offer_placeholder{
   text-align: center;
@@ -120,9 +120,7 @@ p.no_offer_placeholder{
 div.accommodation_page {
   display: flex;
   flex-direction: column;
-  overflow: scroll;
   height: 100%;
-
 }
 
 p {

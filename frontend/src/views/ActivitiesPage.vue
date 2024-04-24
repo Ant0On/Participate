@@ -84,7 +84,6 @@ watch(currentPage, (newPage) => {
 
 <template>
   <div class="activities_page">
-    <NavBar currentPage="activities"/>
     <p>Inspiring activities</p>
     <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
@@ -120,7 +119,6 @@ p.no_offer_placeholder{
 div.activities_page {
   display: flex;
   flex-direction: column;
-  overflow: scroll;
   height: 100%;
 }
 

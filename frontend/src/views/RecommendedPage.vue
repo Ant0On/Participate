@@ -81,7 +81,6 @@ watch(currentPage, (newPage) => {
 
 <template>
   <div class="recommended_page">
-    <NavBar currentPage="recommended"/>
     <p>Recommended offers</p>
     <OfferSearch v-model:location="location"
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
@@ -117,7 +116,6 @@ p.no_offer_placeholder{
 div.recommended_page {
   display: flex;
   flex-direction: column;
-  overflow: scroll;
   height: 100%;
 
 }

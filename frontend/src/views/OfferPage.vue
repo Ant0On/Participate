@@ -48,7 +48,6 @@ onMounted(async () => {
 
 <template>
   <div class="event_page">
-    <NavBar :currentPage="type"/>
     <div class="item_detail">
       <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
                               :numberOfPeople="offer.numberOfPeople" :userId="offer.appUserID" :description="offer.description"

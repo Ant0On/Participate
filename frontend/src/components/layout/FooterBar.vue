@@ -11,10 +11,9 @@ const icons = ref([
 </script>
 
 <template>
-    <v-footer class="d-flex flex-column" style="background-color: #efefef; padding: 16px 0 0 0">
+    <v-footer class="d-flex flex-column" elevation="8">
       <div class="d-flex w-100 align-center px-4">
         <strong>Get connected with us on social networks!</strong>
-
         <v-spacer></v-spacer>
 
         <v-btn
