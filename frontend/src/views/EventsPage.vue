@@ -1,82 +1,46 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import { useSearchStore } from "@/stores/search.store";
-import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
+import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 
 const searchStore = useSearchStore();
 const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const events = ref([]);
-const currentPage = ref(1);
-const totalPages = ref(0);
 
-async function getCurrentEvents(page) {
-  const response = await fetchWrapper.get(`/api/offers/events?page=${page}`);
-  const responseData = response?.data || [] ;
-  if (responseData){
-    events.value = responseData.map((data) => {
-      const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
-      return {
-        'offerId': data["offer_id"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'title': data["title"],
-        'price': priceAfterDiscount,
-        'capacity': data["capacity"]
-      };
-    });
-
-    totalPages.value = response.totalPages;
-  }
-}
-
-function getNewEvents(location, dateFrom, dateTo, numberOfPeople) {
-  return events.value.filter((data) => {
-    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople);
+function mapEvents(responseData){
+  return responseData.map((data) => {
+    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
+    return {
+      'offerId': data["offer_id"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'title': data["title"],
+      'price': priceAfterDiscount,
+      'capacity': data["capacity"]
+    };
   });
 }
 
-function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople) {
-  let isMatchingSearch = true;
-  if (typeof location !== "undefined" && location !== "") {
-    isMatchingSearch = data.location.includes(location);
-  }
-
-  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0) {
-    isMatchingSearch = numberOfPeople <= data.maxPeople;
-  }
-
-  return isMatchingSearch;
-}
+const pagesGenerator = fetchPaginatedData('/api/offers/events', mapEvents)
 
 onMounted(async () => {
-  await getCurrentEvents(currentPage.value);
+  events.value = await pagesGenerator.next();
 });
 
-watch(location, (newLocation) => {
-  events.value = getNewEvents(newLocation, dateFrom, dateTo, numberOfPeople);
-});
+async function load({ done }){
+  const response = await pagesGenerator.next();
 
-watch(dateFrom, (newDateFrom) => {
-  events.value = getNewEvents(location, newDateFrom, dateTo, numberOfPeople);
-});
+  events.value.push(...response)
 
-watch(dateTo, (newDateTo) => {
-  events.value = getNewEvents(location, dateFrom, newDateTo, numberOfPeople);
-});
+  done('ok');
 
-watch(numberOfPeople, (newNumberOfPeople) => {
-  events.value = getNewEvents(location, dateFrom, dateTo, newNumberOfPeople);
-});
-
-watch(currentPage, (newPage) => {
-  getCurrentEvents(newPage);
-});
+}
 </script>
 
 <template>
@@ -86,17 +50,17 @@ watch(currentPage, (newPage) => {
                  v-model:date-from="dateFrom" v-model:date-to="dateTo"
                  v-model:number-of-people="numberOfPeople"/>
     <div v-if="events.length > 0" class="offer_items">
+      <v-infinite-scroll :height="300" :items="events" :onLoad="load">
+
+      </v-infinite-scroll>
+
+
       <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
                      :title="event.title" :price="event.price"
                      :capacity="event.capacity" type="event" :id="event.offerId"/>
     </div>
     <div v-else class="no_offers">
       <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
-    </div>
-    <div v-if="totalPages > 1" class="pagination">
-      <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span >Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>
 </template>
