@@ -14,6 +14,7 @@ const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 const events = ref([]);
 
 function mapEvents(responseData){
+
   return responseData.map((data) => {
     const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
     return {
@@ -35,11 +36,13 @@ onMounted(async () => {
 
 async function load({ done }){
   const response = await pagesGenerator.next();
-
-  events.value.push(...response)
-
+  if(response?.done)
+  {
+    done('empty')
+    return
+  }
+  events.value.push(...response.value)
   done('ok');
-
 }
 </script>
 
@@ -51,13 +54,15 @@ async function load({ done }){
                  v-model:number-of-people="numberOfPeople"/>
     <div v-if="events.length > 0" class="offer_items">
       <v-infinite-scroll :height="300" :items="events" :onLoad="load">
-
+        <template v-slot:empty>
+          <p class="no_offer_placeholder">Currently there are no more offers to display!</p>
+        </template>
+        <template v-for="event in events" :key="item">
+          <OfferListItem :location="event.location" :description="event.description"
+                         :title="event.title" :price="event.price"
+                         :capacity="event.capacity" type="event" :id="event.offerId"/>
+        </template>
       </v-infinite-scroll>
-
-
-      <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
-                     :title="event.title" :price="event.price"
-                     :capacity="event.capacity" type="event" :id="event.offerId"/>
     </div>
     <div v-else class="no_offers">
       <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
