@@ -111,12 +111,6 @@ const schemaPassword = Yup.object().shape({
         </button>
       </div>
     </div>
-    <div class="line"></div>
-    <div class="logout_button_container">
-      <button class="button_basic logout_button" @click="auth.logout()">
-        Log out
-      </button>
-    </div>
   </div>
 </template>
 

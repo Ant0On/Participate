@@ -2,7 +2,6 @@
 import { ref, watch, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
-import NavBar from "@/components/nav/NavBar.vue";
 import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import { useSearchStore } from "@/stores/search.store";

@@ -1,7 +1,5 @@
 <script setup>
 import {ref} from 'vue';
-import Footer from "@/components/layout/FooterBar.vue";
-import NavBar from "@/components/nav/NavBar.vue";
 import LoginSection from "@/components/login/LoginSection.vue";
 import SignUpSection from "@/components/login/SignUpSection.vue";
 import {useAuthStore} from "@/stores/auth.store";

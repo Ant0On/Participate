@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <v-app-bar class="px-4">
+  <v-app-bar class="px-4" >
       <router-link to="/">
           <v-img width="250" height="60" :src="require('@/assets/img/logo.png')"></v-img>
       </router-link>
@@ -49,12 +49,6 @@
 
     </v-tabs>
     <v-spacer></v-spacer>
-
-    <v-avatar
-        class="hidden-sm-and-down"
-        color="grey-darken-1"
-        size="32"
-    ></v-avatar>
 
   </v-app-bar>
 </template>

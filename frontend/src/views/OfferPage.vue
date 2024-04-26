@@ -1,7 +1,6 @@
 <script setup>
 import {defineProps, ref, onMounted} from 'vue';
 
-import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
 import OfferDetailDescription from "@/components/detail/OfferDetailDescription.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
