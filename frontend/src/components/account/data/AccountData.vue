@@ -1,15 +1,14 @@
 <script setup>
 import {computed, reactive, ref} from 'vue';
 import * as Yup from 'yup';
+import {storeToRefs} from 'pinia';
 
 import {useAuthStore} from "@/stores/auth.store";
 import TextInput from "@/components/ui/TextInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
-const auth = useAuthStore();
-const user = auth.user;
-
-const userRole = user.Role
+const userStore = useAuthStore();
+const {user: user} = storeToRefs(userStore)
 
 const errors = reactive({
   apiError: "",
@@ -18,7 +17,7 @@ const errors = reactive({
 
 const isUserImage = computed(() => {
   try {
-    require(`@/../images/customers/${user.ID}.jpeg`)
+    require(`@/../images/customers/${user.value?.ID}.jpeg`)
     return true
   } catch {
     return false
@@ -29,49 +28,49 @@ const isImageUploaded = ref(false)
 const uploadedImage = ref({})
 
 const customerData = ref({
-  Name: user.FirstName,
-  LastName: user.LastName,
-  Email: user.Email
+  Name: user.value.FirstName,
+  LastName: user.value.LastName,
+  Email: user.value.Email
 })
 
 const hostData = ref({
-  Description: user.Description ? user.Description : '',
-  PhoneNumber: user.PhoneNumber ? user.PhoneNumber : '',
-  BankAccount: user.BankAccount ? user.BankAccount : '',
+  Description: user.value.Description ? user.value.Description : '',
+  PhoneNumber: user.value.PhoneNumber ? user.value.PhoneNumber : '',
+  BankAccount: user.value.BankAccount ? user.value.BankAccount : '',
 })
 
 const currentCustomerData = ref({
-  Name: user.FirstName,
-  LastName: user.LastName,
-  Email: user.Email
+  Name: user.value.FirstName,
+  LastName: user.value.LastName,
+  Email: user.value.Email
 })
 
 const currentHostData = ref({
-  Description: user.Description ? user.Description : '',
-  PhoneNumber: user.PhoneNumber ? user.PhoneNumber : '',
-  BankAccount: user.BankAccount ? user.BankAccount : '',
+  Description: user.value.Description ? user.value.Description : '',
+  PhoneNumber: user.value.PhoneNumber ? user.value.PhoneNumber : '',
+  BankAccount: user.value.BankAccount ? user.value.BankAccount : '',
 })
 
 async function onSubmit() {
   await schemaCustomer.validate(customerData.value).then(async () => {
-    if (user.Role === "host") {
+    if (user.value.Role === "host") {
       await schemaHost.validate(hostData.value).then(async () => {
         if (hostData.value.Description !== currentHostData.value.Description)
-          await fetchWrapper.put(`/api/host/${user.ID}/change/description`, {
+          await fetchWrapper.put(`/api/host/${user.value.ID}/change/description`, {
             value: hostData.value.Description
           })
         if (hostData.value.PhoneNumber !== currentHostData.value.PhoneNumber)
-          await fetchWrapper.put(`/api/host/${user.ID}/change/phone_number`, {
+          await fetchWrapper.put(`/api/host/${user.value.ID}/change/phone_number`, {
             value: hostData.value.PhoneNumber
           })
         if (hostData.value.BankAccount !== currentHostData.value.BankAccount)
-          await fetchWrapper.put(`/api/host/${user.ID}/change/bank_account`, {
+          await fetchWrapper.put(`/api/host/${user.value.ID}/change/bank_account`, {
             value: hostData.value.BankAccount
           })
 
-        user.Description = hostData.value.Description
-        user.PhoneNumber = hostData.value.PhoneNumber
-        user.BankAccount = hostData.value.BankAccount
+        user.value.Description = hostData.value.Description
+        user.value.PhoneNumber = hostData.value.PhoneNumber
+        user.value.BankAccount = hostData.value.BankAccount
       }).catch((hostErrors) => {
         errors.apiError = formatErrors(hostErrors.errors);
       });
@@ -79,20 +78,20 @@ async function onSubmit() {
     }
     isSubmitMode.value = false;
     if (customerData.value.Name !== currentCustomerData.value.Name)
-      await fetchWrapper.put(`/api/customer/${user.ID}/change/first_name`, {
+      await fetchWrapper.put(`/api/customer/${user.value.ID}/change/first_name`, {
         value: customerData.value.Name.trim()
       })
     if (customerData.value.LastName !== currentCustomerData.value.LastName)
-      await fetchWrapper.put(`/api/customer/${user.ID}/change/last_name`, {
+      await fetchWrapper.put(`/api/customer/${user.value.ID}/change/last_name`, {
         value: customerData.value.LastName.trim()
       })
     if (customerData.value.Email !== currentCustomerData.value.Email)
-      await fetchWrapper.put(`/api/customer/${user.ID}/change/email`, {
+      await fetchWrapper.put(`/api/customer/${user.value.ID}/change/email`, {
         value: customerData.value.Email.trim()
       })
-    user.FirstName = customerData.value.Name
-    user.LastName = customerData.value.LastName
-    user.Email = customerData.value.Email
+    user.value.FirstName = customerData.value.Name
+    user.value.LastName = customerData.value.LastName
+    user.value.Email = customerData.value.Email
 
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
@@ -102,7 +101,7 @@ async function onSubmit() {
       const imageFile = dataURLtoFile(uploadedImage.value, 'image.jpeg');
       uploadedImage.value = null
       isImageUploaded.value = false
-        await fetchWrapper.put(`/api/customer/${user.ID}/change/picture`, {
+        await fetchWrapper.put(`/api/customer/${user.value.ID}/change/picture`, {
           image: imageFile
         }, "multipart/form-data")
     }
@@ -179,7 +178,7 @@ function dataURLtoFile(dataURL, fileName) {
           <TextInput label-text="Last Name" :isActive="isSubmitMode" v-model="customerData.LastName" />
           <TextInput label-text="Email" :isActive="isSubmitMode" v-model="customerData.Email"/>
         </div>
-        <div class="host_fields" v-if="userRole === 'host'">
+        <div class="host_fields" v-if="user.Role === 'host'">
           <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.Description" />
           <TextInput label-text="Phone number" :is-active="isSubmitMode" v-model="hostData.PhoneNumber"/>
           <TextInput label-text="Bank account" :is-active="isSubmitMode" v-model="hostData.BankAccount" />
@@ -212,12 +211,6 @@ function dataURLtoFile(dataURL, fileName) {
           Submit
         </button>
       </div>
-    </div>
-    <div class="line"></div>
-    <div class="logout_button_container">
-      <button class="button_basic logout_button" @click="auth.logout()">
-        Log out
-      </button>
     </div>
   </div>
 </template>

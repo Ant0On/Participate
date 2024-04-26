@@ -1,34 +1,26 @@
 <script setup>
 import {ref} from 'vue';
+import {storeToRefs} from 'pinia';
+
 import LoginSection from "@/components/login/LoginSection.vue";
 import SignUpSection from "@/components/login/SignUpSection.vue";
 import {useAuthStore} from "@/stores/auth.store";
-import AccountNav from "@/components/account/AccountNav.vue";
 import AccountData from "@/components/account/data/AccountData.vue";
-import AccountHistory from "@/components/account/history/AccountHistory.vue";
-import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
-import AccountCurrentOffer from "@/components/account/current_offer/CurrentOffer.vue";
-import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
-import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
-import AccountChangePassword from "@/components/account/change_password/ChangePassword.vue";
 
 const loginPage = ref(true)
 
-const authStore = useAuthStore()
-const user = authStore.user;
+const userStore = useAuthStore()
+const {user: user} = storeToRefs(userStore);
 
 const currentPage = ref('Account Information')
 
-function onPageChange(page){
-  currentPage.value = page;
-}
 
 </script>
 
 <template>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <div class="logging">
-    <div class="login_container" v-if="user === null">
+    <div class="login_container" v-if="!user">
       <Transition name="slide-fade">
         <div class="login" v-if="loginPage">
           <LoginSection @sign-up-clicked="loginPage = !loginPage"/>
@@ -43,16 +35,7 @@ function onPageChange(page){
     <div class="account_container" v-else>
       <p> Welcome again {{ user.FirstName }}!</p>
       <div class="account_data">
-        <AccountNav @page-changed="onPageChange"/>
-        <div class="data">
-          <AccountData v-if="currentPage === 'Account Information'"/>
-          <AccountChangePassword v-else-if="currentPage === 'Change Password'"/>
-          <AccountMyOffers v-else-if="currentPage === 'My Offers'"/>
-          <AccountHistory v-else-if="currentPage === 'History'"/>
-          <AccountNewOffer v-else-if="currentPage === 'New Offer'"/>
-          <AccountBecomeHost v-else-if="currentPage === 'Become a host'"/>
-          <AccountCurrentOffer v-else/>
-        </div>
+          <AccountData/>
       </div>
     </div>
   </div>

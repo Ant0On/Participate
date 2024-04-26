@@ -1,13 +1,15 @@
 <script setup>
 import {onMounted, ref, reactive} from 'vue';
+import {storeToRefs} from 'pinia';
+
 import {useAuthStore} from "@/stores/auth.store";
 import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import HistoryItem from "@/components/account/history/HistoryItem.vue";
 import RateOfferModal from "@/components/account/history/rate_offer/RateOfferModal.vue";
 
-const auth = useAuthStore();
-const user = auth.user;
+const userStore = useAuthStore();
+const {user: user} = storeToRefs(userStore);
 const pageSize = 5;
 
 const allHistoryItems = ref([])
@@ -22,7 +24,7 @@ const errors = reactive({
 
 async function getHistoryItems() {
 
-  await fetchWrapper.get(`/api/customer/${user.ID}/reservations/history`)
+  await fetchWrapper.get(`/api/customer/${user.value?.ID}/reservations/history`)
       .then((response) => {
         if(response) {
           const responseData = response.data
