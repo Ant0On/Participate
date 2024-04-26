@@ -38,8 +38,8 @@ func ConnectDatabase() {
 	fmt.Println("We are connected to the database")
 
 	if err = DB.AutoMigrate(&Country{}, &Town{}, &Accommodation{}, &Activity{}, &Event{}, &Rating{}, &Payment{},
-		&ReservationAccommodation{}, &ReservationEvent{}, &ReservationActivity{}, &GeneralFacility{}, &RoomFacility{},
-		&Equipment{}, &User{}); err != nil {
+		&ReservationAccommodation{}, &ReservationEvent{}, &ReservationActivity{}, &ReservationRoom{},
+		&GeneralFacility{}, &Room{}, &RoomFacility{}, &Equipment{}, &User{}); err != nil {
 		log.Fatal("Migration error:", err)
 	}
 

@@ -14,7 +14,7 @@ import (
 func CreateRoom(c *gin.Context) {
 	var room models.Room
 
-	if err := c.ShouldBind(&room); err != nil {
+	if err := c.ShouldBindJSON(&room); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
 	}
