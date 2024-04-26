@@ -12,6 +12,13 @@
         color="grey-darken-2"
         centered
     >
+      <router-link to="/">
+        <v-tab
+            key="home"
+            text="Home"
+        ></v-tab>
+      </router-link>
+
       <router-link to="/recommended">
         <v-tab
             key="recommended"
