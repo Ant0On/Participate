@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <v-app-bar class="px-4" >
+  <v-app-bar class="px-4" :elevation="0">
       <router-link to="/">
           <v-img width="250" height="60" :src="require('@/assets/img/logo.png')"></v-img>
       </router-link>
