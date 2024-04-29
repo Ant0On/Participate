@@ -42,7 +42,6 @@ const cardPage = ref('main')
   Price    float64             `json:"price" binding:"required,gt=0"`
 	Skill    models.SkillLevel   `json:"skill_level" binding:"required,oneof=beginner intermediate advanced"`
 	Type     models.ActivityType `json:"type" binding:"required,oneof=indoor outdoor"`
-	Duration time.Duration       `json:"duration" binding:"required"`
 
 	Accommodation
   PricePerDay      float64                  `json:"price_per_day" binding:"required,gt=0"`
@@ -51,8 +50,6 @@ const cardPage = ref('main')
 	Rating           int                      `json:"rating" binding:"required,min=1,max=5"`
 
  */
-
-// "require(`@/assets/img/image_placeholder.png`)"
 
 const chips = {
   "sports_event": {
@@ -130,6 +127,16 @@ const chips = {
     icon: "mdi-domain",
     text: "Hotel"
   },
+  "recommended": {
+    color: "amber",
+    icon: "mdi-star-david",
+    text: "Recommended"
+  },
+  "discount": {
+    color: "red",
+    icon: "mdi-tag",
+    text: `-${props.offerItem?.discount}%`
+  }
 }
 </script>
 
@@ -145,66 +152,116 @@ const chips = {
     >
       <v-carousel-item
           :src="image"
-          contain
+          cover
       >
 
       </v-carousel-item>
     </v-carousel>
     <v-img v-else
            :src="require(`@/assets/img/image_placeholder.png`)"
-           height="100"
            @click="onItemClicked"
            cover
     ></v-img>
+
     <v-card-item>
-      <v-card-title>
+      <v-card-title class="font-weight-black">
         {{ offerItem.title }}
       </v-card-title>
 
       <v-card-subtitle>
+      <span class="me-1">
+        {{ offerItem.location }}
+      </span>
+
 
       </v-card-subtitle>
 
     </v-card-item>
 
-    <v-card-text v-if="cardPage === 'main'">
-      <v-chip :prepend-icon="chips.villa.icon"
-              :color="chips.villa.color"
-              variant="flat"
+    <v-card-text >
+
+      <v-row
+          align="center"
+          class="mx-0"
       >
-        {{ chips.villa.text }}
-      </v-chip>
+        <div class="font-weight-bold" :class="(offerItem?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
+          {{(type === "accommodation")? `${offerItem.price} $/day`: `${offerItem.price} $`}}
+        </div>
 
-      {{ offerItem.description }}
+        <div class="font-weight-black ml-1" v-if="offerItem?.discount > 0">
+          {{ (type === "accommodation") ? `   ${offerItem.price - offerItem.price * offerItem.discount / 100} $/day`
+            : `  ${offerItem.price * offerItem.discount / 100} $`}}
+        </div>
+      </v-row>
+
+      <v-row
+          align="center"
+          class="mx-0"
+          v-if="type === 'accommodation'"
+      >
+        <v-rating
+            :model-value="offerItem.rating"
+            color="amber"
+            density="compact"
+            size="small"
+            half-increments
+            readonly
+        ></v-rating>
+
+        <div class="text-grey ms-4">
+          {{offerItem.rating}}
+        </div>
+      </v-row>
+
+      <div class="my-4 text-subtitle-1">
+        <v-chip :prepend-icon="chips.recommended.icon"
+                :color="chips.recommended.color"
+                variant="flat"
+                v-if="offerItem.isRecommended"
+                class="mr-1"
+        >
+          {{chips.recommended.text}}
+        </v-chip>
+        <v-chip :prepend-icon="chips.discount.icon"
+                :color="chips.discount.color"
+                variant="flat"
+                v-if="offerItem?.discount > 0"
+                class="mr-1"
+                >
+          {{chips.discount.text}}
+        </v-chip>
+        <v-chip :prepend-icon="chips?.[offerItem?.type].icon"
+                :color="chips?.[offerItem?.type].color"
+                variant="flat"
+                class="mr-1"
+        >
+          {{chips?.[offerItem?.type].text}}
+        </v-chip>
 
 
+      </div>
+
+      <div class="" v-if="cardPage === 'main'">
+        {{ offerItem.description }}
+      </div>
+      <div class="" v-if="cardPage === 'info'">
+        {{ offerItem.price }}
+<!--        Duration time.Duration       `json:"duration" binding:"required"`
+          	Capacity      int     `json:"capacity" binding:"required,gt=0"`
+
+
+-->
+
+      </div>
     </v-card-text>
-    <v-card-text v-else-if="cardPage === 'accommodation'">
-
-
-      {{ offerItem.capacity }}
-
-
-    </v-card-text>
-    <v-card-text v-else-if="cardPage === 'activity'">
-
-
-      {{ offerItem.capacity }}
-
-
-    </v-card-text>
-
 
     <v-card-actions v-if="type !== 'event'">
       <v-btn-toggle block>
         <v-btn @click="cardPage = 'main'">
           <v-icon icon="mdi-menu"></v-icon>
         </v-btn>
-        <v-btn v-if="type === 'accommodation'" @click="cardPage = 'accommodation'">
-          <v-icon icon="mdi-home"></v-icon>
-        </v-btn>
-        <v-btn v-if="type === 'activity' " @click="cardPage = 'activity'">
-          <v-icon icon="mdi-run"></v-icon>
+        <v-btn @click="cardPage = 'info'">
+          <v-icon icon="mdi-information"></v-icon>
         </v-btn>
       </v-btn-toggle>
     </v-card-actions>
