@@ -153,7 +153,7 @@ const chips = {
 
         <div class="font-weight-black ml-1" v-if="offerItem?.discount > 0">
           {{ (type === "accommodation") ? `   ${offerItem.price - offerItem.price * offerItem.discount / 100} $/day`
-            : `  ${offerItem.price * offerItem.discount / 100} $`}}
+            : `  ${offerItem.price - offerItem.price * offerItem.discount / 100} $`}}
         </div>
       </v-row>
 
@@ -256,7 +256,7 @@ const chips = {
       </v-card>
     </v-card-text>
 
-    <v-card-actions v-if="type !== 'event'">
+    <v-card-actions>
       <v-btn-toggle block>
         <v-btn @click="cardPage = 'main'">
           <v-icon icon="mdi-menu"></v-icon>
