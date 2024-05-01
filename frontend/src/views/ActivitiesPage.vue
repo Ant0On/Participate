@@ -1,104 +1,72 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref,  onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
-import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import { useSearchStore } from "@/stores/search.store";
-import { fetchWrapper } from "@/_helpers/fetch-wrapper";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
+import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 
 const searchStore = useSearchStore();
 const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
 
 const activities = ref([]);
-const currentPage = ref(1);
-const totalPages = ref(0);
 
-async function getCurrentActivities(page) {
-  const response = await fetchWrapper.get(`/api/offers/activities?page=${page}`)
-  const responseData = response?.data || [] ;
+function mapActivities(responseData) {
 
-  if(responseData){
-    activities.value = responseData.map((data) => {
-      const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
-
-      return {
-        'offerId': data["offer_id"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'title': data["title"],
-        'price': priceAfterDiscount,
-        'capacity': data["capacity"]
-      }
-    })
-
-    totalPages.value = response.totalPages;
-  }
+  return responseData.map((data) => {
+    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
+    return {
+      'offerId': data["offer_id"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'title': data["title"],
+      'price': priceAfterDiscount,
+      'capacity': data["capacity"]
+    };
+  });
 }
 
-function getNewActivities(location, dateFrom, dateTo, numberOfPeople) {
-  return activities.value.filter((data) => {
-    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople)
-  })
-}
-
-function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople) {
-  let isMatchingSearch = true;
-  if (typeof location !== "undefined" && location !== "") {
-    isMatchingSearch = data.location.includes(location)
-  }
-
-  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0) {
-    isMatchingSearch = numberOfPeople <= data.maxPeople
-  }
-
-  return isMatchingSearch
-}
+const pagesGenerator = fetchPaginatedData('/api/offers/activities', mapActivities)
 
 onMounted(async () => {
-  await getCurrentActivities(currentPage.value);
+  activities.value = await pagesGenerator.next();
 });
 
-watch(location, (newLocation) => {
-  activities.value = getNewActivities(newLocation, dateFrom, dateTo, numberOfPeople)
-})
-
-watch(dateFrom, (newDateFrom) => {
-  activities.value = getNewActivities(location, newDateFrom, dateTo, numberOfPeople)
-})
-
-watch(dateTo, (newDateTo) => {
-  activities.value = getNewActivities(location, dateFrom, newDateTo, numberOfPeople)
-})
-
-watch(numberOfPeople, (newNumberOfPeople) => {
-  activities.value = getNewActivities(location, dateFrom, dateTo, newNumberOfPeople)
-})
-
-watch(currentPage, (newPage) => {
-  getCurrentActivities(newPage);
-})
+async function load({done}) {
+  const response = await pagesGenerator.next();
+  if (response?.done) {
+    done('empty')
+    return
+  }
+  activities.value.push(...response.value)
+  done('ok');
+}
 </script>
 
 <template>
   <div class="activities_page">
     <p>Inspiring activities</p>
-    <OfferSearch v-model:location="location"
-                 v-model:date-from="dateFrom" v-model:date-to="dateTo"
-                 v-model:number-of-people="numberOfPeople"/>
-    <div v-if="activities.length > 0" class="offer_items">
-      <OfferListItem v-for="activity in activities" :location="activity.location" :description="activity.description"
-                     :title="activity.title" :price="activity.price"
-                     :capacity="activity.capacity" type="activity" :id="activity.offerId"/>
+    <div v-if="activities.length > 0" >
+      <v-infinite-scroll
+          :items="activities"
+          :onLoad="load"
+          empty-text="Currently there are no more offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <v-row class="w-100">
+          <template v-for="activity in activities" :key="activity.offerId">
+            <v-col cols="4">
+              <OfferListItem type="event" :offer-item="activity"/>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+
     </div>
     <div v-else class="no_offers">
       <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
-    </div>
-    <div v-if="totalPages > 1" class="pagination">
-      <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
     </div>
   </div>
 </template>
@@ -130,37 +98,5 @@ p {
   align-self: center;
   margin: 1% 1% 1% 1%;
 }
-
-.offer_items {
-  margin: 3% 5% 0 5%;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0;
-}
-
-.pagination button {
-  cursor: pointer;
-  background-color: #3498db;
-  color: #ffffff;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  margin: 0 5px;
-}
-
-.pagination button:hover {
-  background-color: #2980b9;
-}
-
-.pagination span {
-  margin: 0 10px;
-  font-size: 1.2rem;
-  color: #333;
-}
-
 </style>
 
