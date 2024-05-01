@@ -6,11 +6,6 @@ const props = defineProps({
   offerItem: String,
 })
 
-function onItemClicked() {
-  // router.push({title: 'Offers', params: {type: props.type, id: props.offerItem.offerId}})
-
-}
-
 const image = computed(() => {
   try {
     const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerId}/${props.offerItem.offerId}_0.jpeg`)
@@ -21,36 +16,6 @@ const image = computed(() => {
 })
 
 const cardPage = ref('main')
-
-/*
-  Common fields:
-  OfferID       uint    `json:"offer_id" binding:"required"`
-	Title         string  `json:"title" binding:"required,min=2"`
-	Description   string  `json:"description" binding:"required,min=30"`
-	Capacity      int     `json:"capacity" binding:"required,gt=0"`
-	IsRecommended bool    `json:"is_recommended"`
-	TownName      string  `json:"town_name" binding:"required,min=2"`
-	CountryName   string  `json:"country_name" binding:"required,min=3"`
-	UserID        uint    `json:"user_id" binding:"required"`
-	Discount      float64 `json:"discount" binding:"required,min=0,max=100"`
-
-	Event
-	Price float64          `json:"price" binding:"required,gt=0"`
-	Type  models.EventType `json:"type" binding:"required,oneof=conference concert festival 'sports event'"`
-
-	Activity
-  Price    float64             `json:"price" binding:"required,gt=0"`
-	Skill    models.SkillLevel   `json:"skill_level" binding:"required,oneof=beginner intermediate advanced"`
-	Type     models.ActivityType `json:"type" binding:"required,oneof=indoor outdoor"`
-
-	Accommodation
-  PricePerDay      float64                  `json:"price_per_day" binding:"required,gt=0"`
-	IsAnimalFriendly bool                     `json:"is_animal_friendly"`
-	Type             models.AccommodationType `json:"type" binding:"required,oneof=hotel hostel apartment villa guesthouse"`
-	Rating           int                      `json:"rating" binding:"required,min=1,max=5"`
-
- */
-
 const chips = {
   "sports_event": {
     color: "deep-purple",
@@ -147,7 +112,6 @@ const chips = {
     <v-carousel v-if="image"
                 :show-arrows="[image].length > 1"
                 :hide-delimiters="[image].length === 1"
-                @click="onItemClicked"
                 cycle
     >
       <v-carousel-item
@@ -159,21 +123,20 @@ const chips = {
     </v-carousel>
     <v-img v-else
            :src="require(`@/assets/img/image_placeholder.png`)"
-           @click="onItemClicked"
            cover
     ></v-img>
 
     <v-card-item>
-      <v-card-title class="font-weight-black">
-        {{ offerItem.title }}
-      </v-card-title>
+      <router-link :to="`/offers/${type}/${offerItem.offerId}`">
+        <v-card-title class="font-weight-black">
+          {{ offerItem.title }}
+        </v-card-title>
+      </router-link>
 
       <v-card-subtitle>
       <span class="me-1">
         {{ offerItem.location }}
       </span>
-
-
       </v-card-subtitle>
 
     </v-card-item>
@@ -237,22 +200,60 @@ const chips = {
         >
           {{chips?.[offerItem?.type].text}}
         </v-chip>
-
+        <v-chip :prepend-icon="chips?.[offerItem?.skill].icon"
+                :color="chips?.[offerItem?.skill].color"
+                variant="flat"
+                class="mr-1"
+                v-if="type=== 'activity'"
+        >
+          {{chips?.[offerItem?.skill].text}}
+        </v-chip>
 
       </div>
 
-      <div class="" v-if="cardPage === 'main'">
+      <v-card class="" v-if="cardPage === 'main'" height="100" elevation="0">
         {{ offerItem.description }}
-      </div>
-      <div class="" v-if="cardPage === 'info'">
-        {{ offerItem.price }}
-<!--        Duration time.Duration       `json:"duration" binding:"required"`
-          	Capacity      int     `json:"capacity" binding:"required,gt=0"`
-
-
--->
-
-      </div>
+      </v-card>
+      <v-card class="" v-if="cardPage === 'info'" height="100" elevation="0">
+        <v-container cols="2">
+          <v-row
+              class="font-weight-bold"
+          >
+            <v-col>
+              <v-icon
+                  icon="mdi-home"
+                  size="small"
+              >
+              </v-icon>
+              <span class="me-1">
+                Capacity
+              </span>
+            </v-col>
+            <v-col>
+               <span class="me-1">
+                {{ offerItem.capacity}}
+              </span>
+            </v-col>
+          </v-row>
+          <v-row class=" font-weight-bold" v-if="type === 'activity'" >
+            <v-col>
+              <v-icon
+                  icon="mdi-clock-outline"
+                  size="small"
+              >
+              </v-icon>
+              <span class="me-1">
+                Duration
+              </span>
+            </v-col>
+            <v-col>
+               <span class="me-1">
+                {{ offerItem.duration}}
+              </span>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
     </v-card-text>
 
     <v-card-actions v-if="type !== 'event'">
