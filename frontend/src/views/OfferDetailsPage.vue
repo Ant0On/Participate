@@ -1,21 +1,57 @@
 <script setup>
 import {computed, defineProps, onMounted, ref, toRef} from 'vue';
+import {storeToRefs} from 'pinia';
 
-import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
-import OfferDetailDescription from "@/components/detail/OfferDetailDescription.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
-import ChatButton from "@/components/detail/ChatButton.vue";
-import ChatPopup from "@/components/detail/ChatPopup.vue";
 import {useAuthStore} from "@/stores/auth.store";
 
-const auth = useAuthStore();
-const user = auth.user;
+const userStore = useAuthStore();
+const {user: user} = storeToRefs(userStore)
+
+const reserve = () => {
+  console.log("reserve")
+  step.value++;
+}
 
 const props = defineProps({
   type: String,
   id: String,
   chatID: String
 })
+
+const step = ref(1)
+const typeLink = {
+  'event': 'events',
+  'accommodation': 'accommodations',
+  'activity': 'activities',
+  'recommended': 'recommended'
+}
+
+const offer = {
+  offerId: 1,
+  title: "Wakacyjne pierdolenie",
+  location: "Zamosc, Polska",
+  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+  capacity: 10,
+  isRecommended: true,
+  discount: 10,
+  price: 30,
+  type: "festival",
+  rating: 4.5,
+  duration: 10,
+
+}
+
+const image = computed(() => {
+  try {
+    const image = require(`@/../images/offers/${props.type}/${offer.offerId}/${offer.offerId}_0.jpeg`)
+    return image
+  } catch {
+    return undefined
+  }
+})
+
+
 const isChatAlreadyCreated = ref(false)
 const showChat = ref(false);
 
@@ -35,8 +71,6 @@ function createChatHost() {
   }
 }
 
-const email = ref(user.Email);
-const userID = ref(user.ID);
 const chatID = toRef(props.chatID)
 
 function openChatCustomer() {
@@ -47,14 +81,6 @@ function closeChat() {
   showChat.value = false;
 }
 
-const offer = ref({
-  name: '',
-  price: 0,
-  location: '',
-  numberOfPeople: 0,
-  userID: 0,
-  offer_id: 0,
-})
 const hostData = ref({
   firstName: '',
   detail: '',
@@ -62,7 +88,6 @@ const hostData = ref({
 })
 
 const isDescription = ref(true)
-const backgroundImage = computed(() => `url(${require(`@/../images/offers/${props.id}/${props.id}_0.jpeg`)})`);
 
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.id}`)
@@ -100,51 +125,61 @@ async function doesChatExist() {
 }
 
 onMounted(async () => {
-  await getOfferDetails();
-  await doesChatExist();
+  // await getOfferDetails();
+  // await doesChatExist();
 });
 
 </script>
 
 <template>
-  <div class="event_page">
-    <div class="item_detail">
-      <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
-                              :numberOfPeople="offer.numberOfPeople" :host_first_name="hostData.firstName"
-                              :offer_id="id"
-                              :host_detail="hostData.detail" :imagePath="hostData.imagePath"
-                              v-if="isDescription" @move-to-summary="isDescription = !isDescription"/>
-      <OfferDetailSummary :price="offer.price" :id="id" v-else/>
-      <ChatButton v-if="user.Role === 'host' && type === 'events'" :is-host="true"
-                  :is-chat-already-created=!isChatAlreadyCreated @click="createChatHost"/>
-      <ChatButton v-else-if="user.Role === 'customer' && type === 'events'" :is-host="false"
-                  :is-chat-already-created=isChatAlreadyCreated @join-chat="openChatCustomer"/>
-
-      <ChatPopup v-if="showChat" :email="email" :userID="userID" :offerID="id" :chatID="chatID"
-                 @close-chat="closeChat"/>
-    </div>
-  </div>
+  <v-sheet class="d-flex flex-column">
+    <v-breadcrumbs>
+      <v-breadcrumbs-item :to="`/${typeLink[type]}`"
+                          :title="type[0].toUpperCase() + type.slice(1)"></v-breadcrumbs-item>
+      <v-breadcrumbs-divider>
+        <v-icon icon="mdi-chevron-right"></v-icon>
+      </v-breadcrumbs-divider>
+      <v-breadcrumbs-item :title="offer.title"></v-breadcrumbs-item>
+    </v-breadcrumbs>
+    <v-card class="d-flex flex-row align-self-center h-100 rounded-xl" style="width: 60%">
+      <v-card class="w-50">
+        <v-carousel v-if="image"
+                    :show-arrows="[image].length > 1"
+                    :hide-delimiters="[image].length === 1"
+                    style="min-height: 100%"
+                    cycle
+        >
+          <v-carousel-item
+              :src="image"
+              style="min-height: 100%"
+              cover
+          >
+          </v-carousel-item>
+        </v-carousel>
+        <v-img v-else
+               :src="require(`@/assets/img/image_placeholder.png`)"
+               style="min-height: 100%"
+               cover
+        ></v-img>
+      </v-card>
+      <v-card class="w-50">
+        <v-card-title class="font-weight-black">
+          {{ offer.title }}
+        </v-card-title>
+        <v-card-actions>
+          <v-btn
+              color="blue-darken-2"
+              text="Reserve"
+              block
+              border
+              @click="reserve"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-card>
+  </v-sheet>
 </template>
 
 <style scoped>
 
-div.item_detail {
-  margin: 5% 5% 1% 5%;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(5px);
-  border-radius: 10px;
-}
-
-div.item_detail:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: v-bind(backgroundImage) center/cover no-repeat;
-  opacity: 0.5;
-  z-index: -1;
-  border-radius: 10px;
-}
 </style>
