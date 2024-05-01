@@ -146,7 +146,7 @@ onMounted(async () => {
         <v-carousel v-if="image"
                     :show-arrows="[image].length > 1"
                     :hide-delimiters="[image].length === 1"
-                    style="min-height: 100%"
+                    height="600px"
                     cycle
         >
           <v-carousel-item
@@ -163,9 +163,35 @@ onMounted(async () => {
         ></v-img>
       </v-card>
       <v-card class="w-50">
-        <v-card-title class="font-weight-black">
+        <v-card-title class="font-weight-black text-center">
           {{ offer.title }}
         </v-card-title>
+        <v-card-subtitle class="d-flex align-center justify-center">
+
+          <span class="me-1">
+            {{ offer.location }}
+          </span>
+          <v-spacer></v-spacer>
+
+          <v-rating
+              :model-value="offer.rating"
+              color="amber"
+              density="compact"
+              size="small"
+              half-increments
+              readonly
+              class="me-1"
+              v-if="type === 'accommodation' "
+          ></v-rating>
+          <span class="text-grey me-1" v-if="type === 'accommodation' ">
+              {{ offer.rating }}
+            </span>
+        </v-card-subtitle>
+
+        <v-card-text>
+
+        </v-card-text>
+
         <v-card-actions>
           <v-btn
               color="blue-darken-2"
