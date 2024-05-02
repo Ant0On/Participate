@@ -4,13 +4,14 @@ import {storeToRefs} from 'pinia';
 
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import {useAuthStore} from "@/stores/auth.store";
+import chipsMapper from "@/_helpers/chips";
+import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 
 const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
 
 const reserve = () => {
   console.log("reserve")
-  step.value++;
 }
 
 const props = defineProps({
@@ -18,8 +19,11 @@ const props = defineProps({
   id: String,
   chatID: String
 })
+const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.price, offer?.discount))
 
-const step = ref(1)
+const cardPage = ref('description')
+const offerPage = ref('description')
+
 const typeLink = {
   'event': 'events',
   'accommodation': 'accommodations',
@@ -41,6 +45,7 @@ const offer = {
   duration: 10,
 
 }
+const chips = ref(chipsMapper(offer?.discount))
 
 const image = computed(() => {
   try {
@@ -141,68 +146,146 @@ onMounted(async () => {
       </v-breadcrumbs-divider>
       <v-breadcrumbs-item :title="offer.title"></v-breadcrumbs-item>
     </v-breadcrumbs>
-    <v-card class="d-flex flex-row align-self-center h-100 rounded-xl" style="width: 60%">
-      <v-card class="w-50">
-        <v-carousel v-if="image"
-                    :show-arrows="[image].length > 1"
-                    :hide-delimiters="[image].length === 1"
-                    height="600px"
-                    cycle
-        >
-          <v-carousel-item
-              :src="image"
-              style="min-height: 100%"
-              cover
+    <v-window v-model="offerPage" class="align-self-center" style="width: 60%; height: 600px;">
+      <v-window-item value="description" elevation="4">
+      <v-card class="d-flex flex-row rounded-xl">
+        <v-card class="w-50">
+          <v-carousel v-if="image"
+                      :show-arrows="[image].length > 1"
+                      :hide-delimiters="[image].length === 1"
+                      height="600px"
+                      cycle
           >
-          </v-carousel-item>
-        </v-carousel>
-        <v-img v-else
-               :src="require(`@/assets/img/image_placeholder.png`)"
-               style="min-height: 100%"
-               cover
-        ></v-img>
-      </v-card>
-      <v-card class="w-50">
-        <v-card-title class="font-weight-black text-center">
-          {{ offer.title }}
-        </v-card-title>
-        <v-card-subtitle class="d-flex align-center justify-center">
+            <v-carousel-item
+                :src="image"
+                style="min-height: 100%"
+                cover
+            >
+            </v-carousel-item>
+          </v-carousel>
+          <v-img v-else
+                 :src="require(`@/assets/img/image_placeholder.png`)"
+                 style="min-height: 100%"
+                 cover
+          ></v-img>
+        </v-card>
+        <v-card class="w-50 d-flex flex-column">
+          <v-card-title class="font-weight-black text-center">
+            {{ offer.title }}
+          </v-card-title>
+          <v-card-subtitle class="d-flex align-center justify-center mb-2">
 
           <span class="me-1">
             {{ offer.location }}
           </span>
-          <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
 
-          <v-rating
-              :model-value="offer.rating"
-              color="amber"
-              density="compact"
-              size="small"
-              half-increments
-              readonly
-              class="me-1"
-              v-if="type === 'accommodation' "
-          ></v-rating>
-          <span class="text-grey me-1" v-if="type === 'accommodation' ">
+            <v-rating
+                :model-value="offer.rating"
+                color="amber"
+                density="compact"
+                size="small"
+                half-increments
+                readonly
+                class="me-1"
+                v-if="type === 'accommodation' "
+            ></v-rating>
+            <span class="text-grey me-1" v-if="type === 'accommodation' ">
               {{ offer.rating }}
             </span>
-        </v-card-subtitle>
+          </v-card-subtitle>
+          <v-card-subtitle class="mx-0 d-flex ">
+            <div class="font-weight-bold" :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
+              {{(type === "accommodation")? `Price: ${offer.price} $/day`: `Price: ${offer.price} $`}}
+            </div>
 
-        <v-card-text>
+            <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
+              {{ (type === "accommodation") ? `${priceAfterDiscount} $/day` : `${priceAfterDiscount} $`}}
+            </div>
+          </v-card-subtitle>
+          <div class="ma-4 text-subtitle-1">
+            <v-chip :prepend-icon="chips.recommended.icon"
+                    :color="chips.recommended.color"
+                    variant="flat"
+                    v-if="offer.isRecommended"
+                    class="mr-1"
+            >
+              {{chips.recommended.text}}
+            </v-chip>
+            <v-chip :prepend-icon="chips.discount.icon"
+                    :color="chips.discount.color"
+                    variant="flat"
+                    v-if="offer?.discount > 0"
+                    class="mr-1"
+            >
+              {{chips.discount.text}}
+            </v-chip>
+            <v-chip :prepend-icon="chips?.[offer?.type].icon"
+                    :color="chips?.[offer?.type].color"
+                    variant="flat"
+                    class="mr-1"
+            >
+              {{chips?.[offer?.type].text}}
+            </v-chip>
+            <v-chip :prepend-icon="chips?.[offer?.skill].icon"
+                    :color="chips?.[offer?.skill].color"
+                    variant="flat"
+                    class="mr-1"
+                    v-if="type=== 'activity'"
+            >
+              {{chips?.[offer?.skill].text}}
+            </v-chip>
+          </div>
+          <v-divider></v-divider>
+          <v-card-actions >
+            <v-btn-toggle block rounded="lg">
+              <v-btn @click="cardPage = 'description'">
+                <v-icon icon="mdi-menu"></v-icon>
+              </v-btn>
+              <v-btn @click="cardPage = 'info'">
+                <v-icon icon="mdi-information"></v-icon>
+              </v-btn>
+            </v-btn-toggle>
+          </v-card-actions>
 
-        </v-card-text>
+          <v-card-text>
 
-        <v-card-actions>
-          <v-btn
-              color="blue-darken-2"
-              text="Reserve"
-              block
-              border
-              @click="reserve"
-          ></v-btn>
-        </v-card-actions>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions class="align-self-end w-100">
+            <v-btn
+                color="blue-darken-2 flex-grow"
+                text="Reserve"
+                block
+                border
+                @click="offerPage = 'summary'"
+            ></v-btn>
+          </v-card-actions>
+        </v-card>
       </v-card>
-    </v-card>
+      </v-window-item>
+      <v-window-item value="summary">
+        <v-card class="d-flex flex-row rounded-xl" :height="600">
+
+          {{offer.description}}
+
+
+
+          <v-card-actions class="align-self-end w-100">
+            <v-btn
+                color="grey-darken-2 flex-grow"
+                text="Back"
+                block
+                border
+                @click="offerPage = 'description'"
+            ></v-btn>
+          </v-card-actions>
+        </v-card>
+
+
+      </v-window-item>
+    </v-window>
+
   </v-sheet>
 </template>
 

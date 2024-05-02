@@ -38,6 +38,6 @@ html {
   overflow: scroll;
 }
 
-a{
+a, a:hover, a:focus{
   color: inherit;
 }
