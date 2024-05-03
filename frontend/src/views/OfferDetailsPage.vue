@@ -466,14 +466,12 @@ onMounted(async () => {
               ></v-btn>
             </v-card-actions>
           </v-card>
-          <v-fade-transition>
             <v-card class="w-50 d-flex flex-column justify-space-between">
-<!--            <v-card class="w-50 d-flex flex-column" v-if="formFilled">-->
               <v-card-title class="text-center">
                 Choose form of payment
               </v-card-title>
               <v-card-text class="mt-4">
-                <v-list @update:selected="(x) => console.log(x)">
+                <v-list @update:selected="(payment) => chosenPayment = payment">
                   <v-list-item value="paypal">
                     <template v-slot:prepend>
                       <v-img :src="require('@/assets/img/paypal.png')" :height="75" :width="75"></v-img>
@@ -504,7 +502,6 @@ onMounted(async () => {
                 ></v-btn>
               </v-card-actions>
             </v-card>
-          </v-fade-transition>
         </v-card>
       </v-window-item>
     </v-window>
