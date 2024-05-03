@@ -1,11 +1,14 @@
 <script setup>
 import {computed, defineProps, ref} from 'vue'
+import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
+import chipsMapper from "@/_helpers/chips";
 
 const props = defineProps({
   type: String,
   offerItem: String,
 })
-
+const chips = ref(chipsMapper(props.offerItem?.discount))
+const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount))
 const image = computed(() => {
   try {
     const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerId}/${props.offerItem.offerId}_0.jpeg`)
@@ -16,93 +19,6 @@ const image = computed(() => {
 })
 
 const cardPage = ref('main')
-const chips = {
-  "sports_event": {
-    color: "deep-purple",
-    icon: "mdi-stadium",
-    text: "Sports event"
-  },
-  "festival": {
-    color: "pink-darken-2",
-    icon: "mdi-account-group",
-    text: "Festival"
-  },
-  "concert": {
-    color: "amber",
-    icon: "mdi-music",
-    text: "Concert"
-  },
-  "conference": {
-    color: "indigo",
-    icon: "mdi-library",
-    text: "Conference"
-  },
-  "beginner": {
-    color: "green",
-    icon: "mdi-yoga",
-    text: "Beginner"
-  },
-  "intermediate": {
-    color: "orange",
-    icon: "mdi-bullseye",
-    text: "Intermediate"
-  },
-  "advanced": {
-    color: "red",
-    icon: "mdi-hiking",
-    text: "Advanced"
-  },
-  "indoor": {
-    color: "grey",
-    icon: "mdi-home",
-    text: "Indoor"
-  },
-  "outdoor": {
-    color: "blue-lighten-1",
-    icon: "mdi-cloud",
-    text: "Outdoor"
-  },
-  "animal_friendly": {
-    color: "blue",
-    icon: "mdi-dog-side",
-    text: "Animal friendly"
-  },
-  "guesthouse": {
-    color: "light-blue-darken-4",
-    icon: "mdi-home",
-    text: "Guesthouse"
-  },
-  "villa": {
-    color: "deep-purple-accent-4",
-    icon: "mdi-warehouse",
-    text: "Villa"
-  },
-  "apartment": {
-    color: "green-accent-4",
-    icon: "mdi-city-variant",
-    text: "Apartment"
-  },
-  "hostel": {
-    color: "blue-darken-4",
-    icon: "mdi-office-building",
-    text: "Hostel"
-  },
-  "hotel": {
-    color: "deep-orange",
-    icon: "mdi-domain",
-    text: "Hotel"
-  },
-  "recommended": {
-    color: "amber",
-    icon: "mdi-star-david",
-    text: "Recommended"
-  },
-  "discount": {
-    color: "red",
-    icon: "mdi-tag",
-    text: `-${props.offerItem?.discount}%`
-  }
-}
 </script>
 
 <template>
@@ -152,8 +68,7 @@ const chips = {
         </div>
 
         <div class="font-weight-black ml-1" v-if="offerItem?.discount > 0">
-          {{ (type === "accommodation") ? `   ${offerItem.price - offerItem.price * offerItem.discount / 100} $/day`
-            : `  ${offerItem.price - offerItem.price * offerItem.discount / 100} $`}}
+          {{ (type === "accommodation") ? `   ${priceAfterDiscount} $/day` : `  ${priceAfterDiscount} $`}}
         </div>
       </v-row>
 
@@ -208,7 +123,6 @@ const chips = {
         >
           {{chips?.[offerItem?.skill].text}}
         </v-chip>
-
       </div>
 
       <v-card class="" v-if="cardPage === 'main'" height="100" elevation="0">

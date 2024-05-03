@@ -43,6 +43,12 @@ const offer = {
   type: "festival",
   rating: 4.5,
   duration: 10,
+  generalFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
+  numberOfRooms: 3,
+  dateFrom: new Date().toLocaleDateString(),
+  dateTo: new Date().toLocaleDateString(),
+  date: new Date().toLocaleDateString(),
+  skill: 'beginner'
 
 }
 const chips = ref(chipsMapper(offer?.discount))
@@ -245,12 +251,144 @@ onMounted(async () => {
               <v-btn @click="cardPage = 'info'">
                 <v-icon icon="mdi-information"></v-icon>
               </v-btn>
+              <v-btn @click="cardPage = 'accommodation'">
+<!--              <v-btn @click="cardPage = 'accommodation'" v-if="type === 'accommodation'">-->
+                <v-icon icon="mdi-home"></v-icon>
+              </v-btn>
+              <v-btn @click="cardPage = 'activity'">
+                <!--              <v-btn @click="cardPage = 'activity'" v-if="type === 'activity'">-->
+                <v-icon icon="mdi-run"></v-icon>
+              </v-btn>
             </v-btn-toggle>
           </v-card-actions>
 
-          <v-card-text>
+          <v-card-text v-if="cardPage === 'description'">
+            {{ offer.description }}
+          </v-card-text>
+          <v-card-text v-else-if="cardPage === 'info'">
+            <v-list class="h-100 w-100" style="overflow: hidden">
+              <v-row cols="2">
+                <v-col>
+                  <v-list-item
+                      key="standard_price"
+                      title="Standard Price"
+                      :subtitle="`${offer.price} $ ${(type === 'accommodation')? ' per day': ''}`"
+                  ></v-list-item>
+                </v-col>
+                <v-col>
+                  <v-list-item
+                      key="capacity"
+                      title="Capacity"
+                      :subtitle="offer.capacity"
+                  ></v-list-item>
+                </v-col>
+              </v-row>
+              <v-row cols="2" v-if="type === 'accommodation'">
+                <v-col>
+                  <v-list-item
+                      key="number_of_rooms"
+                      title="Number of rooms"
+                      :subtitle="offer?.numberOfRooms"
+                  ></v-list-item>
+                </v-col>
+                <v-col>
+                  <v-list-item
+                      key="general_facilities"
+                      title="General Facilities"
+                      :subtitle="offer?.generalFacilities.join(', ')"
+                  ></v-list-item>
+                </v-col>
+              </v-row>
+              <v-row cols="2" v-if="type === 'event'">
+                <v-col>
+                  <v-list-item
+                      key="date_from"
+                      title="Date From"
+                      :subtitle="offer?.dateFrom"
+                  ></v-list-item>
+                </v-col>
+                <v-col>
+                  <v-list-item
+                      key="date_to"
+                      title="Date To"
+                      :subtitle="offer?.dateTo"
+                  ></v-list-item>
+                </v-col>
+              </v-row>
+              <v-row cols="2" v-if="type === 'activity'">
+                <v-col>
+                  <v-list-item
+                      key="date"
+                      title="Date"
+                      :subtitle="offer?.date"
+                  ></v-list-item>
+                </v-col>
+                <v-col>
+                  <v-list-item
+                      key="duration"
+                      title="Duration"
+                      :subtitle="offer?.duration"
+                  ></v-list-item>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-list-item
+                  key="general_facilities"
+                  title="General Facilities"
+                  v-if="type === 'accommodation'"
+                >{{
+                  offer?.generalFacilities.join(', ')
+                  }}
+                </v-list-item>
+                <v-list-item
+                key="equipment"
+                title="Equipment"
+                v-if="type === 'activity'"
+                >
+                  {{
+                    offer?.equipment.join(', ')
+                  }}
+                </v-list-item>
+              </v-row>
+            </v-list>
+          </v-card-text>
+
+          <v-card-text v-else-if="cardPage === 'accommodation'">
 
           </v-card-text>
+
+          <v-card-text v-else-if="cardPage === 'activity'">
+            <v-list style="overflow: hidden;">
+              <v-row>
+                <v-list-item
+                key="activity_type"
+                title="Type"
+                >
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-tree"></v-icon>
+                  </template>
+                  {{
+                  offer.type
+                  }}
+                </v-list-item>
+              </v-row>
+              <v-row>
+                <v-list-item
+                    key="skill"
+                    title="Skill"
+                >
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-bullseye"></v-icon>
+                  </template>
+
+                  {{
+                    offer.skill
+                  }}
+                </v-list-item>
+              </v-row>
+            </v-list>
+          </v-card-text>
+
           <v-divider></v-divider>
           <v-card-actions class="align-self-end w-100">
             <v-btn
@@ -266,8 +404,9 @@ onMounted(async () => {
       </v-window-item>
       <v-window-item value="summary">
         <v-card class="d-flex flex-row rounded-xl" :height="600">
-
-          {{offer.description}}
+          <v-form>
+            <v-input></v-input>
+          </v-form>
 
 
 
