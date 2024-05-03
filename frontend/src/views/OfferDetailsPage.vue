@@ -16,24 +16,47 @@ const props = defineProps({
   id: String,
   chatID: String
 })
-const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.price, offer?.discount))
 
-const formFilled = ref(false)
+const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.price, offer?.discount))
 const cardPage = ref('description')
 const offerPage = ref('description')
 const chosenPayment = ref(null)
-const paymentType = ref([
-  {name: 'paypal', url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
-  {name: 'credit_card', url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
-  {name: 'bitcoin', url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
-])
-
+const paymentType = ref({
+  'paypal': {url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
+  'credit_card': {url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
+  'bitcoin': {url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
+})
+const reservationCreated = ref(null)
+const reservation = ref({
+  dateFrom: null,
+  dateTo: null,
+  animal: null,
+  room: null,
+})
+const openRoomDialog = ref(false)
 const typeLink = {
   'event': 'events',
   'accommodation': 'accommodations',
   'activity': 'activities',
   'recommended': 'recommended'
 }
+const choosePaymentAlert = ref(false)
+
+const form = ref()
+async function makeReservation(){
+    choosePaymentAlert.value = false;
+
+    const { valid } = await form.value.validate()
+    if(!valid){
+        return
+    }
+    if(!chosenPayment.value){
+      choosePaymentAlert.value = true;
+      return
+    }
+
+}
+
 
 const offer = {
   offerId: 1,
@@ -135,8 +158,6 @@ const hostData = ref({
   detail: '',
   imagePath: '',
 })
-
-const isDescription = ref(true)
 
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.id}`)
@@ -290,12 +311,11 @@ onMounted(async () => {
                 <v-btn @click="cardPage = 'info'">
                   <v-icon icon="mdi-information"></v-icon>
                 </v-btn>
-                <v-btn @click="cardPage = 'accommodation'">
-                  <!--                <v-btn @click="cardPage = 'accommodation'" v-if="type === 'accommodation' && offer.type in ['hotel', 'hostel', 'guesthouse']">-->
+                <v-btn @click="cardPage = 'accommodation'"
+                       v-if="type === 'accommodation' && ['hotel', 'hostel', 'guesthouse'].includes(offer.type)">
                   <v-icon icon="mdi-home"></v-icon>
                 </v-btn>
-                <v-btn @click="cardPage = 'activity'">
-                  <!--              <v-btn @click="cardPage = 'activity'" v-if="type === 'activity'">-->
+                <v-btn @click="cardPage = 'activity'" v-if="type === 'activity'">
                   <v-icon icon="mdi-run"></v-icon>
                 </v-btn>
               </v-btn-toggle>
@@ -450,12 +470,107 @@ onMounted(async () => {
       </v-window-item>
       <v-window-item value="summary">
         <v-card class="d-flex flex-row rounded-xl" :height="600">
-          <v-card class="w-50 d-flex flex-column">
-            <v-form>
-<!--
--->
-              <v-input></v-input>
-            </v-form>
+          <v-card class="w-50 d-flex flex-column justify-space-between">
+            <v-card-title class="text-center">
+              Fill necessary information
+            </v-card-title>
+            <v-card-text class="d-flex flex-column align-center justify-center">
+              <v-form v-if="type === 'event' || type === 'activity' "
+                      v-model="reservationCreated"
+                      class="w-75 d-flex align-center justify-center"
+                      ref="form"
+              >
+                <v-text-field
+                    label="Date"
+                    clearable
+                    type="date"
+                    variant="outlined"
+                    v-model="reservation.dateTo"
+                    :rules="[value => !!value || 'Date is required']"
+                ></v-text-field>
+              </v-form>
+              <v-form v-else-if="type === 'accommodation'" v-model="reservationCreated"
+                      class="w-75 d-flex flex-column align-center justify-center"
+                      validate-on="submit"
+                      ref="form"
+              >
+                <v-text-field
+                    label="Date From"
+                    clearable
+                    type="date"
+                    variant="outlined"
+                    v-model="reservation.dateFrom"
+                    class="w-100"
+                    :rules="[
+                        value => !!value || 'Starting date is required',
+                        value => value < reservation.dateTo || 'Date must be smaller than ending date'
+                    ]"
+                ></v-text-field>
+                <v-text-field
+                    label="Date To"
+                    clearable
+                    type="date"
+                    variant="outlined"
+                    v-model="reservation.dateTo"
+                    class="w-100 mt-2"
+                    :rules="[
+                        value => !!value || 'Ending date is required',
+                        value => value > reservation.dateFrom || 'Date must be grater than starting date'
+                    ]"
+                ></v-text-field>
+                <v-select
+                    label="Room name"
+                    class="w-100 mt-2"
+                    :rules="[
+                        value => !!value || 'Room is required'
+                    ]"
+                    prepend-icon="mdi-home"
+                    hint="Click on the house icon to see more!"
+                    persistent-hint
+                    :items="offer.rooms"
+                    item-title="roomName"
+                    item-value="roomNumber"
+                    v-model="reservation.room"
+                    v-if="['hotel', 'hostel', 'guesthouse'].includes(offer.type)"
+                    @click:prepend="() => openRoomDialog = true"
+                ></v-select>
+                <v-dialog
+                    v-model="openRoomDialog"
+                    width="auto"
+                >
+                  <v-card>
+                    <v-card-title>
+                      Choose a room
+                    </v-card-title>
+                    <v-card-text>
+                      <v-card-title>
+                        Rooms
+                      </v-card-title>
+                      <v-list v-model:selected="reservation.room">
+                        <v-list-item v-for="room in offer.rooms"
+                                     :key="room.roomNumber"
+                                     :value="room.roomNumber"
+                                     @click="openRoomDialog = false"
+                                     color="blue-darken-2"
+                                     rounded="shaped"
+                        >
+                          <RoomDetail :room="room"/>
+                        </v-list-item>
+                      </v-list>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-btn
+                          color="grey-darken-2 flex-grow"
+                          text="Back"
+                          block
+                          border
+                          @click="openRoomDialog = false"
+                      ></v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-form>
+            </v-card-text>
             <v-card-actions class="align-self-end w-100">
               <v-btn
                   color="grey-darken-2 flex-grow"
@@ -466,46 +581,52 @@ onMounted(async () => {
               ></v-btn>
             </v-card-actions>
           </v-card>
-            <v-card class="w-50 d-flex flex-column justify-space-between">
-              <v-card-title class="text-center">
-                Choose form of payment
-              </v-card-title>
-              <v-card-text class="mt-4">
-                <v-list @update:selected="(payment) => chosenPayment = payment">
-                  <v-list-item value="paypal">
-                    <template v-slot:prepend>
-                      <v-img :src="require('@/assets/img/paypal.png')" :height="75" :width="75"></v-img>
-                    </template>
-                    Paypal
-                  </v-list-item>
-                  <v-list-item value="credit_card">
-                    <template v-slot:prepend>
-                      <v-img :src="require('@/assets/img/credit_card.png')" :height="75" :width="75"></v-img>
-                    </template>
-                    Credit card
-                  </v-list-item>
-                  <v-list-item value="bitcoin">
-                    <template v-slot:prepend>
-                      <v-img :src="require('@/assets/img/bitcoin.png')" :height="75" :width="75"></v-img>
-                    </template>
-                    Bitcoin
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-              <v-card-actions class="w-100">
-                <v-btn
-                    color="blue-darken-2 flex-grow"
-                    text="Make reservation"
-                    block
-                    border
-                    @click="offerPage = 'description'"
-                ></v-btn>
-              </v-card-actions>
-            </v-card>
+          <v-card class="w-50 d-flex flex-column justify-space-between">
+            <v-card-title class="text-center">
+              Choose form of payment
+            </v-card-title>
+            <v-alert v-model="choosePaymentAlert"
+                     type="error"
+                     density="compact"
+                     closable
+            >
+              Please choose payment method!
+            </v-alert>
+            <v-card-text class="mt-4">
+              <v-list @update:selected="(payment) => chosenPayment = payment">
+                <v-list-item value="paypal">
+                  <template v-slot:prepend>
+                    <v-img :src="require('@/assets/img/paypal.png')" :height="75" :width="75"></v-img>
+                  </template>
+                  Paypal
+                </v-list-item>
+                <v-list-item value="credit_card">
+                  <template v-slot:prepend>
+                    <v-img :src="require('@/assets/img/credit_card.png')" :height="75" :width="75"></v-img>
+                  </template>
+                  Credit card
+                </v-list-item>
+                <v-list-item value="bitcoin">
+                  <template v-slot:prepend>
+                    <v-img :src="require('@/assets/img/bitcoin.png')" :height="75" :width="75"></v-img>
+                  </template>
+                  Bitcoin
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+            <v-card-actions class="w-100">
+              <v-btn
+                  color="blue-darken-2 flex-grow"
+                  text="Make reservation"
+                  block
+                  border
+                  @click="makeReservation()"
+              ></v-btn>
+            </v-card-actions>
+          </v-card>
         </v-card>
       </v-window-item>
     </v-window>
-
   </v-sheet>
 </template>
 
