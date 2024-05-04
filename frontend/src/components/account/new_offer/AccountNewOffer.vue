@@ -31,8 +31,18 @@ const errors = reactive({
 
 const userStore = useAuthStore();
 const user = userStore.user;
-const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '');
+const isOfferTypeFilled = computed(() => {
+  console.log("newOffer.value:", newOffer.value);
+  return newOffer.value.offerType !== '';
+});
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
+
+function printNewOfferValueAfterDelay() {
+  setTimeout(() => {
+    console.log("newOffer.value.offerType:", newOffer.value.offerType);
+  }, 5000); // 10 seconds delay
+}
+printNewOfferValueAfterDelay();
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
 const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)

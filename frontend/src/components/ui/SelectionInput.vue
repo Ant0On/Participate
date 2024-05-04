@@ -1,8 +1,6 @@
 <script setup>
-import {defineEmits, defineProps, ref} from 'vue'
-import {v4 as uuidv4} from 'uuid';
-
-let inputUUID = uuidv4();
+import {defineProps, defineEmits, ref} from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 
 const props = defineProps({
   labelText: String,
@@ -10,12 +8,14 @@ const props = defineProps({
   isRequired: Boolean,
   modelValue: String,
   items: Array,
-})
+});
 
-const emits = defineEmits(['update:modelValue'])
+const emits = defineEmits(['update:modelValue']);
+const inputUUID = uuidv4();
+
 const rules = ref({
   required: value => !!value || 'Required.',
-})
+});
 </script>
 
 <template>
@@ -24,7 +24,7 @@ const rules = ref({
       :label="labelText"
       :items="items"
       :placeholder="placeholder"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @update:modelValue="$emit('update:modelValue', $event)"
       v-model="modelValue"
       class="w-100"
       clearable
