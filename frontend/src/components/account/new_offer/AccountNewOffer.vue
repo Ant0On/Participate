@@ -7,17 +7,30 @@ import CheckButtonInput from "@/components/ui/CheckButtonInput.vue";
 import SelectionInput from "@/components/ui/SelectionInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import {useAuthStore} from "@/stores/auth.store";
+import CheckboxesInput from "@/components/ui/CheckboxesInput.vue";
+import DateInput from "@/components/ui/DateInput.vue";
 
 
 const newOffer = ref({
   offerType: '',
-  name: '',
+  title: '',
   description: '',
   price: '',
-  maxPeople: '',
+  capacity: '',
   isAnimalFriendly: false,
   country: '',
+  numberOfRooms: '',
+  accommodationType: '',
+  pricePerDay: '',
+  generalFacilities: [],
+  date: '',
+  activityType: '',
+  duration: '',
+  equipment: '',
   city: '',
+  skillLevel: '',
+  dateFrom: '',
+  dateTo: '',
   images: [],
 });
 
@@ -31,24 +44,29 @@ const errors = reactive({
 
 const userStore = useAuthStore();
 const user = userStore.user;
-const isOfferTypeFilled = computed(() => {
-  console.log("newOffer.value:", newOffer.value);
-  return newOffer.value.offerType !== '';
-});
+const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '')
+const isOfferTypeAccommodation = computed(() => newOffer.value.offerType === 'accommodation')
+const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'activity')
+const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
-
-function printNewOfferValueAfterDelay() {
-  setTimeout(() => {
-    console.log("newOffer.value.offerType:", newOffer.value.offerType);
-  }, 5000); // 10 seconds delay
-}
-printNewOfferValueAfterDelay();
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
 const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
 const addedNewOffer = ref(false)
 const countries = ref([])
 const offerTypes = ['Accommodation', 'Activities', 'Events']
+const accommodationTypes = ['Hotel', 'Hostel', 'Apartment', 'Villa', 'Guesthouse']
+const generalFacilities = [ "Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
+  "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
+  "Concierge Service", "Outdoor Pool", "Children's Playground", "Tennis Court", "Library", "Garden", "Sauna",
+  "Jacuzzi", "Billiards Room", "Cinema", "Karaoke Room", "Bowling Alley", "BBQ Area", "Shuttle Service"]
+const skillLevels = ['Beginner', 'Intermediate', 'Advanced']
+const activityTypes = ['Indoor', 'Outdoor']
+const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", "Sled", "Snowshoes", "Tent",
+  "Sleeping Bag", "Backpack", "Hiking Boots", "Compass", "Map", "Binoculars", "Flashlight", "First Aid Kit",
+  "Water Bottle", "Climbing Harness", "Climbing Rope", "Carabiners", "Rock Climbing Shoes", "Fishing Rod",
+  "Bait", "Camera", "Swimsuit", "Snorkel Gear", "Tennis Racket", "Golf Clubs", "Bicycle"];
+const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 const offerTypesId = {
   'Accommodation': 'accommodation',
   'Events': 'event',
@@ -68,10 +86,10 @@ async function onSubmit() {
         const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
 
         fetchWrapper.post('/api/host/create', {
-              name: newOffer.value.name,
+              title: newOffer.value.title,
               description: newOffer.value.description,
               price: newOffer.value.price,
-              max_people: newOffer.value.maxPeople,
+              capacity: newOffer.value.capacity,
               is_animal_friendly: newOffer.value.isAnimalFriendly,
               is_recommended: false,
               offer_type: offerTypesId[newOffer.value.offerType],
@@ -83,10 +101,10 @@ async function onSubmit() {
             .then(() => {
               newOffer.value = {
                 offerType: '',
-                name: '',
+                title: '',
                 description: '',
                 price: '',
-                maxPeople: '',
+                capacity: '',
                 isAnimalFriendly: false,
                 country: '',
                 city: '',
@@ -147,10 +165,10 @@ function dataURLsToFiles(dataURLs, fileNameBase) {
 function checkIfOfferInfoIsFilled() {
   let offerValues = newOffer.value;
   if (
-      offerValues.name === '' ||
+      offerValues.title === '' ||
       offerValues.description === '' ||
       offerValues.price === '' ||
-      offerValues.maxPeople === '' ||
+      offerValues.capacity === '' ||
       offerValues.isAnimalFriendly === ''
   ) {
     errors.offerInfo = 'Please fill in all offer information fields.';
@@ -184,13 +202,32 @@ onMounted(async () => {
     </Transition>
     <Transition name="bounce">
       <div v-if="isOfferTypeFilled" class="new_offer_info">
-        <TextInput v-model="newOffer.name" label-text="Name" />
+        <TextInput v-model="newOffer.title" label-text="Title" />
         <TextInput v-model="newOffer.description" label-text="Description"/>
-        <NumberInput v-model="newOffer.price" label-text="Price"/>
-        <NumberInput v-model="newOffer.maxPeople" label-text="Max number of people"/>
-        <CheckButtonInput :model-value="newOffer.isAnimalFriendly"
-                          @changed-value="newOffer.isAnimalFriendly = !newOffer.isAnimalFriendly"
-                          label-text="Is animal friendly?" width="100%"/>
+        <NumberInput v-model="newOffer.capacity" label-text="Capacity"/>
+        <div v-if="isOfferTypeAccommodation" class="new_offer_info">
+          <NumberInput v-model="newOffer.numberOfRooms" label-text="Number of rooms"/>
+          <SelectionInput v-model="newOffer.accommodationType" label-text="Accommodation type" placeholder="Type" :items="accommodationTypes"/>
+          <CheckButtonInput :model-value="newOffer.isAnimalFriendly"
+                            @changed-value="newOffer.isAnimalFriendly = !newOffer.isAnimalFriendly"
+                            label-text="Is animal friendly?" width="100%"/>
+          <NumberInput v-model="newOffer.pricePerDay" label-text="Price per day"/>
+          <CheckboxesInput v-model="newOffer.generalFacilities" label-text="Select general facilities" :items="generalFacilities"/>
+        </div>
+        <div v-if="isOfferTypeActivity" class="new_offer_info">
+          <DateInput v-model="newOffer.date" label-text="Date"/>
+          <SelectionInput v-model="newOffer.skillLevel" label-text="Skill level" placeholder="Level" :items="skillLevels"/>
+          <SelectionInput v-model="newOffer.activityType" label-text="Activity type" placeholder="Type" :items="activityTypes"/>
+          <NumberInput v-model="newOffer.price" label-text="Price"/>
+          <NumberInput v-model="newOffer.duration" label-text="Duration"/>
+          <CheckboxesInput v-model="newOffer.equipment" label-text="Select equipment needed" :items="equipmentList"/>
+        </div>
+        <div v-if="isOfferTypeEvent" class="new_offer_info">
+          <DateInput v-model="newOffer.dateFrom" label-text="Date from"/>
+          <DateInput v-model="newOffer.dateTo" label-text="Date to"/>
+          <SelectionInput v-model="newOffer.eventType" label-text="Event type" placeholder="Type" :items="eventTypes"/>
+          <NumberInput v-model="newOffer.price" label-text="Price"/>
+        </div>
       </div>
     </Transition>
     <Transition name="bounce">
