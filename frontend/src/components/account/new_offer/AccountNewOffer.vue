@@ -31,6 +31,12 @@ const newOffer = ref({
   skillLevel: '',
   dateFrom: '',
   dateTo: '',
+  roomNumber: '',
+  roomName: '',
+  roomDescription: '',
+  roomCapacity: '',
+  area: '',
+  roomFacilities: [],
   images: [],
 });
 
@@ -46,6 +52,8 @@ const userStore = useAuthStore();
 const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '')
 const isOfferTypeAccommodation = computed(() => newOffer.value.offerType === 'accommodation')
+const isAccommodationTypeWithSelectableRooms = computed(() =>
+    newOffer.value.accommodationType === 'hotel' || newOffer.value.accommodationType === 'hostel' || newOffer.value.accommodationType === 'guesthouse')
 const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'activity')
 const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
@@ -213,6 +221,15 @@ onMounted(async () => {
                             label-text="Is animal friendly?" width="100%"/>
           <NumberInput v-model="newOffer.pricePerDay" label-text="Price per day"/>
           <CheckboxesInput v-model="newOffer.generalFacilities" label-text="Select general facilities" :items="generalFacilities"/>
+          <div v-if="isAccommodationTypeWithSelectableRooms" class="new_offer_info">
+            <p class="new_offer_text">Add rooms to your accommodation</p>
+            <NumberInput v-model="newOffer.roomNumber" label-text="Room number"/>
+            <TextInput v-model="newOffer.roomName" label-text="Room name"/>
+            <TextInput v-model="newOffer.roomDescription" label-text="Room description"/>
+            <NumberInput v-model="newOffer.roomCapacity" label-text="Room capacity"/>
+            <NumberInput v-model="newOffer.area" label-text="Room area"/>
+            <CheckboxesInput v-model="newOffer.roomFacilities" label-text="Select room facilities" :items="generalFacilities"/>
+          </div>
         </div>
         <div v-if="isOfferTypeActivity" class="new_offer_info">
           <DateInput v-model="newOffer.date" label-text="Date"/>
