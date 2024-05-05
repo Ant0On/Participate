@@ -51,18 +51,27 @@ const errors = reactive({
 const userStore = useAuthStore();
 const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '')
-const isOfferTypeAccommodation = computed(() => newOffer.value.offerType === 'accommodation')
+const isOfferTypeAccommodation = computed(() => newOffer.value.offerType === 'Accommodation')
+
+function printNewOfferValueAfterDelay() {
+  setTimeout(() => {
+    console.log("newOffer.value.offerType:", newOffer.value.offerType);
+  }, 5000); // 10 seconds delay
+}
+
+printNewOfferValueAfterDelay();
+
 const isAccommodationTypeWithSelectableRooms = computed(() =>
-    newOffer.value.accommodationType === 'hotel' || newOffer.value.accommodationType === 'hostel' || newOffer.value.accommodationType === 'guesthouse')
-const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'activity')
-const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'event')
+    newOffer.value.accommodationType === 'Hotel' || newOffer.value.accommodationType === 'Hostel' || newOffer.value.accommodationType === 'Guesthouse')
+const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'Activity')
+const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'Event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
 const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
 const addedNewOffer = ref(false)
 const countries = ref([])
-const offerTypes = ['Accommodation', 'Activities', 'Events']
+const offerTypes = ['Accommodation', 'Activity', 'Event']
 const accommodationTypes = ['Hotel', 'Hostel', 'Apartment', 'Villa', 'Guesthouse']
 const generalFacilities = [ "Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
   "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
@@ -77,8 +86,8 @@ const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", 
 const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 const offerTypesId = {
   'Accommodation': 'accommodation',
-  'Events': 'event',
-  'Activities': 'activity'
+  'Event': 'event',
+  'Activity': 'activity'
 }
 
 async function getCountryId(countryName) {
@@ -220,7 +229,7 @@ onMounted(async () => {
                             @changed-value="newOffer.isAnimalFriendly = !newOffer.isAnimalFriendly"
                             label-text="Is animal friendly?" width="100%"/>
           <NumberInput v-model="newOffer.pricePerDay" label-text="Price per day"/>
-          <CheckboxesInput v-model="newOffer.generalFacilities" label-text="Select general facilities" :items="generalFacilities"/>
+          <CheckboxesInput v-model="newOffer.generalFacilities" label-text="Select general facilities" placeholder="Facilities" :items="generalFacilities"/>
           <div v-if="isAccommodationTypeWithSelectableRooms" class="new_offer_info">
             <p class="new_offer_text">Add rooms to your accommodation</p>
             <NumberInput v-model="newOffer.roomNumber" label-text="Room number"/>
@@ -228,7 +237,7 @@ onMounted(async () => {
             <TextInput v-model="newOffer.roomDescription" label-text="Room description"/>
             <NumberInput v-model="newOffer.roomCapacity" label-text="Room capacity"/>
             <NumberInput v-model="newOffer.area" label-text="Room area"/>
-            <CheckboxesInput v-model="newOffer.roomFacilities" label-text="Select room facilities" :items="generalFacilities"/>
+            <CheckboxesInput v-model="newOffer.roomFacilities" label-text="Select room facilities" placeholder="Facilities" :items="generalFacilities"/>
           </div>
         </div>
         <div v-if="isOfferTypeActivity" class="new_offer_info">
@@ -237,7 +246,7 @@ onMounted(async () => {
           <SelectionInput v-model="newOffer.activityType" label-text="Activity type" placeholder="Type" :items="activityTypes"/>
           <NumberInput v-model="newOffer.price" label-text="Price"/>
           <NumberInput v-model="newOffer.duration" label-text="Duration"/>
-          <CheckboxesInput v-model="newOffer.equipment" label-text="Select equipment needed" :items="equipmentList"/>
+          <CheckboxesInput v-model="newOffer.equipment" label-text="Select equipment needed" placeholder="Equipment" :items="equipmentList"/>
         </div>
         <div v-if="isOfferTypeEvent" class="new_offer_info">
           <DateInput v-model="newOffer.dateFrom" label-text="Date from"/>
