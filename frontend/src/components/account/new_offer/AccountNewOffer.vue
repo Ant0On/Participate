@@ -9,7 +9,8 @@ import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import {useAuthStore} from "@/stores/auth.store";
 import CheckboxesInput from "@/components/ui/CheckboxesInput.vue";
 import DateInput from "@/components/ui/DateInput.vue";
-
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
 
 const newOffer = ref({
   offerType: '',
@@ -25,7 +26,7 @@ const newOffer = ref({
   generalFacilities: [],
   date: '',
   activityType: '',
-  duration: '',
+  dateRange: '',
   equipment: '',
   city: '',
   skillLevel: '',
@@ -66,6 +67,7 @@ const isAccommodationTypeWithSelectableRooms = computed(() =>
 const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'Activity')
 const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'Event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
+const isRoomInfoFilled = computed(() => checkIfRoomInfoIsFilled())
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
 const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
@@ -139,6 +141,10 @@ async function onSubmit() {
   })
 }
 
+async function onAddRoom() {
+
+}
+
 async function uploadImage(imageInput) {
   const images = imageInput.target.files;
   const promises = [];
@@ -181,14 +187,31 @@ function dataURLsToFiles(dataURLs, fileNameBase) {
 
 function checkIfOfferInfoIsFilled() {
   let offerValues = newOffer.value;
+  console.log('offerValues:', offerValues)
   if (
       offerValues.title === '' ||
       offerValues.description === '' ||
-      offerValues.price === '' ||
       offerValues.capacity === '' ||
       offerValues.isAnimalFriendly === ''
   ) {
     errors.offerInfo = 'Please fill in all offer information fields.';
+    return false;
+  } else {
+    errors.offerInfo = '';
+    return true;
+  }
+}
+
+function checkIfRoomInfoIsFilled() {
+  let offerValues = newOffer.value;
+  if (
+      offerValues.roomNumber === '' ||
+      offerValues.roomName === '' ||
+      offerValues.roomDescription === '' ||
+      offerValues.roomCapacity === '' ||
+      offerValues.area === ''
+  ) {
+    errors.offerInfo = 'Please fill in all room information fields.';
     return false;
   } else {
     errors.offerInfo = '';
@@ -236,8 +259,11 @@ onMounted(async () => {
             <TextInput v-model="newOffer.roomName" label-text="Room name"/>
             <TextInput v-model="newOffer.roomDescription" label-text="Room description"/>
             <NumberInput v-model="newOffer.roomCapacity" label-text="Room capacity"/>
-            <NumberInput v-model="newOffer.area" label-text="Room area"/>
+            <NumberInput v-model="newOffer.area" label-text="Room area in m2"/>
             <CheckboxesInput v-model="newOffer.roomFacilities" label-text="Select room facilities" placeholder="Facilities" :items="generalFacilities"/>
+            <button :disabled="isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }" @click="onAddRoom">
+              Add room
+            </button>
           </div>
         </div>
         <div v-if="isOfferTypeActivity" class="new_offer_info">
@@ -245,7 +271,7 @@ onMounted(async () => {
           <SelectionInput v-model="newOffer.skillLevel" label-text="Skill level" placeholder="Level" :items="skillLevels"/>
           <SelectionInput v-model="newOffer.activityType" label-text="Activity type" placeholder="Type" :items="activityTypes"/>
           <NumberInput v-model="newOffer.price" label-text="Price"/>
-          <NumberInput v-model="newOffer.duration" label-text="Duration"/>
+          <VueDatePicker v-model="newOffer.dateRange" placeholder="Select date range" range />
           <CheckboxesInput v-model="newOffer.equipment" label-text="Select equipment needed" placeholder="Equipment" :items="equipmentList"/>
         </div>
         <div v-if="isOfferTypeEvent" class="new_offer_info">
@@ -377,7 +403,6 @@ div.new_offer_info {
   flex-grow: 1;
   width: 60%;
   row-gap: 15px;
-
 }
 
 div.new_offer_start {
@@ -418,6 +443,12 @@ p.new_offer_text {
   align-self: center;
   align-items: center;
   text-align: center;
+}
+
+.disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
 }
 
 .button_basic:active {
