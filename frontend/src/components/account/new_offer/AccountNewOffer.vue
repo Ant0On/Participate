@@ -24,7 +24,6 @@ const newOffer = ref({
   accommodationType: '',
   pricePerDay: '',
   generalFacilities: [],
-  date: '',
   activityType: '',
   dateRange: '',
   equipment: '',
@@ -53,15 +52,6 @@ const userStore = useAuthStore();
 const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '')
 const isOfferTypeAccommodation = computed(() => newOffer.value.offerType === 'Accommodation')
-
-function printNewOfferValueAfterDelay() {
-  setTimeout(() => {
-    console.log("newOffer.value.offerType:", newOffer.value.offerType);
-  }, 5000); // 10 seconds delay
-}
-
-printNewOfferValueAfterDelay();
-
 const isAccommodationTypeWithSelectableRooms = computed(() =>
     newOffer.value.accommodationType === 'Hotel' || newOffer.value.accommodationType === 'Hostel' || newOffer.value.accommodationType === 'Guesthouse')
 const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'Activity')
@@ -75,7 +65,7 @@ const addedNewOffer = ref(false)
 const countries = ref([])
 const offerTypes = ['Accommodation', 'Activity', 'Event']
 const accommodationTypes = ['Hotel', 'Hostel', 'Apartment', 'Villa', 'Guesthouse']
-const generalFacilities = [ "Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
+const generalFacilities = ["Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
   "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
   "Concierge Service", "Outdoor Pool", "Children's Playground", "Tennis Court", "Library", "Garden", "Sauna",
   "Jacuzzi", "Billiards Room", "Cinema", "Karaoke Room", "Bowling Alley", "BBQ Area", "Shuttle Service"]
@@ -189,13 +179,36 @@ function checkIfOfferInfoIsFilled() {
   let offerValues = newOffer.value;
   console.log('offerValues:', offerValues)
   if (
+      offerValues.offerType === '' ||
       offerValues.title === '' ||
       offerValues.description === '' ||
-      offerValues.capacity === '' ||
-      offerValues.isAnimalFriendly === ''
+      offerValues.capacity === ''
   ) {
-    errors.offerInfo = 'Please fill in all offer information fields.';
-    return false;
+    if( (offerValues.offerType === 'Accommodation' && offerValues.numberOfRooms === '') ||
+        (offerValues.offerType === 'Accommodation' && offerValues.accommodationType === '') ||
+        (offerValues.offerType === 'Accommodation' && offerValues.isAnimalFriendly === '') ||
+        (offerValues.offerType === 'Accommodation' && offerValues.pricePerDay === '') ||
+        (offerValues.offerType === 'Accommodation' && offerValues.numberOfRooms === '')
+    ) {
+      errors.offerInfo = 'Please fill in all accommodation information fields.';
+      return false;
+    }
+    if( (offerValues.offerType === 'Activity' && offerValues.skillLevel === '') ||
+        (offerValues.offerType === 'Activity' && offerValues.activityType === '') ||
+        (offerValues.offerType === 'Activity' && offerValues.price === '') ||
+        (offerValues.offerType === 'Activity' && offerValues.dateRange === '')
+    ) {
+      errors.offerInfo = 'Please fill in all activity information fields.';
+      return false;
+    }
+    if( (offerValues.offerType === 'Event' && offerValues.dateFrom === '') ||
+        (offerValues.offerType === 'Event' && offerValues.dateTo === '') ||
+        (offerValues.offerType === 'Event' && offerValues.eventType === '') ||
+        (offerValues.offerType === 'Event' && offerValues.price === '')
+    ) {
+      errors.offerInfo = 'Please fill in all event information fields.';
+      return false;
+    }
   } else {
     errors.offerInfo = '';
     return true;
@@ -204,6 +217,9 @@ function checkIfOfferInfoIsFilled() {
 
 function checkIfRoomInfoIsFilled() {
   let offerValues = newOffer.value;
+  if (offerValues.offerType === 'Villa' || offerValues.offerType === 'Apartment') {
+    return
+  }
   if (
       offerValues.roomNumber === '' ||
       offerValues.roomName === '' ||
@@ -211,7 +227,6 @@ function checkIfRoomInfoIsFilled() {
       offerValues.roomCapacity === '' ||
       offerValues.area === ''
   ) {
-    errors.offerInfo = 'Please fill in all room information fields.';
     return false;
   } else {
     errors.offerInfo = '';
@@ -242,37 +257,43 @@ onMounted(async () => {
     </Transition>
     <Transition name="bounce">
       <div v-if="isOfferTypeFilled" class="new_offer_info">
-        <TextInput v-model="newOffer.title" label-text="Title" />
+        <TextInput v-model="newOffer.title" label-text="Title"/>
         <TextInput v-model="newOffer.description" label-text="Description"/>
         <NumberInput v-model="newOffer.capacity" label-text="Capacity"/>
         <div v-if="isOfferTypeAccommodation" class="new_offer_info">
           <NumberInput v-model="newOffer.numberOfRooms" label-text="Number of rooms"/>
-          <SelectionInput v-model="newOffer.accommodationType" label-text="Accommodation type" placeholder="Type" :items="accommodationTypes"/>
+          <SelectionInput v-model="newOffer.accommodationType" label-text="Accommodation type" placeholder="Type"
+                          :items="accommodationTypes"/>
           <CheckButtonInput :model-value="newOffer.isAnimalFriendly"
                             @changed-value="newOffer.isAnimalFriendly = !newOffer.isAnimalFriendly"
                             label-text="Is animal friendly?" width="100%"/>
           <NumberInput v-model="newOffer.pricePerDay" label-text="Price per day"/>
-          <CheckboxesInput v-model="newOffer.generalFacilities" label-text="Select general facilities" placeholder="Facilities" :items="generalFacilities"/>
-          <div v-if="isAccommodationTypeWithSelectableRooms" class="new_offer_info">
+          <CheckboxesInput v-model="newOffer.generalFacilities" label-text="Select general facilities"
+                           placeholder="Facilities" :items="generalFacilities"/>
+          <div v-if="isAccommodationTypeWithSelectableRooms" class="new_offer_info room-info-container">
             <p class="new_offer_text">Add rooms to your accommodation</p>
             <NumberInput v-model="newOffer.roomNumber" label-text="Room number"/>
             <TextInput v-model="newOffer.roomName" label-text="Room name"/>
             <TextInput v-model="newOffer.roomDescription" label-text="Room description"/>
             <NumberInput v-model="newOffer.roomCapacity" label-text="Room capacity"/>
             <NumberInput v-model="newOffer.area" label-text="Room area in m2"/>
-            <CheckboxesInput v-model="newOffer.roomFacilities" label-text="Select room facilities" placeholder="Facilities" :items="generalFacilities"/>
-            <button :disabled="isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }" @click="onAddRoom">
+            <CheckboxesInput v-model="newOffer.roomFacilities" label-text="Select room facilities"
+                             placeholder="Facilities" :items="generalFacilities"/>
+            <button :disabled="isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }"
+                    @click="onAddRoom">
               Add room
             </button>
           </div>
         </div>
         <div v-if="isOfferTypeActivity" class="new_offer_info">
-          <DateInput v-model="newOffer.date" label-text="Date"/>
-          <SelectionInput v-model="newOffer.skillLevel" label-text="Skill level" placeholder="Level" :items="skillLevels"/>
-          <SelectionInput v-model="newOffer.activityType" label-text="Activity type" placeholder="Type" :items="activityTypes"/>
+          <SelectionInput v-model="newOffer.skillLevel" label-text="Skill level" placeholder="Level"
+                          :items="skillLevels"/>
+          <SelectionInput v-model="newOffer.activityType" label-text="Activity type" placeholder="Type"
+                          :items="activityTypes"/>
           <NumberInput v-model="newOffer.price" label-text="Price"/>
-          <VueDatePicker v-model="newOffer.dateRange" placeholder="Select date range" range />
-          <CheckboxesInput v-model="newOffer.equipment" label-text="Select equipment needed" placeholder="Equipment" :items="equipmentList"/>
+          <VueDatePicker v-model="newOffer.dateRange" placeholder="Select date range" range/>
+          <CheckboxesInput v-model="newOffer.equipment" label-text="Select equipment needed" placeholder="Equipment"
+                           :items="equipmentList"/>
         </div>
         <div v-if="isOfferTypeEvent" class="new_offer_info">
           <DateInput v-model="newOffer.dateFrom" label-text="Date from"/>
@@ -461,5 +482,12 @@ div.errors {
   margin-bottom: 5%;
   margin-top: 5%;
   text-align: center;
+}
+
+.room-info-container {
+  border: 2px solid #333;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 </style>
