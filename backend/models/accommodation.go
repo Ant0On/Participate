@@ -16,6 +16,7 @@ const (
 	Guesthouse AccommodationType = "guesthouse"
 )
 
+// TODO move TownID and UserID to Offer
 type Accommodation struct {
 	gorm.Model
 	Offer

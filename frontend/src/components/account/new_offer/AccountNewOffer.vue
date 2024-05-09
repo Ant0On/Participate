@@ -16,29 +16,43 @@ const newOffer = ref({
   offerType: '',
   title: '',
   description: '',
-  price: '',
   capacity: '',
-  isAnimalFriendly: false,
   country: '',
+  city: '',
+  images: [],
+});
+
+const newAccommodation = ref({
   numberOfRooms: '',
   accommodationType: '',
+  isAnimalFriendly: false,
   pricePerDay: '',
   generalFacilities: [],
+})
+
+const newActivity = ref({
+  skillLevel: '',
+  price: '',
   activityType: '',
   dateRange: '',
   equipment: '',
-  city: '',
-  skillLevel: '',
+})
+
+const newEvent = ref({
   dateFrom: '',
   dateTo: '',
-  roomNumber: '',
-  roomName: '',
-  roomDescription: '',
-  roomCapacity: '',
+  price: '',
+  eventType: ''
+})
+
+const newRoom = ref({
+  number: '',
+  name: '',
+  description: '',
+  capacity: '',
   area: '',
   roomFacilities: [],
-  images: [],
-});
+})
 
 const errors = reactive({
   apiError: '',
