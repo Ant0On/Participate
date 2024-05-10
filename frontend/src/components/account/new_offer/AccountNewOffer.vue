@@ -22,6 +22,8 @@ const newOffer = ref({
   images: [],
 });
 
+const rooms = ref([]);
+
 const newAccommodation = ref({
   numberOfRooms: '',
   accommodationType: '',
@@ -67,7 +69,9 @@ const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '')
 const isOfferTypeAccommodation = computed(() => newOffer.value.offerType === 'Accommodation')
 const isAccommodationTypeWithSelectableRooms = computed(() =>
-    newOffer.value.accommodationType === 'Hotel' || newOffer.value.accommodationType === 'Hostel' || newOffer.value.accommodationType === 'Guesthouse')
+    newAccommodation.value.accommodationType === 'Hotel' ||
+    newAccommodation.value.accommodationType === 'Hostel' ||
+    newAccommodation.value.accommodationType === 'Guesthouse')
 const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'Activity')
 const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'Event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
@@ -90,11 +94,6 @@ const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", 
   "Water Bottle", "Climbing Harness", "Climbing Rope", "Carabiners", "Rock Climbing Shoes", "Fishing Rod",
   "Bait", "Camera", "Swimsuit", "Snorkel Gear", "Tennis Racket", "Golf Clubs", "Bicycle"];
 const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
-const offerTypesId = {
-  'Accommodation': 'accommodation',
-  'Event': 'event',
-  'Activity': 'activity'
-}
 
 async function getCountryId(countryName) {
   const response = await fetchWrapper.get('/api/country/get/all')
@@ -108,15 +107,7 @@ async function onSubmit() {
   }).then((data) => {
         const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
 
-        fetchWrapper.post('/api/host/create', {
-              title: newOffer.value.title,
-              description: newOffer.value.description,
-              price: newOffer.value.price,
-              capacity: newOffer.value.capacity,
-              is_animal_friendly: newOffer.value.isAnimalFriendly,
-              is_recommended: false,
-              offer_type: offerTypesId[newOffer.value.offerType],
-              user_id: user.ID,
+        fetchWrapper.post('', {
               town_id: data.town.ID,
               images: imageFiles
             },
@@ -146,7 +137,25 @@ async function onSubmit() {
 }
 
 async function onAddRoom() {
+  const room = {
+    number: newRoom.value.number,
+    name: newRoom.value.name,
+    description: newRoom.value.description,
+    capacity: newRoom.value.capacity,
+    area: newRoom.value.area,
+    roomFacilities: newRoom.value.roomFacilities,
+  };
 
+  rooms.value.push(room);
+
+  newRoom.value = {
+    number: '',
+    name: '',
+    description: '',
+    capacity: '',
+    area: '',
+    roomFacilities: [],
+  };
 }
 
 async function uploadImage(imageInput) {
@@ -191,34 +200,36 @@ function dataURLsToFiles(dataURLs, fileNameBase) {
 
 function checkIfOfferInfoIsFilled() {
   let offerValues = newOffer.value;
-  console.log('offerValues:', offerValues)
+  let accommodationValues = newAccommodation.value
+  let activityValues = newActivity.value
+  let eventValues = newEvent.value
   if (
       offerValues.offerType === '' ||
       offerValues.title === '' ||
       offerValues.description === '' ||
       offerValues.capacity === ''
   ) {
-    if( (offerValues.offerType === 'Accommodation' && offerValues.numberOfRooms === '') ||
-        (offerValues.offerType === 'Accommodation' && offerValues.accommodationType === '') ||
-        (offerValues.offerType === 'Accommodation' && offerValues.isAnimalFriendly === '') ||
-        (offerValues.offerType === 'Accommodation' && offerValues.pricePerDay === '') ||
-        (offerValues.offerType === 'Accommodation' && offerValues.numberOfRooms === '')
+    if( (offerValues.offerType === 'Accommodation' && accommodationValues.numberOfRooms === '') ||
+        (offerValues.offerType === 'Accommodation' && accommodationValues.accommodationType === '') ||
+        (offerValues.offerType === 'Accommodation' && accommodationValues.isAnimalFriendly === '') ||
+        (offerValues.offerType === 'Accommodation' && accommodationValues.pricePerDay === '') ||
+        (offerValues.offerType === 'Accommodation' && accommodationValues.numberOfRooms === '')
     ) {
       errors.offerInfo = 'Please fill in all accommodation information fields.';
       return false;
     }
-    if( (offerValues.offerType === 'Activity' && offerValues.skillLevel === '') ||
-        (offerValues.offerType === 'Activity' && offerValues.activityType === '') ||
-        (offerValues.offerType === 'Activity' && offerValues.price === '') ||
-        (offerValues.offerType === 'Activity' && offerValues.dateRange === '')
+    if( (offerValues.offerType === 'Activity' && activityValues.skillLevel === '') ||
+        (offerValues.offerType === 'Activity' && activityValues.activityType === '') ||
+        (offerValues.offerType === 'Activity' && activityValues.price === '') ||
+        (offerValues.offerType === 'Activity' && activityValues.dateRange === '')
     ) {
       errors.offerInfo = 'Please fill in all activity information fields.';
       return false;
     }
-    if( (offerValues.offerType === 'Event' && offerValues.dateFrom === '') ||
-        (offerValues.offerType === 'Event' && offerValues.dateTo === '') ||
-        (offerValues.offerType === 'Event' && offerValues.eventType === '') ||
-        (offerValues.offerType === 'Event' && offerValues.price === '')
+    if( (offerValues.offerType === 'Event' && eventValues.dateFrom === '') ||
+        (offerValues.offerType === 'Event' && eventValues.dateTo === '') ||
+        (offerValues.offerType === 'Event' && eventValues.eventType === '') ||
+        (offerValues.offerType === 'Event' && eventValues.price === '')
     ) {
       errors.offerInfo = 'Please fill in all event information fields.';
       return false;
@@ -230,16 +241,17 @@ function checkIfOfferInfoIsFilled() {
 }
 
 function checkIfRoomInfoIsFilled() {
-  let offerValues = newOffer.value;
-  if (offerValues.offerType === 'Villa' || offerValues.offerType === 'Apartment') {
+  let accommodationValues = newAccommodation.value
+  let roomValues = newRoom.value
+  if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
     return
   }
   if (
-      offerValues.roomNumber === '' ||
-      offerValues.roomName === '' ||
-      offerValues.roomDescription === '' ||
-      offerValues.roomCapacity === '' ||
-      offerValues.area === ''
+      roomValues.number === '' ||
+      roomValues.name === '' ||
+      roomValues.description === '' ||
+      roomValues.capacity === '' ||
+      roomValues.area === ''
   ) {
     return false;
   } else {
@@ -275,23 +287,23 @@ onMounted(async () => {
         <TextInput v-model="newOffer.description" label-text="Description"/>
         <NumberInput v-model="newOffer.capacity" label-text="Capacity"/>
         <div v-if="isOfferTypeAccommodation" class="new_offer_info">
-          <NumberInput v-model="newOffer.numberOfRooms" label-text="Number of rooms"/>
-          <SelectionInput v-model="newOffer.accommodationType" label-text="Accommodation type" placeholder="Type"
+          <NumberInput v-model="newAccommodation.numberOfRooms" label-text="Number of rooms"/>
+          <SelectionInput v-model="newAccommodation.accommodationType" label-text="Accommodation type" placeholder="Type"
                           :items="accommodationTypes"/>
-          <CheckButtonInput :model-value="newOffer.isAnimalFriendly"
-                            @changed-value="newOffer.isAnimalFriendly = !newOffer.isAnimalFriendly"
+          <CheckButtonInput :model-value="newAccommodation.isAnimalFriendly"
+                            @changed-value="newAccommodation.isAnimalFriendly = !newAccommodation.isAnimalFriendly"
                             label-text="Is animal friendly?" width="100%"/>
-          <NumberInput v-model="newOffer.pricePerDay" label-text="Price per day"/>
-          <CheckboxesInput v-model="newOffer.generalFacilities" label-text="Select general facilities"
+          <NumberInput v-model="newAccommodation.pricePerDay" label-text="Price per day"/>
+          <CheckboxesInput v-model="newAccommodation.generalFacilities" label-text="Select general facilities"
                            placeholder="Facilities" :items="generalFacilities"/>
           <div v-if="isAccommodationTypeWithSelectableRooms" class="new_offer_info room-info-container">
             <p class="new_offer_text">Add rooms to your accommodation</p>
-            <NumberInput v-model="newOffer.roomNumber" label-text="Room number"/>
-            <TextInput v-model="newOffer.roomName" label-text="Room name"/>
-            <TextInput v-model="newOffer.roomDescription" label-text="Room description"/>
-            <NumberInput v-model="newOffer.roomCapacity" label-text="Room capacity"/>
-            <NumberInput v-model="newOffer.area" label-text="Room area in m2"/>
-            <CheckboxesInput v-model="newOffer.roomFacilities" label-text="Select room facilities"
+            <NumberInput v-model="newRoom.number" label-text="Room number"/>
+            <TextInput v-model="newRoom.name" label-text="Room name"/>
+            <TextInput v-model="newRoom.description" label-text="Room description"/>
+            <NumberInput v-model="newRoom.capacity" label-text="Room capacity"/>
+            <NumberInput v-model="newRoom.area" label-text="Room area in m2"/>
+            <CheckboxesInput v-model="newRoom.roomFacilities" label-text="Select room facilities"
                              placeholder="Facilities" :items="generalFacilities"/>
             <button :disabled="isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }"
                     @click="onAddRoom">
@@ -300,20 +312,20 @@ onMounted(async () => {
           </div>
         </div>
         <div v-if="isOfferTypeActivity" class="new_offer_info">
-          <SelectionInput v-model="newOffer.skillLevel" label-text="Skill level" placeholder="Level"
+          <SelectionInput v-model="newActivity.skillLevel" label-text="Skill level" placeholder="Level"
                           :items="skillLevels"/>
-          <SelectionInput v-model="newOffer.activityType" label-text="Activity type" placeholder="Type"
+          <SelectionInput v-model="newActivity.activityType" label-text="Activity type" placeholder="Type"
                           :items="activityTypes"/>
-          <NumberInput v-model="newOffer.price" label-text="Price"/>
-          <VueDatePicker v-model="newOffer.dateRange" placeholder="Select date range" range/>
-          <CheckboxesInput v-model="newOffer.equipment" label-text="Select equipment needed" placeholder="Equipment"
+          <NumberInput v-model="newActivity.price" label-text="Price"/>
+          <VueDatePicker v-model="newActivity.dateRange" placeholder="Select date range" range/>
+          <CheckboxesInput v-model="newActivity.equipment" label-text="Select equipment needed" placeholder="Equipment"
                            :items="equipmentList"/>
         </div>
         <div v-if="isOfferTypeEvent" class="new_offer_info">
-          <DateInput v-model="newOffer.dateFrom" label-text="Date from"/>
-          <DateInput v-model="newOffer.dateTo" label-text="Date to"/>
-          <SelectionInput v-model="newOffer.eventType" label-text="Event type" placeholder="Type" :items="eventTypes"/>
-          <NumberInput v-model="newOffer.price" label-text="Price"/>
+          <DateInput v-model="newEvent.dateFrom" label-text="Date from"/>
+          <DateInput v-model="newEvent.dateTo" label-text="Date to"/>
+          <SelectionInput v-model="newEvent.eventType" label-text="Event type" placeholder="Type" :items="eventTypes"/>
+          <NumberInput v-model="newEvent.price" label-text="Price"/>
         </div>
       </div>
     </Transition>

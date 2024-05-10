@@ -29,8 +29,6 @@ type Activity struct {
 	Type         ActivityType  `gorm:"type:varchar(255);check:activity_type IN ('indoor', 'outdoor'); column:activity_type; not null" form:"activity_type" binding:"required,oneof=indoor outdoor"`
 	Price        float64       `gorm:"not null" form:"price" binding:"required,gt=0"`
 	Duration     time.Duration `gorm:"not null" form:"duration" binding:"required"`
-	TownID       uint          `gorm:"not null" form:"town_id" binding:"required"`
-	UserID       uint          `gorm:"not null" form:"user_id" binding:"required"`
 	Equipment    []Equipment   `gorm:"many2many:activity_equipment;"`
 	Reservations []ReservationActivity
 }
