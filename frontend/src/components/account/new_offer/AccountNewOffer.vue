@@ -64,6 +64,14 @@ const errors = reactive({
   image: '',
 });
 
+function printDateRangeAfterDelay() {
+  setTimeout(() => {
+    console.log("Date Range:", newActivity.value.dateRange);
+  }, 10000);
+}
+
+printDateRangeAfterDelay()
+
 const userStore = useAuthStore();
 const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '')
@@ -108,7 +116,7 @@ async function onSubmit() {
         const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
 
         if (newOffer.value.offerType === 'Accommodation') {
-           fetchWrapper.post('api/host/accommodation/create', {
+          fetchWrapper.post('api/host/accommodation/create', {
             title: newOffer.value.title,
             description: newOffer.value.description,
             capacity: newOffer.value.capacity,
@@ -121,44 +129,130 @@ async function onSubmit() {
             general_facilities: newAccommodation.generalFacilities,
             images: imageFiles
           }, "multipart/form-data")
-              .then( (data) => {
-                  fetchWrapper.post('api/host/general_facilities/something', {})
-              }).then( () => {
-                if (newAccommodation.accommodationType !== 'Villa' && newAccommodation.accommodationType !== 'Apartment') {
-                  fetchWrapper.post('api/host/room/create', {})
-                }
+              .then((data) => {
+                fetchWrapper.post('api/host/general_facilities/something', {})
               }).then(() => {
-                newOffer.value = {
-                  offerType: '',
-                  title: '',
-                  description: '',
-                  capacity: '',
-                  country: '',
-                  city: '',
-                  images: [],
-                }
-                newAccommodation.value = {
-                  numberOfRooms: '',
-                  accommodationType: '',
-                  isAnimalFriendly: '',
-                  pricePerDay: '',
-                  generalFacilities: []
-                }
-                isAddingNewOffer.value = false;
-                addedNewOffer.value = true;
-                errors.apiError = null
-              }).catch(error => {
-                errors.apiError = "Something went wrong - " + error
-              }).catch((error) => {
-                errors.apiError = "A problem occurred during addition of an offer! " + error.message;
-              })
+            if (newAccommodation.accommodationType !== 'Villa' && newAccommodation.accommodationType !== 'Apartment') {
+              fetchWrapper.post('api/host/room/create', {})
+            }
+          }).then(() => {
+            newOffer.value = {
+              offerType: '',
+              title: '',
+              description: '',
+              capacity: '',
+              country: '',
+              city: '',
+              images: [],
+            }
+            newAccommodation.value = {
+              numberOfRooms: '',
+              accommodationType: '',
+              isAnimalFriendly: '',
+              pricePerDay: '',
+              generalFacilities: []
+            }
+            isAddingNewOffer.value = false;
+            addedNewOffer.value = true;
+            errors.apiError = null
+          }).catch(error => {
+            errors.apiError = "Something went wrong - " + error
+          }).catch((error) => {
+            errors.apiError = "A problem occurred during addition of an offer! " + error.message;
+          })
+        } else if (newOffer.value.offerType === 'Activity') {
+          fetchWrapper.post('api/host/activity/create', {
+            title: newOffer.value.title,
+            description: newOffer.value.description,
+            capacity: newOffer.value.capacity,
+            town_id: data.town.ID,
+            user: user.ID,
+            date: newActivity.value.dateRange[0],
+            skill_level: newActivity.value.skillLevel.toLowerCase(),
+            activity_type: newActivity.value.activityType.toLowerCase(),
+            price: newActivity.value.price,
+            duration: calculateDurationInNanoseconds(newActivity.value.dateRange[0], newActivity.value.dateRange[1]),
+            equipment: newActivity.value.equipment,
+            images: imageFiles
+          }, "multipart/form-data")
+              .then((data) => {
+                fetchWrapper.post('api/host/equipment/something', {})
+              }).then(() => {
+            newOffer.value = {
+              offerType: '',
+              title: '',
+              description: '',
+              capacity: '',
+              country: '',
+              city: '',
+              images: [],
+            }
+            newActivity.value = {
+              date: '',
+              skillLevel: '',
+              activityType: '',
+              price: '',
+              duration: '',
+              equipment: []
+            }
+            isAddingNewOffer.value = false;
+            addedNewOffer.value = true;
+            errors.apiError = null
+          }).catch(error => {
+            errors.apiError = "Something went wrong - " + error
+          }).catch((error) => {
+            errors.apiError = "A problem occurred during addition of an offer! " + error.message;
+          })
+        } else {
+          fetchWrapper.post('api/host/event/create', {
+            title: newOffer.value.title,
+            description: newOffer.value.description,
+            capacity: newOffer.value.capacity,
+            town_id: data.town.ID,
+            user: user.ID,
+            date_from: newEvent.value.dateFrom,
+            date_to: newEvent.value.dateTo,
+            price: newEvent.value.price,
+            event_type: newEvent.value.eventType.toLowerCase(),
+            images: imageFiles
+          }, "multipart/form-data")
+              .then(() => {
+            newOffer.value = {
+              offerType: '',
+              title: '',
+              description: '',
+              capacity: '',
+              country: '',
+              city: '',
+              images: [],
+            }
+            newEvent.value = {
+              dateFrom: '',
+              dateTo: '',
+              price: '',
+              eventType: ''
+            }
+            isAddingNewOffer.value = false;
+            addedNewOffer.value = true;
+            errors.apiError = null
+          }).catch(error => {
+            errors.apiError = "Something went wrong - " + error
+          }).catch((error) => {
+            errors.apiError = "A problem occurred during addition of an offer! " + error.message;
+          })
         }
-
-        // TODO activity & event
-
 
       }
   )
+}
+
+function calculateDurationInNanoseconds(startDate, endDate) {
+  const startTimeMilliseconds = startDate.getTime();
+  const endTimeMilliseconds = endDate.getTime();
+
+  const durationMilliseconds = Math.abs(endTimeMilliseconds - startTimeMilliseconds);
+
+  return durationMilliseconds * 1e+6;
 }
 
 async function onAddRoom() {
@@ -236,7 +330,7 @@ function checkIfOfferInfoIsFilled() {
       offerValues.description === '' ||
       offerValues.capacity === ''
   ) {
-    if( (offerValues.offerType === 'Accommodation' && accommodationValues.numberOfRooms === '') ||
+    if ((offerValues.offerType === 'Accommodation' && accommodationValues.numberOfRooms === '') ||
         (offerValues.offerType === 'Accommodation' && accommodationValues.accommodationType === '') ||
         (offerValues.offerType === 'Accommodation' && accommodationValues.isAnimalFriendly === '') ||
         (offerValues.offerType === 'Accommodation' && accommodationValues.pricePerDay === '') ||
@@ -244,14 +338,14 @@ function checkIfOfferInfoIsFilled() {
     ) {
       return false;
     }
-    if( (offerValues.offerType === 'Activity' && activityValues.skillLevel === '') ||
+    if ((offerValues.offerType === 'Activity' && activityValues.skillLevel === '') ||
         (offerValues.offerType === 'Activity' && activityValues.activityType === '') ||
         (offerValues.offerType === 'Activity' && activityValues.price === '') ||
         (offerValues.offerType === 'Activity' && activityValues.dateRange === '')
     ) {
       return false;
     }
-    if( (offerValues.offerType === 'Event' && eventValues.dateFrom === '') ||
+    if ((offerValues.offerType === 'Event' && eventValues.dateFrom === '') ||
         (offerValues.offerType === 'Event' && eventValues.dateTo === '') ||
         (offerValues.offerType === 'Event' && eventValues.eventType === '') ||
         (offerValues.offerType === 'Event' && eventValues.price === '')
@@ -312,7 +406,8 @@ onMounted(async () => {
         <NumberInput v-model="newOffer.capacity" label-text="Capacity"/>
         <div v-if="isOfferTypeAccommodation" class="w-100">
           <NumberInput v-model="newAccommodation.numberOfRooms" label-text="Number of rooms"/>
-          <SelectionInput v-model="newAccommodation.accommodationType" label-text="Accommodation type" placeholder="Type"
+          <SelectionInput v-model="newAccommodation.accommodationType" label-text="Accommodation type"
+                          placeholder="Type"
                           :items="accommodationTypes"/>
           <CheckButtonInput :model-value="newAccommodation.isAnimalFriendly"
                             @changed-value="newAccommodation.isAnimalFriendly = !newAccommodation.isAnimalFriendly"
@@ -323,7 +418,7 @@ onMounted(async () => {
           <div v-if="isAccommodationTypeWithSelectableRooms" class="w-100 room-info-container">
             <p class="new_offer_text">Add rooms to your accommodation</p>
             <v-text-field v-model="newRoom.number" label="Room number" clearable placeholder="Number" class="w-100"
-                         type="number"/>
+                          type="number"/>
             <v-text-field v-model="newRoom.name" label="Room name" clearable placeholder="Name" class="w-100"/>
             <v-text-field v-model="newRoom.description" label="Room description" clearable placeholder="Description"
                           class="w-100"/>

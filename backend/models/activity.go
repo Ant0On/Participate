@@ -34,6 +34,7 @@ type Activity struct {
 }
 
 func (a *Activity) Save() error {
+	a.Duration.Hours()
 	if err := DB.Create(a).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
