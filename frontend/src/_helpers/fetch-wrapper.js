@@ -15,6 +15,7 @@ function request(method) {
         };
 
         if (data) {
+            console.log('data:', data)
             if (method === 'GET') {
                 const queryParams = new URLSearchParams(data);
                 url = `${url}?${queryParams}`;

@@ -66,11 +66,12 @@ const errors = reactive({
 
 function printDateRangeAfterDelay() {
   setTimeout(() => {
-    console.log("Date Range:", newActivity.value.dateRange);
-  }, 10000);
+    console.log("New event:", newEvent.value);
+  }
+  )
 }
 
-printDateRangeAfterDelay()
+// printDateRangeAfterDelay()
 
 const userStore = useAuthStore();
 const user = userStore.user;
@@ -116,7 +117,7 @@ async function onSubmit() {
         const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
 
         if (newOffer.value.offerType === 'Accommodation') {
-          fetchWrapper.post('api/host/accommodation/create', {
+          fetchWrapper.post('/api/host/accommodation/create', {
             title: newOffer.value.title,
             description: newOffer.value.description,
             capacity: newOffer.value.capacity,
@@ -157,8 +158,6 @@ async function onSubmit() {
             errors.apiError = null
           }).catch(error => {
             errors.apiError = "Something went wrong - " + error
-          }).catch((error) => {
-            errors.apiError = "A problem occurred during addition of an offer! " + error.message;
           })
         } else if (newOffer.value.offerType === 'Activity') {
           fetchWrapper.post('api/host/activity/create', {
@@ -200,18 +199,16 @@ async function onSubmit() {
             errors.apiError = null
           }).catch(error => {
             errors.apiError = "Something went wrong - " + error
-          }).catch((error) => {
-            errors.apiError = "A problem occurred during addition of an offer! " + error.message;
           })
         } else {
-          fetchWrapper.post('api/host/event/create', {
+          fetchWrapper.post('/api/host/event/create', {
             title: newOffer.value.title,
             description: newOffer.value.description,
             capacity: newOffer.value.capacity,
             town_id: data.town.ID,
-            user: user.ID,
-            date_from: newEvent.value.dateFrom,
-            date_to: newEvent.value.dateTo,
+            user_id: user.ID,
+            date_from: new Date(newEvent.value.dateFrom).toJSON(),
+            date_to: new Date(newEvent.value.dateTo).toJSON(),
             price: newEvent.value.price,
             event_type: newEvent.value.eventType.toLowerCase(),
             images: imageFiles
@@ -237,8 +234,6 @@ async function onSubmit() {
             errors.apiError = null
           }).catch(error => {
             errors.apiError = "Something went wrong - " + error
-          }).catch((error) => {
-            errors.apiError = "A problem occurred during addition of an offer! " + error.message;
           })
         }
 
@@ -321,42 +316,52 @@ function dataURLsToFiles(dataURLs, fileNameBase) {
 
 function checkIfOfferInfoIsFilled() {
   let offerValues = newOffer.value;
-  let accommodationValues = newAccommodation.value
-  let activityValues = newActivity.value
-  let eventValues = newEvent.value
+  let accommodationValues = newAccommodation.value;
+  let activityValues = newActivity.value;
+  let eventValues = newEvent.value;
+
   if (
       offerValues.offerType === '' ||
       offerValues.title === '' ||
       offerValues.description === '' ||
       offerValues.capacity === ''
   ) {
-    if ((offerValues.offerType === 'Accommodation' && accommodationValues.numberOfRooms === '') ||
-        (offerValues.offerType === 'Accommodation' && accommodationValues.accommodationType === '') ||
-        (offerValues.offerType === 'Accommodation' && accommodationValues.isAnimalFriendly === '') ||
-        (offerValues.offerType === 'Accommodation' && accommodationValues.pricePerDay === '') ||
-        (offerValues.offerType === 'Accommodation' && accommodationValues.numberOfRooms === '')
-    ) {
-      return false;
-    }
-    if ((offerValues.offerType === 'Activity' && activityValues.skillLevel === '') ||
-        (offerValues.offerType === 'Activity' && activityValues.activityType === '') ||
-        (offerValues.offerType === 'Activity' && activityValues.price === '') ||
-        (offerValues.offerType === 'Activity' && activityValues.dateRange === '')
-    ) {
-      return false;
-    }
-    if ((offerValues.offerType === 'Event' && eventValues.dateFrom === '') ||
-        (offerValues.offerType === 'Event' && eventValues.dateTo === '') ||
-        (offerValues.offerType === 'Event' && eventValues.eventType === '') ||
-        (offerValues.offerType === 'Event' && eventValues.price === '')
-    ) {
-      return false;
-    }
-  } else {
-    errors.offerInfo = '';
-    return true;
+    return false;
   }
+
+  if (offerValues.offerType === 'Accommodation') {
+    if (
+        accommodationValues.numberOfRooms === '' ||
+        accommodationValues.accommodationType === '' ||
+        accommodationValues.isAnimalFriendly === '' ||
+        accommodationValues.pricePerDay === ''
+    ) {
+      return false;
+    }
+  } else if (offerValues.offerType === 'Activity') {
+    if (
+        activityValues.skillLevel === '' ||
+        activityValues.activityType === '' ||
+        activityValues.price === '' ||
+        activityValues.dateRange === ''
+    ) {
+      return false;
+    }
+  } else if (offerValues.offerType === 'Event') {
+    if (
+        eventValues.dateFrom === '' ||
+        eventValues.dateTo === '' ||
+        eventValues.eventType === '' ||
+        eventValues.price === ''
+    ) {
+      return false;
+    }
+  }
+
+  errors.offerInfo = '';
+  return true;
 }
+
 
 function checkIfRoomInfoIsFilled() {
   let accommodationValues = newAccommodation.value
@@ -454,7 +459,7 @@ onMounted(async () => {
       </div>
     </Transition>
     <Transition name="bounce">
-      <div v-if="isOfferInfoFilled" class="w-100">
+      <div v-if="isOfferInfoFilled" class="new_offer_info">
         <SelectionInput v-model="newOffer.country" label-text="Country" :items="countries"/>
         <TextInput v-model="newOffer.city" label-text="City"/>
       </div>
