@@ -3,11 +3,9 @@
 
 <template>
   <v-app-bar class="px-4" :elevation="0">
-      <router-link to="/">
-          <v-img width="250" height="60" :src="require('@/assets/img/logo.png')"></v-img>
-      </router-link>
-
-
+    <router-link to="/">
+      <v-img width="250" height="60" :src="require('@/assets/img/logo.png')"></v-img>
+    </router-link>
     <v-tabs
         color="grey-darken-2"
         centered
@@ -49,7 +47,6 @@
 
     </v-tabs>
     <v-spacer></v-spacer>
-
   </v-app-bar>
 </template>
 

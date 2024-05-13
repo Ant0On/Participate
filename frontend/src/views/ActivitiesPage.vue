@@ -6,6 +6,7 @@ import OfferListItem from "@/components/offers/OfferListItem.vue";
 import { useSearchStore } from "@/stores/search.store";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
+import SearchBar from "@/components/layout/SearchBar.vue";
 
 const searchStore = useSearchStore();
 const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
@@ -47,6 +48,7 @@ async function load({done}) {
 <template>
   <div class="activities_page">
     <p>Inspiring activities</p>
+    <SearchBar/>
     <div v-if="activities.length > 0" >
       <v-infinite-scroll
           :items="activities"
