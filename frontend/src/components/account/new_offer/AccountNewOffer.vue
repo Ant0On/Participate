@@ -66,12 +66,12 @@ const errors = reactive({
 
 function printDateRangeAfterDelay() {
   setTimeout(() => {
-    console.log("New event:", newEvent.value);
-  }
+    console.log("New event:", newAccommodation.value);
+  }, 15000
   )
 }
 
-// printDateRangeAfterDelay()
+printDateRangeAfterDelay()
 
 const userStore = useAuthStore();
 const user = userStore.user;
@@ -122,19 +122,19 @@ async function onSubmit() {
             description: newOffer.value.description,
             capacity: newOffer.value.capacity,
             town_id: data.town.ID,
-            user: user.ID,
-            number_of_rooms: newAccommodation.numberOfRooms,
-            type: newAccommodation.accommodationType.toLowerCase(),
-            is_animal_friendly: newAccommodation.isAnimalFriendly,
-            price_per_day: newAccommodation.pricePerDay,
-            general_facilities: newAccommodation.generalFacilities,
+            user_id: user.ID,
+            number_of_rooms: newAccommodation.value.numberOfRooms,
+            type: newAccommodation.value.accommodationType.toLowerCase(),
+            is_animal_friendly: newAccommodation.value.isAnimalFriendly,
+            price_per_day: newAccommodation.value.pricePerDay,
+            // general_facilities: newAccommodation.generalFacilities,
             images: imageFiles
           }, "multipart/form-data")
               .then((data) => {
-                fetchWrapper.post('api/host/general_facilities/something', {})
+                fetchWrapper.post('/api/host/general_facilities/something', {})
               }).then(() => {
             if (newAccommodation.accommodationType !== 'Villa' && newAccommodation.accommodationType !== 'Apartment') {
-              fetchWrapper.post('api/host/room/create', {})
+              fetchWrapper.post('/api/host/room/create', {})
             }
           }).then(() => {
             newOffer.value = {
@@ -160,22 +160,22 @@ async function onSubmit() {
             errors.apiError = "Something went wrong - " + error
           })
         } else if (newOffer.value.offerType === 'Activity') {
-          fetchWrapper.post('api/host/activity/create', {
+          fetchWrapper.post('/api/host/activity/create', {
             title: newOffer.value.title,
             description: newOffer.value.description,
             capacity: newOffer.value.capacity,
             town_id: data.town.ID,
-            user: user.ID,
-            date: newActivity.value.dateRange[0],
+            user_id: user.ID,
+            date: new Date(newActivity.value.dateRange[0]).toJSON(),
             skill_level: newActivity.value.skillLevel.toLowerCase(),
             activity_type: newActivity.value.activityType.toLowerCase(),
             price: newActivity.value.price,
-            duration: calculateDurationInNanoseconds(newActivity.value.dateRange[0], newActivity.value.dateRange[1]),
-            equipment: newActivity.value.equipment,
+            duration: calculateDurationInHours(newActivity.value.dateRange[0], newActivity.value.dateRange[1]) + 'h',
+            // equipment: newActivity.value.equipment,
             images: imageFiles
           }, "multipart/form-data")
               .then((data) => {
-                fetchWrapper.post('api/host/equipment/something', {})
+                fetchWrapper.post('/api/host/equipment/something', {})
               }).then(() => {
             newOffer.value = {
               offerType: '',
@@ -241,13 +241,13 @@ async function onSubmit() {
   )
 }
 
-function calculateDurationInNanoseconds(startDate, endDate) {
+function calculateDurationInHours(startDate, endDate) {
   const startTimeMilliseconds = startDate.getTime();
   const endTimeMilliseconds = endDate.getTime();
 
   const durationMilliseconds = Math.abs(endTimeMilliseconds - startTimeMilliseconds);
 
-  return durationMilliseconds * 1e+6;
+  return durationMilliseconds / (1000 * 60 * 60);
 }
 
 async function onAddRoom() {

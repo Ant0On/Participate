@@ -24,7 +24,7 @@ const (
 type Activity struct {
 	gorm.Model
 	Offer
-	Date         time.Time     `gorm:"not null" json:"date" binding:"required"`
+	Date         time.Time     `gorm:"not null" form:"date" binding:"required"`
 	Skill        SkillLevel    `gorm:"type:varchar(255);check:skill_level IN ('beginner', 'intermediate', 'advanced'); column:skill_level; not null" form:"skill_level" binding:"required,oneof=beginner intermediate advanced"`
 	Type         ActivityType  `gorm:"type:varchar(255);check:activity_type IN ('indoor', 'outdoor'); column:activity_type; not null" form:"activity_type" binding:"required,oneof=indoor outdoor"`
 	Price        float64       `gorm:"not null" form:"price" binding:"required,gt=0"`
