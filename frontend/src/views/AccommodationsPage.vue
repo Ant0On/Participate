@@ -1,18 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
+import {onMounted, ref} from 'vue';
+import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import { useSearchStore } from "@/stores/search.store";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
+import {useOfferStore} from "@/stores/offers.store";
 
-const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
+const offerStore = useOfferStore();
+const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(offerStore)
 
 const accommodations = ref([]);
-function mapActivities(responseData) {
+
+function mapAccommodation(responseData) {
 
   return responseData.map((data) => {
     const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
@@ -27,7 +28,15 @@ function mapActivities(responseData) {
   });
 }
 
-const pagesGenerator = fetchPaginatedData('/api/offers/accommodations', mapActivities)
+function getQuery(){
+  if(inputValue.value)
+  {
+    return (isLocalization)? `/?localization=${inputValue.value}`: `/?name=${inputValue.value}`
+  }
+  return ''
+}
+
+let pagesGenerator = fetchPaginatedData(`/api/offers/accommodations${getQuery()}`, mapAccommodation)
 
 onMounted(async () => {
   accommodations.value = await pagesGenerator.next();
@@ -42,13 +51,18 @@ async function load({done}) {
   accommodations.value.push(...response.value)
   done('ok');
 }
+
+offerStore.$subscribe(async (mutation, state)=>{
+  pagesGenerator = fetchPaginatedData(`/api/offers/accommodations${getQuery()}`, mapAccommodation)
+  accommodations.value = await pagesGenerator.next();
+})
 </script>
 
 <template>
   <div class="accommodation_page">
     <p>Climatic places</p>
     <SearchBar/>
-    <div v-if="accommodations.length > 0" >
+    <div v-if="accommodations.length > 0">
       <v-infinite-scroll
           :items="accommodations"
           :onLoad="load"
@@ -73,15 +87,17 @@ async function load({done}) {
 
 <style scoped>
 
-div.no_offers{
+div.no_offers {
   display: flex;
   align-items: center;
   justify-content: center;
   padding-top: 10%;
 }
-p.no_offer_placeholder{
+
+p.no_offer_placeholder {
   text-align: center;
 }
+
 div.accommodation_page {
   display: flex;
   flex-direction: column;

@@ -3,13 +3,13 @@ import {onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import {useSearchStore} from "@/stores/search.store";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
+import {useOfferStore} from "@/stores/offers.store";
 
-const searchStore = useSearchStore();
-const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
+const offerStore = useOfferStore();
+const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(offerStore)
 
 const events = ref([]);
 
@@ -28,7 +28,15 @@ function mapEvents(responseData) {
   });
 }
 
-const pagesGenerator = fetchPaginatedData('/api/offers/events', mapEvents)
+function getQuery(){
+  if(inputValue.value)
+  {
+    return (isLocalization)? `/?localization=${inputValue.value}`: `/?name=${inputValue.value}`
+  }
+  return ''
+}
+
+let pagesGenerator = fetchPaginatedData(`/api/offers/events${getQuery()}`, mapEvents)
 
 onMounted(async () => {
   events.value = await pagesGenerator.next();
@@ -43,6 +51,12 @@ async function load({done}) {
   events.value.push(...response.value)
   done('ok');
 }
+
+offerStore.$subscribe(async (mutation, state)=>{
+  pagesGenerator = fetchPaginatedData(`/api/offers/events${getQuery()}`, mapEvents)
+  events.value = await pagesGenerator.next();
+
+})
 
 const eventItem = [{
   offerId: 1,
@@ -71,7 +85,7 @@ const eventItem = [{
     rating: 4.5,
     duration: 10,
 
-  },  {
+  }, {
     offerId: 1,
     title: "Wakacyjne pierdolenie",
     location: "Zamosc, Polska",
@@ -84,7 +98,7 @@ const eventItem = [{
     rating: 4.5,
     duration: 10,
 
-  },  {
+  }, {
     offerId: 1,
     title: "Wakacyjne pierdolenie",
     location: "Zamosc, Polska",
@@ -97,7 +111,7 @@ const eventItem = [{
     rating: 4.5,
     duration: 10,
 
-  },  {
+  }, {
     offerId: 1,
     title: "Wakacyjne pierdolenie",
     location: "Zamosc, Polska",
@@ -110,7 +124,7 @@ const eventItem = [{
     rating: 4.5,
     duration: 10,
 
-  },  {
+  }, {
     offerId: 1,
     title: "Wakacyjne pierdolenie",
     location: "Zamosc, Polska",
@@ -124,29 +138,29 @@ const eventItem = [{
     duration: 10,
 
   },
-  ]
+]
 </script>
 
 <template>
   <div class="event_page">
     <p>Unforgettable events</p>
-    <SearchBar />
-    <div v-if="eventItem.length > 0" >
-            <v-infinite-scroll
-                :items="eventItem"
-                :onLoad="load"
-                empty-text="Currently there are no more offers to display!"
-                mode="manual"
-                class="w-100"
-            >
-              <v-row class="w-100">
-                <template v-for="event in eventItem" :key="event.offerId">
-                  <v-col cols="4">
-                    <OfferListItem type="event" :offer-item="event"/>
-                  </v-col>
-                </template>
-              </v-row>
-            </v-infinite-scroll>
+    <SearchBar/>
+    <div v-if="eventItem.length > 0">
+      <v-infinite-scroll
+          :items="eventItem"
+          :onLoad="load"
+          empty-text="Currently there are no more offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <v-row class="w-100">
+          <template v-for="event in eventItem" :key="event.offerId">
+            <v-col cols="4">
+              <OfferListItem type="event" :offer-item="event"/>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
 
     </div>
     <div v-else class="no_offers">

@@ -1,10 +1,12 @@
 <script setup>
-import {defineEmits, defineProps, ref} from 'vue';
-import { router } from "@/router";
+import {defineProps, ref} from 'vue';
+import {router} from "@/router";
 import {storeToRefs} from 'pinia';
 import {useSearchStore} from "@/stores/search.store";
+import {useOfferStore} from "@/stores/offers.store";
 
-const searchStore = useSearchStore()
+const searchStore = useSearchStore();
+const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(useOfferStore())
 const {previousSearch: previousSearch} = storeToRefs(searchStore)
 const type = ref("accommodations")
 const isSearchLocalization = ref(false)
@@ -23,24 +25,15 @@ const offerType = [
     value: "activities"
   }]
 const props = defineProps({
-  searchNameCallback: {
-    type: Function,
-    default: (item) => {
-      console.log("default callback", item)
-    }
-  },
-  searchLocalizationCallback: {
-    type: Function,
-    default: (item) => {
-      console.log("default callback", item)
-    }
+  type:{
+    type: String,
+    default: null
   },
   main: {
     type: Boolean,
     default: false,
   }
 })
-const emits = defineEmits(['update:searchItems'])
 const items = ref(previousSearch.value)
 
 function onAppendIconClick() {
@@ -48,15 +41,11 @@ function onAppendIconClick() {
     prependIcon: 'mdi-clock-outline',
     title: searchInput.value,
   })
-  if(props.main)
-  {
+  if (props.main) {
     router.push(`/${type.value}`)
   }
-  if (isSearchLocalization.value) {
-    props.searchLocalizationCallback(searchInput.value)
-    return
-  }
-  props.searchNameCallback(searchInput.value)
+  isLocalization.value = isSearchLocalization.value
+  inputValue.value = searchInput.value
 }
 
 searchStore.$subscribe((mutation, state) => {

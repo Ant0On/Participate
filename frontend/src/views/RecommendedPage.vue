@@ -1,18 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
+import {onMounted, ref} from 'vue';
+import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import { useSearchStore } from "@/stores/search.store";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
+import {useOfferStore} from "@/stores/offers.store";
 
-const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
+const offerStore = useOfferStore();
+const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(offerStore)
 
 const offers = ref([]);
-function mapActivities(responseData) {
+
+function mapRecommended(responseData) {
 
   return responseData.map((data) => {
     const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
@@ -26,8 +27,15 @@ function mapActivities(responseData) {
     };
   });
 }
+function getQuery(){
+  if(inputValue.value)
+  {
+    return (isLocalization)? `/?localization=${inputValue.value}`: `/?name=${inputValue.value}`
+  }
+  return ''
+}
 
-const pagesGenerator = fetchPaginatedData('/api/offers/recommended', mapActivities)
+let pagesGenerator = fetchPaginatedData(`/api/offers/recommended${getQuery()}`, mapRecommended)
 
 onMounted(async () => {
   offers.value = await pagesGenerator.next();
@@ -42,13 +50,17 @@ async function load({done}) {
   offers.value.push(...response.value)
   done('ok');
 }
+offerStore.$subscribe(async (mutation, state)=>{
+  pagesGenerator = fetchPaginatedData(`/api/offers/recommended${getQuery()}`, mapRecommended)
+  offers.value = await pagesGenerator.next();
+})
 </script>
 
 <template>
   <div class="recommended_page">
     <p>Recommended offers</p>
     <SearchBar/>
-    <div v-if="offers.length > 0" >
+    <div v-if="offers.length > 0">
       <v-infinite-scroll
           :items="offers"
           :onLoad="load"
@@ -72,13 +84,14 @@ async function load({done}) {
 </template>
 
 <style scoped>
-div.no_offers{
+div.no_offers {
   display: flex;
   align-items: center;
   justify-content: center;
   padding-top: 10%;
 }
-p.no_offer_placeholder{
+
+p.no_offer_placeholder {
   text-align: center;
 }
 
@@ -88,6 +101,7 @@ div.recommended_page {
   height: 100%;
 
 }
+
 p {
   color: #000000;
   font-family: "Poppins", Helvetica;

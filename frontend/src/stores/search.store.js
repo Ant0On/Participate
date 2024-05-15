@@ -11,7 +11,6 @@ export const useSearchStore = defineStore({
             {
                 const newSearch = [previousSearch,
                     ...JSON.parse(localStorage.getItem('search'))?.filter(item => item.title !== previousSearch.title) || []]
-                console.log(JSON.parse(localStorage.getItem('search')))
                 this.$patch({previousSearch: newSearch})
                 localStorage.setItem('search', JSON.stringify(this.previousSearch));
             }
