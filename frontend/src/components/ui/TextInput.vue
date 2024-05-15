@@ -1,5 +1,5 @@
 <script setup>
-import {defineEmits, defineProps} from 'vue'
+import {defineEmits, defineProps, ref} from 'vue'
 import {v4 as uuidv4} from 'uuid';
 
 let inputUUID = uuidv4();
@@ -9,60 +9,38 @@ const props = defineProps({
   placeholder: String,
   isRequired: Boolean,
   modelValue: String,
-  width: String,
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+  rules: [],
+  min: Number
 })
 
 const emits = defineEmits(['update:modelValue'])
+const rules = ref({
+  required: value => !!value || 'Required.',
+  min: v => v.length >= props.min || `Min ${props.min} characters`,
+})
+
 </script>
 
 <template>
-  <div class="text_input">
-    <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue"
-           @input="$emit('update:modelValue', $event.target.value)" :disabled="!isActive" :class="{'disabled': !isActive}"/>
-  </div>
+
+  <v-text-field
+      :label="labelText"
+      :id="inputUUID"
+      @input="$emit('update:modelValue', $event.target.value)"
+      :disabled="!isActive"
+      :rules="[isRequired && rules.required, min && rules.min]"
+      v-model="modelValue"
+      clearable
+      :placeholder="placeholder"
+      class="w-100"
+  >
+
+  </v-text-field>
 </template>
 
 <style scoped>
-.text_input {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-}
-.disabled{
-  color: black;
-  background-color: #efefef;
-}
-input {
-  width: v-bind(width);
-  height: 40px;
-  background-color: var(--surfacelight);
-  border: 1px;
-  resize: vertical;
-}
-
-label {
-  font-family: "IBMPlex Sans-Regular", Helvetica;
-  font-style: normal;
-  font-weight: 500;
-  color: var(--text-secondary-grey2);
-  line-height: 150%;
-}
-
-span {
-  font-family: "IBMPlex Sans-Regular", Helvetica;
-  font-style: normal;
-  color: var(--systemred);
-}
-
-input:focus {
-  border: 1px;
-  color: var(--text-link)
-}
 </style>

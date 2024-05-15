@@ -57,11 +57,11 @@ const schema = Yup.object().shape({
     <p>Create new account</p>
     <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <form class="signup_form" @submit.prevent>
-      <TextInput width="440px" labelText="Your first name" placeholder="Type your first name" :isRequired="true"
+      <TextInput labelText="Your first name" placeholder="Type your first name" :isRequired="true"
                  v-model="signUpData.FirstName"/>
-      <TextInput width="440px" labelText="Your last name" placeholder="Type your last name" :isRequired="true"
+      <TextInput labelText="Your last name" placeholder="Type your last name" :isRequired="true"
                  v-model="signUpData.LastName"/>
-      <TextInput width="440px" labelText="Your email" placeholder="Type your email" :isRequired="true"
+      <TextInput  labelText="Your email" placeholder="Type your email" :isRequired="true"
                  v-model="signUpData.Login"/>
       <PasswordInput v-model="signUpData.Password" :labelText="'Your password'" @keyup.enter="onSubmit" :isRequired="true"/>
       <PasswordInput v-model="signUpData.ConfirmPassword" :labelText="'Confirm your password'"
@@ -77,8 +77,8 @@ div.signup_section {
   flex-direction: column;
   justify-content: flex-start;
   row-gap: 40px;
-  margin-top: 50px;
-  margin-right: 8%;
+  flex-grow: 1;
+  padding: 5%;
 }
 
 div.errors {

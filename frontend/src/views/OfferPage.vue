@@ -1,7 +1,6 @@
 <script setup>
 import {defineProps, ref, onMounted} from 'vue';
 
-import NavBar from "@/components/nav/NavBar.vue";
 import OfferDetailSummary from "@/components/detail/OfferDetailSummary.vue";
 import OfferDetailDescription from "@/components/detail/OfferDetailDescription.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -48,7 +47,6 @@ onMounted(async () => {
 
 <template>
   <div class="event_page">
-    <NavBar :currentPage="type"/>
     <div class="item_detail">
       <OfferDetailDescription :type="type" :name="offer.name" :price="offer.price" :location="offer.location"
                               :numberOfPeople="offer.numberOfPeople" :userId="offer.appUserID" :description="offer.description"

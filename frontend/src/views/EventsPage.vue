@@ -1,123 +1,176 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
+import {onMounted, ref} from 'vue';
+import {storeToRefs} from 'pinia';
 
-import NavBar from "@/components/nav/NavBar.vue";
-import OfferSearch from "@/components/offers/OfferSearch.vue";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import { useSearchStore } from "@/stores/search.store";
-import { fetchWrapper } from "@/_helpers/fetch-wrapper";
+import {useSearchStore} from "@/stores/search.store";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
+import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
+import SearchBar from "@/components/layout/SearchBar.vue";
 
 const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
+const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
 
 const events = ref([]);
-const currentPage = ref(1);
-const totalPages = ref(0);
 
-async function getCurrentEvents(page) {
-  const response = await fetchWrapper.get(`/api/offers/events?page=${page}`);
-  const responseData = response?.data || [] ;
-  if (responseData){
-    events.value = responseData.map((data) => {
-      const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
-      return {
-        'offerId': data["offer_id"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'title': data["title"],
-        'price': priceAfterDiscount,
-        'capacity': data["capacity"]
-      };
-    });
+function mapEvents(responseData) {
 
-    totalPages.value = response.totalPages;
-  }
-}
-
-function getNewEvents(location, dateFrom, dateTo, numberOfPeople) {
-  return events.value.filter((data) => {
-    return checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople);
+  return responseData.map((data) => {
+    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
+    return {
+      'offerId': data["offer_id"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'title': data["title"],
+      'price': priceAfterDiscount,
+      'capacity': data["capacity"]
+    };
   });
 }
 
-function checkIfOfferMatchesSearch(data, location, dateFrom, dateTo, numberOfPeople) {
-  let isMatchingSearch = true;
-  if (typeof location !== "undefined" && location !== "") {
-    isMatchingSearch = data.location.includes(location);
-  }
-
-  if (typeof numberOfPeople !== "undefined" && numberOfPeople !== 0) {
-    isMatchingSearch = numberOfPeople <= data.maxPeople;
-  }
-
-  return isMatchingSearch;
-}
+const pagesGenerator = fetchPaginatedData('/api/offers/events', mapEvents)
 
 onMounted(async () => {
-  await getCurrentEvents(currentPage.value);
+  events.value = await pagesGenerator.next();
 });
 
-watch(location, (newLocation) => {
-  events.value = getNewEvents(newLocation, dateFrom, dateTo, numberOfPeople);
-});
+async function load({done}) {
+  const response = await pagesGenerator.next();
+  if (response?.done) {
+    done('empty')
+    return
+  }
+  events.value.push(...response.value)
+  done('ok');
+}
 
-watch(dateFrom, (newDateFrom) => {
-  events.value = getNewEvents(location, newDateFrom, dateTo, numberOfPeople);
-});
+const eventItem = [{
+  offerId: 1,
+  title: "Wakacyjne pierdolenie",
+  location: "Zamosc, Polska",
+  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+  capacity: 10,
+  isRecommended: true,
+  discount: 10,
+  price: 30,
+  type: "festival",
+  rating: 4.5,
+  duration: 10,
 
-watch(dateTo, (newDateTo) => {
-  events.value = getNewEvents(location, dateFrom, newDateTo, numberOfPeople);
-});
+},
+  {
+    offerId: 1,
+    title: "Wakacyjne pierdolenie",
+    location: "Zamosc, Polska",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    capacity: 10,
+    isRecommended: true,
+    discount: 10,
+    price: 30,
+    type: "festival",
+    rating: 4.5,
+    duration: 10,
 
-watch(numberOfPeople, (newNumberOfPeople) => {
-  events.value = getNewEvents(location, dateFrom, dateTo, newNumberOfPeople);
-});
+  },  {
+    offerId: 1,
+    title: "Wakacyjne pierdolenie",
+    location: "Zamosc, Polska",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    capacity: 10,
+    isRecommended: true,
+    discount: 10,
+    price: 30,
+    type: "festival",
+    rating: 4.5,
+    duration: 10,
 
-watch(currentPage, (newPage) => {
-  getCurrentEvents(newPage);
-});
+  },  {
+    offerId: 1,
+    title: "Wakacyjne pierdolenie",
+    location: "Zamosc, Polska",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    capacity: 10,
+    isRecommended: true,
+    discount: 10,
+    price: 30,
+    type: "festival",
+    rating: 4.5,
+    duration: 10,
+
+  },  {
+    offerId: 1,
+    title: "Wakacyjne pierdolenie",
+    location: "Zamosc, Polska",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    capacity: 10,
+    isRecommended: true,
+    discount: 10,
+    price: 30,
+    type: "festival",
+    rating: 4.5,
+    duration: 10,
+
+  },  {
+    offerId: 1,
+    title: "Wakacyjne pierdolenie",
+    location: "Zamosc, Polska",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    capacity: 10,
+    isRecommended: true,
+    discount: 10,
+    price: 30,
+    type: "festival",
+    rating: 4.5,
+    duration: 10,
+
+  },
+  ]
 </script>
 
 <template>
   <div class="event_page">
-    <NavBar currentPage="events"/>
     <p>Unforgettable events</p>
-    <OfferSearch v-model:location="location"
-                 v-model:date-from="dateFrom" v-model:date-to="dateTo"
-                 v-model:number-of-people="numberOfPeople"/>
-    <div v-if="events.length > 0" class="offer_items">
-      <OfferListItem v-for="event in events" :location="event.location" :description="event.description"
-                     :title="event.title" :price="event.price"
-                     :capacity="event.capacity" type="event" :id="event.offerId"/>
+    <SearchBar />
+    <div v-if="eventItem.length > 0" >
+            <v-infinite-scroll
+                :items="eventItem"
+                :onLoad="load"
+                empty-text="Currently there are no more offers to display!"
+                mode="manual"
+                class="w-100"
+            >
+              <v-row class="w-100">
+                <template v-for="event in eventItem" :key="event.offerId">
+                  <v-col cols="4">
+                    <OfferListItem type="event" :offer-item="event"/>
+                  </v-col>
+                </template>
+              </v-row>
+            </v-infinite-scroll>
+
     </div>
     <div v-else class="no_offers">
-      <p class="no_offer_placeholder">Currently there are no offers of given type!</p>
-    </div>
-    <div v-if="totalPages > 1" class="pagination">
-      <button @click="currentPage > 1 && (currentPage -= 1)">Previous</button>
-      <span >Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="currentPage < totalPages && (currentPage += 1)">Next</button>
+      <p class="text-center">Currently there are no offers of given type!</p>
     </div>
   </div>
 </template>
 
 <style scoped>
-div.no_offers{
+.event_page {
+  height: 100%;
+}
+
+div.no_offers {
   display: flex;
   align-items: center;
   justify-content: center;
   padding-top: 10%;
 }
-p.no_offer_placeholder{
-  text-align: center;
-}
+
 
 div.event_page {
   display: flex;
   flex-direction: column;
-  overflow: scroll;
 }
 
 p {
@@ -130,34 +183,4 @@ p {
   margin: 1% 1% 1% 1%;
 }
 
-.offer_items {
-  margin: 3% 5% 0 5%;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0;
-}
-
-.pagination button {
-  cursor: pointer;
-  background-color: #3498db;
-  color: #ffffff;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  margin: 0 5px;
-}
-
-.pagination button:hover {
-  background-color: #2980b9;
-}
-
-.pagination span {
-  margin: 0 10px;
-  font-size: 1.2rem;
-  color: #333;
-}
 </style>

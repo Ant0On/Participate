@@ -60,9 +60,9 @@ async function onSubmit(){
     <p class="host_info_description"> Please fill all your data to become a host!</p>
     <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <div class="host_info_fields">
-      <TextInput label-text="Description" v-model="hostData.description" width="100%"/>
-      <TextInput label-text="Phone number" v-model="hostData.phoneNumber" width="100%"/>
-      <TextInput label-text="Bank account" v-model="hostData.bankAccount" width="100%"/>
+      <TextInput label-text="Description" v-model="hostData.description" />
+      <TextInput label-text="Phone number" v-model="hostData.phoneNumber" />
+      <TextInput label-text="Bank account" v-model="hostData.bankAccount"/>
       <PasswordInput :labelText="'Enter your password'" v-model="hostData.password"/>
     </div>
     <button class="button_basic" @click="onSubmit">

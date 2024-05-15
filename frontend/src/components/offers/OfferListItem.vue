@@ -1,108 +1,187 @@
 <script setup>
-import {defineProps, computed} from 'vue'
-import {router} from '@/router'
+import {computed, defineProps, ref} from 'vue'
+import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
+import chipsMapper from "@/_helpers/chips";
 
 const props = defineProps({
   type: String,
-  id: String,
-  location: String,
-  title: String,
-  price: String,
-  capacity: String,
+  offerItem: String,
 })
-
-function onItemClicked() {
-  router.push({title: 'Offers', params:{type: props.type, id: props.id}})
-}
-
-const isImageSource = computed(() =>{
-  try{
-    require(`@/../images/offers/${props.type}/${props.id}/${props.id}_0.jpeg`)
-    return true
-  }
-  catch{
-    return false
+const chips = ref(chipsMapper(props.offerItem?.discount))
+const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount))
+const image = computed(() => {
+  try {
+    const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerId}/${props.offerItem.offerId}_0.jpeg`)
+    return image
+  } catch {
+    return undefined
   }
 })
+
+const cardPage = ref('main')
 </script>
 
 <template>
-  <div class="offer_item" @click="onItemClicked">
-    <img v-if="isImageSource" :src="require(`@/../images/offers/${type}/${id}/${id}_0.jpeg`)" alt="Image">
-    <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
-    <div class="item_details">
-      <div class="title">{{ title }}</div>
-      <div class="price">Price: {{ price }} $</div>
-      <div class="capacity">Capacity: {{ capacity }} people</div>
-      <div class="location">Location: {{ location }}</div>
-    </div>
+  <v-card
+      class="mx-auto my-12 "
+  >
+    <v-carousel v-if="image"
+                :show-arrows="[image].length > 1"
+                :hide-delimiters="[image].length === 1"
+                cycle
+    >
+      <v-carousel-item
+          :src="image"
+          cover
+      >
 
-  </div>
+      </v-carousel-item>
+    </v-carousel>
+    <v-img v-else
+           :src="require(`@/assets/img/image_placeholder.png`)"
+           cover
+    ></v-img>
+
+    <v-card-item>
+      <router-link :to="`/offers/${type}/${offerItem.offerId}`">
+        <v-card-title class="font-weight-black">
+          {{ offerItem.title }}
+        </v-card-title>
+      </router-link>
+
+      <v-card-subtitle>
+      <span class="me-1">
+        {{ offerItem.location }}
+      </span>
+      </v-card-subtitle>
+
+    </v-card-item>
+
+    <v-card-text >
+
+      <v-row
+          align="center"
+          class="mx-0"
+      >
+        <div class="font-weight-bold" :class="(offerItem?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
+          {{(type === "accommodation")? `${offerItem.price} $/day`: `${offerItem.price} $`}}
+        </div>
+
+        <div class="font-weight-black ml-1" v-if="offerItem?.discount > 0">
+          {{ (type === "accommodation") ? `   ${priceAfterDiscount} $/day` : `  ${priceAfterDiscount} $`}}
+        </div>
+      </v-row>
+
+      <v-row
+          align="center"
+          class="mx-0"
+          v-if="type === 'accommodation'"
+      >
+        <v-rating
+            :model-value="offerItem.rating"
+            color="amber"
+            density="compact"
+            size="small"
+            half-increments
+            readonly
+        ></v-rating>
+
+        <div class="text-grey ms-4">
+          {{offerItem.rating}}
+        </div>
+      </v-row>
+
+      <div class="my-4 text-subtitle-1">
+        <v-chip :prepend-icon="chips.recommended.icon"
+                :color="chips.recommended.color"
+                variant="flat"
+                v-if="offerItem.isRecommended"
+                class="mr-1"
+        >
+          {{chips.recommended.text}}
+        </v-chip>
+        <v-chip :prepend-icon="chips.discount.icon"
+                :color="chips.discount.color"
+                variant="flat"
+                v-if="offerItem?.discount > 0"
+                class="mr-1"
+                >
+          {{chips.discount.text}}
+        </v-chip>
+        <v-chip :prepend-icon="chips?.[offerItem?.type].icon"
+                :color="chips?.[offerItem?.type].color"
+                variant="flat"
+                class="mr-1"
+        >
+          {{chips?.[offerItem?.type].text}}
+        </v-chip>
+        <v-chip :prepend-icon="chips?.[offerItem?.skill].icon"
+                :color="chips?.[offerItem?.skill].color"
+                variant="flat"
+                class="mr-1"
+                v-if="type=== 'activity'"
+        >
+          {{chips?.[offerItem?.skill].text}}
+        </v-chip>
+      </div>
+
+      <v-card class="" v-if="cardPage === 'main'" height="100" elevation="0">
+        {{ offerItem.description }}
+      </v-card>
+      <v-card class="" v-if="cardPage === 'info'" height="100" elevation="0">
+        <v-container cols="2">
+          <v-row
+              class="font-weight-bold"
+          >
+            <v-col>
+              <v-icon
+                  icon="mdi-home"
+                  size="small"
+              >
+              </v-icon>
+              <span class="me-1">
+                Capacity
+              </span>
+            </v-col>
+            <v-col>
+               <span class="me-1">
+                {{ offerItem.capacity}}
+              </span>
+            </v-col>
+          </v-row>
+          <v-row class=" font-weight-bold" v-if="type === 'activity'" >
+            <v-col>
+              <v-icon
+                  icon="mdi-clock-outline"
+                  size="small"
+              >
+              </v-icon>
+              <span class="me-1">
+                Duration
+              </span>
+            </v-col>
+            <v-col>
+               <span class="me-1">
+                {{ offerItem.duration}}
+              </span>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn-toggle block>
+        <v-btn @click="cardPage = 'main'">
+          <v-icon icon="mdi-menu"></v-icon>
+        </v-btn>
+        <v-btn @click="cardPage = 'info'">
+          <v-icon icon="mdi-information"></v-icon>
+        </v-btn>
+      </v-btn-toggle>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <style scoped>
-div.offer_item {
-  display: flex;
-  flex-direction: row;
-  row-gap: 10px;
-  margin-top: 1%;
-  background-color: #E6E6E6;
-  border-radius: 10px;
-}
-
-div.item_details {
-  margin: 1% 5% 1% 5%;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-
-}
-
-div.title {
-  color: #000000;
-  font-family: "Poppins", Helvetica;
-  font-size: 1.8rem;
-  font-weight: 700;
-  line-height: normal;
-  align-self: center;
-  padding: 1%;
-}
-
-div.price {
-  color: #7a7a7a;
-  font-family: "Poppins", Helvetica;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: normal;
-  padding: 1%;
-}
-
-div.capacity {
-  color: #7a7a7a;
-  font-family: "Poppins", Helvetica;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: normal;
-  padding: 1%;
-}
-
-div.location {
-  color: #7a7a7a;
-  font-family: "Poppins", Helvetica;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: normal;
-  align-self: flex-end;
-  padding: 1%;
-}
-
-img {
-  border-radius: 10px;
-  overflow: hidden;
-  height: 250px;
-  width: 250px;
-  opacity: 0.9;
-  flex-shrink: 0;
-  margin: 2%;
-}
 </style>

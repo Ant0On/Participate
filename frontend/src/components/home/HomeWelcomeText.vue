@@ -4,7 +4,7 @@
 </script>
 
 <template>
-  <div class="label">
+  <div class="label mx-12 px-4">
     <p class="text-wrapper">Create memories that last a lifetime!</p>
     <p class="subtext1">All attractions, all in one place, no need to search elsewhere, just participate!</p>
     <p class="subtext2">Ultimate guide to exploring new destinations and experiencing unforgettable adventures!</p>
@@ -18,7 +18,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin: 90px 5% 10px 8%;
 }
 
 .label .text-wrapper {

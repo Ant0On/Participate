@@ -17,21 +17,21 @@ const emit = defineEmits(['update:location', 'update:dateFrom', 'update:dateTo',
 let inputWidth = window.innerWidth / 5;
 
 window.addEventListener("resize", () => {
-    inputWidth = window.innerWidth / 5;
+  inputWidth = window.innerWidth / 5;
 });
 
 </script>
 
 <template>
   <div class="offer_search">
-    <TextInput :model-value="location" @input="$emit('update:location', $event.target.value)" :width="inputWidth+'px'"
+    <TextInput :model-value="location" @input="$emit('update:location', $event.target.value)"
                label-text="Location" placeholder="Location" :is-required="true"/>
     <DateInput :model-value="dateFrom" @input="$emit('update:dateFrom', $event.target.value)" label-text="Date from"
-               :is-required="true" :width="inputWidth+'px'"/>
+               :is-required="true" :max="dateTo"/>
     <DateInput :model-value="dateTo" @input="$emit('update:dateTo', $event.target.value)" label-text="Date to"
-               :is-required="false" :width="inputWidth+'px'"/>
+               :is-required="false" :min="dateFrom"/>
     <NumberInput :model-value="numberOfPeople" @input="$emit('update:numberOfPeople', $event.target.value)"
-                 label-text="Number of people" placeholder="People" :is-required="true" :width="inputWidth+'px'"/>
+                 label-text="Number of people" placeholder="People" :is-required="true"/>
   </div>
 </template>
 

@@ -31,7 +31,7 @@ watch(() => props.isSetPriceModal, (value) => {
       <div v-if="isModalVisible" class="modal_wrapper">
         <div class="data">
           <p> Change offer price: </p>
-          <NumberInput v-model="price" label-text="Offer price" width="70%" align-items="center"/>
+          <NumberInput v-model="price" label-text="Offer price" width="70" align-items="center"/>
           <div class="price_buttons">
             <button class="button_basic" @click="isModalVisible = !isModalVisible " > Close</button>
             <button class="button_basic" @click="setDiscount"> Set price </button>

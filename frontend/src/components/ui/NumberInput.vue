@@ -1,5 +1,5 @@
 <script setup>
-import {defineEmits, defineProps} from 'vue'
+import {defineEmits, defineProps, ref} from 'vue'
 import {v4 as uuidv4} from 'uuid';
 
 let inputUUID = uuidv4();
@@ -9,9 +9,9 @@ const props = defineProps({
   placeholder: String,
   isRequired: Boolean,
   modelValue: String | Number,
-  width: {
-    type: String,
-    default: "100%"
+  isActive: {
+    type: Boolean,
+    default: true
   },
   min: {
     type: Number,
@@ -20,55 +20,38 @@ const props = defineProps({
   max: {
     type: Number,
   },
-  alignItems: {
+  width: {
+    default: "100",
     type: String,
-    default: 'flex-start'
   }
 })
 
 const emits = defineEmits(['update:modelValue'])
+const required = value => !!value || 'Required.'
+const rules = ref({
+  required: value => !!value || 'Required.',
+  min: v => v >= props.min || `Minimal value must be higher than ${props.min - 1}`,
+  max: v => v <= props.max || `Minimal value must be lower than ${props.min + 1}`,
+})
+
+const widthClass = ref(`w-${props.width}`)
 </script>
 
 <template>
-  <div class="text_input">
-    <label :for="inputUUID">{{ labelText }}<span v-if="isRequired">*</span></label>
-    <input :id="inputUUID" :placeholder="placeholder" :value="modelValue" type="number" :min="min" :max="max"
-           @input="$emit('update:modelValue', $event.target.value)"/>
-  </div>
+
+  <v-text-field
+      :label="labelText"
+      :id="inputUUID"
+      @input="$emit('update:modelValue', $event.target.value)"
+      :disabled="!isActive"
+      :rules="[isRequired && rules.required, rules.min, max && rules.max]"
+      v-model="modelValue"
+      :placeholder="placeholder"
+      :class="widthClass"
+      type="number"
+  ></v-text-field>
+
 </template>
 
 <style scoped>
-input[type=number]{
-  width: v-bind(width);
-  height: 40px;
-  background-color: var(--surfacelight);
-  border: 1px;
-  resize: vertical;
-}
-.text_input {
-  display: flex;
-  align-items: v-bind(alignItems);
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-}
-
-label {
-  font-family: "IBMPlex Sans-Regular", Helvetica;
-  font-style: normal;
-  font-weight: 500;
-  color: var(--text-secondary-grey2);
-  line-height: 150%;
-}
-
-span {
-  font-family: "IBMPlex Sans-Regular", Helvetica;
-  font-style: normal;
-  color: var(--systemred);
-}
-
-input:focus {
-  border: 1px;
-  color: var(--text-link)
-}
 </style>

@@ -87,9 +87,9 @@ const schema = Yup.object().shape({
     <p>What are you looking for?</p>
     <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <SelectionInput v-model="searchOffer.offerType" label-text="Offer type" placeholder="Type" :is-required="true" :items="offerTypes"/>
-    <TextInput v-model="searchOffer.location" width="100%" label-text="Location" placeholder="At least 5 characters" :is-required="true" />
-    <DateInput v-model="searchOffer.dateFrom" label-text="Date from" :is-required="true"/>
-    <DateInput v-model="searchOffer.dateTo" label-text="Date to" :is-required="true"/>
+    <TextInput v-model="searchOffer.location" label-text="Location" placeholder="At least 5 characters" :is-required="true" :min="5" />
+    <DateInput v-model="searchOffer.dateFrom" label-text="Date from" :is-required="true" :max="dateTo"/>
+    <DateInput v-model="searchOffer.dateTo" label-text="Date to" :is-required="true" :min="dateFrom"/>
     <NumberInput v-model="searchOffer.numberOfPeople" label-text="Number of people" placeholder="People" :is-required="true"/>
     <SearchButton text="Search" width="100px" height="35px" @button-clicked="searchOffers" style="align-self: center"/>
   </div>

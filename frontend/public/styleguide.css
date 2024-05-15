@@ -30,6 +30,14 @@
   --uicolorprimary: rgba(103, 80, 163, 1);
   --button-acctive: rgba(22, 89, 224, 0.5);
 }
-body{
-  background-color: #efefef;
+body, html, #app{
+  min-height: 100%;
+}
+
+html {
+  overflow: scroll;
+}
+
+a, a:hover, a:focus{
+  color: inherit;
 }
