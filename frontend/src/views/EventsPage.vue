@@ -44,103 +44,22 @@ async function load({done}) {
   done('ok');
 }
 
-const eventItem = [{
-  offerId: 1,
-  title: "Wakacyjne pierdolenie",
-  location: "Zamosc, Polska",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-  capacity: 10,
-  isRecommended: true,
-  discount: 10,
-  price: 30,
-  type: "festival",
-  rating: 4.5,
-  duration: 10,
-
-},
-  {
-    offerId: 1,
-    title: "Wakacyjne pierdolenie",
-    location: "Zamosc, Polska",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-    capacity: 10,
-    isRecommended: true,
-    discount: 10,
-    price: 30,
-    type: "festival",
-    rating: 4.5,
-    duration: 10,
-
-  },  {
-    offerId: 1,
-    title: "Wakacyjne pierdolenie",
-    location: "Zamosc, Polska",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-    capacity: 10,
-    isRecommended: true,
-    discount: 10,
-    price: 30,
-    type: "festival",
-    rating: 4.5,
-    duration: 10,
-
-  },  {
-    offerId: 1,
-    title: "Wakacyjne pierdolenie",
-    location: "Zamosc, Polska",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-    capacity: 10,
-    isRecommended: true,
-    discount: 10,
-    price: 30,
-    type: "festival",
-    rating: 4.5,
-    duration: 10,
-
-  },  {
-    offerId: 1,
-    title: "Wakacyjne pierdolenie",
-    location: "Zamosc, Polska",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-    capacity: 10,
-    isRecommended: true,
-    discount: 10,
-    price: 30,
-    type: "festival",
-    rating: 4.5,
-    duration: 10,
-
-  },  {
-    offerId: 1,
-    title: "Wakacyjne pierdolenie",
-    location: "Zamosc, Polska",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-    capacity: 10,
-    isRecommended: true,
-    discount: 10,
-    price: 30,
-    type: "festival",
-    rating: 4.5,
-    duration: 10,
-
-  },
-  ]
 </script>
 
 <template>
   <div class="event_page">
     <p>Unforgettable events</p>
     <SearchBar />
-    <div v-if="eventItem.length > 0" >
+    <div v-if="events.length > 0" >
             <v-infinite-scroll
-                :items="eventItem"
+                :items="events"
                 :onLoad="load"
                 empty-text="Currently there are no more offers to display!"
                 mode="manual"
                 class="w-100"
             >
               <v-row class="w-100">
-                <template v-for="event in eventItem" :key="event.offerId">
+                <template v-for="event in events" :key="event.offerId">
                   <v-col cols="4">
                     <OfferListItem type="event" :offer-item="event"/>
                   </v-col>
