@@ -1,15 +1,18 @@
 <script setup>
-import HomeOfferSearch from "@/components/home/HomeOfferSearch.vue";
 import HomeWelcomeText from "@/components/home/HomeWelcomeText.vue";
+import SearchBar from "@/components/layout/SearchBar.vue";
 </script>
 
 <template>
   <div class="home_page">
     <div class="search_and_welcome">
-      <div class="welcome">
-        <HomeWelcomeText/>
-        <HomeOfferSearch/>
+      <div class="pa-3 w-100" style="height: 300px;">
+        <div class="w-100 d-flex justify-center mb-3" style="height: 40%; width: 70%" >
+          <v-img :src="require('@/assets/img/logo.png')" />
+        </div>
+        <SearchBar main class="my-10"/>
       </div>
+      <HomeWelcomeText/>
       <div class="image_container">
         <router-link :to="{ path: '/accommodations' }">
           <div
