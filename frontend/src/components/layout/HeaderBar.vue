@@ -5,8 +5,6 @@ import {storeToRefs} from 'pinia';
 const navStore = useNavStore()
 const {currentPage: currentPage} = storeToRefs(navStore)
 
-console.log(currentPage)
-
 </script>
 
 <template>
