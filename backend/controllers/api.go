@@ -55,6 +55,12 @@ func RegisterRoutes(r *gin.Engine) {
 	event.GET("/:id/offers", GetEventsForHost)
 	event.PUT("/price/:id", ChangeEventPrice)
 
+	room := r.Group("/api/host/room")
+	event.Use(middlewares.JwtAuthMiddleware("host"))
+	room.POST("/create", CreateRoom)
+	room.GET("/:id/get", GetRooms)
+	room.GET("/:id/reservations/pending", GetPendingRoomReservations)
+
 	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))
 	customer.GET(":id/reservations/accommodation/history", GetReservationsAccommodationHistory)
@@ -116,9 +122,4 @@ func RegisterRoutes(r *gin.Engine) {
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
 	//protected.PUT("/offer/:id/recommend", RecommendOffer)
-
-	room := r.Group("/api/room")
-	room.POST("/create", CreateRoom)
-	room.GET("/:id/get", GetRooms)
-	room.GET("/:id/reservations/pending", GetPendingRoomReservations)
 }

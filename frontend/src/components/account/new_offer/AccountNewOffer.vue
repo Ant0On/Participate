@@ -132,10 +132,21 @@ async function onSubmit() {
           }, "multipart/form-data")
               .then((data) => {
                 fetchWrapper.post('/api/host/general_facilities/something', {})
-              }).then(() => {
+              }).then((data) => {
             if (newAccommodation.accommodationType !== 'Villa' && newAccommodation.accommodationType !== 'Apartment') {
-              fetchWrapper.post('/api/host/room/create', {})
+              rooms.value.forEach((room) => {
+                fetchWrapper.post('/api/host/room/create', {
+                  room_number: room.number,
+                  room_name: room.name,
+                  room_description: room.description,
+                  room_capacity: room.capacity,
+                  room_area: room.area,
+                  accommodation_id: data.accommodation.ID
+                })
+              });
             }
+          }).then((data) => {
+            fetchWrapper.post('api/host/room_facilities/something', {})
           }).then(() => {
             newOffer.value = {
               offerType: '',
