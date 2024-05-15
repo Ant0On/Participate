@@ -43,17 +43,17 @@ const typeLink = {
 const choosePaymentAlert = ref(false)
 
 const form = ref()
-async function makeReservation(){
-    choosePaymentAlert.value = false;
 
-    const { valid } = await form.value.validate()
-    if(!valid){
-        return
-    }
-    if(!chosenPayment.value){
-      choosePaymentAlert.value = true;
-      return
-    }
+async function makeReservation() {
+  choosePaymentAlert.value = false;
+  const {valid} = await form.value.validate()
+  if (!valid) {
+    return
+  }
+  if (!chosenPayment.value) {
+    choosePaymentAlert.value = true;
+    return
+  }
 
 }
 
@@ -160,24 +160,51 @@ const hostData = ref({
 })
 
 async function getOfferDetails() {
-  const response = await fetchWrapper.get(`/api/offers/${props.id}`)
+  const response = await fetchWrapper.get(`/api/offers/${props.type}/${props.id}`)
 
-  const responseData = response.data
-  offer.value = {
-    'userID': responseData["user_id"],
-    'location': responseData["country_name"] + ', ' + responseData["town_name"],
-    'description': responseData["description"],
-    'name': responseData["name"],
-    'price': responseData["price"],
-    'numberOfPeople': responseData["max_people"],
-  }
-
-  const response_host = await fetchWrapper.get(`/api/host/${offer.value.userID}`)
-
-  hostData.value = {
-    'firstName': response_host["FirstName"],
-    'detail': response_host["Description"],
-    'imagePath': response_host["ImagePath"]
+  if(response?.data){
+    const data = response.data
+    if (props.type === "accommodation") {
+      offer.value = {
+        'offerId': data["offer_id"],
+        'title': data["title"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'capacity': data["capacity"],
+        'price': data['price_per_day'],
+        'isRecommended': data['is_recommended'],
+        'discount': data['discount'],
+        'type': data['type'],
+        'animal_friendly': data['is_animal_friendly'],
+        'rating': data['rating']
+      }
+    } else if (props.type === "events") {
+      offer.value = {
+        'offerId': data["offer_id"],
+        'title': data["title"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'capacity': data["capacity"],
+        'price': data['price'],
+        'isRecommended': data['is_recommended'],
+        'discount': data['discount'],
+        'type': data['type']
+      }
+    } else if(props.type === "activities") {
+      offer.value = {
+        'offerId': data["offer_id"],
+        'title': data["title"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'capacity': data["capacity"],
+        'price': data['price'],
+        'isRecommended': data['is_recommended'],
+        'discount': data['discount'],
+        'skill': data['skill_level'],
+        'type': data['type'],
+        'duration': data['duration']
+      }
+    }
   }
 }
 
@@ -195,7 +222,7 @@ async function doesChatExist() {
 }
 
 onMounted(async () => {
-  // await getOfferDetails();
+  await getOfferDetails();
   // await doesChatExist();
 });
 
@@ -486,7 +513,9 @@ onMounted(async () => {
                     type="date"
                     variant="outlined"
                     v-model="reservation.dateTo"
-                    :rules="[value => !!value || 'Date is required']"
+                    :rules="[value => !!value || 'Date is required',
+                    value => new Date(value) >= new Date() || 'Date can\'t be smaller than today\'s date',
+                    ]"
                 ></v-text-field>
               </v-form>
               <v-form v-else-if="type === 'accommodation'" v-model="reservationCreated"
@@ -503,7 +532,8 @@ onMounted(async () => {
                     class="w-100"
                     :rules="[
                         value => !!value || 'Starting date is required',
-                        value => value < reservation.dateTo || 'Date must be smaller than ending date'
+                        value => value < reservation.dateTo || 'Date must be smaller than ending date',
+                        value => new Date(value) >= new Date() || 'Date can\'t be smaller than today\'s date',
                     ]"
                 ></v-text-field>
                 <v-text-field
@@ -515,7 +545,8 @@ onMounted(async () => {
                     class="w-100 mt-2"
                     :rules="[
                         value => !!value || 'Ending date is required',
-                        value => value > reservation.dateFrom || 'Date must be grater than starting date'
+                        value => value > reservation.dateFrom || 'Date must be grater than starting date',
+                        value => new Date(value) >= new Date() || 'Date can\'t be smaller than today\'s date'
                     ]"
                 ></v-text-field>
                 <v-select
