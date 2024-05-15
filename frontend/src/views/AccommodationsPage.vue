@@ -19,19 +19,23 @@ function mapAccommodation(responseData) {
     const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
     return {
       'offerId': data["offer_id"],
+      'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
-      'title': data["title"],
-      'price': priceAfterDiscount,
-      'capacity': data["capacity"]
+      'capacity': data["capacity"],
+      'price': data['price_per_day'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'type': data['type'],
+      'animal_friendly': data['is_animal_friendly'],
+      'rating': data['rating']
     };
   });
 }
 
-function getQuery(){
-  if(inputValue.value)
-  {
-    return (isLocalization)? `/?localization=${inputValue.value}`: `/?name=${inputValue.value}`
+function getQuery() {
+  if (inputValue.value) {
+    return (isLocalization) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
   }
   return ''
 }
@@ -52,7 +56,7 @@ async function load({done}) {
   done('ok');
 }
 
-offerStore.$subscribe(async (mutation, state)=>{
+offerStore.$subscribe(async (mutation, state) => {
   pagesGenerator = fetchPaginatedData(`/api/offers/accommodations${getQuery()}`, mapAccommodation)
   accommodations.value = await pagesGenerator.next();
 })

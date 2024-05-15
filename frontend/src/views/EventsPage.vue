@@ -3,7 +3,6 @@ import {onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
 import {useOfferStore} from "@/stores/offers.store";
@@ -16,22 +15,23 @@ const events = ref([]);
 function mapEvents(responseData) {
 
   return responseData.map((data) => {
-    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
     return {
       'offerId': data["offer_id"],
+      'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
-      'title': data["title"],
-      'price': priceAfterDiscount,
-      'capacity': data["capacity"]
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'type': data['type']
     };
   });
 }
 
-function getQuery(){
-  if(inputValue.value)
-  {
-    return (isLocalization)? `/?localization=${inputValue.value}`: `/?name=${inputValue.value}`
+function getQuery() {
+  if (inputValue.value) {
+    return (isLocalization) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
   }
   return ''
 }
@@ -52,7 +52,7 @@ async function load({done}) {
   done('ok');
 }
 
-offerStore.$subscribe(async (mutation, state)=>{
+offerStore.$subscribe(async (mutation, state) => {
   pagesGenerator = fetchPaginatedData(`/api/offers/events${getQuery()}`, mapEvents)
   events.value = await pagesGenerator.next();
 

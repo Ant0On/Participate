@@ -6,7 +6,6 @@ import OfferListItem from "@/components/offers/OfferListItem.vue";
 import {useOfferStore} from "@/stores/offers.store";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
-import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 
 const offerStore = useOfferStore();
 const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(offerStore)
@@ -15,22 +14,25 @@ const activities = ref([]);
 function mapActivities(responseData) {
 
   return responseData.map((data) => {
-    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
     return {
       'offerId': data["offer_id"],
+      'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
-      'title': data["title"],
-      'price': priceAfterDiscount,
-      'capacity': data["capacity"]
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'skill': data['skill_level'],
+      'type': data['type'],
+      'duration': data['duration']
     };
   });
 }
 
-function getQuery(){
-  if(inputValue.value)
-  {
-    return (isLocalization)? `/?localization=${inputValue.value}`: `/?name=${inputValue.value}`
+function getQuery() {
+  if (inputValue.value) {
+    return (isLocalization) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
   }
   return ''
 }
@@ -51,7 +53,8 @@ async function load({done}) {
   activities.value.push(...response.value)
   done('ok');
 }
-offerStore.$subscribe(async (mutation, state)=>{
+
+offerStore.$subscribe(async (mutation, state) => {
   pagesGenerator = fetchPaginatedData(`/api/offers/activities${getQuery()}`, mapActivities)
   activities.value = await pagesGenerator.next();
 })
