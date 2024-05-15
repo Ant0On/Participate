@@ -56,7 +56,7 @@ function onAppendIconClick() {
     props.searchLocalizationCallback(searchInput.value)
     return
   }
-  props.searchLocalizationCallback(searchInput.value)
+  props.searchNameCallback(searchInput.value)
 }
 
 searchStore.$subscribe((mutation, state) => {
