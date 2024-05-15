@@ -24,7 +24,6 @@ func RegisterRoutes(r *gin.Engine) {
 	host.PUT("/:id/change/description", ChangeDescription)
 	host.PUT("/:id/change/phone_number", ChangePhoneNumber)
 	host.PUT("/:id/change/bank_account", ChangeBankAccount)
-	//	host.POST("/:offerID/chat/create", CreateChat)
 
 	activity := r.Group("api/host/activity")
 	activity.Use(middlewares.JwtAuthMiddleware("host"))
@@ -61,6 +60,7 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.GET(":id/reservations/accommodation/history", GetReservationsAccommodationHistory)
 	customer.GET(":id/reservations/activity/history", GetReservationsActivityHistory)
 	customer.GET(":id/reservations/event/history", GetReservationsEventHistory)
+	customer.GET(":id/reservations/room/history", GetReservationsRoomHistory)
 	customer.PUT(":id/change/first_name", ChangeFirstName)
 	customer.PUT(":id/change/last_name", ChangeLastName)
 	customer.PUT(":id/change/email", ChangeEmail)
@@ -69,7 +69,6 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.POST("/offer/accommodation/:id/rate", GradeAccommodationReservation)
 	customer.POST("/offer/activity/:id/rate", GradeActivityReservation)
 	customer.POST(":id/promote", PromoteToHost)
-	customer.POST(":id/:chatId/message/send", SendMessage)
 
 	country := r.Group("/api/country")
 	country.GET("/get/all", GetAllCountries)
@@ -103,16 +102,23 @@ func RegisterRoutes(r *gin.Engine) {
 
 	reservationAccommodation := r.Group("/api/reservation/accommodation")
 	reservationAccommodation.GET("/get/:id", GetAccommodationReservationById)
-	reservationAccommodation.GET("/:state", GetAccommodationReservationsByState)
+	reservationAccommodation.GET("/:state", GetAccommodationReservationsByState) //Ujednolicic byc moze
 	reservationAccommodation.POST("/add", AddAccommodationReservation)
-	reservationAccommodation.POST("/:id/:state", ChangeAccommodationReservationState)
+	reservationAccommodation.POST("/:id/:state", ChangeAccommodationReservationState) //Tak samo jak wyzej
+
+	reservationRoom := r.Group("/api/reservation/room")
+	reservationRoom.GET("/get/:id", GetRoomReservationById)
+	reservationRoom.GET("/:state", GetRoomReservationsByState)
+	reservationRoom.POST("/add", AddRoomReservation)
+	reservationRoom.POST("/:id/:state", ChangeRoomReservationState)
 
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
 	//protected.PUT("/offer/:id/recommend", RecommendOffer)
 
-	chat := r.Group("api/chat")
-	chat.GET("/:offerID/messages", GetAllMessages)
-	//chat.GET("/offer/:offerID", GetChatByOfferID)
+	room := r.Group("/api/room")
+	room.POST("/create", CreateRoom)
+	room.GET("/:id/get", GetRooms)
+	room.GET("/:id/reservations/pending", GetPendingRoomReservations)
 }

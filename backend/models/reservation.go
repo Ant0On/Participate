@@ -12,6 +12,7 @@ type ReservationOperations interface {
 	Update() error
 	Delete() error
 	ChangeState(state string) error
+	ChangeCapacity() error
 }
 
 const (
