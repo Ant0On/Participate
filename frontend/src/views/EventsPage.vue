@@ -6,6 +6,7 @@ import OfferListItem from "@/components/offers/OfferListItem.vue";
 import {useSearchStore} from "@/stores/search.store";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
+import SearchBar from "@/components/layout/SearchBar.vue";
 
 const searchStore = useSearchStore();
 const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
@@ -129,6 +130,7 @@ const eventItem = [{
 <template>
   <div class="event_page">
     <p>Unforgettable events</p>
+    <SearchBar />
     <div v-if="eventItem.length > 0" >
             <v-infinite-scroll
                 :items="eventItem"
