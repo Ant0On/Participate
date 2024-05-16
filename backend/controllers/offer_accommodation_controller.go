@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"net/http"
+
 	"backend/models"
 	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -68,6 +71,41 @@ func DiscountAccommodation(c *gin.Context) {
 
 func ChangeAccommodationPrice(c *gin.Context) {
 	ChangeOfferPrice(c, models.GetAccommodationByID)
+}
+
+func UpdateGeneralFacilities(c *gin.Context) {
+	id := c.Param("id")
+	var req utils.FacilitiesRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	accommodation, err := models.GetAccommodationById(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var facilities []models.GeneralFacility
+
+	for i := 0; i < len(req.Facilities); i++ {
+		facility, err := models.GetFacilityById(req.Facilities[i])
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"models.GetFacilityById": err.Error()})
+			return
+		}
+		facilities = append(facilities, facility)
+	}
+	err = accommodation.UpdateFacilities(facilities)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"accommodation.UpdateFacilities: ": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Facilities added to accommodation successful"})
+
 }
 
 /*

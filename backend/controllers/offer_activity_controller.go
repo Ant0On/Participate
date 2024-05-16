@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"net/http"
+
 	"backend/models"
 	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -68,6 +71,41 @@ func DiscountActivity(c *gin.Context) {
 
 func ChangeActivityPrice(c *gin.Context) {
 	ChangeOfferPrice(c, models.GetActivityByID)
+}
+
+func UpdateEquipment(c *gin.Context) {
+	id := c.Param("id")
+	var req utils.EquipmentRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	activity, err := models.GetActivityById(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var newEquipments []models.Equipment
+
+	for i := 0; i < len(req.Equipment); i++ {
+		equipment, err := models.GetEquipmentByID(req.Equipment[i])
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"models.GetEquipmentByID": err.Error()})
+			return
+		}
+		newEquipments = append(newEquipments, equipment)
+	}
+	err = activity.UpdateEquipment(newEquipments)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"activity.UpdateEquipment: ": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Equipment added to activity successful"})
+
 }
 
 /*

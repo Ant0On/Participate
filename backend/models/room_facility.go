@@ -9,6 +9,7 @@ import (
 type RoomFacility struct {
 	gorm.Model
 	Name string
+	Room []Room `gorm:"many2many:room_room_facilities;"`
 }
 
 var RoomFacilitiesList = []RoomFacility{
