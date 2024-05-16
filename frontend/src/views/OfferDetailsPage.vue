@@ -115,11 +115,16 @@ const offer = {
 const chips = ref(chipsMapper(offer?.discount))
 
 const image = computed(() => {
+  const images = []
+  let number = 0
   try {
-    const image = require(`@/../images/offers/${props.type}/${offer.offerId}/${offer.offerId}_0.jpeg`)
-    return image
-  } catch {
-    return undefined
+    while(true){
+      const image = require(`@/../images/offers/${props.type}/${offer.value.offerId}/${offer.value.offerId}_${number}.jpeg`)
+      images.push(image)
+      number++
+    }
+  } catch (error){
+    return images
   }
 })
 
@@ -225,7 +230,6 @@ onMounted(async () => {
   await getOfferDetails();
   // await doesChatExist();
 });
-
 </script>
 
 <template>
@@ -243,13 +247,14 @@ onMounted(async () => {
         <v-card class="d-flex flex-row rounded-xl h-100">
           <v-card class="w-50">
             <v-carousel v-if="image"
-                        :show-arrows="[image].length > 1"
-                        :hide-delimiters="[image].length === 1"
+                        :show-arrows="[...image].length > 1"
+                        :hide-delimiters="[...image].length === 1"
                         height="600px"
                         cycle
             >
               <v-carousel-item
-                  :src="image"
+                  v-for="img in image"
+                  :src="img"
                   style="min-height: 100%"
                   cover
               >

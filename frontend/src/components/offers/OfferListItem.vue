@@ -10,11 +10,16 @@ const props = defineProps({
 const chips = ref(chipsMapper(props.offerItem?.discount))
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount))
 const image = computed(() => {
+  const images = []
+  let number = 0
   try {
-    const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerId}/${props.offerItem.offerId}_0.jpeg`)
-    return image
-  } catch {
-    return undefined
+    while(true){
+      const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerId}/${props.offerItem.offerId}_${number}.jpeg`)
+      images.push(image)
+      number++
+    }
+  } catch (error){
+    return images
   }
 })
 
@@ -26,12 +31,13 @@ const cardPage = ref('main')
       class="mx-auto my-12 "
   >
     <v-carousel v-if="image"
-                :show-arrows="[image].length > 1"
-                :hide-delimiters="[image].length === 1"
+                :show-arrows="[...image].length > 1"
+                :hide-delimiters="[...image].length === 1"
                 cycle
     >
       <v-carousel-item
-          :src="image"
+          v-for="img in image"
+          :src="img"
           cover
       >
 
