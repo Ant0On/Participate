@@ -123,7 +123,7 @@ func RegisterRoutes(r *gin.Engine) {
 
 	room := r.Group("/api/room")
 	room.Use(middlewares.JwtAuthMiddleware("host"))
-	room.POST("/create", CreateRoom)
+	room.POST("/create", CreateRooms)
 	room.GET("/:id/get", GetRooms)
 	room.GET("/:id/reservations/pending", GetPendingRoomReservations)
 	room.POST("/:id/facilities/add", AddRoomFacilities)
