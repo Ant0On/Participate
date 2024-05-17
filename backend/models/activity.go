@@ -90,7 +90,7 @@ func GetActivityById(id string) (*Activity, error) {
 	return &a, nil
 }
 
-func (a *Activity) UpdateEquipment(equipment []Equipment) error {
+func (a *Activity) AddEquipment(equipment []Equipment) error {
 	a.Equipment = equipment
 	return a.Update()
 }

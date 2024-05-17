@@ -69,3 +69,12 @@ func GetAllRoomFacilities() ([]RoomFacility, error) {
 	}
 	return roomFacilities, nil
 }
+
+func GetRoomFacilityById(id string) (RoomFacility, error) {
+	var facility RoomFacility
+
+	if err := DB.First(&facility, id).Error; err != nil {
+		return RoomFacility{}, fmt.Errorf("DB.First: %w", err)
+	}
+	return facility, nil
+}

@@ -85,7 +85,7 @@ func GetAccommodationById(id string) (*Accommodation, error) {
 	return &a, nil
 }
 
-func (a *Accommodation) UpdateFacilities(facilities []GeneralFacility) error {
+func (a *Accommodation) AddFacilities(facilities []GeneralFacility) error {
 	a.GeneralFacilities = facilities
 	return a.Update()
 }

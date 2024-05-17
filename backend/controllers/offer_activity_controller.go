@@ -73,7 +73,7 @@ func ChangeActivityPrice(c *gin.Context) {
 	ChangeOfferPrice(c, models.GetActivityByID)
 }
 
-func UpdateEquipment(c *gin.Context) {
+func AddEquipment(c *gin.Context) {
 	id := c.Param("id")
 	var req utils.EquipmentRequest
 
@@ -98,7 +98,7 @@ func UpdateEquipment(c *gin.Context) {
 		}
 		newEquipments = append(newEquipments, equipment)
 	}
-	err = activity.UpdateEquipment(newEquipments)
+	err = activity.AddEquipment(newEquipments)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"activity.UpdateEquipment: ": err.Error()})
 		return
