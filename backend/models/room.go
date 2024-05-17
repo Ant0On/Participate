@@ -24,6 +24,12 @@ func (r *Room) Save() error {
 
 	return nil
 }
+func (r *Room) Update() error {
+	if err := DB.Save(&r).Error; err != nil {
+		return err
+	}
+	return nil
+}
 
 func GetRoomByID(id string) (*Room, error) {
 	var r Room
@@ -38,4 +44,9 @@ func (r *Room) Delete() error {
 		return fmt.Errorf("DB.Delete: %w", err)
 	}
 	return nil
+}
+
+func (r *Room) AddFacilities(facilities []RoomFacility) error {
+	r.RoomFacilities = facilities
+	return r.Update()
 }

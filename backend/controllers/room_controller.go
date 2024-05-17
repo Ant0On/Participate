@@ -11,20 +11,22 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateRoom(c *gin.Context) {
-	var room models.Room
+func CreateRooms(c *gin.Context) {
+	var rooms []models.Room
 
-	if err := c.ShouldBindJSON(&room); err != nil {
+	if err := c.ShouldBindJSON(&rooms); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
 	}
 
-	if err := room.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"room.Save: ": err.Error()})
-		return
+	for _, room := range rooms {
+		if err := room.Save(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"room.Save: ": err.Error()})
+			return
+		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "room created successfully!", "room": room})
+	c.JSON(http.StatusOK, gin.H{"message": "rooms created successfully!", "rooms": rooms})
 }
 
 func GetRooms(c *gin.Context) {

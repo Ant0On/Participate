@@ -8,7 +8,8 @@ import (
 
 type Equipment struct {
 	gorm.Model
-	Name string
+	Name     string
+	Activity []Activity `gorm:"many2many:activity_equipment;"`
 }
 
 var EquipmentList = []Equipment{
@@ -64,6 +65,15 @@ func GetAllEquipment() ([]Equipment, error) {
 
 	if err := DB.Order("name").Find(&equipment).Error; err != nil {
 		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
+	}
+	return equipment, nil
+}
+
+func GetEquipmentByID(id string) (Equipment, error) {
+	var equipment Equipment
+
+	if err := DB.First(&equipment, id).Error; err != nil {
+		return Equipment{}, fmt.Errorf("DB.First: %w", err)
 	}
 	return equipment, nil
 }

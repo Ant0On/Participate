@@ -24,3 +24,11 @@ type ChangePriceReq struct {
 type DiscountRequest struct {
 	Discount float64 `json:"discount" binding:"required,gte=0,lte=100"`
 }
+
+type EquipmentRequest struct {
+	Equipment []string `json:"equipment"`
+}
+
+type FacilitiesRequest struct {
+	Facilities []string `json:"facilities"`
+}
