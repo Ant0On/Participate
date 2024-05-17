@@ -74,3 +74,16 @@ func GetAccommodationByID(id string) (OfferOperations, error) {
 	}
 	return OfferOperations(&a), nil
 }
+
+func GetAccommodationById(id string) (*Accommodation, error) {
+	var a Accommodation
+	if err := DB.First(&a, id).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return &a, nil
+}
+
+func (a *Accommodation) AddFacilities(facilities []GeneralFacility) error {
+	a.GeneralFacilities = facilities
+	return a.Update()
+}

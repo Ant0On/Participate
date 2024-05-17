@@ -32,6 +32,8 @@ func RegisterRoutes(r *gin.Engine) {
 	activity.PUT("/update/:id", UpdateActivity)
 	activity.PUT("/discount/:offerID", DiscountActivity)
 	activity.GET("/:id/reservations/pending", GetPendingActivityReservations)
+	activity.GET("/:id/equipment", GetActivityWithEquipment)
+	activity.POST("/:id/equipment/add", AddEquipment)
 	activity.GET("/:id/offers", GetActivitiesForHost)
 	activity.PUT("/price/:id", ChangeActivityPrice)
 
@@ -42,8 +44,10 @@ func RegisterRoutes(r *gin.Engine) {
 	accommodation.PUT("/update/:id", UpdateAccommodation)
 	accommodation.PUT("/discount/:offerID", DiscountAccommodation)
 	accommodation.GET("/:id/reservations/pending", GetPendingAccommodationReservations)
+	accommodation.GET("/:id/room", GetAccommodationWithRoomsByID)
 	accommodation.GET("/:id/offers", GetAccommodationsForHost)
 	accommodation.PUT("/price/:id", ChangeAccommodationPrice)
+	accommodation.POST("/:id/facilities/add", AddGeneralFacilities)
 
 	event := r.Group("api/host/event")
 	event.Use(middlewares.JwtAuthMiddleware("host"))
@@ -54,12 +58,6 @@ func RegisterRoutes(r *gin.Engine) {
 	event.GET("/:id/reservations/pending", GetPendingEventReservations)
 	event.GET("/:id/offers", GetEventsForHost)
 	event.PUT("/price/:id", ChangeEventPrice)
-
-	room := r.Group("/api/host/room")
-	event.Use(middlewares.JwtAuthMiddleware("host"))
-	room.POST("/create", CreateRoom)
-	room.GET("/:id/get", GetRooms)
-	room.GET("/:id/reservations/pending", GetPendingRoomReservations)
 
 	customer := r.Group("api/customer")
 	customer.Use(middlewares.JwtAuthMiddleware("customer"))
@@ -122,4 +120,11 @@ func RegisterRoutes(r *gin.Engine) {
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
 	//protected.PUT("/offer/:id/recommend", RecommendOffer)
+
+	room := r.Group("/api/room")
+	room.Use(middlewares.JwtAuthMiddleware("host"))
+	room.POST("/create", CreateRooms)
+	room.GET("/:id/get", GetRooms)
+	room.GET("/:id/reservations/pending", GetPendingRoomReservations)
+	room.POST("/:id/facilities/add", AddRoomFacilities)
 }

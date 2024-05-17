@@ -80,3 +80,16 @@ func GetActivityByID(id string) (OfferOperations, error) {
 	}
 	return OfferOperations(&a), nil
 }
+
+func GetActivityById(id string) (*Activity, error) {
+	var a Activity
+	if err := DB.First(&a, id).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return &a, nil
+}
+
+func (a *Activity) AddEquipment(equipment []Equipment) error {
+	a.Equipment = equipment
+	return a.Update()
+}
