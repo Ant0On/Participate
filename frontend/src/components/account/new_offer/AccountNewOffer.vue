@@ -182,11 +182,13 @@ async function onSubmit() {
             activity_type: newActivity.value.activityType.toLowerCase(),
             price: newActivity.value.price,
             duration: calculateDurationInHours(newActivity.value.dateRange[0], newActivity.value.dateRange[1]) + 'h',
-            // equipment: newActivity.value.equipment,
             images: imageFiles
           }, "multipart/form-data")
               .then((data) => {
-                fetchWrapper.post('/api/host/equipment/something', {})
+                console.log('Response:', data)
+                fetchWrapper.post(`/api/host/activity/${data.offer.ID}/equipment/add`, {
+                  equipment: newActivity.value.equipment
+                })
               }).then(() => {
             newOffer.value = {
               offerType: '',
