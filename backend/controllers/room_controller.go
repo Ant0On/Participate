@@ -18,7 +18,7 @@ func CreateRooms(c *gin.Context) {
 	payload, _ := c.GetRawData()
 	logger.Logger.Info("Received JSON payload: ", string(payload))
 
-	if err := c.ShouldBindJSON(&rooms); err != nil {
+	if err := c.ShouldBindJSON(rooms); err != nil {
 		logger.Logger.Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
