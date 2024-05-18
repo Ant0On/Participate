@@ -66,8 +66,8 @@ const errors = reactive({
 
 function printDateRangeAfterDelay() {
   setTimeout(() => {
-    console.log("New event:", newAccommodation.value);
-  }, 15000
+        console.log("New event:", newAccommodation.value);
+      }, 15000
   )
 }
 
@@ -110,149 +110,151 @@ async function getCountryId(countryName) {
 }
 
 async function onSubmit() {
-  await fetchWrapper.post('/api/town/add', {
-    name: newOffer.value.city,
-    country_id: await getCountryId(newOffer.value.country),
-  }).then((data) => {
-        const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
+  try {
+    const townData = await fetchWrapper.post('/api/town/add', {
+      name: newOffer.value.city,
+      country_id: await getCountryId(newOffer.value.country),
+    });
 
-        if (newOffer.value.offerType === 'Accommodation') {
-          fetchWrapper.post('/api/host/accommodation/create', {
-            title: newOffer.value.title,
-            description: newOffer.value.description,
-            capacity: newOffer.value.capacity,
-            town_id: data.town.ID,
-            user_id: user.ID,
-            number_of_rooms: newAccommodation.value.numberOfRooms,
-            type: newAccommodation.value.accommodationType.toLowerCase(),
-            is_animal_friendly: newAccommodation.value.isAnimalFriendly,
-            price_per_day: newAccommodation.value.pricePerDay,
-            // general_facilities: newAccommodation.generalFacilities,
-            images: imageFiles
-          }, "multipart/form-data")
-              .then((data) => {
-                fetchWrapper.post('/api/host/general_facilities/something', {})
-              }).then((data) => {
-            if (newAccommodation.accommodationType !== 'Villa' && newAccommodation.accommodationType !== 'Apartment') {
-              rooms.value.forEach((room) => {
-                fetchWrapper.post('/api/host/room/create', {
-                  room_number: room.number,
-                  room_name: room.name,
-                  room_description: room.description,
-                  room_capacity: room.capacity,
-                  room_area: room.area,
-                  accommodation_id: data.accommodation.ID
-                })
-              });
-            }
-          }).then((data) => {
-            fetchWrapper.post('api/host/room_facilities/something', {})
-          }).then(() => {
-            newOffer.value = {
-              offerType: '',
-              title: '',
-              description: '',
-              capacity: '',
-              country: '',
-              city: '',
-              images: [],
-            }
-            newAccommodation.value = {
-              numberOfRooms: '',
-              accommodationType: '',
-              isAnimalFriendly: '',
-              pricePerDay: '',
-              generalFacilities: []
-            }
-            isAddingNewOffer.value = false;
-            addedNewOffer.value = true;
-            errors.apiError = null
-          }).catch(error => {
-            errors.apiError = "Something went wrong - " + error
-          })
-        } else if (newOffer.value.offerType === 'Activity') {
-          fetchWrapper.post('/api/host/activity/create', {
-            title: newOffer.value.title,
-            description: newOffer.value.description,
-            capacity: newOffer.value.capacity,
-            town_id: data.town.ID,
-            user_id: user.ID,
-            date: new Date(newActivity.value.dateRange[0]).toJSON(),
-            skill_level: newActivity.value.skillLevel.toLowerCase(),
-            activity_type: newActivity.value.activityType.toLowerCase(),
-            price: newActivity.value.price,
-            duration: calculateDurationInHours(newActivity.value.dateRange[0], newActivity.value.dateRange[1]) + 'h',
-            images: imageFiles
-          }, "multipart/form-data")
-              .then((data) => {
-                console.log('Response:', data)
-                fetchWrapper.post(`/api/host/activity/${data.offer.ID}/equipment/add`, {
-                  equipment: newActivity.value.equipment
-                })
-              }).then(() => {
-            newOffer.value = {
-              offerType: '',
-              title: '',
-              description: '',
-              capacity: '',
-              country: '',
-              city: '',
-              images: [],
-            }
-            newActivity.value = {
-              date: '',
-              skillLevel: '',
-              activityType: '',
-              price: '',
-              duration: '',
-              equipment: []
-            }
-            isAddingNewOffer.value = false;
-            addedNewOffer.value = true;
-            errors.apiError = null
-          }).catch(error => {
-            errors.apiError = "Something went wrong - " + error
-          })
-        } else {
-          fetchWrapper.post('/api/host/event/create', {
-            title: newOffer.value.title,
-            description: newOffer.value.description,
-            capacity: newOffer.value.capacity,
-            town_id: data.town.ID,
-            user_id: user.ID,
-            date_from: new Date(newEvent.value.dateFrom).toJSON(),
-            date_to: new Date(newEvent.value.dateTo).toJSON(),
-            price: newEvent.value.price,
-            event_type: newEvent.value.eventType.toLowerCase(),
-            images: imageFiles
-          }, "multipart/form-data")
-              .then(() => {
-            newOffer.value = {
-              offerType: '',
-              title: '',
-              description: '',
-              capacity: '',
-              country: '',
-              city: '',
-              images: [],
-            }
-            newEvent.value = {
-              dateFrom: '',
-              dateTo: '',
-              price: '',
-              eventType: ''
-            }
-            isAddingNewOffer.value = false;
-            addedNewOffer.value = true;
-            errors.apiError = null
-          }).catch(error => {
-            errors.apiError = "Something went wrong - " + error
-          })
-        }
+    const imageFiles = dataURLsToFiles(newOffer.value.images, 'image');
 
+    if (newOffer.value.offerType === 'Accommodation') {
+      const accommodationData = await fetchWrapper.post('/api/host/accommodation/create', {
+        title: newOffer.value.title,
+        description: newOffer.value.description,
+        capacity: newOffer.value.capacity,
+        town_id: townData.town.ID,
+        user_id: user.ID,
+        number_of_rooms: newAccommodation.value.numberOfRooms,
+        type: newAccommodation.value.accommodationType.toLowerCase(),
+        is_animal_friendly: newAccommodation.value.isAnimalFriendly,
+        price_per_day: newAccommodation.value.pricePerDay,
+        images: imageFiles
+      }, "multipart/form-data");
+
+      const facilitiesData = await fetchWrapper.post(`/api/host/accommodation/${accommodationData.offer.ID}/facilities/add`, {
+        facilities: newAccommodation.value.generalFacilities
+      });
+
+      console.log('Response:', facilitiesData);
+
+      rooms.value.forEach(room => {
+        room.accommodation_id = accommodationData.offer.ID;
+      });
+
+      console.log('Rooms:', rooms.value);
+
+      if (newAccommodation.value.accommodationType !== 'Villa' && newAccommodation.value.accommodationType !== 'Apartment') {
+        await fetchWrapper.post(`/api/room/create`, rooms.value);
       }
-  )
+
+      await fetchWrapper.post('api/host/room_facilities/something', {});
+
+      newOffer.value = {
+        offerType: '',
+        title: '',
+        description: '',
+        capacity: '',
+        country: '',
+        city: '',
+        images: [],
+      };
+
+      newAccommodation.value = {
+        numberOfRooms: '',
+        accommodationType: '',
+        isAnimalFriendly: '',
+        pricePerDay: '',
+        generalFacilities: []
+      };
+
+      isAddingNewOffer.value = false;
+      addedNewOffer.value = true;
+      errors.apiError = null;
+
+    } else if (newOffer.value.offerType === 'Activity') {
+      const activityData = await fetchWrapper.post('/api/host/activity/create', {
+        title: newOffer.value.title,
+        description: newOffer.value.description,
+        capacity: newOffer.value.capacity,
+        town_id: townData.town.ID,
+        user_id: user.ID,
+        date: new Date(newActivity.value.dateRange[0]).toJSON(),
+        skill_level: newActivity.value.skillLevel.toLowerCase(),
+        activity_type: newActivity.value.activityType.toLowerCase(),
+        price: newActivity.value.price,
+        duration: calculateDurationInHours(newActivity.value.dateRange[0], newActivity.value.dateRange[1]) + 'h',
+        images: imageFiles
+      }, "multipart/form-data");
+
+      await fetchWrapper.post(`/api/host/activity/${activityData.offer.ID}/equipment/add`, {
+        equipment: newActivity.value.equipment
+      });
+
+      newOffer.value = {
+        offerType: '',
+        title: '',
+        description: '',
+        capacity: '',
+        country: '',
+        city: '',
+        images: [],
+      };
+
+      newActivity.value = {
+        date: '',
+        skillLevel: '',
+        activityType: '',
+        price: '',
+        duration: '',
+        equipment: []
+      };
+
+      isAddingNewOffer.value = false;
+      addedNewOffer.value = true;
+      errors.apiError = null;
+
+    } else {
+      await fetchWrapper.post('/api/host/event/create', {
+        title: newOffer.value.title,
+        description: newOffer.value.description,
+        capacity: newOffer.value.capacity,
+        town_id: townData.town.ID,
+        user_id: user.ID,
+        date_from: new Date(newEvent.value.dateFrom).toJSON(),
+        date_to: new Date(newEvent.value.dateTo).toJSON(),
+        price: newEvent.value.price,
+        event_type: newEvent.value.eventType.toLowerCase(),
+        images: imageFiles
+      }, "multipart/form-data");
+
+      newOffer.value = {
+        offerType: '',
+        title: '',
+        description: '',
+        capacity: '',
+        country: '',
+        city: '',
+        images: [],
+      };
+
+      newEvent.value = {
+        dateFrom: '',
+        dateTo: '',
+        price: '',
+        eventType: ''
+      };
+
+      isAddingNewOffer.value = false;
+      addedNewOffer.value = true;
+      errors.apiError = null;
+    }
+
+  } catch (error) {
+    errors.apiError = "Something went wrong - " + error;
+  }
 }
+
 
 function calculateDurationInHours(startDate, endDate) {
   const startTimeMilliseconds = startDate.getTime();

@@ -70,10 +70,10 @@ func GetAllRoomFacilities() ([]RoomFacility, error) {
 	return roomFacilities, nil
 }
 
-func GetRoomFacilityById(id string) (RoomFacility, error) {
+func GetRoomFacilityByName(name string) (RoomFacility, error) {
 	var facility RoomFacility
 
-	if err := DB.First(&facility, id).Error; err != nil {
+	if err := DB.Model(&RoomFacility{}).Where("name = ?", name).Scan(&facility).Error; err != nil {
 		return RoomFacility{}, fmt.Errorf("DB.First: %w", err)
 	}
 	return facility, nil

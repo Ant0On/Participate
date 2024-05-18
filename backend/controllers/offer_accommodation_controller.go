@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"backend/logger"
 	"backend/models"
 	"backend/models/DTO"
 	"backend/utils"
@@ -77,6 +78,8 @@ func AddGeneralFacilities(c *gin.Context) {
 	id := c.Param("id")
 	var req utils.FacilitiesRequest
 
+	logger.Logger.Info("Inside AddGeneralFacilities")
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -91,9 +94,9 @@ func AddGeneralFacilities(c *gin.Context) {
 	var facilities []models.GeneralFacility
 
 	for i := 0; i < len(req.Facilities); i++ {
-		facility, err := models.GetFacilityById(req.Facilities[i])
+		facility, err := models.GetFacilityByName(req.Facilities[i])
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"models.GetFacilityById": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"models.GetFacilityByName": err.Error()})
 			return
 		}
 		facilities = append(facilities, facility)
@@ -126,9 +129,9 @@ func AddRoomFacilities(c *gin.Context) {
 	var facilities []models.RoomFacility
 
 	for i := 0; i < len(req.Facilities); i++ {
-		facility, err := models.GetRoomFacilityById(req.Facilities[i])
+		facility, err := models.GetRoomFacilityByName(req.Facilities[i])
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"models.GetRoomFacilityById": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"models.GetRoomFacilityByName": err.Error()})
 			return
 		}
 		facilities = append(facilities, facility)

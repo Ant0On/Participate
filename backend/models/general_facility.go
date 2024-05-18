@@ -68,10 +68,10 @@ func GetAllGeneralFacilities() ([]GeneralFacility, error) {
 	return generalFacilities, nil
 }
 
-func GetFacilityById(id string) (GeneralFacility, error) {
+func GetFacilityByName(name string) (GeneralFacility, error) {
 	var facility GeneralFacility
 
-	if err := DB.First(&facility, id).Error; err != nil {
+	if err := DB.Model(&GeneralFacility{}).Where("name = ?", name).Scan(&facility).Error; err != nil {
 		return GeneralFacility{}, fmt.Errorf("DB.First: %w", err)
 	}
 	return facility, nil
