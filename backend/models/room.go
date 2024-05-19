@@ -14,7 +14,7 @@ type Room struct {
 	Capacity        int            `gorm:"not null" json:"capacity" binding:"required,gt=0"`
 	Area            int            `gorm:"not null" json:"area" binding:"required,gt=0"`
 	AccommodationID uint           `gorm:"not null" json:"accommodation_id" binding:"required"`
-	RoomFacilities  []RoomFacility `gorm:"many2many:room_room_facilities;"`
+	RoomFacilities  []RoomFacility `gorm:"many2many:room_room_facilities;" json:"room_facilities"`
 }
 
 func (r *Room) Save() error {

@@ -136,20 +136,12 @@ async function onSubmit() {
         facilities: newAccommodation.value.generalFacilities
       });
 
-      console.log('Response:', facilitiesData);
-
       rooms.value.forEach(room => {
         room.accommodation_id = accommodationData.offer.ID;
       });
 
-      console.log('Rooms:', rooms.value);
-
       if (newAccommodation.value.accommodationType !== 'Villa' && newAccommodation.value.accommodationType !== 'Apartment') {
         await fetchWrapper.post(`/api/room/create`, rooms.value);
-      }
-
-      for (const room of rooms.value) {
-        await fetchWrapper.post('api/host/room_facilities/something', {});
       }
 
       newOffer.value = {
@@ -274,7 +266,7 @@ async function onAddRoom() {
     description: newRoom.value.description,
     capacity: Number(newRoom.value.capacity),
     area: Number(newRoom.value.area),
-    roomFacilities: newRoom.value.roomFacilities,
+    room_facilities: newRoom.value.roomFacilities.map(facility => ({ name: facility })),
   };
 
   rooms.value.push(room);

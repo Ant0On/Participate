@@ -17,15 +17,45 @@ func CreateRooms(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&rooms); err != nil {
 		logger.Logger.Error(err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBindJSON: ": err.Error()})
+		return
+	}
+
+	tx := models.DB.Begin()
+	if tx.Error != nil {
+		logger.Logger.Error(tx.Error.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
 		return
 	}
 
 	for _, room := range rooms {
-		if err := room.Save(); err != nil {
+		// Save the Room
+		if err := tx.Create(&room).Error; err != nil {
+			tx.Rollback()
 			c.JSON(http.StatusBadRequest, gin.H{"room.Save: ": err.Error()})
 			return
 		}
+
+		// Save RoomFacilities if any
+		for _, facility := range room.RoomFacilities {
+			if err := tx.Where("name = ?", facility.Name).FirstOrCreate(&facility).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusBadRequest, gin.H{"facility.Save: ": err.Error()})
+				return
+			}
+			// Associate the facility with the room
+			if err := tx.Model(&room).Association("RoomFacilities").Append(&facility); err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusBadRequest, gin.H{"association.Save: ": err.Error()})
+				return
+			}
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		logger.Logger.Error(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "rooms created successfully!", "rooms": rooms})
