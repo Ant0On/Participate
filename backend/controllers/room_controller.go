@@ -26,21 +26,18 @@ func CreateRooms(c *gin.Context) {
 	}
 
 	for _, room := range rooms {
-		// Save the Room
 		if err := tx.Create(&room).Error; err != nil {
 			tx.Rollback()
 			c.JSON(http.StatusBadRequest, gin.H{"room.Save: ": err.Error()})
 			return
 		}
 
-		// Save RoomFacilities if any
 		for _, facility := range room.RoomFacilities {
 			if err := tx.Where("name = ?", facility.Name).FirstOrCreate(&facility).Error; err != nil {
 				tx.Rollback()
 				c.JSON(http.StatusBadRequest, gin.H{"facility.Save: ": err.Error()})
 				return
 			}
-			// Associate the facility with the room
 			if err := tx.Model(&room).Association("RoomFacilities").Append(&facility); err != nil {
 				tx.Rollback()
 				c.JSON(http.StatusBadRequest, gin.H{"association.Save: ": err.Error()})
