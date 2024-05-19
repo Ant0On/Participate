@@ -39,7 +39,8 @@ function getQuery() {
 let pagesGenerator = fetchPaginatedData(`/api/offers/recommended${getQuery()}`, mapRecommended)
 
 onMounted(async () => {
-  offers.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  offers.value = response.value;
 });
 
 async function load({done}) {
@@ -54,7 +55,8 @@ async function load({done}) {
 
 offerStore.$subscribe(async (mutation, state) => {
   pagesGenerator = fetchPaginatedData(`/api/offers/recommended${getQuery()}`, mapRecommended)
-  offers.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  offers.value = response.value;
 })
 </script>
 

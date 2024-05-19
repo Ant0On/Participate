@@ -43,7 +43,8 @@ function getQuery() {
 let pagesGenerator = fetchPaginatedData(`/api/offers/accommodations${getQuery()}`, mapAccommodation)
 
 onMounted(async () => {
-  accommodations.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  accommodations.value = response.value;
 });
 
 async function load({done}) {
@@ -58,7 +59,8 @@ async function load({done}) {
 
 offerStore.$subscribe(async (mutation, state) => {
   pagesGenerator = fetchPaginatedData(`/api/offers/accommodations${getQuery()}`, mapAccommodation)
-  accommodations.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  accommodations.value = response.value;
 })
 </script>
 

@@ -33,7 +33,7 @@ func GetActivityByID(c *gin.Context) {
 	var activityWithLocation DTO.ActivityWithLocation
 	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
 		"activity.price, activity.capacity, activity.skill_level," +
-		"activity.is_recommended, activity.duration, activity.activity_type as type activity.discount, " +
+		"activity.is_recommended, activity.duration, activity.activity_type as type, activity.discount, " +
 		"activity.user_id, town.name as town_name, country.name as country_name"
 	GetOfferByID(c, OfferQueryParameters{
 		tableName:   "activity",

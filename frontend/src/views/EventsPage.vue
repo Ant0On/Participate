@@ -39,7 +39,8 @@ function getQuery() {
 let pagesGenerator = fetchPaginatedData(`/api/offers/events${getQuery()}`, mapEvents)
 
 onMounted(async () => {
-  events.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  events.value = response.value
 });
 
 async function load({done}) {
@@ -53,7 +54,8 @@ async function load({done}) {
 }
 offerStore.$subscribe(async (mutation, state) => {
   pagesGenerator = fetchPaginatedData(`/api/offers/events${getQuery()}`, mapEvents)
-  events.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  events.value = response.value
 
 })
 </script>
@@ -62,7 +64,7 @@ offerStore.$subscribe(async (mutation, state) => {
   <div class="event_page">
     <p>Unforgettable events</p>
     <SearchBar />
-    <div v-if="events.length > 0" >
+    <div v-if="events?.length > 0" >
             <v-infinite-scroll
                 :items="events"
                 :onLoad="load"

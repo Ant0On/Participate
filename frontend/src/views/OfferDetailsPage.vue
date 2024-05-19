@@ -10,14 +10,14 @@ import RoomDetail from "@/components/detail/RoomDetail.vue";
 
 const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
-
+const offer = ref(null)
 const props = defineProps({
   type: String,
   id: String,
   chatID: String
 })
 
-const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.price, offer?.discount))
+const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.value?.price, offer.value?.discount))
 const cardPage = ref('description')
 const offerPage = ref('description')
 const chosenPayment = ref(null)
@@ -57,73 +57,18 @@ async function makeReservation() {
 
 }
 
-
-const offer = {
-  offerId: 1,
-  title: "Wakacyjne pierdolenie",
-  location: "Zamosc, Polska",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-  capacity: 10,
-  isRecommended: true,
-  discount: 10,
-  price: 30,
-  type: "festival",
-  rating: 4.5,
-  duration: 10,
-  generalFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-  numberOfRooms: 3,
-  dateFrom: new Date().toLocaleDateString(),
-  dateTo: new Date().toLocaleDateString(),
-  date: new Date().toLocaleDateString(),
-  skill: 'beginner',
-  rooms: [
-    {
-      roomNumber: 1,
-      roomName: 'Pierwszy',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 2,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-    {
-      roomNumber: 2,
-      roomName: 'Drugi',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 2,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-    {
-      roomNumber: 3,
-      roomName: 'Trzeci',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 1,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-    {
-      roomNumber: 4,
-      roomName: 'Czwarty',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 3,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-  ]
-
-}
-const chips = ref(chipsMapper(offer?.discount))
+const chips = ref(chipsMapper(offer.value?.discount))
 
 const image = computed(() => {
   const images = []
   let number = 0
   try {
-    while(true){
-      const image = require(`@/../images/offers/${props.type}/${offer.value.offerId}/${offer.value.offerId}_${number}.jpeg`)
+    while (true) {
+      const image = require(`@/../images/offers/${props.type}/${offer.value?.offerId}/${offer.value?.offerId}_${number}.jpeg`)
       images.push(image)
       number++
     }
-  } catch (error){
+  } catch (error) {
     return images
   }
 })
@@ -136,7 +81,7 @@ function createChatHost() {
   if (isChatAlreadyCreated.value) {
     openChatCustomer()
   }
-  if (user.Role === 'host' && offer.value.userID !== user.ID) {
+  if (user.Role === 'host' && offer.value?.userID !== user.ID) {
     console.error('You are not the owner of this offer!')
   } else {
     fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
@@ -166,11 +111,10 @@ const hostData = ref({
 
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.type}/${props.id}`)
-
-  if(response?.data){
+  if (response?.data) {
     const data = response.data
     if (props.type === "accommodation") {
-      offer.value = {
+      return {
         'offerId': data["offer_id"],
         'title': data["title"],
         'location': data["country_name"] + ', ' + data["town_name"],
@@ -183,8 +127,9 @@ async function getOfferDetails() {
         'animal_friendly': data['is_animal_friendly'],
         'rating': data['rating']
       }
-    } else if (props.type === "events") {
-      offer.value = {
+
+    } else if (props.type === "event") {
+      return {
         'offerId': data["offer_id"],
         'title': data["title"],
         'location': data["country_name"] + ', ' + data["town_name"],
@@ -195,8 +140,8 @@ async function getOfferDetails() {
         'discount': data['discount'],
         'type': data['type']
       }
-    } else if(props.type === "activities") {
-      offer.value = {
+    } else if (props.type === "activity") {
+      return {
         'offerId': data["offer_id"],
         'title': data["title"],
         'location': data["country_name"] + ', ' + data["town_name"],
@@ -227,13 +172,18 @@ async function doesChatExist() {
 }
 
 onMounted(async () => {
-  await getOfferDetails();
+  offer.value = await getOfferDetails();
   // await doesChatExist();
 });
+
 </script>
 
 <template>
-  <v-sheet class="d-flex flex-column">
+  <v-progress-circular v-if="!offer"
+      color="primary"
+      indeterminate
+  ></v-progress-circular>
+  <v-sheet v-else class="d-flex flex-column">
     <v-breadcrumbs>
       <v-breadcrumbs-item :to="`/${typeLink[type]}`"
                           :title="type[0].toUpperCase() + type.slice(1)"></v-breadcrumbs-item>
