@@ -64,15 +64,6 @@ const errors = reactive({
   image: '',
 });
 
-function printDateRangeAfterDelay() {
-  setTimeout(() => {
-        console.log("New event:", newAccommodation.value);
-      }, 15000
-  )
-}
-
-printDateRangeAfterDelay()
-
 const userStore = useAuthStore();
 const user = userStore.user;
 const isOfferTypeFilled = computed(() => newOffer.value.offerType !== '')
@@ -96,6 +87,12 @@ const generalFacilities = ["Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "
   "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
   "Concierge Service", "Outdoor Pool", "Children's Playground", "Tennis Court", "Library", "Garden", "Sauna",
   "Jacuzzi", "Billiards Room", "Cinema", "Karaoke Room", "Bowling Alley", "BBQ Area", "Shuttle Service"]
+const roomFacilities = [ "Television", "Air Conditioning", "Mini Fridge", "Safe", "Coffee Maker", "Microwave",
+  "Kettle", "Iron and Ironing Board", "Hair Dryer", "Desk", "Ocean View", "Mountain View", "Balcony", "Bathtub",
+  "Shower", "WiFi", "Room Service", "Breakfast Included", "In-Room Safe", "Telephone", "DVD Player", "Alarm Clock",
+  "Robes", "Slippers", "Toiletries", "Work Desk", "Sofa Bed", "Fireplace", "Refrigerator", "Dining Area"
+];
+
 const skillLevels = ['Beginner', 'Intermediate', 'Advanced']
 const activityTypes = ['Indoor', 'Outdoor']
 const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", "Sled", "Snowshoes", "Tent",
@@ -132,7 +129,7 @@ async function onSubmit() {
         images: imageFiles
       }, "multipart/form-data");
 
-      const facilitiesData = await fetchWrapper.post(`/api/host/accommodation/${accommodationData.offer.ID}/facilities/add`, {
+      await fetchWrapper.post(`/api/host/accommodation/${accommodationData.offer.ID}/facilities/add`, {
         facilities: newAccommodation.value.generalFacilities
       });
 
@@ -279,8 +276,6 @@ async function onAddRoom() {
     area: '',
     roomFacilities: [],
   };
-
-  console.log('newRoom.value:', newRoom.value)
 }
 
 async function uploadImage(imageInput) {
@@ -441,7 +436,7 @@ onMounted(async () => {
             <v-text-field v-model="newRoom.area" label="Room area in m2" clearable placeholder="Area"
                           class="w-100" type="number"/>
             <v-select v-model="newRoom.roomFacilities" label="Select room facilities"
-                      class="w-100" clearable chips multiple :items="generalFacilities"/>
+                      class="w-100" clearable chips multiple :items="roomFacilities"/>
             <button :disabled="!isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }"
                     @click="onAddRoom">
               Add room

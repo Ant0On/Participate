@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"backend/logger"
 	"backend/models"
 	"backend/utils"
 
@@ -15,8 +14,6 @@ import (
 
 func CreateOffer(c *gin.Context, tableName string, offer models.OfferOperations) {
 	if err := c.ShouldBind(offer); err != nil {
-		logger.Logger.Error(err.Error())
-		logger.Logger.Info(offer)
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
 	}

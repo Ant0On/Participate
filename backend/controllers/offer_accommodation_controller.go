@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 
-	"backend/logger"
 	"backend/models"
 	"backend/models/DTO"
 	"backend/utils"
@@ -77,8 +76,6 @@ func ChangeAccommodationPrice(c *gin.Context) {
 func AddGeneralFacilities(c *gin.Context) {
 	id := c.Param("id")
 	var req utils.FacilitiesRequest
-
-	logger.Logger.Info("Inside AddGeneralFacilities")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

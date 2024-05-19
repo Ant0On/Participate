@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"backend/logger"
 	"backend/models"
 
 	"github.com/gin-gonic/gin"
@@ -16,14 +15,12 @@ func CreateRooms(c *gin.Context) {
 	var rooms []models.Room
 
 	if err := c.ShouldBindJSON(&rooms); err != nil {
-		logger.Logger.Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBindJSON: ": err.Error()})
 		return
 	}
 
 	tx := models.DB.Begin()
 	if tx.Error != nil {
-		logger.Logger.Error(tx.Error.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
 		return
 	}
@@ -53,7 +50,6 @@ func CreateRooms(c *gin.Context) {
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		logger.Logger.Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
 		return
 	}
