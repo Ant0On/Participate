@@ -77,7 +77,7 @@ offerStore.$subscribe(async (mutation, state) => {
         <v-row class="w-100">
           <template v-for="accommodation in accommodations" :key="accommodation.offerId">
             <v-col cols="4">
-              <OfferListItem type="event" :offer-item="accommodation"/>
+              <OfferListItem type="accommodation" :offer-item="accommodation"/>
             </v-col>
           </template>
         </v-row>
