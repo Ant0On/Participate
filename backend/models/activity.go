@@ -24,18 +24,17 @@ const (
 type Activity struct {
 	gorm.Model
 	Offer
-	Date         time.Time     `gorm:"not null" json:"date" binding:"required"`
+	Date         time.Time     `gorm:"not null" form:"date" binding:"required"`
 	Skill        SkillLevel    `gorm:"type:varchar(255);check:skill_level IN ('beginner', 'intermediate', 'advanced'); column:skill_level; not null" form:"skill_level" binding:"required,oneof=beginner intermediate advanced"`
 	Type         ActivityType  `gorm:"type:varchar(255);check:activity_type IN ('indoor', 'outdoor'); column:activity_type; not null" form:"activity_type" binding:"required,oneof=indoor outdoor"`
 	Price        float64       `gorm:"not null" form:"price" binding:"required,gt=0"`
 	Duration     time.Duration `gorm:"not null" form:"duration" binding:"required"`
-	TownID       uint          `gorm:"not null" form:"town_id" binding:"required"`
-	UserID       uint          `gorm:"not null" form:"user_id" binding:"required"`
 	Equipment    []Equipment   `gorm:"many2many:activity_equipment;"`
 	Reservations []ReservationActivity
 }
 
 func (a *Activity) Save() error {
+	a.Duration.Hours()
 	if err := DB.Create(a).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
 	}
@@ -80,4 +79,17 @@ func GetActivityByID(id string) (OfferOperations, error) {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
 	return OfferOperations(&a), nil
+}
+
+func GetActivityById(id string) (*Activity, error) {
+	var a Activity
+	if err := DB.First(&a, id).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return &a, nil
+}
+
+func (a *Activity) AddEquipment(equipment []Equipment) error {
+	a.Equipment = equipment
+	return a.Update()
 }

@@ -16,13 +16,6 @@ type ReservationAccommodation struct {
 	AccommodationID uint      `json:"accommodation_id"`
 }
 
-func (r *ReservationAccommodation) ValidateDates() error {
-	if r.DateFrom.Before(time.Now()) || r.DateTo.Before(time.Now()) {
-		return fmt.Errorf("reservation dates cannot be in the past")
-	}
-
-	return nil
-}
 func (r *ReservationAccommodation) Save() error {
 	if err := r.Validate(); err != nil {
 		return fmt.Errorf("r.Validate: %v", err)

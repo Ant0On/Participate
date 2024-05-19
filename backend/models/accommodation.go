@@ -23,8 +23,6 @@ type Accommodation struct {
 	Type              AccommodationType `gorm:"type:varchar(255);check:accommodation_type IN ('hotel', 'hostel', 'apartment', 'villa', 'guesthouse'); column:accommodation_type; not null" form:"type" binding:"required,oneof=hotel hostel apartment villa guesthouse"`
 	IsAnimalFriendly  bool              `gorm:"not null" form:"is_animal_friendly"`
 	PricePerDay       float64           `gorm:"not null" form:"price_per_day" binding:"required,min=1"`
-	TownID            uint              `gorm:"not null" form:"town_id" binding:"required"`
-	UserID            uint              `gorm:"not null" form:"user_id" binding:"required"`
 	GeneralFacilities []GeneralFacility `gorm:"many2many:accommodation_general_facilities;"`
 	Rooms             []Room
 	Reservations      []ReservationAccommodation
@@ -75,4 +73,17 @@ func GetAccommodationByID(id string) (OfferOperations, error) {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
 	return OfferOperations(&a), nil
+}
+
+func GetAccommodationById(id string) (*Accommodation, error) {
+	var a Accommodation
+	if err := DB.First(&a, id).Error; err != nil {
+		return nil, fmt.Errorf("DB.First: %w", err)
+	}
+	return &a, nil
+}
+
+func (a *Accommodation) AddFacilities(facilities []GeneralFacility) error {
+	a.GeneralFacilities = facilities
+	return a.Update()
 }

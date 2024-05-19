@@ -20,6 +20,7 @@ const rules = ref({
 
 <template>
   <v-select
+      chips
       :id="inputUUID"
       :label="labelText"
       :items="items"
@@ -29,6 +30,7 @@ const rules = ref({
       class="w-100"
       clearable
       :rules="[isRequired && rules.required]"
+      multiple
   ></v-select>
 </template>
 

@@ -9,6 +9,7 @@ import (
 type RoomFacility struct {
 	gorm.Model
 	Name string
+	Room []Room `gorm:"many2many:room_room_facilities;"`
 }
 
 var RoomFacilitiesList = []RoomFacility{
@@ -67,4 +68,13 @@ func GetAllRoomFacilities() ([]RoomFacility, error) {
 		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
 	}
 	return roomFacilities, nil
+}
+
+func GetRoomFacilityByName(name string) (RoomFacility, error) {
+	var facility RoomFacility
+
+	if err := DB.Model(&RoomFacility{}).Where("name = ?", name).Scan(&facility).Error; err != nil {
+		return RoomFacility{}, fmt.Errorf("DB.First: %w", err)
+	}
+	return facility, nil
 }

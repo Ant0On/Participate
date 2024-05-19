@@ -8,7 +8,8 @@ import (
 
 type GeneralFacility struct {
 	gorm.Model
-	Name string
+	Name          string
+	Accommodation []Accommodation `gorm:"many2many:accommodation_general_facilities;"`
 }
 
 var GeneralFacilitiesList = []GeneralFacility{
@@ -65,4 +66,13 @@ func GetAllGeneralFacilities() ([]GeneralFacility, error) {
 		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
 	}
 	return generalFacilities, nil
+}
+
+func GetFacilityByName(name string) (GeneralFacility, error) {
+	var facility GeneralFacility
+
+	if err := DB.Model(&GeneralFacility{}).Where("name = ?", name).Scan(&facility).Error; err != nil {
+		return GeneralFacility{}, fmt.Errorf("DB.First: %w", err)
+	}
+	return facility, nil
 }
