@@ -148,7 +148,9 @@ async function onSubmit() {
         await fetchWrapper.post(`/api/room/create`, rooms.value);
       }
 
-      await fetchWrapper.post('api/host/room_facilities/something', {});
+      for (const room of rooms.value) {
+        await fetchWrapper.post('api/host/room_facilities/something', {});
+      }
 
       newOffer.value = {
         offerType: '',
@@ -267,11 +269,11 @@ function calculateDurationInHours(startDate, endDate) {
 
 async function onAddRoom() {
   const room = {
-    number: newRoom.value.number,
+    number: Number(newRoom.value.number),
     name: newRoom.value.name,
     description: newRoom.value.description,
-    capacity: newRoom.value.capacity,
-    area: newRoom.value.area,
+    capacity: Number(newRoom.value.capacity),
+    area: Number(newRoom.value.area),
     roomFacilities: newRoom.value.roomFacilities,
   };
 

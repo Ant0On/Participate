@@ -15,10 +15,7 @@ import (
 func CreateRooms(c *gin.Context) {
 	var rooms []models.Room
 
-	payload, _ := c.GetRawData()
-	logger.Logger.Info("Received JSON payload: ", string(payload))
-
-	if err := c.ShouldBindJSON(rooms); err != nil {
+	if err := c.ShouldBindJSON(&rooms); err != nil {
 		logger.Logger.Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
 		return
@@ -26,7 +23,6 @@ func CreateRooms(c *gin.Context) {
 
 	for _, room := range rooms {
 		if err := room.Save(); err != nil {
-			logger.Logger.Error(err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"room.Save: ": err.Error()})
 			return
 		}
