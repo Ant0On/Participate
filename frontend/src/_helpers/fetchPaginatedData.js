@@ -20,5 +20,5 @@ export default async function* fetchPaginatedData(url, onMap=(data)=>data){
 }
 
 async function fetchPage(url, pageNumber){
-    return await fetchWrapper.get(`${url}?page=${pageNumber}`)
+    return await fetchWrapper.get(`${url}${(url.includes('?'))? '&': '?'}page=${pageNumber}`)
 }
