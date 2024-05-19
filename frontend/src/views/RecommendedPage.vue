@@ -13,7 +13,6 @@ const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(off
 const offers = ref([]);
 
 function mapRecommended(responseData) {
-
   return responseData.map((data) => {
     return {
       'offerId': data["offer_id"],

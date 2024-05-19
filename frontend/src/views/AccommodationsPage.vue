@@ -16,7 +16,6 @@ const accommodations = ref([]);
 function mapAccommodation(responseData) {
 
   return responseData.map((data) => {
-    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
     return {
       'offerId': data["offer_id"],
       'title': data["title"],

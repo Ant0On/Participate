@@ -7,6 +7,7 @@ import {useAuthStore} from "@/stores/auth.store";
 import chipsMapper from "@/_helpers/chips";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import RoomDetail from "@/components/detail/RoomDetail.vue";
+import {router} from "@/router";
 
 const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
@@ -22,9 +23,9 @@ const cardPage = ref('description')
 const offerPage = ref('description')
 const chosenPayment = ref(null)
 const paymentType = ref({
-  'paypal': {url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
-  'credit_card': {url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
-  'bitcoin': {url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
+  'paypal': {id:1, url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
+  'credit_card': {id: 2, url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
+  'bitcoin': {id: 3, url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
 })
 const reservationCreated = ref(null)
 const reservation = ref({
@@ -32,6 +33,7 @@ const reservation = ref({
   dateTo: null,
   animal: null,
   room: null,
+  numberOfPeople: null,
 })
 const openRoomDialog = ref(false)
 const typeLink = {
@@ -54,7 +56,31 @@ async function makeReservation() {
     choosePaymentAlert.value = true;
     return
   }
+  const reservationBody = {
+    'reservation_state': 'pending',
+    'number_of_people': Number(reservation.value.numberOfPeople),
+    'user_id': Number(user.value.ID),
+    'offer_id': Number(props.id),
+    'payment_id': paymentType.value[chosenPayment.value].id
+  }
+  if(props.type === "event"){
+    reservationBody.date = reservation.value.dateTo
+    reservation.event_id = Number(props.id)
+  }else if(props.type === "activity"){
+    reservationBody.date = reservation.value.dateTo
+    reservation.activity_id = Number(props.id)
+  }else if(props.type === "accommodation"){
+    reservationBody.date_from = reservation.value.dateFrom
+    reservationBody.date_to = reservation.value.dateTo
+    reservation.accommodation_id = Number(props.id)
+  }
 
+  fetchWrapper.post(`/api/reservation/${props.type}/add`, reservationBody).then((resp) => {
+    router.push('/');
+    window.open(paymentType.value[chosenPayment.value].url, '_blank');
+  }).catch((error) => {
+
+  })
 }
 
 const chips = ref(chipsMapper(offer.value?.discount))
@@ -459,11 +485,23 @@ onMounted(async () => {
             <v-card-text class="d-flex flex-column align-center justify-center">
               <v-form v-if="type === 'event' || type === 'activity' "
                       v-model="reservationCreated"
-                      class="w-75 d-flex align-center justify-center"
+                      class="w-75 d-flex align-center justify-center flex-column"
                       ref="form"
               >
                 <v-text-field
+                    label="Number of people"
+                    class="w-100"
+                    clearable
+                    type="number"
+                    variant="outlined"
+                    v-model="reservation.numberOfPeople"
+                    :rules="[value => !!value && value > 0 || 'Number of people is required',
+                    value => value <= offer?.capacity || 'Number of people must be lower than capacity',
+                    ]"
+                ></v-text-field>
+                <v-text-field
                     label="Date"
+                    class="w-100"
                     clearable
                     type="date"
                     variant="outlined"
@@ -475,16 +513,26 @@ onMounted(async () => {
               </v-form>
               <v-form v-else-if="type === 'accommodation'" v-model="reservationCreated"
                       class="w-75 d-flex flex-column align-center justify-center"
-                      validate-on="submit"
                       ref="form"
               >
+                <v-text-field
+                    label="Number of people"
+                    class="w-100"
+                    clearable
+                    type="number"
+                    variant="outlined"
+                    v-model="reservation.numberOfPeople"
+                    :rules="[value => !!value && value > 0 || 'Number of people is required',
+                    value => value <= offer?.capacity || 'Number of people must be lower than capacity',
+                    ]"
+                ></v-text-field>
                 <v-text-field
                     label="Date From"
                     clearable
                     type="date"
                     variant="outlined"
                     v-model="reservation.dateFrom"
-                    class="w-100"
+                    class="w-100 mt-2"
                     :rules="[
                         value => !!value || 'Starting date is required',
                         value => value < reservation.dateTo || 'Date must be smaller than ending date',
