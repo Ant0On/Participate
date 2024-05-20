@@ -41,7 +41,7 @@ func GetEventByID(c *gin.Context) {
 func GetEventsForHost(c *gin.Context) {
 	var eventsWithLocation []DTO.EventWithLocation
 	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.is_recommended, event.event_type, event.discount, " +
+		"event.price, event.capacity, event.is_recommended, event.event_type as type, event.discount, " +
 		"event.user_id, town.name as town_name, country.name as country_name"
 	GetOffersForHost(c, OfferQueryParameters{
 		tableName:   "event",

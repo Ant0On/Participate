@@ -1,29 +1,21 @@
 <script setup>
 import {onMounted, ref, reactive} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
-import SwitchListPage from "@/components/common/SwitchListPage.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
-import MyOffersItem from "@/components/account/my_offers/MyOffersItem.vue";
-
+import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
+import OfferListItem from "@/components/offers/OfferListItem.vue";
 
 const auth = useAuthStore();
 const user = auth.user;
-const pageSize = 5;
 const errors = reactive({
   apiError: ""
 })
 
 const allEvents = ref([])
-const myEvents = ref([])
-const currentPage = ref(1)
-const maxPage = ref(1)
 
 async function getMyOffers() {
-  console.log('Starting request to fetch offers'); // Log before the request
   await fetchWrapper.get(`/api/host/event/${user.ID}/offers`)
       .then((response) => {
-        console.log('Request successful:', response); // Log the response
-        console.log('Response Data:', response.data);
         try {
           const responseData = response.data;
           allEvents.value = responseData.map((data) => {
@@ -35,14 +27,12 @@ async function getMyOffers() {
               'offerID': data['offer_id'],
               'discount': data['discount'],
               'capacity': data['capacity'],
-              'eventType': data['event_type'],
+              'eventType': data['type'],
               'offerType': 'event'
             };
           });
           console.log('HELLO:');
           console.log('Events:', allEvents.value);
-          myEvents.value = allEvents.value.slice(0, pageSize);
-          maxPage.value = Math.floor(allEvents.value.length / pageSize) + 1;
         } catch (error) {
           console.error('Error during mapping or assignment:', error);
         }
@@ -53,77 +43,76 @@ async function getMyOffers() {
       });
 }
 
+const pagesGenerator = fetchPaginatedData(`/api/host/event/${user.ID}/offers`, getMyOffers)
 
-function pageBack() {
-  if (currentPage.value > 1) {
-    currentPage.value -= 1;
-    myEvents.value = allEvents.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
+onMounted(async () => {
+  allEvents.value = await pagesGenerator.next();
+});
+
+async function load({done}) {
+  const response = await pagesGenerator.next();
+  if (response?.done) {
+    done('empty')
+    return
   }
+  allEvents.value.push(...response.value)
+  done('ok');
 }
 
-function pageFroward() {
-  if (currentPage.value < maxPage.value) {
-    currentPage.value += 1;
-    myEvents.value = allEvents.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
-
-  }
-}
-
-onMounted(async () => await getMyOffers())
 </script>
 
 <template>
+  <div class="event_page">
+    <div v-if="allEvents.length > 0" >
+      <v-infinite-scroll
+          :items="allEvents"
+          :onLoad="load"
+          empty-text="Currently there are no offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <v-row class="w-100">
+          <template v-for="event in allEvents" :key="event.offerID">
+            <v-col cols="4">
+              <OfferListItem type="event" :offer-item="event"/>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
 
-  <div class="my_offers">
-    <p>My offers</p>
-    <div class="items_list">
-      <div class="my_offer_items">
-        <MyOffersItem v-for="myOffer in myEvents" :title="myOffer.title" :offer-type="myOffer.offerType"
-                      :discount="myOffer.discount" :offerType="myOffer.offerType" :offerID="myOffer.offerID"/>
-      </div>
-      <div class="navigation">
-        <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
-                        @page-forward="pageFroward"/>
-      </div>
+    </div>
+    <div v-else class="no_offers">
+      <p class="text-center">Currently there are no offers!</p>
     </div>
   </div>
-
 </template>
 
 <style scoped>
-div.my_offers {
-  display: flex;
-  flex-direction: column;
-  height: max(500px, 80%);
-  flex-grow: 1;
+.event_page {
+  height: 100%;
 }
 
-div.items_list {
+div.no_offers {
   display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  justify-content: space-between;
-  padding-top: 2%;
-
+  align-items: center;
+  justify-content: center;
+  padding-top: 10%;
 }
 
-div.my_offer_items {
+
+div.event_page {
   display: flex;
   flex-direction: column;
-  padding-left: 2%;
-}
-
-div.navigation {
-  padding-top: 2%;
 }
 
 p {
   color: #000000;
   font-family: "Poppins", Helvetica;
-  font-size: 1.4rem;
-  padding-bottom: 2%;
-  font-weight: 400;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: normal;
   align-self: center;
+  margin: 1% 1% 1% 1%;
 }
 
 </style>
