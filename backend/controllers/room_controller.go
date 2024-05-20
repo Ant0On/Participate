@@ -33,7 +33,7 @@ func CreateRooms(c *gin.Context) {
 		}
 
 		for _, facility := range room.RoomFacilities {
-			if err := tx.Where("name = ?", facility.Name).FirstOrCreate(&facility).Error; err != nil {
+			if err := tx.Where("name = ?", facility.Name).First(&facility).Error; err != nil {
 				tx.Rollback()
 				c.JSON(http.StatusBadRequest, gin.H{"facility.Save: ": err.Error()})
 				return
