@@ -72,7 +72,7 @@ func (r *ReservationActivity) ChangeState(state string) error {
 
 func (r *ReservationActivity) ChangeCapacity() error {
 	var a Activity
-	if err := DB.First(&a, r.OfferID).Error; err != nil {
+	if err := DB.First(&a, r.ActivityID).Error; err != nil {
 		return fmt.Errorf("DB.First: %w", err)
 	}
 	a.Capacity -= r.NumberOfPeople
