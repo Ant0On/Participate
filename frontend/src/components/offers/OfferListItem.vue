@@ -7,11 +7,12 @@ const props = defineProps({
   type: String,
   offerItem: String,
 })
+console.log('Item', props.offerItem)
 const chips = ref(chipsMapper(props.offerItem?.discount))
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount))
 const image = computed(() => {
   try {
-    const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerId}/${props.offerItem.offerId}_0.jpeg`)
+    const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerID}/${props.offerItem.offerID}_0.jpeg`)
     return image
   } catch {
     return undefined
@@ -43,7 +44,7 @@ const cardPage = ref('main')
     ></v-img>
 
     <v-card-item>
-      <router-link :to="`/offers/${type}/${offerItem.offerId}`">
+      <router-link :to="`/offers/${type}/${offerItem.offerID}`">
         <v-card-title class="font-weight-black">
           {{ offerItem.title }}
         </v-card-title>
@@ -92,36 +93,36 @@ const cardPage = ref('main')
       </v-row>
 
       <div class="my-4 text-subtitle-1">
-        <v-chip :prepend-icon="chips.recommended.icon"
-                :color="chips.recommended.color"
+        <v-chip :prepend-icon="chips.recommended?.icon"
+                :color="chips.recommended?.color"
                 variant="flat"
                 v-if="offerItem.isRecommended"
                 class="mr-1"
         >
-          {{chips.recommended.text}}
+          {{chips.recommended?.text}}
         </v-chip>
-        <v-chip :prepend-icon="chips.discount.icon"
-                :color="chips.discount.color"
+        <v-chip :prepend-icon="chips.discount?.icon"
+                :color="chips.discount?.color"
                 variant="flat"
                 v-if="offerItem?.discount > 0"
                 class="mr-1"
                 >
-          {{chips.discount.text}}
+          {{chips.discount?.text}}
         </v-chip>
-        <v-chip :prepend-icon="chips?.[offerItem?.type].icon"
-                :color="chips?.[offerItem?.type].color"
+        <v-chip :prepend-icon="chips?.[offerItem?.type]?.icon"
+                :color="chips?.[offerItem?.type]?.color"
                 variant="flat"
                 class="mr-1"
         >
-          {{chips?.[offerItem?.type].text}}
+          {{chips?.[offerItem?.type]?.text}}
         </v-chip>
-        <v-chip :prepend-icon="chips?.[offerItem?.skill].icon"
-                :color="chips?.[offerItem?.skill].color"
+        <v-chip :prepend-icon="chips?.[offerItem?.skill]?.icon"
+                :color="chips?.[offerItem?.skill]?.color"
                 variant="flat"
                 class="mr-1"
                 v-if="type=== 'activity'"
         >
-          {{chips?.[offerItem?.skill].text}}
+          {{chips?.[offerItem?.skill]?.text}}
         </v-chip>
       </div>
 

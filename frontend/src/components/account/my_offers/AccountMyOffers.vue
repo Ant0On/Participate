@@ -1,7 +1,6 @@
 <script setup>
 import {onMounted, ref, reactive} from 'vue';
 import {useAuthStore} from "@/stores/auth.store";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 
@@ -13,14 +12,9 @@ const errors = reactive({
 
 const allEvents = ref([])
 
-async function getMyOffers() {
-  await fetchWrapper.get(`/api/host/event/${user.ID}/offers`)
-      .then((response) => {
+async function getMyOffers(responseData) {
         try {
-          const responseData = response.data;
-          allEvents.value = responseData.map((data) => {
-            // Log each data item being mapped
-            console.log('Mapping data:', data);
+          return responseData.map((data) => {
             return {
               'location': data["country_name"] + ', ' + data["town_name"],
               'title': data["title"],
@@ -31,16 +25,9 @@ async function getMyOffers() {
               'offerType': 'event'
             };
           });
-          console.log('HELLO:');
-          console.log('Events:', allEvents.value);
         } catch (error) {
           console.error('Error during mapping or assignment:', error);
         }
-      })
-      .catch((error) => {
-        console.error('Request failed:', error); // Log the error
-        errors.apiError = "Default Error";
-      });
 }
 
 const pagesGenerator = fetchPaginatedData(`/api/host/event/${user.ID}/offers`, getMyOffers)
@@ -63,7 +50,7 @@ async function load({done}) {
 
 <template>
   <div class="event_page">
-    <div v-if="allEvents.length > 0" >
+    <div>
       <v-infinite-scroll
           :items="allEvents"
           :onLoad="load"
@@ -72,20 +59,20 @@ async function load({done}) {
           class="w-100"
       >
         <v-row class="w-100">
-          <template v-for="event in allEvents" :key="event.offerID">
+          <template v-for="event in allEvents.value" :key="event.offerID">
             <v-col cols="4">
-              <OfferListItem type="event" :offer-item="event"/>
+              <OfferListItem type="event" :offerItem="event"/>
             </v-col>
           </template>
         </v-row>
       </v-infinite-scroll>
-
     </div>
     <div v-else class="no_offers">
       <p class="text-center">Currently there are no offers!</p>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .event_page {
