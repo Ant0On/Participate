@@ -13,8 +13,7 @@ const {user: user} = storeToRefs(userStore)
 
 const props = defineProps({
   type: String,
-  id: String,
-  chatID: String
+  id: String
 })
 
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.price, offer?.discount))
@@ -123,36 +122,6 @@ const image = computed(() => {
   }
 })
 
-
-const isChatAlreadyCreated = ref(false)
-const showChat = ref(false);
-
-function createChatHost() {
-  if (isChatAlreadyCreated.value) {
-    openChatCustomer()
-  }
-  if (user.Role === 'host' && offer.value.userID !== user.ID) {
-    console.error('You are not the owner of this offer!')
-  } else {
-    fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
-          isChatAlreadyCreated.value = true;
-          showChat.value = true
-          window.location.reload();
-        }
-    ).catch()
-  }
-}
-
-const chatID = toRef(props.chatID)
-
-function openChatCustomer() {
-  showChat.value = true
-}
-
-function closeChat() {
-  showChat.value = false;
-}
-
 const hostData = ref({
   firstName: '',
   detail: '',
@@ -181,22 +150,8 @@ async function getOfferDetails() {
   }
 }
 
-async function doesChatExist() {
-  return fetchWrapper.get(`/api/chat/offer/${props.id}`).then((response) => {
-    if (!response) {
-      isChatAlreadyCreated.value = false
-    } else {
-      chatID.value = response.data["ID"]
-      isChatAlreadyCreated.value = true
-    }
-  }).catch(error => {
-    console.log(error)
-  })
-}
-
 onMounted(async () => {
   // await getOfferDetails();
-  // await doesChatExist();
 });
 
 </script>

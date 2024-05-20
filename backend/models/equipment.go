@@ -69,10 +69,10 @@ func GetAllEquipment() ([]Equipment, error) {
 	return equipment, nil
 }
 
-func GetEquipmentByID(id string) (Equipment, error) {
+func GetEquipmentByName(name string) (Equipment, error) {
 	var equipment Equipment
 
-	if err := DB.First(&equipment, id).Error; err != nil {
+	if err := DB.Model(&Equipment{}).Where("name = ?", name).Scan(&equipment).Error; err != nil {
 		return Equipment{}, fmt.Errorf("DB.First: %w", err)
 	}
 	return equipment, nil

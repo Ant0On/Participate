@@ -91,9 +91,9 @@ func AddGeneralFacilities(c *gin.Context) {
 	var facilities []models.GeneralFacility
 
 	for i := 0; i < len(req.Facilities); i++ {
-		facility, err := models.GetFacilityById(req.Facilities[i])
+		facility, err := models.GetFacilityByName(req.Facilities[i])
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"models.GetFacilityById": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"models.GetFacilityByName": err.Error()})
 			return
 		}
 		facilities = append(facilities, facility)
@@ -126,9 +126,9 @@ func AddRoomFacilities(c *gin.Context) {
 	var facilities []models.RoomFacility
 
 	for i := 0; i < len(req.Facilities); i++ {
-		facility, err := models.GetRoomFacilityById(req.Facilities[i])
+		facility, err := models.GetRoomFacilityByName(req.Facilities[i])
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"models.GetRoomFacilityById": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"models.GetRoomFacilityByName": err.Error()})
 			return
 		}
 		facilities = append(facilities, facility)

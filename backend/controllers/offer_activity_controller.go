@@ -91,9 +91,9 @@ func AddEquipment(c *gin.Context) {
 	var newEquipments []models.Equipment
 
 	for i := 0; i < len(req.Equipment); i++ {
-		equipment, err := models.GetEquipmentByID(req.Equipment[i])
+		equipment, err := models.GetEquipmentByName(req.Equipment[i])
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"models.GetEquipmentByID": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"models.GetEquipmentByName": err.Error()})
 			return
 		}
 		newEquipments = append(newEquipments, equipment)
