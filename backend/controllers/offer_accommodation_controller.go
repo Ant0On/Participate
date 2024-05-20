@@ -44,7 +44,7 @@ func GetAccommodationByID(c *gin.Context) {
 }
 
 func GetAccommodationsForHost(c *gin.Context) {
-	var accommodationWithLocation DTO.AccommodationWithLocation
+	var accommodationWithLocation []DTO.AccommodationWithLocation
 	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
 		"accommodation.is_recommended, accommodation.accommodation_type, accommodation.discount, " +

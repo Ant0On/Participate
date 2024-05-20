@@ -13,46 +13,58 @@ const errors = reactive({
   apiError: ""
 })
 
-const allMyOffers = ref([])
-const myOffers = ref([])
+const allEvents = ref([])
+const myEvents = ref([])
 const currentPage = ref(1)
 const maxPage = ref(1)
 
 async function getMyOffers() {
-  fetchWrapper.get(`/api/host/${user.ID}/offers`)
+  console.log('Starting request to fetch offers'); // Log before the request
+  await fetchWrapper.get(`/api/host/event/${user.ID}/offers`)
       .then((response) => {
-        const responseData = response.data
-        allMyOffers.value = responseData.map((data) => {
-          return {
-            'location': data["country_name"] + ', ' + data["town_name"],
-            'name': data["name"],
-            'price': data["price"],
-            'offerType': data['offer_type'],
-            'withAnimals': data['is_animal_friendly'],
-            'offerId': data['offer_id'],
-            'discount': data['discount']
-          }
-        })
-        myOffers.value = allMyOffers.value.slice(0, pageSize);
-        maxPage.value = Math.floor(allMyOffers.value.length / pageSize) + 1
+        console.log('Request successful:', response); // Log the response
+        console.log('Response Data:', response.data);
+        try {
+          const responseData = response.data;
+          allEvents.value = responseData.map((data) => {
+            // Log each data item being mapped
+            console.log('Mapping data:', data);
+            return {
+              'location': data["country_name"] + ', ' + data["town_name"],
+              'title': data["title"],
+              'offerID': data['offer_id'],
+              'discount': data['discount'],
+              'capacity': data['capacity'],
+              'eventType': data['event_type'],
+              'offerType': 'event'
+            };
+          });
+          console.log('HELLO:');
+          console.log('Events:', allEvents.value);
+          myEvents.value = allEvents.value.slice(0, pageSize);
+          maxPage.value = Math.floor(allEvents.value.length / pageSize) + 1;
+        } catch (error) {
+          console.error('Error during mapping or assignment:', error);
+        }
       })
       .catch((error) => {
-        errors.apiError = "Default Error"
-      })
+        console.error('Request failed:', error); // Log the error
+        errors.apiError = "Default Error";
+      });
 }
 
 
 function pageBack() {
   if (currentPage.value > 1) {
     currentPage.value -= 1;
-    myOffers.value = allMyOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
+    myEvents.value = allEvents.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
   }
 }
 
 function pageFroward() {
   if (currentPage.value < maxPage.value) {
     currentPage.value += 1;
-    myOffers.value = allMyOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
+    myEvents.value = allEvents.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
 
   }
 }
@@ -66,8 +78,8 @@ onMounted(async () => await getMyOffers())
     <p>My offers</p>
     <div class="items_list">
       <div class="my_offer_items">
-        <MyOffersItem v-for="myOffer in myOffers" :name="myOffer.name" :offer-type="myOffer.offerType" :discount="myOffer.discount"
-                      :with-animals="myOffer.withAnimals" :offer-id="myOffer.offerId" :price="myOffer.price"/>
+        <MyOffersItem v-for="myOffer in myEvents" :title="myOffer.title" :offer-type="myOffer.offerType"
+                      :discount="myOffer.discount" :offerType="myOffer.offerType" :offerID="myOffer.offerID"/>
       </div>
       <div class="navigation">
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"backend/logger"
 	"backend/models"
 	"backend/utils"
 
@@ -125,6 +126,8 @@ func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
 		Where(parameters.tableName+".user_id = ?", hostID).
 		Select(parameters.selectQuery).
 		Find(parameters.dto)
+
+	logger.Logger.Info(result.RowsAffected)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

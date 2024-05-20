@@ -106,9 +106,9 @@ func RegisterRoutes(r *gin.Engine) {
 
 	reservationAccommodation := r.Group("/api/reservation/accommodation")
 	reservationAccommodation.GET("/get/:id", GetAccommodationReservationById)
-	reservationAccommodation.GET("/:state", GetAccommodationReservationsByState) //Ujednolicic byc moze
+	reservationAccommodation.GET("/:state", GetAccommodationReservationsByState)
 	reservationAccommodation.POST("/add", AddAccommodationReservation)
-	reservationAccommodation.POST("/:id/:state", ChangeAccommodationReservationState) //Tak samo jak wyzej
+	reservationAccommodation.POST("/:id/:state", ChangeAccommodationReservationState)
 
 	reservationRoom := r.Group("/api/reservation/room")
 	reservationRoom.GET("/get/:id", GetRoomReservationById)

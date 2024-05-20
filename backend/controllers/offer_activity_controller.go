@@ -44,7 +44,7 @@ func GetActivityByID(c *gin.Context) {
 }
 
 func GetActivitiesForHost(c *gin.Context) {
-	var activityWithLocation DTO.ActivityWithLocation
+	var activityWithLocation []DTO.ActivityWithLocation
 	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
 		"activity.price, activity.capacity, activity.skill_level," +
 		"activity.is_recommended, activity.duration, activity.activity_type, activity.discount, " +

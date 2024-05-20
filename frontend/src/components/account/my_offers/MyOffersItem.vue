@@ -5,10 +5,10 @@ import PriceModal from "@/components/account/my_offers/PriceModal.vue";
 
 const props = defineProps({
   id: String,
-  name: String,
+  title: String,
   offerType: String,
-  withAnimals: Boolean,
-  offerId: String,
+  capacity: String,
+  offerID: String,
   discount: String,
   price: String
 });
@@ -30,7 +30,7 @@ function onPriceChanged(price){
 
 const isImageSource = computed(() =>{
   try{
-    require(`@/../images/offers/${props.offerId}/${props.offerId}_0.jpeg`)
+    require(`@/../images/offers/${props.offerType}/${props.offerID}/${props.offerID}_0.jpeg`)
     return true
   }
   catch{
@@ -41,14 +41,13 @@ const isImageSource = computed(() =>{
 
 <template>
   <div class="my_offer_item">
-    <img v-if="isImageSource" :src="require(`@/../images/offers/${props.offerId}/${props.offerId}_0.jpeg`)" alt="Image">
+    <img v-if="isImageSource" :src="require(`@/../images/offers/${props.offerType}/${props.offerID}/${props.offerID}_0.jpeg`)" alt="Image">
     <img v-else :src="require(`@/assets/img/image_placeholder.png`)" alt="Image">
     <div class="my_offer_item_details">
-      <div class="title">{{ name }}</div>
+      <div class="title">{{ title }}</div>
       <div class="summary_data">
         <div class="details">
           <div class="field">Type: {{ offerType }}</div>
-          <div class="field">Animals: {{ (withAnimals) ? 'Yes' : 'No' }}</div>
         </div>
         <div class="details">
           <div class="field">Price: {{ price }}</div>
@@ -58,13 +57,13 @@ const isImageSource = computed(() =>{
           <button class="button_basic" @click="isSetDiscountModal = !isSetDiscountModal">
             Set discount
           </button>
-          <DiscountModal :id="offerId" :discount="discount" :is-set-discount-modal="isSetDiscountModal" @discount-changed="onDiscountChanged"/>
+          <DiscountModal :id="offerID" :discount="discount" :is-set-discount-modal="isSetDiscountModal" @discount-changed="onDiscountChanged"/>
         </div>
         <div class="change_data">
           <button class="button_basic" @click="isSetPriceModal = !isSetPriceModal">
             Set price
           </button>
-          <PriceModal :id="offerId" :price="price" :is-set-price-modal="isSetPriceModal" @price-change="onPriceChanged"/>
+          <PriceModal :id="offerID" :price="price" :is-set-price-modal="isSetPriceModal" @price-change="onPriceChanged"/>
         </div>
       </div>
     </div>
