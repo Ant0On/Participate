@@ -44,33 +44,13 @@ onMounted(async () => {
   allEvents.value = await eventsGenerator.next();
 });
 
-async function loadEvents({ done }) {
-  const response = await eventsGenerator.next();
+async function loadOffers(generator, offerList, done) {
+  const response = await generator.next();
   if (response?.done) {
     done('empty');
     return;
   }
-  allEvents.value.push(...response.value);
-  done('ok');
-}
-
-async function loadActivities({ done }) {
-  const response = await activitiesGenerator.next();
-  if (response?.done) {
-    done('empty');
-    return;
-  }
-  allActivities.value.push(...response.value);
-  done('ok');
-}
-
-async function loadAccommodations({ done }) {
-  const response = await accommodationsGenerator.next();
-  if (response?.done) {
-    done('empty');
-    return;
-  }
-  allAccommodations.value.push(...response.value);
+  offerList.value.push(...response.value);
   done('ok');
 }
 
@@ -127,7 +107,7 @@ function handleDeleteConfirmation(result) {
     <div>
       <v-infinite-scroll
           :items="allEvents"
-          :onLoad="loadEvents"
+          :onLoad="(done) => loadOffers(eventsGenerator, allEvents, done)"
           empty-text="Currently there are no offers to display!"
           mode="manual"
           class="w-100"
@@ -152,7 +132,7 @@ function handleDeleteConfirmation(result) {
     <div>
       <v-infinite-scroll
           :items="allAccommodations"
-          :onLoad="loadAccommodations"
+          :onLoad="(done) => loadOffers(accommodationsGenerator, allAccommodations, done)"
           empty-text="Currently there are no offers to display!"
           mode="manual"
           class="w-100"
@@ -177,7 +157,7 @@ function handleDeleteConfirmation(result) {
     <div>
       <v-infinite-scroll
           :items="allActivities"
-          :onLoad="loadActivities"
+          :onLoad="(done) => loadOffers(activitiesGenerator, allActivities, done)"
           empty-text="Currently there are no offers to display!"
           mode="manual"
           class="w-100"
