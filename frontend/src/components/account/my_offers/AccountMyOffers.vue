@@ -39,8 +39,8 @@ const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.ID}/of
 const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.ID}/offers`, getMyOffers);
 
 onMounted(async () => {
-  allAccommodations.value = await accommodationsGenerator.next()
-  allActivities.value = await activitiesGenerator.next()
+  allAccommodations.value = await accommodationsGenerator.next();
+  allActivities.value = await activitiesGenerator.next();
   allEvents.value = await eventsGenerator.next();
 });
 
@@ -86,23 +86,36 @@ function editOffer(offerID) {
   // Logic for editing the offer
 }
 
-async function deleteOffer(offerID) {
+async function deleteOffer(offerID, offerType) {
   try {
-    await fetchWrapper.delete(`/api/host/event/delete/${offerID}`)
-    allEvents.value.value = allEvents.value.value.filter(event => event.offerID !== offerID);
+    const apiMap = {
+      event: `/api/host/event/delete/${offerID}`,
+      activity: `/api/host/activity/delete/${offerID}`,
+      accommodation: `/api/host/accommodation/delete/${offerID}`
+    };
+
+    await fetchWrapper.delete(apiMap[offerType]);
+
+    const offerListMap = {
+      event: allEvents,
+      activity: allActivities,
+      accommodation: allAccommodations
+    };
+
+    offerListMap[offerType].value.value = offerListMap[offerType].value.value.filter(offer => offer.offerID !== offerID);
   } catch (error) {
     console.error('Error deleting the offer:', error);
   }
 }
 
-function confirmDeleteOffer(offerID) {
-  offerToDelete.value = offerID;
+function confirmDeleteOffer(offerID, offerType) {
+  offerToDelete.value = { offerID, offerType };
   confirmDelete.value = true;
 }
 
 function handleDeleteConfirmation(result) {
   if (result) {
-    deleteOffer(offerToDelete.value);
+    deleteOffer(offerToDelete.value.offerID, offerToDelete.value.offerType);
   }
   confirmDelete.value = false;
   offerToDelete.value = null;
@@ -128,7 +141,7 @@ function handleDeleteConfirmation(result) {
                   <v-btn v-if="index === 1" @click="setDiscount(event.offerID)">Set discount</v-btn>
                   <v-btn v-if="index === 1" @click="changePrice(event.offerID)">Change price</v-btn>
                   <v-btn v-if="index === 0" @click="editOffer(event.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(event.offerID)">Delete</v-btn>
+                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(event.offerID, 'event')">Delete</v-btn>
                 </template>
               </OfferListItem>
             </v-col>
@@ -153,7 +166,7 @@ function handleDeleteConfirmation(result) {
                   <v-btn v-if="index === 1" @click="setDiscount(accommodation.offerID)">Set discount</v-btn>
                   <v-btn v-if="index === 1" @click="changePrice(accommodation.offerID)">Change price</v-btn>
                   <v-btn v-if="index === 0" @click="editOffer(accommodation.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(accommodation.offerID)">Delete</v-btn>
+                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete</v-btn>
                 </template>
               </OfferListItem>
             </v-col>
@@ -178,7 +191,7 @@ function handleDeleteConfirmation(result) {
                   <v-btn v-if="index === 1" @click="setDiscount(activity.offerID)">Set discount</v-btn>
                   <v-btn v-if="index === 1" @click="changePrice(activity.offerID)">Change price</v-btn>
                   <v-btn v-if="index === 0" @click="editOffer(activity.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(activity.offerID)">Delete</v-btn>
+                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete</v-btn>
                 </template>
               </OfferListItem>
             </v-col>
