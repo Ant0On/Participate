@@ -145,7 +145,12 @@ func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
 func DeleteOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
 	id := c.Params.ByName("id")
 
+	logger.Logger.Info("Inside Delete Offer")
+	logger.Logger.Info("ID - ", id)
+
 	offer, err := getByID(id)
+	logger.Logger.Info("After getByID")
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"models.OfferByID:": err.Error()})
 		return
