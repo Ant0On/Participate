@@ -7,8 +7,10 @@ const props = defineProps({
   type: String,
   offerItem: Object,
 });
+
 const chips = ref(chipsMapper(props.offerItem?.discount));
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount));
+const discount = computed(() => props.offerItem?.discount ?? 0);
 const image = computed(() => {
   try {
     const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerID}/${props.offerItem.offerID}_0.jpeg`);
@@ -57,7 +59,7 @@ const cardPage = ref('main');
           {{ chips.recommended?.text }}
         </v-chip>
         <v-chip v-if="offerItem?.discount > 0" :prepend-icon="chips.discount?.icon" :color="chips.discount?.color" variant="flat" class="mr-1">
-          {{ chips.discount?.text }}
+          -{{ discount }}%
         </v-chip>
         <v-chip :prepend-icon="chips?.[offerItem?.type]?.icon" :color="chips?.[offerItem?.type]?.color" variant="flat" class="mr-1">
           {{ chips?.[offerItem?.type]?.text }}
