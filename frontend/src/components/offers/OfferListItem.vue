@@ -53,9 +53,6 @@ const cardPage = ref('main');
       </v-row>
 
       <div class="my-4 text-subtitle-1">
-        <v-chip v-if="offerItem.isRecommended" :prepend-icon="chips.recommended?.icon" :color="chips.recommended?.color" variant="flat" class="mr-1">
-          {{ chips.recommended?.text }}
-        </v-chip>
         <v-chip v-if="offerItem?.discount > 0" :prepend-icon="chips.discount?.icon" :color="chips.discount?.color" variant="flat" class="mr-1">
           {{ chips.discount?.text }}
         </v-chip>
@@ -99,10 +96,10 @@ const cardPage = ref('main');
       </v-row>
       <v-row>
         <v-col cols="6">
-          <slot name="actions" :index="1"></slot>
+          <slot name="actions" :index="0"></slot>
         </v-col>
         <v-col cols="6">
-          <slot name="actions" :index="0"></slot>
+          <slot name="actions" :index="1"></slot>
         </v-col>
       </v-row>
     </v-card-actions>

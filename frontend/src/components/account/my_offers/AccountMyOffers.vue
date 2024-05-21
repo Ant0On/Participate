@@ -54,18 +54,6 @@ async function loadOffers(generator, offerList, done) {
   done('ok');
 }
 
-function setDiscount(offerID) {
-  // Logic for setting discount
-}
-
-function changePrice(offerID) {
-  // Logic for changing price
-}
-
-function editOffer(offerID) {
-  // Logic for editing the offer
-}
-
 async function deleteOffer(offerID, offerType) {
   try {
     const apiMap = {
@@ -118,10 +106,8 @@ function handleDeleteConfirmation(result) {
             <v-col cols="4">
               <OfferListItem type="event" :offerItem="event">
                 <template #actions="{ index }">
-                  <v-btn v-if="index === 1" @click="setDiscount(event.offerID)">Set discount</v-btn>
-                  <v-btn v-if="index === 1" @click="changePrice(event.offerID)">Change price</v-btn>
                   <v-btn v-if="index === 0" @click="editOffer(event.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(event.offerID, 'event')">Delete</v-btn>
+                  <v-btn v-if="index === 1" @click="confirmDeleteOffer(event.offerID, 'event')">Delete</v-btn>
                 </template>
               </OfferListItem>
             </v-col>
@@ -143,10 +129,8 @@ function handleDeleteConfirmation(result) {
             <v-col cols="4">
               <OfferListItem type="accommodation" :offerItem="accommodation">
                 <template #actions="{ index }">
-                  <v-btn v-if="index === 1" @click="setDiscount(accommodation.offerID)">Set discount</v-btn>
-                  <v-btn v-if="index === 1" @click="changePrice(accommodation.offerID)">Change price</v-btn>
                   <v-btn v-if="index === 0" @click="editOffer(accommodation.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete</v-btn>
+                  <v-btn v-if="index === 1" @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete</v-btn>
                 </template>
               </OfferListItem>
             </v-col>
@@ -168,10 +152,8 @@ function handleDeleteConfirmation(result) {
             <v-col cols="4">
               <OfferListItem type="activity" :offerItem="activity">
                 <template #actions="{ index }">
-                  <v-btn v-if="index === 1" @click="setDiscount(activity.offerID)">Set discount</v-btn>
-                  <v-btn v-if="index === 1" @click="changePrice(activity.offerID)">Change price</v-btn>
                   <v-btn v-if="index === 0" @click="editOffer(activity.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete</v-btn>
+                  <v-btn v-if="index === 1" @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete</v-btn>
                 </template>
               </OfferListItem>
             </v-col>
