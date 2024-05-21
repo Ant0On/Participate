@@ -12,6 +12,8 @@ const errors = reactive({
 });
 
 const allEvents = ref([]);
+const allActivities = ref([]);
+const allAccommodations = ref([]);
 const confirmDelete = ref(false);
 const offerToDelete = ref(null);
 
@@ -24,8 +26,7 @@ async function getMyOffers(responseData) {
         offerID: data['offer_id'],
         discount: data['discount'],
         capacity: data['capacity'],
-        eventType: data['type'],
-        offerType: 'event'
+        price: data['price'] !== undefined ? data['price'] : data['price_per_day']
       };
     });
   } catch (error) {
@@ -33,19 +34,43 @@ async function getMyOffers(responseData) {
   }
 }
 
-const pagesGenerator = fetchPaginatedData(`/api/host/event/${user.ID}/offers`, getMyOffers);
+const eventsGenerator = fetchPaginatedData(`/api/host/event/${user.ID}/offers`, getMyOffers);
+const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.ID}/offers`, getMyOffers);
+const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.ID}/offers`, getMyOffers);
 
 onMounted(async () => {
-  allEvents.value = await pagesGenerator.next();
+  allAccommodations.value = await accommodationsGenerator.next()
+  allActivities.value = await activitiesGenerator.next()
+  allEvents.value = await eventsGenerator.next();
 });
 
-async function load({ done }) {
-  const response = await pagesGenerator.next();
+async function loadEvents({ done }) {
+  const response = await eventsGenerator.next();
   if (response?.done) {
     done('empty');
     return;
   }
   allEvents.value.push(...response.value);
+  done('ok');
+}
+
+async function loadActivities({ done }) {
+  const response = await activitiesGenerator.next();
+  if (response?.done) {
+    done('empty');
+    return;
+  }
+  allActivities.value.push(...response.value);
+  done('ok');
+}
+
+async function loadAccommodations({ done }) {
+  const response = await accommodationsGenerator.next();
+  if (response?.done) {
+    done('empty');
+    return;
+  }
+  allAccommodations.value.push(...response.value);
   done('ok');
 }
 
@@ -89,11 +114,12 @@ function handleDeleteConfirmation(result) {
     <div>
       <v-infinite-scroll
           :items="allEvents"
-          :onLoad="load"
+          :onLoad="loadEvents"
           empty-text="Currently there are no offers to display!"
           mode="manual"
           class="w-100"
       >
+        <p class="text-center">Events</p>
         <v-row class="w-100">
           <template v-for="event in allEvents.value" :key="event.offerID">
             <v-col cols="4">
@@ -103,6 +129,56 @@ function handleDeleteConfirmation(result) {
                   <v-btn v-if="index === 1" @click="changePrice(event.offerID)">Change price</v-btn>
                   <v-btn v-if="index === 0" @click="editOffer(event.offerID)">Edit</v-btn>
                   <v-btn v-if="index === 0" @click="confirmDeleteOffer(event.offerID)">Delete</v-btn>
+                </template>
+              </OfferListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+    </div>
+    <div>
+      <v-infinite-scroll
+          :items="allAccommodations"
+          :onLoad="loadAccommodations"
+          empty-text="Currently there are no offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Accommodations</p>
+        <v-row class="w-100">
+          <template v-for="accommodation in allAccommodations.value" :key="accommodation.offerID">
+            <v-col cols="4">
+              <OfferListItem type="accommodation" :offerItem="accommodation">
+                <template #actions="{ index }">
+                  <v-btn v-if="index === 1" @click="setDiscount(accommodation.offerID)">Set discount</v-btn>
+                  <v-btn v-if="index === 1" @click="changePrice(accommodation.offerID)">Change price</v-btn>
+                  <v-btn v-if="index === 0" @click="editOffer(accommodation.offerID)">Edit</v-btn>
+                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(accommodation.offerID)">Delete</v-btn>
+                </template>
+              </OfferListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+    </div>
+    <div>
+      <v-infinite-scroll
+          :items="allActivities"
+          :onLoad="loadActivities"
+          empty-text="Currently there are no offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Activities</p>
+        <v-row class="w-100">
+          <template v-for="activity in allActivities.value" :key="activity.offerID">
+            <v-col cols="4">
+              <OfferListItem type="activity" :offerItem="activity">
+                <template #actions="{ index }">
+                  <v-btn v-if="index === 1" @click="setDiscount(activity.offerID)">Set discount</v-btn>
+                  <v-btn v-if="index === 1" @click="changePrice(activity.offerID)">Change price</v-btn>
+                  <v-btn v-if="index === 0" @click="editOffer(activity.offerID)">Edit</v-btn>
+                  <v-btn v-if="index === 0" @click="confirmDeleteOffer(activity.offerID)">Delete</v-btn>
                 </template>
               </OfferListItem>
             </v-col>
