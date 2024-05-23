@@ -57,16 +57,16 @@ func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 	query := models.DB.Model(parameters.model)
 
 	var totalRecords int64
-	searchQuery := c.Query("query")
+	searchQuery := c.Query("name")
 	if searchQuery != "" {
-		query = query.Where("title LIKE ?", "%"+searchQuery+"%")
+		query = query.Where("title ILIKE ?", "%"+searchQuery+"%")
 	}
 
 	location := c.Query("location")
 	if location != "" {
 		query = query.Joins("JOIN town AS t ON "+parameters.tableName+".town_id = t.id").
 			Joins("JOIN country AS c ON t.country_id = c.id").
-			Where("t.name LIKE ? OR c.name LIKE ?", "%"+location+"%", "%"+location+"%")
+			Where("t.name ILIKE ? OR c.name ILIKE ?", "%"+location+"%", "%"+location+"%")
 	}
 
 	query.Count(&totalRecords)
