@@ -12,7 +12,7 @@ type ReservationActivity struct {
 	Reservation
 	Date       time.Time `gorm:"not null" json:"date" binding:"required"`
 	RatingID   uint      `json:"rating_id"`
-	ActivityID uint      `json:"activity_id"`
+	ActivityID uint      `gorm:"not null" json:"activity_id" binding:"required"`
 }
 
 func (r *ReservationActivity) Save() error {
