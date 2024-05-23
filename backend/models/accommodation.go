@@ -43,7 +43,7 @@ func (a *Accommodation) GetID() (uint, error) {
 	return a.ID, nil
 }
 
-func SearchAccommodations(title, location string) ([]Accommodation, error) {
+func (a *Accommodation) Search(title, location string) ([]interface{}, error) {
 	var accommodations []Accommodation
 	query := DB.Model(&Accommodation{})
 
@@ -54,7 +54,16 @@ func SearchAccommodations(title, location string) ([]Accommodation, error) {
 		query = query.Where("location LIKE ?", "%"+location+"%")
 	}
 
-	return accommodations, nil
+	if err := query.Find(&accommodations).Error; err != nil {
+		return nil, fmt.Errorf("DB.Find: %w", err)
+	}
+
+	results := make([]interface{}, len(accommodations))
+	for i, v := range accommodations {
+		results[i] = v
+	}
+
+	return results, nil
 }
 
 func (a *Accommodation) Update() error {

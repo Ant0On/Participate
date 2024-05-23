@@ -41,7 +41,7 @@ func (e *Event) GetID() (uint, error) {
 	return e.ID, nil
 }
 
-func SearchEvents(title, location string) ([]Event, error) {
+func (e *Event) Search(title, location string) ([]interface{}, error) {
 	var events []Event
 	query := DB.Model(&Event{})
 
@@ -52,7 +52,16 @@ func SearchEvents(title, location string) ([]Event, error) {
 		query = query.Where("location LIKE ?", "%"+location+"%")
 	}
 
-	return events, nil
+	if err := query.Find(&events).Error; err != nil {
+		return nil, fmt.Errorf("DB.Find: %w", err)
+	}
+
+	results := make([]interface{}, len(events))
+	for i, v := range events {
+		results[i] = v
+	}
+
+	return results, nil
 }
 
 func (e *Event) Update() error {

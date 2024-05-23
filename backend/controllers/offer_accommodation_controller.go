@@ -73,19 +73,6 @@ func ChangeAccommodationPrice(c *gin.Context) {
 	ChangeOfferPrice(c, models.GetAccommodationByID)
 }
 
-func SearchAccommodationsByTitleOrLocation(c *gin.Context) {
-	title := c.Query("title")
-	location := c.Query("location")
-
-	accommodations, err := models.SearchAccommodations(title, location)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, accommodations)
-}
-
 func AddGeneralFacilities(c *gin.Context) {
 	id := c.Param("id")
 	var req utils.FacilitiesRequest

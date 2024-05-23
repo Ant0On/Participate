@@ -201,6 +201,21 @@ func DiscountOffer(c *gin.Context, getByID func(string) (models.OfferOperations,
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }
 
+func SearchHandler(searchable models.OfferOperations) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		title := c.Query("title")
+		location := c.Query("location")
+
+		results, err := searchable.Search(title, location)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, results)
+	}
+}
+
 func ChangeOfferPrice(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
 	id := c.Params.ByName("id")
 	var req utils.ChangePriceReq
