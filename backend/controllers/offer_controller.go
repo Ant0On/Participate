@@ -62,7 +62,7 @@ func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 		query = query.Where("title ILIKE ?", "%"+searchQuery+"%")
 	}
 
-	location := c.Query("location")
+	location := c.Query("localization")
 	if location != "" {
 		query = query.Joins("JOIN town AS t ON "+parameters.tableName+".town_id = t.id").
 			Joins("JOIN country AS c ON t.country_id = c.id").
