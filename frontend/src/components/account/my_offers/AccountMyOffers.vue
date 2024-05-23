@@ -95,7 +95,7 @@ function handleDeleteConfirmation(result) {
     <div>
       <v-infinite-scroll
           :items="allEvents"
-          :onLoad="(done) => loadOffers(eventsGenerator, allEvents, done)"
+          :onLoad="({done}) => loadOffers(eventsGenerator, allEvents, done)"
           empty-text="Currently there are no offers to display!"
           mode="manual"
           class="w-100"
@@ -104,10 +104,14 @@ function handleDeleteConfirmation(result) {
         <v-row class="w-100">
           <template v-for="event in allEvents.value" :key="event.offerID">
             <v-col cols="4">
-              <OfferListItem type="event" :offerItem="event">
-                <template #actions="{ index }">
-                  <v-btn v-if="index === 0" @click="editOffer(event.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 1" @click="confirmDeleteOffer(event.offerID, 'event')">Delete</v-btn>
+              <OfferListItem type="event" :offerItem="event" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="h-100 d-flex justify-space-between">
+                    <v-btn elevation="0" color="blue-grey-lighten-2"
+                           @click="editOffer(event.offerID)">Edit</v-btn>
+                    <v-btn color="red-lighten-2" elevation="0"
+                           @click="confirmDeleteOffer(event.offerID, 'event')">Delete</v-btn>
+                  </v-card>
                 </template>
               </OfferListItem>
             </v-col>
@@ -118,7 +122,7 @@ function handleDeleteConfirmation(result) {
     <div>
       <v-infinite-scroll
           :items="allAccommodations"
-          :onLoad="(done) => loadOffers(accommodationsGenerator, allAccommodations, done)"
+          :onLoad="({done}) => loadOffers(accommodationsGenerator, allAccommodations, done)"
           empty-text="Currently there are no offers to display!"
           mode="manual"
           class="w-100"
@@ -127,10 +131,14 @@ function handleDeleteConfirmation(result) {
         <v-row class="w-100">
           <template v-for="accommodation in allAccommodations.value" :key="accommodation.offerID">
             <v-col cols="4">
-              <OfferListItem type="accommodation" :offerItem="accommodation">
-                <template #actions="{ index }">
-                  <v-btn v-if="index === 0" @click="editOffer(accommodation.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 1" @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete</v-btn>
+              <OfferListItem type="accommodation" :offerItem="accommodation" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="h-100 d-flex justify-space-between">
+                    <v-btn elevation="0" color="blue-grey-lighten-2"
+                           @click="editOffer(accommodation.offerID)">Edit</v-btn>
+                    <v-btn color="red-lighten-2" elevation="0"
+                           @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete</v-btn>
+                  </v-card>
                 </template>
               </OfferListItem>
             </v-col>
@@ -141,7 +149,7 @@ function handleDeleteConfirmation(result) {
     <div>
       <v-infinite-scroll
           :items="allActivities"
-          :onLoad="(done) => loadOffers(activitiesGenerator, allActivities, done)"
+          :onLoad="({done}) => loadOffers(activitiesGenerator, allActivities, done)"
           empty-text="Currently there are no offers to display!"
           mode="manual"
           class="w-100"
@@ -150,10 +158,14 @@ function handleDeleteConfirmation(result) {
         <v-row class="w-100">
           <template v-for="activity in allActivities.value" :key="activity.offerID">
             <v-col cols="4">
-              <OfferListItem type="activity" :offerItem="activity">
-                <template #actions="{ index }">
-                  <v-btn v-if="index === 0" @click="editOffer(activity.offerID)">Edit</v-btn>
-                  <v-btn v-if="index === 1" @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete</v-btn>
+              <OfferListItem type="activity" :offerItem="activity" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="h-100 d-flex justify-space-between">
+                    <v-btn elevation="0" color="blue-grey-lighten-2"
+                           @click="editOffer(activity.offerID)">Edit</v-btn>
+                    <v-btn color="red-lighten-2" elevation="0"
+                           @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete</v-btn>
+                  </v-card>
                 </template>
               </OfferListItem>
             </v-col>

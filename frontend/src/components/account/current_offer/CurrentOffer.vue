@@ -41,7 +41,7 @@ async function getCurrentOffers() {
           maxPage.value = Math.floor(allCurrentOffers.value.length / pageSize) + 1
         }
       })
-      .catch((error) =>{
+      .catch((error) => {
         errors.apiError = "Failed to fetch current offers. Please try again later. " + error;
       })
 }
@@ -49,14 +49,14 @@ async function getCurrentOffers() {
 function pageBack() {
   if (currentPage.value > 1) {
     currentPage.value -= 1;
-    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) *pageSize, currentPage.value * pageSize )
+    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
   }
 }
 
 function pageFroward() {
   if (currentPage.value < maxPage.value) {
     currentPage.value += 1;
-    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) *pageSize, currentPage.value * pageSize )
+    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
 
   }
 }
@@ -70,9 +70,11 @@ onMounted(async () => await getCurrentOffers())
     <p>Current offers</p>
     <div class="items_list">
       <div class="offer_items">
-        <CurrentOfferItem v-for="currentOffer in currentOffers" :name="currentOffer.name" :offer-type="currentOffer.offerType"
-                     :date-from="currentOffer.dateFrom" :date-to="currentOffer.dateTo" :id="currentOffer.reservationID"
-                     :with-animals="currentOffer.withAnimals" :offer-id="currentOffer.offerId"/>
+        <CurrentOfferItem v-for="currentOffer in currentOffers" :name="currentOffer.name"
+                          :offer-type="currentOffer.offerType"
+                          :date-from="currentOffer.dateFrom" :date-to="currentOffer.dateTo"
+                          :id="currentOffer.reservationID"
+                          :with-animals="currentOffer.withAnimals" :offer-id="currentOffer.offerId"/>
       </div>
       <div class="navigation">
         <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
@@ -85,12 +87,13 @@ onMounted(async () => await getCurrentOffers())
 </template>
 
 <style scoped>
-div.current_offers{
+div.current_offers {
   display: flex;
   flex-direction: column;
   height: max(500px, 80%);
   flex-grow: 1;
 }
+
 div.items_list {
   display: flex;
   flex-direction: column;
@@ -99,15 +102,18 @@ div.items_list {
   padding-top: 2%;
 
 }
-div.offer_items{
+
+div.offer_items {
   display: flex;
   flex-direction: column;
   padding-left: 2%;
 }
-div.navigation{
+
+div.navigation {
   padding-top: 2%;
 }
-p{
+
+p {
   color: #000000;
   font-family: "Poppins", Helvetica;
   font-size: 1.4rem;

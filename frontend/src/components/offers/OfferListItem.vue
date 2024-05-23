@@ -6,6 +6,10 @@ import chipsMapper from "@/_helpers/chips";
 const props = defineProps({
   type: String,
   offerItem: Object,
+  custom: {
+    type: Boolean,
+    default: false,
+  }
 });
 const chips = ref(chipsMapper(props.offerItem?.discount));
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount));
@@ -18,7 +22,7 @@ const image = computed(() => {
   }
 });
 
-const cardPage = ref('main');
+const cardPage = ref((props.custom)? 'custom' : 'main');
 </script>
 
 <template>
@@ -63,7 +67,8 @@ const cardPage = ref('main');
           {{ chips?.[offerItem?.skill]?.text }}
         </v-chip>
       </div>
-
+      <slot v-if="cardPage === 'custom'" name="template">
+      </slot>
       <v-card v-if="cardPage === 'main'" height="100" elevation="0">{{ offerItem.description }}</v-card>
       <v-card v-if="cardPage === 'info'" height="100" elevation="0">
         <v-container cols="2">
@@ -89,17 +94,10 @@ const cardPage = ref('main');
       <v-row>
         <v-col cols="12">
           <v-btn-toggle block>
+            <v-btn v-if="custom" @click="cardPage = 'custom'"><v-icon icon="mdi-cog"></v-icon></v-btn>
             <v-btn @click="cardPage = 'main'"><v-icon icon="mdi-menu"></v-icon></v-btn>
             <v-btn @click="cardPage = 'info'"><v-icon icon="mdi-information"></v-icon></v-btn>
           </v-btn-toggle>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="6">
-          <slot name="actions" :index="0"></slot>
-        </v-col>
-        <v-col cols="6">
-          <slot name="actions" :index="1"></slot>
         </v-col>
       </v-row>
     </v-card-actions>
