@@ -17,6 +17,9 @@ func RegisterRoutes(r *gin.Engine) {
 	public.GET("/offers/activity/:id", GetActivityByID)
 	public.GET("/offers/events", GetEvents)
 	public.GET("/offers/event/:id", GetEventByID)
+	public.GET("/offers/activities/search", SearchActivitiesByTitleOrLocation)
+	public.GET("/offers/accommodations/search", SearchAccommodationsByTitleOrLocation)
+	public.GET("/offers/events/search", SearchEventsByTitleOrLocation)
 	//public.GET("/offers/recommended", GetRecommendedOffers)
 	//public.PUT("/offers/recommended/add", AddRecommendedOffers)
 

@@ -43,6 +43,20 @@ func (a *Accommodation) GetID() (uint, error) {
 	return a.ID, nil
 }
 
+func SearchAccommodations(title, location string) ([]Accommodation, error) {
+	var accommodations []Accommodation
+	query := DB.Model(&Accommodation{})
+
+	if title != "" {
+		query = query.Where("title LIKE ?", "%"+title+"%")
+	}
+	if location != "" {
+		query = query.Where("location LIKE ?", "%"+location+"%")
+	}
+
+	return accommodations, nil
+}
+
 func (a *Accommodation) Update() error {
 	if err := DB.Save(&a).Error; err != nil {
 		return err

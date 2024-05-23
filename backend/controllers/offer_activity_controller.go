@@ -73,6 +73,19 @@ func ChangeActivityPrice(c *gin.Context) {
 	ChangeOfferPrice(c, models.GetActivityByID)
 }
 
+func SearchActivitiesByTitleOrLocation(c *gin.Context) {
+	title := c.Query("title")
+	location := c.Query("location")
+
+	activities, err := models.SearchActivities(title, location)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, activities)
+}
+
 func AddEquipment(c *gin.Context) {
 	id := c.Param("id")
 	var req utils.EquipmentRequest

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"net/http"
+
 	"backend/models"
 	"backend/models/DTO"
 
@@ -65,6 +67,19 @@ func DiscountEvent(c *gin.Context) {
 
 func ChangeEventPrice(c *gin.Context) {
 	ChangeOfferPrice(c, models.GetEventByID)
+}
+
+func SearchEventsByTitleOrLocation(c *gin.Context) {
+	title := c.Query("title")
+	location := c.Query("location")
+
+	events, err := models.SearchEvents(title, location)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, events)
 }
 
 /*

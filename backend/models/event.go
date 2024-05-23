@@ -41,6 +41,20 @@ func (e *Event) GetID() (uint, error) {
 	return e.ID, nil
 }
 
+func SearchEvents(title, location string) ([]Event, error) {
+	var events []Event
+	query := DB.Model(&Event{})
+
+	if title != "" {
+		query = query.Where("title LIKE ?", "%"+title+"%")
+	}
+	if location != "" {
+		query = query.Where("location LIKE ?", "%"+location+"%")
+	}
+
+	return events, nil
+}
+
 func (e *Event) Update() error {
 	if err := DB.Save(e).Error; err != nil {
 		return err

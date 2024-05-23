@@ -49,6 +49,20 @@ func (a *Activity) GetID() (uint, error) {
 	return a.ID, nil
 }
 
+func SearchActivities(title, location string) ([]Activity, error) {
+	var activities []Activity
+	query := DB.Model(&Activity{})
+
+	if title != "" {
+		query = query.Where("title LIKE ?", "%"+title+"%")
+	}
+	if location != "" {
+		query = query.Where("location LIKE ?", "%"+location+"%")
+	}
+
+	return activities, nil
+}
+
 func (a *Activity) Update() error {
 	if err := DB.Save(a).Error; err != nil {
 		return err
