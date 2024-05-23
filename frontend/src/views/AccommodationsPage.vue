@@ -34,7 +34,7 @@ function mapAccommodation(responseData) {
 
 function getQuery() {
   if (inputValue.value) {
-    return (isLocalization) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
+    return (isLocalization.value) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
   }
   return ''
 }
