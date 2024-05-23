@@ -68,14 +68,14 @@ offerStore.$subscribe(async (mutation, state) => {
     <SearchBar />
     <div v-if="events?.length > 0" >
             <v-infinite-scroll
-                :items="eventItem"
+                :items="events"
                 :onLoad="load"
                 empty-text="Currently there are no more offers to display!"
                 mode="manual"
                 class="w-100"
             >
               <v-row class="w-100">
-                <template v-for="event in eventItem" :key="event.offerId">
+                <template v-for="event in events" :key="event.offerId">
                   <v-col cols="4">
                     <OfferListItem type="event" :offer-item="event"/>
                   </v-col>
