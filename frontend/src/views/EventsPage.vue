@@ -3,6 +3,8 @@ import {onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
+import {useSearchStore} from "@/stores/search.store";
+import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
 import {useOfferStore} from "@/stores/offers.store";
@@ -66,14 +68,14 @@ offerStore.$subscribe(async (mutation, state) => {
     <SearchBar />
     <div v-if="events?.length > 0" >
             <v-infinite-scroll
-                :items="events"
+                :items="eventItem"
                 :onLoad="load"
                 empty-text="Currently there are no more offers to display!"
                 mode="manual"
                 class="w-100"
             >
               <v-row class="w-100">
-                <template v-for="event in events" :key="event.offerId">
+                <template v-for="event in eventItem" :key="event.offerId">
                   <v-col cols="4">
                     <OfferListItem type="event" :offer-item="event"/>
                   </v-col>

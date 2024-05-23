@@ -36,7 +36,7 @@ const newActivity = ref({
   skillLevel: '',
   price: '',
   activityType: '',
-  dateRange: '',
+  dateRange: [],
   equipment: '',
 })
 
@@ -62,6 +62,7 @@ const errors = reactive({
   offerInfo: '',
   country: '',
   image: '',
+  dateRange: '',
 });
 
 const userStore = useAuthStore();
@@ -134,12 +135,12 @@ async function onSubmit() {
   }
 }
 
-async function handleAccommodationOffer(townId, imageFiles) {
+async function handleAccommodationOffer(townID, imageFiles) {
   const accommodationData = await fetchWrapper.post('/api/host/accommodation/create', {
     title: newOffer.value.title,
     description: newOffer.value.description,
     capacity: newOffer.value.capacity,
-    town_id: townId,
+    town_id: townID,
     user_id: user.ID,
     number_of_rooms: newAccommodation.value.numberOfRooms,
     type: newAccommodation.value.accommodationType.toLowerCase(),
@@ -161,12 +162,12 @@ async function handleAccommodationOffer(townId, imageFiles) {
   }
 }
 
-async function handleActivityOffer(townId, imageFiles) {
+async function handleActivityOffer(townID, imageFiles) {
   const activityData = await fetchWrapper.post('/api/host/activity/create', {
     title: newOffer.value.title,
     description: newOffer.value.description,
     capacity: newOffer.value.capacity,
-    town_id: townId,
+    town_id: townID,
     user_id: user.ID,
     date: new Date(newActivity.value.dateRange[0]).toJSON(),
     skill_level: newActivity.value.skillLevel.toLowerCase(),
@@ -181,12 +182,12 @@ async function handleActivityOffer(townId, imageFiles) {
   });
 }
 
-async function handleEventOffer(townId, imageFiles) {
+async function handleEventOffer(townID, imageFiles) {
   await fetchWrapper.post('/api/host/event/create', {
     title: newOffer.value.title,
     description: newOffer.value.description,
     capacity: newOffer.value.capacity,
-    town_id: townId,
+    town_id: townID,
     user_id: user.ID,
     date_from: new Date(newEvent.value.dateFrom).toJSON(),
     date_to: new Date(newEvent.value.dateTo).toJSON(),
@@ -218,10 +219,9 @@ function resetForm() {
   newActivity.value = {
     dateRange: [],
     skillLevel: '',
-    activityType: '',
     price: '',
-    duration: '',
-    equipment: []
+    activityType: '',
+    equipment: [],
   };
 
   newEvent.value = {
@@ -234,15 +234,6 @@ function resetForm() {
   isAddingNewOffer.value = false;
   addedNewOffer.value = true;
   errors.apiError = null;
-}
-
-function calculateDurationInHours(startDate, endDate) {
-  const startTimeMilliseconds = startDate.getTime();
-  const endTimeMilliseconds = endDate.getTime();
-
-  const durationMilliseconds = Math.abs(endTimeMilliseconds - startTimeMilliseconds);
-
-  return durationMilliseconds / (1000 * 60 * 60);
 }
 
 async function onAddRoom() {
@@ -267,10 +258,71 @@ async function onAddRoom() {
   };
 }
 
+function calculateDurationInHours(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diff = end - start;
+  const hours = diff / (1000 * 60 * 60);
+  return hours;
+}
+
+function checkIfOfferInfoIsFilled() {
+  errors.offerInfo = '';
+  errors.dateRange = '';
+
+  if (newOffer.value.title === '' || newOffer.value.description === '' || newOffer.value.capacity === '') {
+    errors.offerInfo = 'Please fill out all required offer information.';
+    return false;
+  }
+
+  const now = new Date();
+
+  if (isOfferTypeActivity.value) {
+    if (newActivity.value.skillLevel === '' || newActivity.value.price === '' || newActivity.value.activityType === '' || newActivity.value.dateRange.length === 0) {
+      errors.offerInfo = 'Please fill out all required activity information.';
+      return false;
+    }
+
+    const [startDate, endDate] = newActivity.value.dateRange;
+    if (!startDate || !endDate) {
+      errors.dateRange = 'Date range is required.';
+      return false;
+    }
+
+    if (new Date(startDate) <= now) {
+      errors.dateRange = 'Start date must be after the current date.';
+      return false;
+    }
+
+    if (new Date(startDate) >= new Date(endDate)) {
+      errors.dateRange = 'Start date must be before end date.';
+      return false;
+    }
+  }
+
+  if (isOfferTypeEvent.value) {
+    if (newEvent.value.dateFrom === '' || newEvent.value.dateTo === '' || newEvent.value.price === '' || newEvent.value.eventType === '') {
+      errors.offerInfo = 'Please fill out all required event information.';
+      return false;
+    }
+
+    if (new Date(newEvent.value.dateFrom) <= now) {
+      errors.dateRange = 'Start date must be after the current date.';
+      return false;
+    }
+
+    if (new Date(newEvent.value.dateFrom) >= new Date(newEvent.value.dateTo)) {
+      errors.dateRange = 'Start date must be before end date.';
+      return false;
+    }
+  }
+
+  return true;
+}
+
 async function uploadImage(imageInput) {
   const images = imageInput.target.files;
   const promises = [];
-
   for (const image of images) {
     const reader = new FileReader();
     promises.push(
@@ -282,105 +334,12 @@ async function uploadImage(imageInput) {
         })
     );
   }
-
-  Promise.all(promises).then((imageDataArray) => {
-    newOffer.value.images = imageDataArray;
-  });
-}
-
-function dataURLtoFile(dataURL, fileName) {
-  const arr = dataURL.split(',');
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new File([u8arr], fileName, {type: mime});
-}
-
-function dataURLsToFiles(dataURLs, fileNameBase) {
-  return dataURLs.map((dataURL, index) => {
-    const fileName = `${fileNameBase}_${index}.jpeg`;
-    return dataURLtoFile(dataURL, fileName);
-  });
-}
-
-function checkIfOfferInfoIsFilled() {
-  let offerValues = newOffer.value;
-  let accommodationValues = newAccommodation.value;
-  let activityValues = newActivity.value;
-  let eventValues = newEvent.value;
-
-  if (
-      offerValues.offerType === '' ||
-      offerValues.title === '' ||
-      offerValues.description === '' ||
-      offerValues.capacity === ''
-  ) {
-    return false;
-  }
-
-  if (offerValues.offerType === 'Accommodation') {
-    if (
-        accommodationValues.numberOfRooms === '' ||
-        accommodationValues.accommodationType === '' ||
-        accommodationValues.isAnimalFriendly === '' ||
-        accommodationValues.pricePerDay === ''
-    ) {
-      return false;
-    }
-  } else if (offerValues.offerType === 'Activity') {
-    if (
-        activityValues.skillLevel === '' ||
-        activityValues.activityType === '' ||
-        activityValues.price === '' ||
-        activityValues.dateRange === ''
-    ) {
-      return false;
-    }
-  } else if (offerValues.offerType === 'Event') {
-    if (
-        eventValues.dateFrom === '' ||
-        eventValues.dateTo === '' ||
-        eventValues.eventType === '' ||
-        eventValues.price === ''
-    ) {
-      return false;
-    }
-  }
-
-  errors.offerInfo = '';
-  return true;
-}
-
-
-function checkIfRoomInfoIsFilled() {
-  let accommodationValues = newAccommodation.value
-  let roomValues = newRoom.value
-  if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
-    return
-  }
-  if (
-      roomValues.number === '' ||
-      roomValues.name === '' ||
-      roomValues.description === '' ||
-      roomValues.capacity === '' ||
-      roomValues.area === ''
-  ) {
-    return false;
-  } else {
-    errors.offerInfo = '';
-    return true;
-  }
 }
 
 onMounted(async () => {
   const response = await fetchWrapper.get('/api/country/get/all')
-  countries.value = response.data.map((country) => country.Name)
+  countries.value = response.data.map(country => country.Name)
 })
-
 </script>
 
 <template>
@@ -394,23 +353,24 @@ onMounted(async () => {
     <Transition name="bounce">
       <div v-if="isAddingNewOffer" class="new_offer_info">
         <p class="new_offer_text">Fill all information below to add a new experience!</p>
-        <SelectionInput v-model="newOffer.offerType" label-text="Offer type" placeholder="Type" :items="offerTypes"/>
+        <SelectionInput v-model="newOffer.offerType" label-text="Offer type" placeholder="Type" :items="offerTypes"
+                        :isRequired="true"/>
       </div>
     </Transition>
     <Transition name="bounce">
       <div v-if="isOfferTypeFilled" class="new_offer_info">
-        <TextInput v-model="newOffer.title" label-text="Title"/>
-        <TextInput v-model="newOffer.description" label-text="Description"/>
-        <NumberInput v-model="newOffer.capacity" label-text="Capacity"/>
+        <TextInput v-model="newOffer.title" label-text="Title" :isRequired="true" :min="2" :max="100"/>
+        <TextInput v-model="newOffer.description" label-text="Description" :isRequired="true" :min="30" :max="300"/>
+        <NumberInput v-model="newOffer.capacity" label-text="Capacity" :isRequired="true" :min="1"/>
         <div v-if="isOfferTypeAccommodation" class="w-100">
-          <NumberInput v-model="newAccommodation.numberOfRooms" label-text="Number of rooms"/>
+          <NumberInput v-model="newAccommodation.numberOfRooms" label-text="Number of rooms" :isRequired="true"
+                       :min="1"/>
           <SelectionInput v-model="newAccommodation.accommodationType" label-text="Accommodation type"
-                          placeholder="Type"
-                          :items="accommodationTypes"/>
+                          placeholder="Type" :items="accommodationTypes" :isRequired="true"/>
           <CheckButtonInput :model-value="newAccommodation.isAnimalFriendly"
                             @changed-value="newAccommodation.isAnimalFriendly = !newAccommodation.isAnimalFriendly"
                             label-text="Is animal friendly?" width="100%"/>
-          <NumberInput v-model="newAccommodation.pricePerDay" label-text="Price per day"/>
+          <NumberInput v-model="newAccommodation.pricePerDay" label-text="Price per day in $" :isRequired="true" :min="1"/>
           <CheckboxesInput v-model="newAccommodation.generalFacilities" label-text="Select general facilities"
                            placeholder="Facilities" :items="generalFacilities"/>
           <div v-if="isAccommodationTypeWithSelectableRooms" class="w-100 room-info-container">
@@ -434,27 +394,29 @@ onMounted(async () => {
         </div>
         <div v-if="isOfferTypeActivity" class="w-100">
           <SelectionInput v-model="newActivity.skillLevel" label-text="Skill level" placeholder="Level"
-                          :items="skillLevels"/>
+                          :items="skillLevels" :isRequired="true"/>
           <SelectionInput v-model="newActivity.activityType" label-text="Activity type" placeholder="Type"
-                          :items="activityTypes"/>
-          <NumberInput v-model="newActivity.price" label-text="Price"/>
-          <VueDatePicker v-model="newActivity.dateRange" placeholder="Select date range" range/>
+                          :items="activityTypes" :isRequired="true"/>
+          <NumberInput v-model="newActivity.price" label-text="Price in $" :isRequired="true" :min="1"/>
+          <VueDatePicker v-model="newActivity.dateRange" placeholder="Select date range" range :model-config="{ format: 'YYYY-MM-DD' }"
+                         :isRequired="true"/>
           <br>
           <CheckboxesInput v-model="newActivity.equipment" label-text="Select equipment needed" placeholder="Equipment"
                            :items="equipmentList"/>
         </div>
         <div v-if="isOfferTypeEvent" class="w-100">
-          <DateInput v-model="newEvent.dateFrom" label-text="Date from"/>
-          <DateInput v-model="newEvent.dateTo" label-text="Date to"/>
-          <SelectionInput v-model="newEvent.eventType" label-text="Event type" placeholder="Type" :items="eventTypes"/>
-          <NumberInput v-model="newEvent.price" label-text="Price"/>
+          <DateInput v-model="newEvent.dateFrom" label-text="Date from" :isRequired="true"/>
+          <DateInput v-model="newEvent.dateTo" label-text="Date to" :isRequired="true"/>
+          <SelectionInput v-model="newEvent.eventType" label-text="Event type" placeholder="Type" :items="eventTypes"
+                          :isRequired="true"/>
+          <NumberInput v-model="newEvent.price" label-text="Price in $" :isRequired="true" :min="1"/>
         </div>
       </div>
     </Transition>
     <Transition name="bounce">
       <div v-if="isOfferInfoFilled" class="new_offer_info">
-        <SelectionInput v-model="newOffer.country" label-text="Country" :items="countries"/>
-        <TextInput v-model="newOffer.city" label-text="City"/>
+        <SelectionInput v-model="newOffer.country" label-text="Country" :items="countries" :isRequired="true"/>
+        <TextInput v-model="newOffer.city" label-text="City" :isRequired="true" :min="2" :max="50"/>
       </div>
     </Transition>
     <Transition name="bounce">
@@ -478,6 +440,7 @@ onMounted(async () => {
         <div class="errors" v-if="errors.offerInfo">{{ errors.offerInfo }}</div>
         <div class="errors" v-if="errors.country">{{ errors.country }}</div>
         <div class="errors" v-if="errors.image">{{ errors.image }}</div>
+        <div class="errors" v-if="errors.dateRange">{{ errors.dateRange }}</div>
         <button v-if="isOfferImageFilled" class="button_basic" @click="onSubmit">
           Create an offer
         </button>

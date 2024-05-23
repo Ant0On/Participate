@@ -14,13 +14,15 @@ const props = defineProps({
     default: true
   },
   rules: [],
-  min: Number
+  min: Number,
+  max: Number
 })
 
 const emits = defineEmits(['update:modelValue'])
 const rules = ref({
   required: value => !!value || 'Required.',
   min: v => v.length >= props.min || `Min ${props.min} characters`,
+  max: v => v.length >= props.max || `Max ${props.max} characters`,
 })
 
 </script>
@@ -32,7 +34,7 @@ const rules = ref({
       :id="inputUUID"
       @input="$emit('update:modelValue', $event.target.value)"
       :disabled="!isActive"
-      :rules="[isRequired && rules.required, min && rules.min]"
+      :rules="[isRequired && rules.required, min && rules.min, max && rules.max]"
       v-model="modelValue"
       clearable
       :placeholder="placeholder"

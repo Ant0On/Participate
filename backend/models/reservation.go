@@ -24,22 +24,22 @@ const (
 )
 
 type Reservation struct {
-	ReservationState ReservationState `gorm:"type:varchar(255);check:reservation_state IN ('pending', 'accepted', 'ongoing', 'finished', 'rejected'); column:reservation_state; not null" json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
+	ReservationState ReservationState `gorm:"type:varchar(255);check:reservation_state IN ('pending', 'accepted', 'ongoing', 'finished', 'rejected'); column:reservation_state; not null; default:'pending'" json:"reservation_state,omitempty"`
 	NumberOfPeople   int              `gorm:"not null" json:"number_of_people" binding:"required,gt=0"`
 	UserID           uint             `gorm:"not null" json:"user_id" binding:"required"`
-	OfferID          uint             `gorm:"not null" json:"offer_id" binding:"required"`
 	PaymentID        uint             `gorm:"not null" json:"payment_id" binding:"required"`
 }
 
+// TODO move validation to specific reservations
 func (r *Reservation) Validate() error {
-	var offer Offer
-	if err := DB.First(&offer, r.OfferID).Error; err != nil {
-		return fmt.Errorf("DB.First: %w", err)
-	}
-
-	if r.NumberOfPeople > offer.Capacity {
-		return fmt.Errorf("too many people added to reservation")
-	}
+	//var offer Offer
+	//if err := DB.First(&offer, r.OfferID).Error; err != nil {
+	//	return fmt.Errorf("DB.First: %w", err)
+	//}
+	//
+	//if r.NumberOfPeople > offer.Capacity {
+	//	return fmt.Errorf("too many people added to reservation")
+	//}
 	return nil
 }
 
