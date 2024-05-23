@@ -5,7 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 const props = defineProps({
   labelText: String,
   placeholder: String,
-  isRequired: Boolean,
+  isRequired: {
+    type: Boolean,
+    default: false
+  },
   modelValue: String,
   items: Array,
 });
@@ -13,9 +16,6 @@ const props = defineProps({
 const emits = defineEmits(['update:modelValue']);
 const inputUUID = uuidv4();
 
-const rules = ref({
-  required: value => !!value || 'Required.',
-});
 </script>
 
 <template>
@@ -29,7 +29,6 @@ const rules = ref({
       v-model="modelValue"
       class="w-100"
       clearable
-      :rules="[isRequired && rules.required]"
       multiple
   ></v-select>
 </template>
