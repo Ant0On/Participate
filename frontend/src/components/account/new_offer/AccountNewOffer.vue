@@ -320,6 +320,22 @@ function checkIfOfferInfoIsFilled() {
   return true;
 }
 
+async function uploadImage(imageInput) {
+  const images = imageInput.target.files;
+  const promises = [];
+  for (const image of images) {
+    const reader = new FileReader();
+    promises.push(
+        new Promise((resolve) => {
+          reader.onload = (source) => {
+            resolve(source.target.result);
+          };
+          reader.readAsDataURL(image);
+        })
+    );
+  }
+}
+
 onMounted(async () => {
   const response = await fetchWrapper.get('/api/country/get/all')
   countries.value = response.data.map(country => country.Name)
