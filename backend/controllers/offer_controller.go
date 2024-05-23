@@ -57,6 +57,18 @@ func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 	query := models.DB.Model(parameters.model)
 
 	var totalRecords int64
+	searchQuery := c.Query("query")
+	if searchQuery != "" {
+		query = query.Where("title LIKE ?", "%"+searchQuery+"%")
+	}
+
+	location := c.Query("location")
+	if location != "" {
+		query = query.Joins("JOIN town AS t ON "+parameters.tableName+".town_id = t.id").
+			Joins("JOIN country AS c ON t.country_id = c.id").
+			Where("t.name LIKE ? OR c.name LIKE ?", "%"+location+"%", "%"+location+"%")
+	}
+
 	query.Count(&totalRecords)
 	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
 
@@ -199,21 +211,6 @@ func DiscountOffer(c *gin.Context, getByID func(string) (models.OfferOperations,
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
-}
-
-func SearchHandler(searchable models.OfferOperations) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		title := c.Query("title")
-		location := c.Query("location")
-
-		results, err := searchable.Search(title, location)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, results)
-	}
 }
 
 func ChangeOfferPrice(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {

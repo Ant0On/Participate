@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"backend/middlewares"
-	"backend/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,9 +17,6 @@ func RegisterRoutes(r *gin.Engine) {
 	public.GET("/offers/activity/:id", GetActivityByID)
 	public.GET("/offers/events", GetEvents)
 	public.GET("/offers/event/:id", GetEventByID)
-	public.GET("/offers/activities/search", SearchHandler(&models.Activity{}))
-	public.GET("/offers/accommodations/search", SearchHandler(&models.Accommodation{}))
-	public.GET("/offers/events/search", SearchHandler(&models.Event{}))
 	//public.GET("/offers/recommended", GetRecommendedOffers)
 	//public.PUT("/offers/recommended/add", AddRecommendedOffers)
 

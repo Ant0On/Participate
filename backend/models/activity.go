@@ -49,29 +49,6 @@ func (a *Activity) GetID() (uint, error) {
 	return a.ID, nil
 }
 
-func (a *Activity) Search(title, location string) ([]interface{}, error) {
-	var activities []Activity
-	query := DB.Model(&Activity{})
-
-	if title != "" {
-		query = query.Debug().Where("title LIKE ?", "%"+title+"%")
-	}
-	if location != "" {
-		query = query.Debug().Where("location LIKE ?", "%"+location+"%")
-	}
-
-	if err := query.Find(&activities).Error; err != nil {
-		return nil, fmt.Errorf("DB.Find: %w", err)
-	}
-
-	results := make([]interface{}, len(activities))
-	for i, v := range activities {
-		results[i] = v
-	}
-
-	return results, nil
-}
-
 func (a *Activity) Update() error {
 	if err := DB.Save(a).Error; err != nil {
 		return err

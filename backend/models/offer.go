@@ -16,7 +16,6 @@ type OfferOperations interface {
 	UpdatePrice(price float64) error
 	AddDiscount(discount float64) error
 	GetID() (uint, error)
-	Search(title, location string) ([]interface{}, error)
 	HandleOfferImageUploads(c *gin.Context, tableName string, id uint) error
 }
 
