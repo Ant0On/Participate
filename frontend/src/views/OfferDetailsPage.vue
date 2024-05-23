@@ -37,7 +37,6 @@ const typeLink = {
   'event': 'events',
   'accommodation': 'accommodations',
   'activity': 'activities',
-  'recommended': 'recommended'
 }
 const choosePaymentAlert = ref(false)
 
@@ -63,7 +62,6 @@ const offer = {
   location: "Zamosc, Polska",
   description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
   capacity: 10,
-  isRecommended: true,
   discount: 10,
   price: 30,
   type: "festival",
@@ -225,14 +223,6 @@ onMounted(async () => {
               </div>
             </v-card-subtitle>
             <div class="ma-4 text-subtitle-1">
-              <v-chip :prepend-icon="chips.recommended.icon"
-                      :color="chips.recommended.color"
-                      variant="flat"
-                      v-if="offer.isRecommended"
-                      class="mr-1"
-              >
-                {{ chips.recommended.text }}
-              </v-chip>
               <v-chip :prepend-icon="chips.discount.icon"
                       :color="chips.discount.color"
                       variant="flat"

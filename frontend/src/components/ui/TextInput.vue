@@ -22,7 +22,7 @@ const emits = defineEmits(['update:modelValue'])
 const rules = ref({
   required: value => !!value || 'Required.',
   min: v => v.length >= props.min || `Min ${props.min} characters`,
-  max: v => v.length >= props.max || `Max ${props.max} characters`,
+  max: v => v.length <= props.max || `Max ${props.max} characters`,
 })
 
 </script>
