@@ -66,9 +66,9 @@ func (e *Event) AddDiscount(discount float64) error {
 }
 
 func GetEventByID(id string) (OfferOperations, error) {
-	var e Event
-	if err := DB.First(e, id).Error; err != nil {
+	var e *Event
+	if err := DB.First(&e, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return OfferOperations(&e), nil
+	return OfferOperations(e), nil
 }

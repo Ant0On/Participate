@@ -68,11 +68,11 @@ func (a *Accommodation) AddDiscount(discount float64) error {
 }
 
 func GetAccommodationByID(id string) (OfferOperations, error) {
-	var a Accommodation
+	var a *Accommodation
 	if err := DB.First(&a, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return OfferOperations(&a), nil
+	return OfferOperations(a), nil
 }
 
 func GetAccommodationById(id string) (*Accommodation, error) {

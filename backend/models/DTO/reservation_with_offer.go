@@ -7,58 +7,58 @@ import (
 )
 
 type ReservationAccommodationWithOffer struct {
-	ReservationID     uint                     `json:"reservation_id" binding:"required"`
-	Title             string                   `json:"title" binding:"required,min=2"`
-	PricePerDay       float64                  `json:"price_per_day" binding:"required,gt=0"`
-	Capacity          int                      `json:"capacity" binding:"required,gt=0"`
-	DateFrom          time.Time                `json:"date_from" binding:"required"`
-	DateTo            time.Time                `json:"date_to" binding:"required,gtefield=DateFrom"`
+	ReservationID     uint                     `json:"reservation_id"`
+	Title             string                   `json:"title"`
+	PricePerDay       float64                  `json:"price_per_day"`
+	Capacity          int                      `json:"capacity"`
+	DateFrom          time.Time                `json:"date_from"`
+	DateTo            time.Time                `json:"date_to"`
 	IsAnimalFriendly  bool                     `json:"is_animal_friendly"`
-	AccommodationType models.AccommodationType `json:"accommodation_type" binding:"required,oneof=hotel hostel apartment villa guesthouse"`
-	TownName          string                   `json:"town_name" binding:"required,min=2"`
-	CountryName       string                   `json:"country_name" binding:"required,min=3"`
-	AccommodationID   uint                     `json:"accommodation_id" binding:"required"`
+	AccommodationType models.AccommodationType `json:"accommodation_type"`
+	TownName          string                   `json:"town_name"`
+	CountryName       string                   `json:"country_name"`
+	AccommodationID   uint                     `json:"accommodation_id"`
 	RatingID          uint                     `json:"rating_id"`
-	ReservationState  string                   `json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
+	ReservationState  string                   `json:"reservation_state"`
 }
 
 type ReservationActivityWithOffer struct {
-	ReservationID    uint                `json:"reservation_id" binding:"required"`
-	Title            string              `json:"title" binding:"required,min=2"`
-	Price            float64             `json:"price" binding:"required,gt=0"`
-	Capacity         int                 `json:"capacity" binding:"required,gt=0"`
-	Date             time.Time           `json:"date" binding:"required"`
-	ActivityType     models.ActivityType `json:"activity_type" binding:"required,oneof=indoor outdoor"`
-	TownName         string              `json:"town_name" binding:"required,min=2"`
-	CountryName      string              `json:"country_name" binding:"required,min=3"`
-	ActivityID       uint                `json:"activity_id" binding:"required"`
+	ReservationID    uint                `json:"reservation_id"`
+	Title            string              `json:"title"`
+	Price            float64             `json:"price"`
+	Capacity         int                 `json:"capacity"`
+	Date             time.Time           `json:"date"`
+	ActivityType     models.ActivityType `json:"activity_type"`
+	TownName         string              `json:"town_name"`
+	CountryName      string              `json:"country_name"`
+	ActivityID       uint                `json:"activity_id"`
 	RatingID         uint                `json:"rating_id"`
-	ReservationState string              `json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
+	ReservationState string              `json:"reservation_state"`
 }
 
 type ReservationEventWithOffer struct {
-	ReservationID    uint             `json:"reservation_id" binding:"required"`
-	Title            string           `json:"title" binding:"required,min=2"`
-	Price            float64          `json:"price" binding:"required,gt=0"`
-	Capacity         int              `json:"capacity" binding:"required,gt=0"`
-	Date             time.Time        `json:"date" binding:"required"`
-	EventType        models.EventType `json:"event_type" binding:"required,oneof=conference concert festival 'sports event'"`
-	TownName         string           `json:"town_name" binding:"required,min=2"`
-	CountryName      string           `json:"country_name" binding:"required,min=3"`
-	EventID          uint             `json:"event_id" binding:"required"`
+	ReservationID    uint             `json:"reservation_id"`
+	Title            string           `json:"title"`
+	Price            float64          `json:"price"`
+	Capacity         int              `json:"capacity"`
+	Date             time.Time        `json:"date"`
+	EventType        models.EventType `json:"event_type"`
+	TownName         string           `json:"town_name"`
+	CountryName      string           `json:"country_name"`
+	EventID          uint             `json:"event_id"`
 	RatingID         uint             `json:"rating_id"`
-	ReservationState string           `json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
+	ReservationState string           `json:"reservation_state"`
 }
 
 type ReservationRoomWithOffer struct {
-	ReservationID    uint      `json:"reservation_id" binding:"required"`
-	Title            string    `json:"title" binding:"required,min=2"`
-	PricePerDay      float64   `json:"price_per_day" binding:"required,gt=0"`
-	Capacity         int       `json:"capacity" binding:"required,gt=0"`
-	DateFrom         time.Time `json:"date_from" binding:"required"`
-	DateTo           time.Time `json:"date_to" binding:"required,gtefield=DateFrom"`
+	ReservationID    uint      `json:"reservation_id"`
+	Title            string    `json:"title"`
+	PricePerDay      float64   `json:"price_per_day"`
+	Capacity         int       `json:"capacity"`
+	DateFrom         time.Time `json:"date_from"`
+	DateTo           time.Time `json:"date_to"`
 	IsAnimalFriendly bool      `json:"is_animal_friendly"`
-	RoomID           uint      `json:"room_id" binding:"required"`
+	RoomID           uint      `json:"room_id"`
 	RatingID         uint      `json:"rating_id"`
-	ReservationState string    `json:"reservation_state" binding:"required,oneof=pending accepted ongoing finished rejected"`
+	ReservationState string    `json:"reservation_state"`
 }

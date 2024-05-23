@@ -10,7 +10,6 @@ import Accommodations from "@/views/AccommodationsPage.vue";
 import Events from "@/views/EventsPage.vue";
 import Activities from "@/views/ActivitiesPage.vue";
 import Offer from "@/views/OfferDetailsPage.vue";
-import Recommended from "@/views/RecommendedPage.vue";
 import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
 import AccountHistory from "@/components/account/history/AccountHistory.vue";
 import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
@@ -49,11 +48,6 @@ const routes = [
         name: 'Offers',
         component: Offer,
         props: true
-    },
-    {
-        path: '/recommended',
-        name: "Recommended",
-        component: Recommended
     },
     {
         path: '/account/become_host',

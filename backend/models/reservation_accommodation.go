@@ -13,7 +13,7 @@ type ReservationAccommodation struct {
 	DateFrom        time.Time `gorm:"not null" json:"date_from" binding:"required"`
 	DateTo          time.Time `gorm:"not null" json:"date_to" binding:"required,gtfield=DateFrom"`
 	RatingID        uint      `json:"rating_id"`
-	AccommodationID uint      `json:"accommodation_id"`
+	AccommodationID uint      `gorm:"not null" json:"accommodation_id" binding:"required"`
 }
 
 func (r *ReservationAccommodation) Save() error {

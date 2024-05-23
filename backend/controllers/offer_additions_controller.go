@@ -65,7 +65,6 @@ func GetActivityWithEquipment(c *gin.Context) {
 			activity.title,
 			activity.description,
 			activity.capacity,
-			activity.is_recommended,
 			activity.discount,
 			activity.date,
 			activity.skill_level as skill_level,

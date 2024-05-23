@@ -17,8 +17,6 @@ func RegisterRoutes(r *gin.Engine) {
 	public.GET("/offers/activity/:id", GetActivityByID)
 	public.GET("/offers/events", GetEvents)
 	public.GET("/offers/event/:id", GetEventByID)
-	//public.GET("/offers/recommended", GetRecommendedOffers)
-	//public.PUT("/offers/recommended/add", AddRecommendedOffers)
 
 	host := r.Group("/api/host")
 	host.PUT("/:id/change/description", ChangeDescription)
@@ -106,9 +104,9 @@ func RegisterRoutes(r *gin.Engine) {
 
 	reservationAccommodation := r.Group("/api/reservation/accommodation")
 	reservationAccommodation.GET("/get/:id", GetAccommodationReservationById)
-	reservationAccommodation.GET("/:state", GetAccommodationReservationsByState) //Ujednolicic byc moze
+	reservationAccommodation.GET("/:state", GetAccommodationReservationsByState)
 	reservationAccommodation.POST("/add", AddAccommodationReservation)
-	reservationAccommodation.POST("/:id/:state", ChangeAccommodationReservationState) //Tak samo jak wyzej
+	reservationAccommodation.POST("/:id/:state", ChangeAccommodationReservationState)
 
 	reservationRoom := r.Group("/api/reservation/room")
 	reservationRoom.GET("/get/:id", GetRoomReservationById)
@@ -119,7 +117,6 @@ func RegisterRoutes(r *gin.Engine) {
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware("admin"))
 	protected.GET("/user", CurrentUser)
-	//protected.PUT("/offer/:id/recommend", RecommendOffer)
 
 	room := r.Group("/api/room")
 	room.Use(middlewares.JwtAuthMiddleware("host"))

@@ -74,11 +74,11 @@ func (a *Activity) AddDiscount(discount float64) error {
 }
 
 func GetActivityByID(id string) (OfferOperations, error) {
-	var a Activity
+	var a *Activity
 	if err := DB.First(&a, id).Error; err != nil {
 		return nil, fmt.Errorf("DB.First: %w", err)
 	}
-	return OfferOperations(&a), nil
+	return OfferOperations(a), nil
 }
 
 func GetActivityById(id string) (*Activity, error) {
