@@ -33,7 +33,8 @@ const cardPage = ref((props.custom)? 'custom' : 'main');
     <v-img v-else :src="require(`@/assets/img/image_placeholder.png`)" cover></v-img>
 
     <v-card-item>
-      <router-link :to="`/offers/${type}/${offerItem.offerID}`">
+      <v-card-title v-if="custom" class="font-weight-black">{{ offerItem.title }}</v-card-title>
+      <router-link v-else :to="`/offers/${type}/${offerItem.offerID}`">
         <v-card-title class="font-weight-black">{{ offerItem.title }}</v-card-title>
       </router-link>
       <v-card-subtitle>

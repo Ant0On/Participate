@@ -1,12 +1,14 @@
 <script setup>
-import { onMounted, ref, reactive } from 'vue';
-import { useAuthStore } from "@/stores/auth.store";
+import {onMounted, reactive, ref} from 'vue';
+import {storeToRefs} from 'pinia';
+import {useAuthStore} from "@/stores/auth.store";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
-const auth = useAuthStore();
-const user = auth.user;
+const userStore = useAuthStore();
+
+const {user: user} = storeToRefs(userStore)
 const errors = reactive({
   apiError: ""
 });
@@ -17,26 +19,64 @@ const allAccommodations = ref([]);
 const confirmDelete = ref(false);
 const offerToDelete = ref(null);
 
-async function getMyOffers(responseData) {
-  try {
-    return responseData.map((data) => {
-      return {
-        location: data["country_name"] + ', ' + data["town_name"],
-        title: data["title"],
-        offerID: data['offer_id'],
-        discount: data['discount'],
-        capacity: data['capacity'],
-        price: data['price'] !== undefined ? data['price'] : data['price_per_day']
-      };
-    });
-  } catch (error) {
-    console.error('Error during mapping or assignment:', error);
-  }
+function mapAccommodation(responseData) {
+
+  return responseData.map((data) => {
+    return {
+      'offerId': data["offer_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'capacity': data["capacity"],
+      'price': data['price_per_day'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'type': data['type'],
+      'animal_friendly': data['is_animal_friendly'],
+      'rating': data['rating']
+    };
+  });
 }
 
-const eventsGenerator = fetchPaginatedData(`/api/host/event/${user.ID}/offers`, getMyOffers);
-const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.ID}/offers`, getMyOffers);
-const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.ID}/offers`, getMyOffers);
+function mapActivities(responseData) {
+
+  return responseData.map((data) => {
+    return {
+      'offerId': data["offer_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'skill': data['skill_level'],
+      'type': data['type'],
+      'duration': data['duration']
+    };
+  });
+}
+
+function mapEvents(responseData) {
+
+  return responseData.map((data) => {
+    return {
+      'offerId': data["offer_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'type': data['type']
+    };
+  });
+}
+
+const eventsGenerator = fetchPaginatedData(`/api/host/event/${user.value.ID}/offers`, mapEvents);
+const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.value.ID}/offers`, mapActivities);
+const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.value.ID}/offers`, mapAccommodation);
 
 onMounted(async () => {
   allAccommodations.value = await accommodationsGenerator.next();
@@ -77,7 +117,7 @@ async function deleteOffer(offerID, offerType) {
 }
 
 function confirmDeleteOffer(offerID, offerType) {
-  offerToDelete.value = { offerID, offerType };
+  offerToDelete.value = {offerID, offerType};
   confirmDelete.value = true;
 }
 
@@ -106,11 +146,13 @@ function handleDeleteConfirmation(result) {
             <v-col cols="4">
               <OfferListItem type="event" :offerItem="event" custom>
                 <template v-slot:template>
-                  <v-card elevation="0" class="h-100 d-flex justify-space-between">
-                    <v-btn elevation="0" color="blue-grey-lighten-2"
-                           @click="editOffer(event.offerID)">Edit</v-btn>
-                    <v-btn color="red-lighten-2" elevation="0"
-                           @click="confirmDeleteOffer(event.offerID, 'event')">Delete</v-btn>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="blue-grey-lighten-2" rounded
+                           @click="editOffer(event.offerID)">Edit
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="confirmDeleteOffer(event.offerID, 'event')">Delete
+                    </v-btn>
                   </v-card>
                 </template>
               </OfferListItem>
@@ -133,11 +175,13 @@ function handleDeleteConfirmation(result) {
             <v-col cols="4">
               <OfferListItem type="accommodation" :offerItem="accommodation" custom>
                 <template v-slot:template>
-                  <v-card elevation="0" class="h-100 d-flex justify-space-between">
-                    <v-btn elevation="0" color="blue-grey-lighten-2"
-                           @click="editOffer(accommodation.offerID)">Edit</v-btn>
-                    <v-btn color="red-lighten-2" elevation="0"
-                           @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete</v-btn>
+                  <v-card elevation="0" class=" d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="blue-grey-lighten-2" rounded
+                           @click="editOffer(accommodation.offerID)">Edit
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete
+                    </v-btn>
                   </v-card>
                 </template>
               </OfferListItem>
@@ -160,11 +204,13 @@ function handleDeleteConfirmation(result) {
             <v-col cols="4">
               <OfferListItem type="activity" :offerItem="activity" custom>
                 <template v-slot:template>
-                  <v-card elevation="0" class="h-100 d-flex justify-space-between">
-                    <v-btn elevation="0" color="blue-grey-lighten-2"
-                           @click="editOffer(activity.offerID)">Edit</v-btn>
-                    <v-btn color="red-lighten-2" elevation="0"
-                           @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete</v-btn>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="blue-grey-lighten-2" rounded
+                           @click="editOffer(activity.offerID)">Edit
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete
+                    </v-btn>
                   </v-card>
                 </template>
               </OfferListItem>
@@ -172,9 +218,6 @@ function handleDeleteConfirmation(result) {
           </template>
         </v-row>
       </v-infinite-scroll>
-    </div>
-    <div v-else class="no_offers">
-      <p class="text-center">Currently there are no offers!</p>
     </div>
     <v-dialog v-model="confirmDelete" max-width="400">
       <v-card>
