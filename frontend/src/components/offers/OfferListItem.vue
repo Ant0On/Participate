@@ -26,7 +26,7 @@ const image = computed(() => {
     return images
   }
 });
-
+console.log(props)
 const cardPage = ref((props.custom)? 'custom' : 'main');
 </script>
 
@@ -54,7 +54,7 @@ const cardPage = ref((props.custom)? 'custom' : 'main');
 
     <v-card-item>
       <v-card-title v-if="custom" class="font-weight-black">{{ offerItem.title }}</v-card-title>
-      <router-link v-else :to="`/offers/${type}/${offerItem.offerID}`">
+      <router-link v-else :to="`/offers/${type}/${offerItem.offerId}`">
         <v-card-title class="font-weight-black">{{ offerItem.title }}</v-card-title>
       </router-link>
       <v-card-subtitle>
