@@ -39,7 +39,7 @@ func GetPendingAccommodationReservations(c *gin.Context) {
 	selectQuery := "reservation_accommodation.id as reservation_accommodation_id, reservation_accommodation.date_from," +
 		" reservation_accommodation.date_to, accommodation.capacity, reservation_accommodation.rating_id," +
 		" accommodation.title, accommodation.price_per_day, accommodation.is_animal_friendly, town.name as town_name," +
-		" country.name as country_name, accommodation.accommodation_type, reservation_accommodation.reservation_state, accommodation.id as accommodation_id"
+		" country.name as country_name, accommodation.accommodation_type as type, reservation_accommodation.reservation_state, accommodation.id as accommodation_id"
 	GetDTOReservation(c, ReservationQueryParameters{
 		offerTableName:       "accommodation",
 		reservationTableName: "reservation_accommodation",
@@ -56,7 +56,7 @@ func GetReservationsAccommodationHistory(c *gin.Context) {
 	selectQuery := "reservation_accommodation.id as reservation_accommodation_id, reservation_accommodation.date_from," +
 		" reservation_accommodation.date_to, accommodation.capacity, reservation_accommodation.rating_id," +
 		" accommodation.title, accommodation.price_per_day, accommodation.is_animal_friendly, town.name as town_name," +
-		" country.name as country_name, accommodation.accommodation_type, reservation_accommodation.reservation_state, accommodation.id as accommodation_id"
+		" country.name as country_name, accommodation.accommodation_type as type, reservation_accommodation.reservation_state, accommodation.id as accommodation_id"
 	GetDTOReservation(c, ReservationQueryParameters{
 		offerTableName:       "accommodation",
 		reservationTableName: "reservation_accommodation",

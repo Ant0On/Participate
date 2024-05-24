@@ -29,7 +29,7 @@ func GetPendingEventReservations(c *gin.Context) {
 	var pendingReservations []DTO.ReservationEventWithOffer
 	selectQuery := "reservation_event.id as reservation_event_id, reservation_event.date," +
 		" event.capacity, event.title, event.price, " +
-		"event.event_type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
+		"event.event_type as type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
 	GetDTOReservation(c, ReservationQueryParameters{
 		offerTableName:       "event",
 		reservationTableName: "reservation_event",
@@ -45,7 +45,7 @@ func GetReservationsEventHistory(c *gin.Context) {
 	var pendingReservations []DTO.ReservationEventWithOffer
 	selectQuery := "reservation_event.id as reservation_event_id, reservation_event.date," +
 		" event.capacity, event.title, event.price, " +
-		"event.event_type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
+		"event.event_type as type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
 	GetDTOReservation(c, ReservationQueryParameters{
 		offerTableName:       "event",
 		reservationTableName: "reservation_event",

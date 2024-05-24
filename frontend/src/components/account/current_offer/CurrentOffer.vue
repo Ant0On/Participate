@@ -1,131 +1,178 @@
 <script setup>
-import {ref, onMounted, reactive} from 'vue';
+import {onMounted, ref} from 'vue';
+import {storeToRefs} from 'pinia';
 import {useAuthStore} from "@/stores/auth.store";
-import SwitchListPage from "@/components/common/SwitchListPage.vue";
-import {fetchWrapper} from "@/_helpers/fetch-wrapper";
-import CurrentOfferItem from "@/components/account/current_offer/CurrentOfferItem.vue";
+import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
+import OfferReservationListItem from "@/components/offers/OfferReservationListItem.vue";
 
-const auth = useAuthStore();
-const user = auth.user;
-const pageSize = 5;
+const userStore = useAuthStore();
+const {user: user} = storeToRefs(userStore)
 
-const allCurrentOffers = ref([])
-const currentOffers = ref([])
-const currentPage = ref(1)
-const maxPage = ref(1)
+const allEvents = ref([]);
+const allActivities = ref([]);
+const allAccommodations = ref([]);
 
-const errors = reactive({
-  apiError: ""
-})
+function mapAccommodation(responseData) {
 
-async function getCurrentOffers() {
-  fetchWrapper.get(`/api/host/${user.ID}/reservations/pending`)
-      .then((response) => {
-        if (response) {
-          const responseData = response.data
-
-          allCurrentOffers.value = responseData.map((data) => {
-            return {
-              'reservationID': data["reservation_id"],
-              'location': data["country_name"] + ', ' + data["town_name"],
-              'name': data["name"],
-              'price': data["price"],
-              'dateFrom': data['date_from'],
-              'dateTo': data['date_to'],
-              'offerType': data['offer_type'],
-              'withAnimals': data['is_animal_friendly'],
-              'offerId': data['offer_id']
-            }
-          })
-          currentOffers.value = allCurrentOffers.value.slice(0, pageSize);
-          maxPage.value = Math.floor(allCurrentOffers.value.length / pageSize) + 1
-        }
-      })
-      .catch((error) => {
-        errors.apiError = "Failed to fetch current offers. Please try again later. " + error;
-      })
+  return responseData.map((data) => {
+    return {
+      'offerId': data["offer_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'capacity': data["capacity"],
+      'price': data['price_per_day'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'type': data['type'],
+      'animal_friendly': data['is_animal_friendly'],
+      'rating': data['rating']
+    };
+  });
 }
 
-function pageBack() {
-  if (currentPage.value > 1) {
-    currentPage.value -= 1;
-    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
+function mapActivities(responseData) {
+
+  return responseData.map((data) => {
+    return {
+      'offerId': data["offer_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'skill': data['skill_level'],
+      'type': data['type'],
+      'duration': data['duration']
+    };
+  });
+}
+
+function mapEvents(responseData) {
+  return responseData.map((data) => {
+    return {
+      'offerId': data["offer_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'description': data["description"],
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'type': data['type']
+    };
+  });
+}
+
+const eventsGenerator = fetchPaginatedData(`/api/host/events/${user.value.ID}/reservations/pending`, mapEvents);
+const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.value.ID}/reservations/pending`, mapActivities);
+const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.value.ID}/reservations/pending`, mapAccommodation);
+
+onMounted(async () => {
+  allAccommodations.value = await accommodationsGenerator.next();
+  allActivities.value = await activitiesGenerator.next();
+  allEvents.value = await eventsGenerator.next();
+});
+
+async function loadOffers(generator, offerList, done) {
+  const response = await generator.next();
+  if (response?.done) {
+    done('empty');
+    return;
   }
+  offerList.value.push(...response.value);
+  done('ok');
 }
 
-function pageFroward() {
-  if (currentPage.value < maxPage.value) {
-    currentPage.value += 1;
-    currentOffers.value = allCurrentOffers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
-
-  }
-}
-
-onMounted(async () => await getCurrentOffers())
 </script>
 
 <template>
-
-  <div class="current_offers">
-    <p>Current offers</p>
-    <div class="items_list">
-      <div class="offer_items">
-        <CurrentOfferItem v-for="currentOffer in currentOffers" :name="currentOffer.name"
-                          :offer-type="currentOffer.offerType"
-                          :date-from="currentOffer.dateFrom" :date-to="currentOffer.dateTo"
-                          :id="currentOffer.reservationID"
-                          :with-animals="currentOffer.withAnimals" :offer-id="currentOffer.offerId"/>
-      </div>
-      <div class="navigation">
-        <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
-                        @page-forward="pageFroward"/>
-      </div>
-      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+  <div class="event_page">
+    <div>
+      <v-infinite-scroll
+          :items="allEvents"
+          :onLoad="({done}) => loadOffers(eventsGenerator, allEvents, done)"
+          empty-text="Currently there are no offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Events</p>
+        <v-row class="w-100">
+          <template v-for="event in allEvents.value" :key="event.offerID">
+            <v-col cols="4">
+              <OfferReservationListItem type="event" :offerItem="event" custom>
+                <template v-slot:template>
+                </template>
+              </OfferReservationListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+    </div>
+    <div>
+      <v-infinite-scroll
+          :items="allAccommodations"
+          :onLoad="({done}) => loadOffers(accommodationsGenerator, allAccommodations, done)"
+          empty-text="Currently there are no offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Accommodations</p>
+        <v-row class="w-100">
+          <template v-for="accommodation in allAccommodations.value" :key="accommodation.offerID">
+            <v-col cols="4">
+              <OfferReservationListItem type="accommodation" :offerItem="accommodation" custom>
+                <template v-slot:template>
+                </template>
+              </OfferReservationListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+    </div>
+    <div>
+      <v-infinite-scroll
+          :items="allActivities"
+          :onLoad="({done}) => loadOffers(activitiesGenerator, allActivities, done)"
+          empty-text="Currently there are no offers to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Activities</p>
+        <v-row class="w-100">
+          <template v-for="activity in allActivities.value" :key="activity.offerID">
+            <v-col cols="4">
+              <OfferReservationListItem type="activity" :offerItem="activity" custom>
+                <template v-slot:template>
+                </template>
+              </OfferReservationListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
     </div>
   </div>
-
 </template>
 
 <style scoped>
-div.current_offers {
-  display: flex;
-  flex-direction: column;
-  height: max(500px, 80%);
-  flex-grow: 1;
+.event_page {
+  height: 100%;
 }
 
-div.items_list {
+div.event_page {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  justify-content: space-between;
-  padding-top: 2%;
-
-}
-
-div.offer_items {
-  display: flex;
-  flex-direction: column;
-  padding-left: 2%;
-}
-
-div.navigation {
-  padding-top: 2%;
 }
 
 p {
   color: #000000;
   font-family: "Poppins", Helvetica;
-  font-size: 1.4rem;
-  padding-bottom: 2%;
-  font-weight: 400;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: normal;
   align-self: center;
+  margin: 1% 1% 1% 1%;
 }
-
-div.errors {
-  font-family: "Sarabun", Helvetica;
-  color: red;
-  padding-top: 2%;
-}
-
 </style>

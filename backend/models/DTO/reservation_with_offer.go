@@ -14,7 +14,7 @@ type ReservationAccommodationWithOffer struct {
 	DateFrom          time.Time                `json:"date_from"`
 	DateTo            time.Time                `json:"date_to"`
 	IsAnimalFriendly  bool                     `json:"is_animal_friendly"`
-	AccommodationType models.AccommodationType `json:"accommodation_type"`
+	AccommodationType models.AccommodationType `json:"type"`
 	TownName          string                   `json:"town_name"`
 	CountryName       string                   `json:"country_name"`
 	AccommodationID   uint                     `json:"accommodation_id"`
@@ -28,7 +28,7 @@ type ReservationActivityWithOffer struct {
 	Price            float64             `json:"price"`
 	Capacity         int                 `json:"capacity"`
 	Date             time.Time           `json:"date"`
-	ActivityType     models.ActivityType `json:"activity_type"`
+	ActivityType     models.ActivityType `json:"type"`
 	TownName         string              `json:"town_name"`
 	CountryName      string              `json:"country_name"`
 	ActivityID       uint                `json:"activity_id"`
@@ -42,7 +42,7 @@ type ReservationEventWithOffer struct {
 	Price            float64          `json:"price"`
 	Capacity         int              `json:"capacity"`
 	Date             time.Time        `json:"date"`
-	EventType        models.EventType `json:"event_type"`
+	EventType        models.EventType `json:"type"`
 	TownName         string           `json:"town_name"`
 	CountryName      string           `json:"country_name"`
 	EventID          uint             `json:"event_id"`
