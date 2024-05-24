@@ -93,6 +93,7 @@ type ReservationQueryParameters struct {
 	dto                  interface{}
 	selectQuery          string
 	condition            func(userID string) string
+	userRole             string
 }
 
 func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
@@ -107,12 +108,24 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 
 	query := models.DB.Model(parameters.model)
 
-	joinCondition := fmt.Sprintf("JOIN %s ON %s.%s = %s.id", parameters.offerTableName, parameters.reservationTableName, parameters.offerID, parameters.reservationTableName)
-	joinCondition += fmt.Sprintf(" JOIN town ON %s.town_id = town.id", parameters.offerTableName)
+	joinCondition := fmt.Sprintf("JOIN %s ON %s.%s = %s.id", parameters.offerTableName, parameters.reservationTableName, parameters.offerID, parameters.offerTableName)
+	if parameters.offerTableName == "room" {
+		joinCondition += " JOIN accommodation ON room.accommodation_id = accommodation.id"
+		joinCondition += " JOIN town ON accommodation.town_id = town.id"
+	} else {
+		joinCondition += fmt.Sprintf(" JOIN town ON %s.town_id = town.id", parameters.offerTableName)
+	}
 	joinCondition += " JOIN country ON town.country_id = country.id"
-	joinCondition += fmt.Sprintf(" JOIN app_user ON %s.user_id = app_user.id", parameters.reservationTableName)
+	if parameters.offerTableName == "room" && parameters.userRole == "host" {
+		joinCondition += " JOIN app_user ON accommodation.user_id = app_user.id"
+	} else if parameters.userRole == "customer" {
+		joinCondition += fmt.Sprintf(" JOIN app_user ON %s.user_id = app_user.id", parameters.reservationTableName)
+	} else {
+		joinCondition += fmt.Sprintf(" JOIN app_user ON %s.user_id = app_user.id", parameters.offerTableName)
+	}
 
 	result = query.
+		Debug().
 		Joins(joinCondition).
 		Where(parameters.condition(userID)).
 		Select(parameters.selectQuery).
@@ -124,9 +137,9 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNoContent, gin.H{"message": "No pending reservations"})
+		c.JSON(http.StatusNoContent, gin.H{"message": "No reservations found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "pending reservations fetched successfully", "data": parameters.dto})
+	c.JSON(http.StatusOK, gin.H{"message": "reservations fetched successfully", "data": parameters.dto})
 }

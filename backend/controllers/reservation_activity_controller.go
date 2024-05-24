@@ -3,13 +3,14 @@ package controllers
 import (
 	"backend/models"
 	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func AddActivityReservation(c *gin.Context) {
-	var reservation *models.ReservationActivity
-	CreateReservation(c, reservation)
+	var reservation models.ReservationActivity
+	CreateReservation(c, &reservation)
 }
 
 func GetActivityReservationById(c *gin.Context) {
@@ -24,9 +25,9 @@ func ChangeActivityReservationState(c *gin.Context) {
 	ChangeReservationState(c, models.GetActivityReservationById)
 }
 
-func GetPendingActivityReservations(c *gin.Context) {
+func GetCurrentActivityReservations(c *gin.Context) {
 	var pendingReservations []DTO.ReservationActivityWithOffer
-	selectQuery := "reservation_activity.id as reservation_activity_id, reservation_activity.date, activity.capacity," +
+	selectQuery := "reservation_activity.id as reservation_id, reservation_activity.date, activity.capacity," +
 		" reservation_activity.rating_id, activity.title, activity.price, activity.activity_type as type," +
 		" town.name as town_name, country.name as country_name, reservation_activity.reservation_state, activity.id as activity_id"
 
@@ -37,12 +38,13 @@ func GetPendingActivityReservations(c *gin.Context) {
 		model:                &models.ReservationActivity{},
 		dto:                  &pendingReservations,
 		selectQuery:          selectQuery,
-		condition:            PendingWhereCondition,
+		condition:            utils.CurrentWhereCondition,
+		userRole:             "host",
 	})
 }
 func GetReservationsActivityHistory(c *gin.Context) {
 	var pendingReservations []DTO.ReservationActivityWithOffer
-	selectQuery := "reservation_activity.id as reservation_activity_id, reservation_activity.date, activity.capacity," +
+	selectQuery := "reservation_activity.id as reservation_id, reservation_activity.date, activity.capacity," +
 		" reservation_activity.rating_id, activity.title, activity.price, activity.activity_type as type," +
 		" town.name as town_name, country.name as country_name, reservation_activity.reservation_state, activity.id as activity_id"
 
@@ -53,6 +55,7 @@ func GetReservationsActivityHistory(c *gin.Context) {
 		model:                &models.ReservationActivity{},
 		dto:                  &pendingReservations,
 		selectQuery:          selectQuery,
-		condition:            HistoryWhereCondition,
+		condition:            utils.HistoryWhereCondition,
+		userRole:             "customer",
 	})
 }

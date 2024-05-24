@@ -41,36 +41,35 @@ const stateMap = {
 }
 
 function mapAccommodation(responseData) {
-
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
+      'offerId': data["accommodation_id"],
       'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'capacity': data["capacity"],
-      'price': data['price_per_day'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
+      'state': data['reservation_state'],
       'type': data['type'],
+      'capacity': data["capacity"],
+      'dateFrom': data['date_from'],
+      'dateTo': data['dateTo'],
+      'price': data['price_per_day'],
+      'reservationId': data['reservation_id'],
       'animal_friendly': data['is_animal_friendly'],
-      'rating': data['rating']
+
     };
   });
 }
 
 function mapActivities(responseData) {
-
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
+      'offerId': data["activity_id"],
       'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
+      'date': data["date"],
       'capacity': data["capacity"],
       'price': data['price'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
+      'state': data['reservation_state'],
+      'reservationId': data['reservation_id'],
       'skill': data['skill_level'],
       'type': data['type'],
       'duration': data['duration']
@@ -81,22 +80,22 @@ function mapActivities(responseData) {
 function mapEvents(responseData) {
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
+      'offerId': data["event_id"],
       'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
+      'state': data["reservation_state"],
       'capacity': data["capacity"],
       'price': data['price'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
+      'reservationId': data['reservation_id'],
+      'date': data['date'],
       'type': data['type']
     };
   });
 }
 
-const eventsGenerator = fetchPaginatedData(`/api/host/event/${user.value.ID}/reservations/pending`, mapEvents);
-const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.value.ID}/reservations/pending`, mapActivities);
-const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.value.ID}/reservations/pending`, mapAccommodation);
+const eventsGenerator = fetchPaginatedData(`/api/host/event/${user.value.ID}/reservations`, mapEvents);
+const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.value.ID}/reservations`, mapActivities);
+const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.value.ID}/reservations`, mapAccommodation);
 
 onMounted(async () => {
   allAccommodations.value = await accommodationsGenerator.next();
@@ -131,7 +130,7 @@ async function acceptReservation(reservationId, type, reservations){
 }
 async function rejectReservation(reservationId, type, reservations){
   fetchWrapper.post(`/api/reservation/${type}/${reservationId}/rejected`, {}).then(() => {
-    changeListReservationState(reservations, reservationId, "accepted")
+    changeListReservationState(reservations, reservationId, "rejected")
   }).catch((err) => {
 
   })

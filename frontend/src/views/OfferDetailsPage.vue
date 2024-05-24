@@ -59,19 +59,18 @@ async function makeReservation() {
     'reservation_state': 'pending',
     'number_of_people': Number(reservation.value.numberOfPeople),
     'user_id': Number(user.value.ID),
-    'offer_id': Number(props.id),
     'payment_id': paymentType.value[chosenPayment.value].id
   }
   if(props.type === "event"){
-    reservationBody.date = reservation.value.dateTo
-    reservation.event_id = Number(props.id)
+    reservationBody.date = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.event_id = Number(props.id)
   }else if(props.type === "activity"){
-    reservationBody.date = reservation.value.dateTo
-    reservation.activity_id = Number(props.id)
+    reservationBody.date = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.activity_id = Number(props.id)
   }else if(props.type === "accommodation"){
-    reservationBody.date_from = reservation.value.dateFrom
-    reservationBody.date_to = reservation.value.dateTo
-    reservation.accommodation_id = Number(props.id)
+    reservationBody.date_from = new Date(reservation.value.dateFrom).toISOString()
+    reservationBody.date_to = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.accommodation_id = Number(props.id)
   }
 
   fetchWrapper.post(`/api/reservation/${props.type}/add`, reservationBody).then((resp) => {

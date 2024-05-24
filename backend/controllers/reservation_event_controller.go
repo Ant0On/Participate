@@ -3,14 +3,14 @@ package controllers
 import (
 	"backend/models"
 	"backend/models/DTO"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func AddEventReservation(c *gin.Context) {
-	var reservation *models.ReservationEvent
-	CreateReservation(c, reservation)
-
+	var reservation models.ReservationEvent
+	CreateReservation(c, &reservation)
 }
 
 func GetEventReservationById(c *gin.Context) {
@@ -25,9 +25,9 @@ func ChangeEventReservationState(c *gin.Context) {
 	ChangeReservationState(c, models.GetEventReservationById)
 }
 
-func GetPendingEventReservations(c *gin.Context) {
+func GetCurrentEventReservations(c *gin.Context) {
 	var pendingReservations []DTO.ReservationEventWithOffer
-	selectQuery := "reservation_event.id as reservation_event_id, reservation_event.date," +
+	selectQuery := "reservation_event.id as reservation_id, reservation_event.date," +
 		" event.capacity, event.title, event.price, " +
 		"event.event_type as type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
 	GetDTOReservation(c, ReservationQueryParameters{
@@ -37,13 +37,14 @@ func GetPendingEventReservations(c *gin.Context) {
 		model:                &models.ReservationEvent{},
 		dto:                  &pendingReservations,
 		selectQuery:          selectQuery,
-		condition:            PendingWhereCondition,
+		condition:            utils.CurrentWhereCondition,
+		userRole:             "host",
 	})
 }
 
 func GetReservationsEventHistory(c *gin.Context) {
 	var pendingReservations []DTO.ReservationEventWithOffer
-	selectQuery := "reservation_event.id as reservation_event_id, reservation_event.date," +
+	selectQuery := "reservation_event.id as reservation_id, reservation_event.date," +
 		" event.capacity, event.title, event.price, " +
 		"event.event_type as type, town.name as town_name, country.name as country_name, reservation_event.reservation_state, event.id as event_id"
 	GetDTOReservation(c, ReservationQueryParameters{
@@ -53,6 +54,7 @@ func GetReservationsEventHistory(c *gin.Context) {
 		model:                &models.ReservationEvent{},
 		dto:                  &pendingReservations,
 		selectQuery:          selectQuery,
-		condition:            HistoryWhereCondition,
+		condition:            utils.HistoryWhereCondition,
+		userRole:             "customer",
 	})
 }

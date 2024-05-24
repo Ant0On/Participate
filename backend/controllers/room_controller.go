@@ -54,7 +54,7 @@ func CreateRooms(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "rooms created successfully!", "rooms": rooms})
 }
 
-func GetRooms(c *gin.Context) {
+func GetRoomsForAccommodation(c *gin.Context) {
 	var rooms []models.Room
 	var result *gorm.DB
 	accommodationId := c.Query("id")

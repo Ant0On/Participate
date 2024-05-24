@@ -140,6 +140,13 @@ const cardPage = ref((props.custom)? 'custom' : 'info');
             </v-col>
             <v-col><span class="me-1">{{ offerItem.dateTo }}</span></v-col>
           </v-row>
+          <v-row class="font-weight-bold" v-if="type === 'activity' || type === 'event'">
+            <v-col>
+              <v-icon icon="mdi-clock-outline" size="small"></v-icon>
+              <span class="me-1">Date</span>
+            </v-col>
+            <v-col><span class="me-1">{{ offerItem.date }}</span></v-col>
+          </v-row>
         </v-container>
       </v-card>
     </v-card-text>
