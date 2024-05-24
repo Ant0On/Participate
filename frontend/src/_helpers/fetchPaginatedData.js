@@ -13,12 +13,12 @@ export default async function* fetchPaginatedData(url, onMap=(data)=>data){
         page += 1;
 
         while(page <= totalPages){
-            yield await onMap(fetchPage(url, page)?.data)
+            yield onMap(await fetchPage(url, page)?.data)
             page += 1;
         }
     }
 }
 
 async function fetchPage(url, pageNumber){
-    return await fetchWrapper.get(`${url}?page=${pageNumber}`)
+    return await fetchWrapper.get(`${url}${(url.includes('?'))? '&': '?'}page=${pageNumber}`)
 }

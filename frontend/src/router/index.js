@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import {storeToRefs} from 'pinia';
 
 import { useAuthStore } from '@/stores/auth.store';
+import {useNavStore} from "@/stores/nav.store";
 
 import Login from '@/views/LoginPage.vue'
 import Home from '@/views/HomePage.vue'
@@ -88,12 +89,13 @@ router.beforeEach(async (to) => {
     const hostRequired = hostPages.includes(to.path);
     const customerRequired = customerPages.includes(to.path);
     const userStore = useAuthStore();
-
+    const navStore = useNavStore();
     const {user: user} = storeToRefs(userStore)
 
     if (hostRequired && user.value?.Role !== "host" || customerRequired && user.value?.Role !== "customer") {
         user.returnUrl = to.fullPath;
+        navStore.changePage('/')
         return '/';
     }
-
+    navStore.changePage(to)
 });

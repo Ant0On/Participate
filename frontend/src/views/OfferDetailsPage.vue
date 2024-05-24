@@ -7,23 +7,25 @@ import {useAuthStore} from "@/stores/auth.store";
 import chipsMapper from "@/_helpers/chips";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import RoomDetail from "@/components/detail/RoomDetail.vue";
+import {router} from "@/router";
 
 const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
-
+const offer = ref(null)
 const props = defineProps({
   type: String,
-  id: String
+  id: String,
+  chatID: String
 })
 
-const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.price, offer?.discount))
+const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.value?.price, offer.value?.discount))
 const cardPage = ref('description')
 const offerPage = ref('description')
 const chosenPayment = ref(null)
 const paymentType = ref({
-  'paypal': {url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
-  'credit_card': {url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
-  'bitcoin': {url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
+  'paypal': {id:1, url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
+  'credit_card': {id: 2, url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
+  'bitcoin': {id: 3, url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
 })
 const reservationCreated = ref(null)
 const reservation = ref({
@@ -31,6 +33,7 @@ const reservation = ref({
   dateTo: null,
   animal: null,
   room: null,
+  numberOfPeople: null,
 })
 const openRoomDialog = ref(false)
 const typeLink = {
@@ -41,84 +44,89 @@ const typeLink = {
 const choosePaymentAlert = ref(false)
 
 const form = ref()
-async function makeReservation(){
-    choosePaymentAlert.value = false;
 
-    const { valid } = await form.value.validate()
-    if(!valid){
-        return
-    }
-    if(!chosenPayment.value){
-      choosePaymentAlert.value = true;
-      return
-    }
+async function makeReservation() {
+  choosePaymentAlert.value = false;
+  const {valid} = await form.value.validate()
+  if (!valid) {
+    return
+  }
+  if (!chosenPayment.value) {
+    choosePaymentAlert.value = true;
+    return
+  }
+  const reservationBody = {
+    'reservation_state': 'pending',
+    'number_of_people': Number(reservation.value.numberOfPeople),
+    'user_id': Number(user.value.ID),
+    'offer_id': Number(props.id),
+    'payment_id': paymentType.value[chosenPayment.value].id
+  }
+  if(props.type === "event"){
+    reservationBody.date = reservation.value.dateTo
+    reservation.event_id = Number(props.id)
+  }else if(props.type === "activity"){
+    reservationBody.date = reservation.value.dateTo
+    reservation.activity_id = Number(props.id)
+  }else if(props.type === "accommodation"){
+    reservationBody.date_from = reservation.value.dateFrom
+    reservationBody.date_to = reservation.value.dateTo
+    reservation.accommodation_id = Number(props.id)
+  }
 
+  fetchWrapper.post(`/api/reservation/${props.type}/add`, reservationBody).then((resp) => {
+    router.push('/');
+    window.open(paymentType.value[chosenPayment.value].url, '_blank');
+  }).catch((error) => {
+
+  })
 }
 
-
-const offer = {
-  offerId: 1,
-  title: "Wakacyjne pierdolenie",
-  location: "Zamosc, Polska",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-  capacity: 10,
-  discount: 10,
-  price: 30,
-  type: "festival",
-  rating: 4.5,
-  duration: 10,
-  generalFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-  numberOfRooms: 3,
-  dateFrom: new Date().toLocaleDateString(),
-  dateTo: new Date().toLocaleDateString(),
-  date: new Date().toLocaleDateString(),
-  skill: 'beginner',
-  rooms: [
-    {
-      roomNumber: 1,
-      roomName: 'Pierwszy',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 2,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-    {
-      roomNumber: 2,
-      roomName: 'Drugi',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 2,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-    {
-      roomNumber: 3,
-      roomName: 'Trzeci',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 1,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-    {
-      roomNumber: 4,
-      roomName: 'Czwarty',
-      roomDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
-      capacity: 3,
-      roomFacilities: ["Swimming Pool", "Gym", "Spa", "Restaurant"],
-      area: 'Zamosc'
-    },
-  ]
-
-}
-const chips = ref(chipsMapper(offer?.discount))
+const chips = ref(chipsMapper(offer.value?.discount))
 
 const image = computed(() => {
+  const images = []
+  let number = 0
   try {
-    const image = require(`@/../images/offers/${props.type}/${offer.offerId}/${offer.offerId}_0.jpeg`)
-    return image
-  } catch {
-    return undefined
+    while (true) {
+      const image = require(`@/../images/offers/${props.type}/${offer.value?.offerId}/${offer.value?.offerId}_${number}.jpeg`)
+      images.push(image)
+      number++
+    }
+  } catch (error) {
+    return images
   }
 })
+
+
+const isChatAlreadyCreated = ref(false)
+const showChat = ref(false);
+
+function createChatHost() {
+  if (isChatAlreadyCreated.value) {
+    openChatCustomer()
+  }
+  if (user.Role === 'host' && offer.value?.userID !== user.ID) {
+    console.error('You are not the owner of this offer!')
+  } else {
+    fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
+          isChatAlreadyCreated.value = true;
+          showChat.value = true
+          window.location.reload();
+        }
+    ).catch()
+  }
+}
+
+const chatID = toRef(props.chatID)
+
+function openChatCustomer() {
+  showChat.value = true
+}
+
+function closeChat() {
+  showChat.value = false;
+}
 
 const hostData = ref({
   firstName: '',
@@ -127,35 +135,80 @@ const hostData = ref({
 })
 
 async function getOfferDetails() {
-  const response = await fetchWrapper.get(`/api/offers/${props.id}`)
+  const response = await fetchWrapper.get(`/api/offers/${props.type}/${props.id}`)
+  if (response?.data) {
+    const data = response.data
+    if (props.type === "accommodation") {
+      return {
+        'offerId': data["offer_id"],
+        'title': data["title"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'capacity': data["capacity"],
+        'price': data['price_per_day'],
+        'isRecommended': data['is_recommended'],
+        'discount': data['discount'],
+        'type': data['type'],
+        'animal_friendly': data['is_animal_friendly'],
+        'rating': data['rating']
+      }
 
-  const responseData = response.data
-  offer.value = {
-    'userID': responseData["user_id"],
-    'location': responseData["country_name"] + ', ' + responseData["town_name"],
-    'description': responseData["description"],
-    'name': responseData["name"],
-    'price': responseData["price"],
-    'numberOfPeople': responseData["max_people"],
-  }
-
-  const response_host = await fetchWrapper.get(`/api/host/${offer.value.userID}`)
-
-  hostData.value = {
-    'firstName': response_host["FirstName"],
-    'detail': response_host["Description"],
-    'imagePath': response_host["ImagePath"]
+    } else if (props.type === "event") {
+      return {
+        'offerId': data["offer_id"],
+        'title': data["title"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'capacity': data["capacity"],
+        'price': data['price'],
+        'isRecommended': data['is_recommended'],
+        'discount': data['discount'],
+        'type': data['type']
+      }
+    } else if (props.type === "activity") {
+      return {
+        'offerId': data["offer_id"],
+        'title': data["title"],
+        'location': data["country_name"] + ', ' + data["town_name"],
+        'description': data["description"],
+        'capacity': data["capacity"],
+        'price': data['price'],
+        'isRecommended': data['is_recommended'],
+        'discount': data['discount'],
+        'skill': data['skill_level'],
+        'type': data['type'],
+        'duration': data['duration']
+      }
+    }
   }
 }
 
+async function doesChatExist() {
+  return fetchWrapper.get(`/api/chat/offer/${props.id}`).then((response) => {
+    if (!response) {
+      isChatAlreadyCreated.value = false
+    } else {
+      chatID.value = response.data["ID"]
+      isChatAlreadyCreated.value = true
+    }
+  }).catch(error => {
+    console.log(error)
+  })
+}
+
 onMounted(async () => {
-  // await getOfferDetails();
+  offer.value = await getOfferDetails();
+  // await doesChatExist();
 });
 
 </script>
 
 <template>
-  <v-sheet class="d-flex flex-column">
+  <v-progress-circular v-if="!offer"
+      color="primary"
+      indeterminate
+  ></v-progress-circular>
+  <v-sheet v-else class="d-flex flex-column">
     <v-breadcrumbs>
       <v-breadcrumbs-item :to="`/${typeLink[type]}`"
                           :title="type[0].toUpperCase() + type.slice(1)"></v-breadcrumbs-item>
@@ -169,13 +222,14 @@ onMounted(async () => {
         <v-card class="d-flex flex-row rounded-xl h-100">
           <v-card class="w-50">
             <v-carousel v-if="image"
-                        :show-arrows="[image].length > 1"
-                        :hide-delimiters="[image].length === 1"
+                        :show-arrows="[...image].length > 1"
+                        :hide-delimiters="[...image].length === 1"
                         height="600px"
                         cycle
             >
               <v-carousel-item
-                  :src="image"
+                  v-for="img in image"
+                  :src="img"
                   style="min-height: 100%"
                   cover
               >
@@ -422,33 +476,58 @@ onMounted(async () => {
             <v-card-text class="d-flex flex-column align-center justify-center">
               <v-form v-if="type === 'event' || type === 'activity' "
                       v-model="reservationCreated"
-                      class="w-75 d-flex align-center justify-center"
+                      class="w-75 d-flex align-center justify-center flex-column"
                       ref="form"
               >
                 <v-text-field
+                    label="Number of people"
+                    class="w-100"
+                    clearable
+                    type="number"
+                    variant="outlined"
+                    v-model="reservation.numberOfPeople"
+                    :rules="[value => !!value && value > 0 || 'Number of people is required',
+                    value => value <= offer?.capacity || 'Number of people must be lower than capacity',
+                    ]"
+                ></v-text-field>
+                <v-text-field
                     label="Date"
+                    class="w-100"
                     clearable
                     type="date"
                     variant="outlined"
                     v-model="reservation.dateTo"
-                    :rules="[value => !!value || 'Date is required']"
+                    :rules="[value => !!value || 'Date is required',
+                    value => new Date(value) >= new Date() || 'Date can\'t be smaller than today\'s date',
+                    ]"
                 ></v-text-field>
               </v-form>
               <v-form v-else-if="type === 'accommodation'" v-model="reservationCreated"
                       class="w-75 d-flex flex-column align-center justify-center"
-                      validate-on="submit"
                       ref="form"
               >
+                <v-text-field
+                    label="Number of people"
+                    class="w-100"
+                    clearable
+                    type="number"
+                    variant="outlined"
+                    v-model="reservation.numberOfPeople"
+                    :rules="[value => !!value && value > 0 || 'Number of people is required',
+                    value => value <= offer?.capacity || 'Number of people must be lower than capacity',
+                    ]"
+                ></v-text-field>
                 <v-text-field
                     label="Date From"
                     clearable
                     type="date"
                     variant="outlined"
                     v-model="reservation.dateFrom"
-                    class="w-100"
+                    class="w-100 mt-2"
                     :rules="[
                         value => !!value || 'Starting date is required',
-                        value => value < reservation.dateTo || 'Date must be smaller than ending date'
+                        value => value < reservation.dateTo || 'Date must be smaller than ending date',
+                        value => new Date(value) >= new Date() || 'Date can\'t be smaller than today\'s date',
                     ]"
                 ></v-text-field>
                 <v-text-field
@@ -460,7 +539,8 @@ onMounted(async () => {
                     class="w-100 mt-2"
                     :rules="[
                         value => !!value || 'Ending date is required',
-                        value => value > reservation.dateFrom || 'Date must be grater than starting date'
+                        value => value > reservation.dateFrom || 'Date must be grater than starting date',
+                        value => new Date(value) >= new Date() || 'Date can\'t be smaller than today\'s date'
                     ]"
                 ></v-text-field>
                 <v-select

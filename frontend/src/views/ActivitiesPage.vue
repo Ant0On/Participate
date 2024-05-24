@@ -1,37 +1,48 @@
 <script setup>
-import { ref,  onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
+import {onMounted, ref} from 'vue';
+import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import { useSearchStore } from "@/stores/search.store";
-import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
+import {useOfferStore} from "@/stores/offers.store";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
 
-const searchStore = useSearchStore();
-const { location, dateFrom, dateTo, numberOfPeople } = storeToRefs(searchStore);
-
+const offerStore = useOfferStore();
+const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(offerStore)
 const activities = ref([]);
 
 function mapActivities(responseData) {
 
   return responseData.map((data) => {
-    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
     return {
       'offerId': data["offer_id"],
+      'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
-      'title': data["title"],
-      'price': priceAfterDiscount,
-      'capacity': data["capacity"]
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'skill': data['skill_level'],
+      'type': data['type'],
+      'duration': data['duration']
     };
   });
 }
 
-const pagesGenerator = fetchPaginatedData('/api/offers/activities', mapActivities)
+function getQuery() {
+  if (inputValue.value) {
+    return (isLocalization.value) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
+  }
+  return ''
+}
+
+
+let pagesGenerator = fetchPaginatedData(`/api/offers/activities${getQuery()}`, mapActivities)
 
 onMounted(async () => {
-  activities.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  activities.value = response.value;
 });
 
 async function load({done}) {
@@ -43,13 +54,19 @@ async function load({done}) {
   activities.value.push(...response.value)
   done('ok');
 }
+
+offerStore.$subscribe(async (mutation, state) => {
+  pagesGenerator = fetchPaginatedData(`/api/offers/activities${getQuery()}`, mapActivities)
+  const response = await pagesGenerator.next();
+  activities.value = response.value;
+})
 </script>
 
 <template>
   <div class="activities_page">
     <p>Inspiring activities</p>
     <SearchBar/>
-    <div v-if="activities.length > 0" >
+    <div v-if="activities.length > 0">
       <v-infinite-scroll
           :items="activities"
           :onLoad="load"
@@ -60,7 +77,7 @@ async function load({done}) {
         <v-row class="w-100">
           <template v-for="activity in activities" :key="activity.offerId">
             <v-col cols="4">
-              <OfferListItem type="event" :offer-item="activity"/>
+              <OfferListItem type="activity" :offer-item="activity"/>
             </v-col>
           </template>
         </v-row>
@@ -74,14 +91,14 @@ async function load({done}) {
 </template>
 
 <style scoped>
-div.no_offers{
+div.no_offers {
   display: flex;
   align-items: center;
   justify-content: center;
   padding-top: 10%;
 }
 
-p.no_offer_placeholder{
+p.no_offer_placeholder {
   text-align: center;
 }
 

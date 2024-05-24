@@ -1,4 +1,10 @@
 <script setup>
+import { useNavStore } from '@/stores/nav.store'
+import {storeToRefs} from 'pinia';
+
+const navStore = useNavStore()
+const {currentPage: currentPage} = storeToRefs(navStore)
+
 </script>
 
 <template>
@@ -8,12 +14,14 @@
     </router-link>
     <v-tabs
         color="grey-darken-2"
+        v-model="currentPage"
         centered
     >
       <router-link to="/">
         <v-tab
             key="home"
             text="Home"
+            value="home"
         ></v-tab>
       </router-link>
 
@@ -21,6 +29,7 @@
         <v-tab
             key="accommodations"
             text="Accommodations"
+            value="accommodations"
         ></v-tab>
       </router-link>
 
@@ -28,6 +37,7 @@
         <v-tab
             key="activities"
             text="Activities"
+            value="activities"
         ></v-tab>
       </router-link>
 
@@ -35,6 +45,7 @@
         <v-tab
             key="events"
             text="Events"
+            value="events"
         ></v-tab>
       </router-link>
 

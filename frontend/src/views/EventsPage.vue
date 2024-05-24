@@ -7,31 +7,42 @@ import {useSearchStore} from "@/stores/search.store";
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
+import {useOfferStore} from "@/stores/offers.store";
 
-const searchStore = useSearchStore();
-const {location, dateFrom, dateTo, numberOfPeople} = storeToRefs(searchStore);
+const offerStore = useOfferStore();
+const {isLocalization: isLocalization, inputValue: inputValue} = storeToRefs(offerStore)
 
 const events = ref([]);
 
 function mapEvents(responseData) {
 
   return responseData.map((data) => {
-    const priceAfterDiscount = calculatePriceAfterDiscount(data['price'], data['discount'])
     return {
       'offerId': data["offer_id"],
+      'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'description': data["description"],
-      'title': data["title"],
-      'price': priceAfterDiscount,
-      'capacity': data["capacity"]
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'isRecommended': data['is_recommended'],
+      'discount': data['discount'],
+      'type': data['type']
     };
   });
 }
 
-const pagesGenerator = fetchPaginatedData('/api/offers/events', mapEvents)
+function getQuery() {
+  if (inputValue.value) {
+    return (isLocalization.value) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
+  }
+  return ''
+}
+
+let pagesGenerator = fetchPaginatedData(`/api/offers/events${getQuery()}`, mapEvents)
 
 onMounted(async () => {
-  events.value = await pagesGenerator.next();
+  const response = await pagesGenerator.next();
+  events.value = response.value
 });
 
 async function load({done}) {
@@ -43,14 +54,19 @@ async function load({done}) {
   events.value.push(...response.value)
   done('ok');
 }
+offerStore.$subscribe(async (mutation, state) => {
+  pagesGenerator = fetchPaginatedData(`/api/offers/events${getQuery()}`, mapEvents)
+  const response = await pagesGenerator.next();
+  events.value = response.value
 
+})
 </script>
 
 <template>
   <div class="event_page">
     <p>Unforgettable events</p>
     <SearchBar />
-    <div v-if="events.length > 0" >
+    <div v-if="events?.length > 0" >
             <v-infinite-scroll
                 :items="events"
                 :onLoad="load"

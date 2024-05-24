@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineProps, ref } from 'vue';
+import {computed, defineProps, ref} from 'vue'
 import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import chipsMapper from "@/_helpers/chips";
 
@@ -14,11 +14,16 @@ const props = defineProps({
 const chips = ref(chipsMapper(props.offerItem?.discount));
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount));
 const image = computed(() => {
+  const images = []
+  let number = 0
   try {
-    const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerID}/${props.offerItem.offerID}_0.jpeg`);
-    return image;
-  } catch {
-    return undefined;
+    while(true){
+      const image = require(`@/../images/offers/${props.type}/${props.offerItem.offerId}/${props.offerItem.offerId}_${number}.jpeg`)
+      images.push(image)
+      number++
+    }
+  } catch (error){
+    return images
   }
 });
 
@@ -26,15 +31,30 @@ const cardPage = ref((props.custom)? 'custom' : 'main');
 </script>
 
 <template>
-  <v-card class="mx-auto my-12">
-    <v-carousel v-if="image" :show-arrows="[image].length > 1" :hide-delimiters="[image].length === 1" cycle>
-      <v-carousel-item :src="image" cover></v-carousel-item>
+  <v-card
+      class="mx-auto my-12 "
+  >
+    <v-carousel v-if="image"
+                :show-arrows="[...image].length > 1"
+                :hide-delimiters="[...image].length === 1"
+                cycle
+    >
+      <v-carousel-item
+          v-for="img in image"
+          :src="img"
+          cover
+      >
+
+      </v-carousel-item>
     </v-carousel>
-    <v-img v-else :src="require(`@/assets/img/image_placeholder.png`)" cover></v-img>
+    <v-img v-else
+           :src="require(`@/assets/img/image_placeholder.png`)"
+           cover
+    ></v-img>
 
     <v-card-item>
       <v-card-title v-if="custom" class="font-weight-black">{{ offerItem.title }}</v-card-title>
-      <router-link v-else :to="`/offers/${type}/${offerItem.offerID}`">
+      <router-link v-else :to="`/offers/${type}/${offerItem.offerId}`">
         <v-card-title class="font-weight-black">{{ offerItem.title }}</v-card-title>
       </router-link>
       <v-card-subtitle>
