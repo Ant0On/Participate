@@ -25,14 +25,6 @@ const {currentPage: currentPage} = storeToRefs(navStore)
         ></v-tab>
       </router-link>
 
-      <router-link to="/recommended">
-        <v-tab
-            key="recommended"
-            text="Recommended"
-            value="recommended"
-        ></v-tab>
-      </router-link>
-
       <router-link to="/accommodations">
         <v-tab
             key="accommodations"
