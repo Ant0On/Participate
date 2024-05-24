@@ -11,6 +11,33 @@ const {user: user} = storeToRefs(userStore)
 const allEvents = ref([]);
 const allActivities = ref([]);
 const allAccommodations = ref([]);
+const stateMap = {
+  pending: {
+    color: "gray",
+    icon: "mdi-state-machine",
+    text: "Pending"
+  },
+  finished: {
+    color: "grey",
+    icon: "mdi-state-machine",
+    text: "Finished",
+  },
+  accepted: {
+    color: "green",
+    text: "Accepted",
+    icon: "mdi-state-machine",
+  },
+  rejected: {
+    color: "red",
+    text: "Rejected",
+    icon: "mdi-state-machine",
+  },
+  ongoing: {
+    color: "blue",
+    text: "Ongoing",
+    icon: "mdi-state-machine",
+  }
+}
 
 function mapAccommodation(responseData) {
 
@@ -66,7 +93,7 @@ function mapEvents(responseData) {
   });
 }
 
-const eventsGenerator = fetchPaginatedData(`/api/host/events/${user.value.ID}/reservations/pending`, mapEvents);
+const eventsGenerator = fetchPaginatedData(`/api/host/event/${user.value.ID}/reservations/pending`, mapEvents);
 const activitiesGenerator = fetchPaginatedData(`/api/host/activity/${user.value.ID}/reservations/pending`, mapActivities);
 const accommodationsGenerator = fetchPaginatedData(`/api/host/accommodation/${user.value.ID}/reservations/pending`, mapAccommodation);
 
@@ -74,6 +101,17 @@ onMounted(async () => {
   allAccommodations.value = await accommodationsGenerator.next();
   allActivities.value = await activitiesGenerator.next();
   allEvents.value = await eventsGenerator.next();
+  allEvents.value = {value: [{
+    reservationId: 1,
+    title: 'Wakacyjne uhm uhm',
+    price: 20,
+    capacity: 10,
+    date: new Date(),
+    type: "concert",
+    location: "Zamosc, Polska",
+    offerId: 1,
+    state: "accepted"
+  }]}
 });
 
 async function loadOffers(generator, offerList, done) {
@@ -86,6 +124,12 @@ async function loadOffers(generator, offerList, done) {
   done('ok');
 }
 
+async function acceptReservation(reservationId, type, reservationList){
+ console.log("accepted")
+}
+async function rejectReservation(reservationId, type, reservationList){
+console.log("rejected")
+}
 </script>
 
 <template>
@@ -100,12 +144,21 @@ async function loadOffers(generator, offerList, done) {
       >
         <p class="text-center">Events</p>
         <v-row class="w-100">
-          <template v-for="event in allEvents.value" :key="event.offerID">
+          <template v-for="event in allEvents.value" :key="event.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem type="event" :offerItem="event" custom>
+              <OfferReservationListItem v-if="event.state === 'pending' "  type="event" :offerItem="event" custom>
                 <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="green-lighten-2" rounded
+                           @click="acceptReservation(event.reservationId, 'event', allEvents)">Accept
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="rejectReservation(event.reservationId, 'event', allEvents)">Reject
+                    </v-btn>
+                  </v-card>
                 </template>
               </OfferReservationListItem>
+              <OfferReservationListItem v-else  type="event" :offerItem="event"/>
             </v-col>
           </template>
         </v-row>
@@ -121,10 +174,18 @@ async function loadOffers(generator, offerList, done) {
       >
         <p class="text-center">Accommodations</p>
         <v-row class="w-100">
-          <template v-for="accommodation in allAccommodations.value" :key="accommodation.offerID">
+          <template v-for="accommodation in allAccommodations.value" :key="accommodation.reservationId">
             <v-col cols="4">
               <OfferReservationListItem type="accommodation" :offerItem="accommodation" custom>
                 <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="green-lighten-2" rounded
+                           @click="acceptReservation(accommodation.reservationId, 'accommodation', allAccommodations)">Accept
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="rejectReservation(accommodation.reservationId, 'accommodation', allAccommodations)">Reject
+                    </v-btn>
+                  </v-card>
                 </template>
               </OfferReservationListItem>
             </v-col>
@@ -142,10 +203,18 @@ async function loadOffers(generator, offerList, done) {
       >
         <p class="text-center">Activities</p>
         <v-row class="w-100">
-          <template v-for="activity in allActivities.value" :key="activity.offerID">
+          <template v-for="activity in allActivities.value" :key="activity.reservationId">
             <v-col cols="4">
               <OfferReservationListItem type="activity" :offerItem="activity" custom>
                 <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="green-lighten-2" rounded
+                           @click="acceptReservation(activity.reservationId, 'activity', allActivities)">Accept
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="rejectReservation(activity.reservationId, 'activity', allActivities)">Reject
+                    </v-btn>
+                  </v-card>
                 </template>
               </OfferReservationListItem>
             </v-col>
