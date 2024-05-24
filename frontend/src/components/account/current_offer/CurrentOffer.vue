@@ -4,6 +4,7 @@ import {storeToRefs} from 'pinia';
 import {useAuthStore} from "@/stores/auth.store";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import OfferReservationListItem from "@/components/offers/OfferReservationListItem.vue";
+import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
@@ -101,17 +102,6 @@ onMounted(async () => {
   allAccommodations.value = await accommodationsGenerator.next();
   allActivities.value = await activitiesGenerator.next();
   allEvents.value = await eventsGenerator.next();
-  allEvents.value = {value: [{
-    reservationId: 1,
-    title: 'Wakacyjne uhm uhm',
-    price: 20,
-    capacity: 10,
-    date: new Date(),
-    type: "concert",
-    location: "Zamosc, Polska",
-    offerId: 1,
-    state: "accepted"
-  }]}
 });
 
 async function loadOffers(generator, offerList, done) {
@@ -124,11 +114,27 @@ async function loadOffers(generator, offerList, done) {
   done('ok');
 }
 
-async function acceptReservation(reservationId, type, reservationList){
- console.log("accepted")
+function changeListReservationState(reservations, reservationId, state){
+  reservations.value.map((reservation) => {
+    if(reservation.reservationId === reservationId)
+      reservation.state = state
+    return reservation
+  })
 }
-async function rejectReservation(reservationId, type, reservationList){
-console.log("rejected")
+
+async function acceptReservation(reservationId, type, reservations){
+  fetchWrapper.post(`/api/reservation/${type}/${reservationId}/accepted`, {}).then(() => {
+    changeListReservationState(reservations, reservationId, "accepted")
+  }).catch((err) => {
+
+  })
+}
+async function rejectReservation(reservationId, type, reservations){
+  fetchWrapper.post(`/api/reservation/${type}/${reservationId}/rejected`, {}).then(() => {
+    changeListReservationState(reservations, reservationId, "accepted")
+  }).catch((err) => {
+
+  })
 }
 </script>
 
