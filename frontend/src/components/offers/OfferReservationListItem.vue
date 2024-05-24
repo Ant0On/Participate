@@ -71,8 +71,12 @@ const cardPage = ref((props.custom)? 'custom' : 'info');
 
       </v-carousel-item>
     </v-carousel>
-    <v-img v-else
+    <v-img v-else-if="type !== 'room'"
            :src="require(`@/assets/img/image_placeholder.png`)"
+           cover
+    ></v-img>
+    <v-img v-else-if="type !== 'room'"
+           :src="require(`@/assets/img/room_placeholder.png`)"
            cover
     ></v-img>
 
