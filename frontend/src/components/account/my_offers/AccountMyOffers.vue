@@ -5,6 +5,7 @@ import {useAuthStore} from "@/stores/auth.store";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import {router} from "@/router";
 
 const userStore = useAuthStore();
 
@@ -128,6 +129,10 @@ function handleDeleteConfirmation(result) {
   confirmDelete.value = false;
   offerToDelete.value = null;
 }
+
+function editOffer(offerId, type){
+  router.push(`/offers/${type}/edit/${offerId}`)
+}
 </script>
 
 <template>
@@ -148,7 +153,7 @@ function handleDeleteConfirmation(result) {
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="blue-grey-lighten-2" rounded
-                           @click="editOffer(event.offerId)">Edit
+                           @click="editOffer(event.offerId, 'event')">Edit
                     </v-btn>
                     <v-btn color="red-lighten-2" elevation="0" rounded
                            @click="confirmDeleteOffer(event.offerId, 'event')">Delete
@@ -177,7 +182,7 @@ function handleDeleteConfirmation(result) {
                 <template v-slot:template>
                   <v-card elevation="0" class=" d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="blue-grey-lighten-2" rounded
-                           @click="editOffer(accommodation.offerId)">Edit
+                           @click="editOffer(accommodation.offerId, 'accommodation')">Edit
                     </v-btn>
                     <v-btn color="red-lighten-2" elevation="0" rounded
                            @click="confirmDeleteOffer(accommodation.offerId, 'accommodation')">Delete
@@ -206,7 +211,7 @@ function handleDeleteConfirmation(result) {
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="blue-grey-lighten-2" rounded
-                           @click="editOffer(activity.offerId)">Edit
+                           @click="editOffer(activity.offerId, 'activity')">Edit
                     </v-btn>
                     <v-btn color="red-lighten-2" elevation="0" rounded
                            @click="confirmDeleteOffer(activity.offerId, 'activity')">Delete

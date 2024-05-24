@@ -10,6 +10,7 @@ import Accommodations from "@/views/AccommodationsPage.vue";
 import Events from "@/views/EventsPage.vue";
 import Activities from "@/views/ActivitiesPage.vue";
 import Offer from "@/views/OfferDetailsPage.vue";
+import OfferEdit from '@/views/OfferEditPage.vue';
 import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
 import AccountHistory from "@/components/account/history/AccountHistory.vue";
 import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
@@ -47,6 +48,12 @@ const routes = [
         path: '/offers/:type/:id',
         name: 'Offers',
         component: Offer,
+        props: true
+    },
+    {
+        path: '/offers/:type/edit/:id',
+        name: 'Offer Edit',
+        component: OfferEdit,
         props: true
     },
     {

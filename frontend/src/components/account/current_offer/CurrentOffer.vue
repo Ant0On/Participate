@@ -28,7 +28,6 @@ function mapAccommodation(responseData) {
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
       'animal_friendly': data['is_animal_friendly'],
-
     };
   });
 }
