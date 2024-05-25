@@ -12,6 +12,10 @@ const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
 
 const offer = ref(null)
+const offerChange = ref(null)
+const offerCountries = ref(null)
+const isEdit = ref(false)
+
 const props = defineProps({
   type: String,
   id: String,
@@ -84,8 +88,22 @@ async function getOfferDetails() {
   }
 }
 
+async function getCountries(){
+  const response = await fetchWrapper.get('/api/country/get/all')
+  return response.data.map((country) => {return {id: country.ID, name: country.Name }})
+}
+function getOfferChange(offer){
+  let offerChange = {...offer};
+  delete offerChange.location;
+  offerChange.country = offerCountries.value.find(country => country.name === offer.location.split(',')[0])
+  offerChange.town = offer.location.split(',')[1].trim()
+  return offerChange
+}
+
 onMounted(async () => {
   offer.value = await getOfferDetails();
+  offerCountries.value = await getCountries();
+  offerChange.value = getOfferChange(offer.value);
 });
 
 </script>
@@ -95,15 +113,15 @@ onMounted(async () => {
                        color="primary"
                        indeterminate
   ></v-progress-circular>
-  <v-sheet v-else class="d-flex flex-column">
-    <v-breadcrumbs>
+  <v-sheet v-else class="d-flex flex-column align-center justify-center">
+    <v-breadcrumbs class="align-self-start">
       <v-breadcrumbs-item :to="'/account/current_offers'" title="My offers"></v-breadcrumbs-item>
       <v-breadcrumbs-divider>
         <v-icon icon="mdi-chevron-right"></v-icon>
       </v-breadcrumbs-divider>
       <v-breadcrumbs-item :title="offer.title"></v-breadcrumbs-item>
     </v-breadcrumbs>
-    <v-card class="d-flex flex-row rounded-xl h-100">
+    <v-card class="d-flex flex-row rounded-xl h-100" width="60%">
       <v-card class="w-50">
         <v-carousel v-if="image"
                     :show-arrows="[...image].length > 1"
@@ -126,29 +144,32 @@ onMounted(async () => {
         ></v-img>
       </v-card>
       <v-card class="w-50 d-flex flex-column">
-        <v-card-title class="font-weight-black text-center">
+        <v-card-title v-if="!isEdit" class="font-weight-black text-center">
           {{ offer.title }}
         </v-card-title>
-        <v-card-subtitle class="d-flex align-center justify-center mb-2">
+        <v-card-title v-else class="font-weight-black text-center">
+          <v-text-field v-model="offerChange.title" flat
+                        label="Title"
+                        density="compact"
+          ></v-text-field>
+        </v-card-title>
 
-          <span class="me-1">
+        <v-card-subtitle class="d-flex mb-2">
+
+          <span v-if="!isEdit" class="me-1">
             {{ offer.location }}
           </span>
-          <v-spacer></v-spacer>
-
-          <v-rating
-              :model-value="offer.rating"
-              color="amber"
-              density="compact"
-              size="small"
-              half-increments
-              readonly
-              class="me-1"
-              v-if="type === 'accommodation' "
-          ></v-rating>
-          <span class="text-grey me-1" v-if="type === 'accommodation' ">
-              {{ offer.rating }}
-            </span>
+          <div v-else class="d-flex justify-space-between w-100">
+            <v-select label="Coutnry"
+                      v-model="offerChange.country"
+                      :items="offerCountries"
+                      class="w-100 ma-2"
+                      density="compact"
+                      item-title="name"
+                      item-value="id"
+            ></v-select>
+            <v-text-field label="Town" v-model="offerChange.town" class="w-100 ma-2" density="compact"></v-text-field>
+          </div>
         </v-card-subtitle>
         <v-card-subtitle class="mx-0 d-flex ">
           <div class="font-weight-bold"
@@ -337,6 +358,22 @@ onMounted(async () => {
             </v-row>
           </v-list>
         </v-card-text>
+        <v-card-actions class="w-100">
+          <v-btn v-if="!isEdit"
+                 color="blue-darken-2 flex-grow"
+                 text="Edit"
+                 block
+                 border
+                 @click="isEdit = !isEdit"
+          ></v-btn>
+          <v-btn v-else-if="isEdit"
+                 color="blue-darken-2 flex-grow"
+                 text="Save"
+                 block
+                 border
+                 @click="isEdit = !isEdit"
+          ></v-btn>
+        </v-card-actions>
       </v-card>
     </v-card>
   </v-sheet>
