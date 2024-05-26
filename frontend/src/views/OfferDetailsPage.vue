@@ -350,11 +350,6 @@ onMounted(async () => {
                     ></v-list-item>
                   </v-col>
                   <v-col>
-                    <v-list-item
-                        key="general_facilities"
-                        title="General Facilities"
-                        :subtitle="offer?.generalFacilities?.join(', ') || 'None'"
-                    ></v-list-item>
                   </v-col>
                 </v-row>
                 <v-row cols="2" v-if="type === 'event'">
