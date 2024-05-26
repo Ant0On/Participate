@@ -224,13 +224,20 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             {{ (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $` }}
           </div>
         </v-card-subtitle>
-        <v-card-subtitle class="d-flex align-center" v-else>
+        <v-card-subtitle class="d-flex flex-space-between w-100" v-else>
           <v-text-field v-model="offerChange.price"
                         width="40px"
                         density="compact"
                         label="Price"
                         type="number"
                         :rules="[(value) => !!value, (value) => value > 0]"
+          ></v-text-field>
+          <v-text-field v-model="offerChange.discount"
+                        density="compact"
+                        class="pl-1"
+                        label="Discount"
+                        type="number"
+                        :rules="[(value) => value >= 0 && value < 100]"
           ></v-text-field>
         </v-card-subtitle>
         <div class="ma-4 text-subtitle-1" v-if="!isEdit">
@@ -258,14 +265,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             {{ chips?.[offer?.skill].text }}
           </v-chip>
         </div>
-        <div class="d-flex justify-space-between w-100" v-else>
-          <v-text-field v-model="offerChange.discount"
-                        density="compact"
-                        class="pr-1"
-                        label="Discount"
-                        type="number"
-                        :rules="[(value) => value >= 0 && value < 100]"
-          ></v-text-field>
+        <v-card-subtitle class="d-flex justify-space-between w-100" v-else>
           <v-select v-model="offerChange.type"
                     :items="(type === 'event')? eventTypes.map((eventType) => eventType.toLowerCase())
                     : (type === 'accommodation')? accommodationTypes.map((accommodationType) => accommodationType.toLowerCase())
@@ -280,7 +280,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                     :items="skillLevels.map((skillLevel) => skillLevel.toLowerCase())"
           >
           </v-select>
-        </div>
+        </v-card-subtitle>
         <v-divider></v-divider>
         <v-card-actions>
           <v-btn-toggle block rounded="lg">
