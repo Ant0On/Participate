@@ -73,12 +73,20 @@ func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 	query.Count(&totalRecords)
 	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
 
-	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
+	joinCondition := " JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
 
 	if parameters.tableName == "activity" {
 		joinCondition += " LEFT JOIN activity_equipment ON activity.id = activity_equipment.activity_id"
 		joinCondition += " LEFT JOIN equipment ON equipment.id = activity_equipment.equipment_id"
+	}
+
+	if parameters.tableName == "accommodation" {
+		joinCondition += " JOIN room ON accommodation.id = room.accommodation_id"
+		joinCondition += " LEFT JOIN room_room_facilities ON room.id = room_room_facilities.room_id"
+		joinCondition += " LEFT JOIN room_facility ON room_room_facilities.room_facility_id = room_facility.id"
+		joinCondition += " LEFT JOIN accommodation_general_facilities ON accommodation.id = accommodation_general_facilities.accommodation_id"
+		joinCondition += " LEFT JOIN general_facility ON accommodation_general_facilities.general_facility_id = general_facility.id"
 	}
 
 	query = query.Joins(joinCondition).Select(parameters.selectQuery)
@@ -109,6 +117,11 @@ func GetOfferByID(c *gin.Context, parameters OfferQueryParameters) {
 
 	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
+
+	if parameters.tableName == "activity" {
+		joinCondition += " LEFT JOIN activity_equipment ON activity.id = activity_equipment.activity_id"
+		joinCondition += " LEFT JOIN equipment ON equipment.id = activity_equipment.equipment_id"
+	}
 
 	query := models.DB.
 		Model(parameters.model).
@@ -147,6 +160,11 @@ func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
 
 	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
+
+	if parameters.tableName == "activity" {
+		joinCondition += " LEFT JOIN activity_equipment ON activity.id = activity_equipment.activity_id"
+		joinCondition += " LEFT JOIN equipment ON equipment.id = activity_equipment.equipment_id"
+	}
 
 	query := models.DB.
 		Model(parameters.model).

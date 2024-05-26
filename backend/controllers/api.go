@@ -30,7 +30,6 @@ func RegisterRoutes(r *gin.Engine) {
 	activity.PUT("/update/:id", UpdateActivity)
 	activity.PUT("/discount/:offerID", DiscountActivity)
 	activity.GET("/:id/reservations", GetCurrentActivityReservations)
-	activity.GET("/:id/equipment", GetActivityWithEquipment)
 	activity.POST("/:id/equipment/add", AddEquipment)
 	activity.GET("/:id/offers", GetActivitiesForHost)
 	activity.PUT("/price/:id", ChangeActivityPrice)

@@ -42,7 +42,7 @@ func GetActivityByID(c *gin.Context) {
 	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
 		"activity.price, activity.capacity, activity.skill_level as skill," +
 		"activity.duration, activity.activity_type as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name" +
+		"activity.user_id, town.name as town_name, country.name as country_name, " +
 		"STRING_AGG(equipment.name, ', ') as equipment"
 
 	groupByQuery := "activity.id, activity.title, activity.description, " +
@@ -64,7 +64,7 @@ func GetActivitiesForHost(c *gin.Context) {
 	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
 		"activity.price, activity.capacity, activity.skill_level as skill," +
 		"activity.duration, activity.activity_type as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name" +
+		"activity.user_id, town.name as town_name, country.name as country_name, " +
 		"STRING_AGG(equipment.name, ', ') as equipment"
 	groupByQuery := "activity.id, activity.title, activity.description, " +
 		"activity.price, activity.capacity, activity.skill_level, " +

@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"backend/models"
 	"backend/models/DTO"
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func CreateAccommodationOffer(c *gin.Context) {
@@ -16,21 +18,49 @@ func CreateAccommodationOffer(c *gin.Context) {
 }
 
 func GetAccommodations(c *gin.Context) {
-	var accommodationWithLocation []DTO.AccommodationWithLocation
-	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.accommodation_type as type, accommodation.discount, " +
-		"accommodation.user_id, town.name as town_name, country.name as country_name"
-	GetOffers(c, OfferQueryParameters{
-		tableName:   "accommodation",
-		model:       &models.Accommodation{},
-		dto:         &accommodationWithLocation,
-		selectQuery: selectQuery,
+	var accommodations []DTO.AccommodationDTO
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit := 10
+	offset := (page - 1) * limit
+
+	query := models.DB.Table("accommodation").
+		Select(`accommodation.title, accommodation.description, accommodation.capacity, 
+		accommodation.discount, accommodation.town_id, accommodation.user_id, town.name as town_name, 
+		country.name as country_name`).
+		Joins("JOIN town ON accommodation.town_id = town.id").
+		Joins("JOIN country ON town.country_id = country.id").
+		Preload("GeneralFacilities", func(db *gorm.DB) *gorm.DB {
+			return db.Model(&models.GeneralFacility{}).Select("general_facility.*")
+		}).
+		Preload("Rooms", func(db *gorm.DB) *gorm.DB {
+			return db.Model(&models.Room{}).Select("room.*").
+				Joins("JOIN accommodation ON room.accommodation_id = accommodation.id").
+				Joins("JOIN room_room_facilities ON room.id = room_room_facilities.room_id").
+				Joins("JOIN room_facility ON room_room_facilities.room_facility_id = room_facility.id").
+				Where("accommodation.id = accommodation.id").
+				Preload("RoomFacilities")
+		}).
+		Offset(offset).
+		Limit(limit)
+
+	if err := query.Scan(&accommodations).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "accommodations fetched successfully",
+		"data":    accommodations,
+		"page":    page,
+		"limit":   limit,
 	})
 }
 
 func GetAccommodationByID(c *gin.Context) {
-	var accommodationWithLocation DTO.AccommodationWithLocation
+	var accommodationWithLocation DTO.AccommodationDTO
 	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
 		"accommodation.accommodation_type as type, accommodation.discount, " +
@@ -44,7 +74,7 @@ func GetAccommodationByID(c *gin.Context) {
 }
 
 func GetAccommodationsForHost(c *gin.Context) {
-	var accommodationWithLocation []DTO.AccommodationWithLocation
+	var accommodationWithLocation []DTO.AccommodationDTO
 	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
 		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
 		"accommodation.accommodation_type as type, accommodation.discount, " +

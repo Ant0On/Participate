@@ -7,15 +7,14 @@ import (
 )
 
 type OfferWithLocation struct {
-	OfferID       uint    `json:"offer_id"`
-	Title         string  `json:"title"`
-	Description   string  `json:"description"`
-	Capacity      int     `json:"capacity"`
-	IsRecommended bool    `json:"is_recommended"`
-	TownName      string  `json:"town_name"`
-	CountryName   string  `json:"country_name"`
-	UserID        uint    `json:"user_id"`
-	Discount      float64 `json:"discount"`
+	OfferID     uint    `json:"offer_id"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Capacity    int     `json:"capacity"`
+	TownName    string  `json:"town_name"`
+	CountryName string  `json:"country_name"`
+	UserID      uint    `json:"user_id"`
+	Discount    float64 `json:"discount"`
 }
 
 type EventWithLocation struct {
@@ -33,10 +32,16 @@ type ActivityWithLocation struct {
 	Equipment string              `json:"equipment"`
 }
 
-type AccommodationWithLocation struct {
+type AccommodationDTO struct {
 	OfferWithLocation
-	PricePerDay      float64                  `json:"price_per_day"`
-	IsAnimalFriendly bool                     `json:"is_animal_friendly"`
-	Type             models.AccommodationType `json:"type"`
-	Rating           int                      `json:"rating"`
+	Capacity          int           `json:"capacity"`
+	Discount          float64       `json:"discount"`
+	TownID            uint          `json:"town_id"`
+	UserID            uint          `json:"user_id"`
+	NumberOfRooms     int           `json:"number_of_rooms"`
+	Type              string        `json:"type"`
+	IsAnimalFriendly  bool          `json:"is_animal_friendly"`
+	PricePerDay       float64       `json:"price_per_day"`
+	GeneralFacilities []string      `json:"general_facilities"`
+	Rooms             []models.Room `json:"rooms"`
 }
