@@ -82,6 +82,7 @@ async function makeReservation() {
 }
 
 const chips = ref(chipsMapper(offer.value?.discount))
+const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
 
 const image = computed(() => {
   const images = []
@@ -268,11 +269,11 @@ onMounted(async () => {
             <v-card-subtitle class="mx-0 d-flex ">
               <div class="font-weight-bold"
                    :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
-                {{ (type === "accommodation") ? `Price: ${offer.price} $/day` : `Price: ${offer.price} $` }}
+                {{ (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $` }}
               </div>
 
               <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
-                {{ (type === "accommodation") ? `${priceAfterDiscount} $/day` : `${priceAfterDiscount} $` }}
+                {{ (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $` }}
               </div>
             </v-card-subtitle>
             <div class="ma-4 text-subtitle-1">
@@ -352,7 +353,7 @@ onMounted(async () => {
                     <v-list-item
                         key="general_facilities"
                         title="General Facilities"
-                        :subtitle="offer?.generalFacilities.join(', ')"
+                        :subtitle="offer?.generalFacilities?.join(', ') || 'None'"
                     ></v-list-item>
                   </v-col>
                 </v-row>
@@ -394,7 +395,7 @@ onMounted(async () => {
                       title="General Facilities"
                       v-if="type === 'accommodation'"
                   >{{
-                      offer?.generalFacilities.join(', ')
+                      offer?.generalFacilities?.join(', ') || 'None'
                     }}
                   </v-list-item>
                   <v-list-item
@@ -403,7 +404,7 @@ onMounted(async () => {
                       v-if="type === 'activity'"
                   >
                     {{
-                      offer?.equipment.join(', ')
+                      offer?.equipment?.join(', ') || 'None'
                     }}
                   </v-list-item>
                 </v-row>

@@ -1,6 +1,6 @@
 const chipsMapper = (discount = 0) => {
     return {
-    "sports_event": {
+    "sports event": {
         color: "deep-purple",
         icon: "mdi-stadium",
         text: "Sports event"
@@ -84,6 +84,11 @@ const chipsMapper = (discount = 0) => {
         color: "red",
         icon: "mdi-tag",
         text: `-${discount || 0}%`
+    },
+    "": {
+        color: "grey",
+        icon: "mdi-tag",
+        text: "",
     }
 }
 }

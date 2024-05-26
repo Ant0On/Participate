@@ -1,6 +1,8 @@
 <script setup>
 import {computed, defineProps, onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
+import VueDatePicker from '@vuepic/vue-datepicker';
+
 
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import {useAuthStore} from "@/stores/auth.store";
@@ -15,6 +17,8 @@ const offer = ref(null)
 const offerChange = ref(null)
 const offerCountries = ref(null)
 const isEdit = ref(false)
+const offerFilled = ref(true)
+const form = ref()
 
 const props = defineProps({
   type: String,
@@ -23,7 +27,7 @@ const props = defineProps({
 })
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.value?.price, offer.value?.discount))
 const cardPage = ref('description')
-const chips = ref(chipsMapper(offer.value?.discount))
+const chips = computed(() => chipsMapper(offer.value?.discount))
 
 const image = computed(() => {
   const images = []
@@ -88,11 +92,14 @@ async function getOfferDetails() {
   }
 }
 
-async function getCountries(){
+async function getCountries() {
   const response = await fetchWrapper.get('/api/country/get/all')
-  return response.data.map((country) => {return {id: country.ID, name: country.Name }})
+  return response.data.map((country) => {
+    return {id: country.ID, name: country.Name}
+  })
 }
-function getOfferChange(offer){
+const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
+function getOfferChange(offer) {
   let offerChange = {...offer};
   delete offerChange.location;
   offerChange.country = offerCountries.value.find(country => country.name === offer.location.split(',')[0])
@@ -100,12 +107,42 @@ function getOfferChange(offer){
   return offerChange
 }
 
+async function onSave(){
+  const {valid} = await form.value.validate()
+  isEdit.value = !isEdit.value
+
+  if(valid)
+  {
+    offer.value = offerChange.value
+    offer.value.location = `${offerChange.value.country.name}, ${offerChange.value.town}`
+  }
+}
+
+
 onMounted(async () => {
   offer.value = await getOfferDetails();
   offerCountries.value = await getCountries();
   offerChange.value = getOfferChange(offer.value);
 });
 
+const accommodationTypes = ['Hotel', 'Hostel', 'Apartment', 'Villa', 'Guesthouse']
+const generalFacilities = ["Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
+  "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
+  "Concierge Service", "Outdoor Pool", "Children's Playground", "Tennis Court", "Library", "Garden", "Sauna",
+  "Jacuzzi", "Billiards Room", "Cinema", "Karaoke Room", "Bowling Alley", "BBQ Area", "Shuttle Service"]
+const roomFacilities = ["Television", "Air Conditioning", "Mini Fridge", "Safe", "Coffee Maker", "Microwave",
+  "Kettle", "Iron and Ironing Board", "Hair Dryer", "Desk", "Ocean View", "Mountain View", "Balcony", "Bathtub",
+  "Shower", "WiFi", "Room Service", "Breakfast Included", "In-Room Safe", "Telephone", "DVD Player", "Alarm Clock",
+  "Robes", "Slippers", "Toiletries", "Work Desk", "Sofa Bed", "Fireplace", "Refrigerator", "Dining Area"
+];
+
+const skillLevels = ['Beginner', 'Intermediate', 'Advanced']
+const activityTypes = ['Indoor', 'Outdoor']
+const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", "Sled", "Snowshoes", "Tent",
+  "Sleeping Bag", "Backpack", "Hiking Boots", "Compass", "Map", "Binoculars", "Flashlight", "First Aid Kit",
+  "Water Bottle", "Climbing Harness", "Climbing Rope", "Carabiners", "Rock Climbing Shoes", "Fishing Rod",
+  "Bait", "Camera", "Swimsuit", "Snorkel Gear", "Tennis Racket", "Golf Clubs", "Bicycle"];
+const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 </script>
 
 <template>
@@ -115,18 +152,19 @@ onMounted(async () => {
   ></v-progress-circular>
   <v-sheet v-else class="d-flex flex-column align-center justify-center">
     <v-breadcrumbs class="align-self-start">
-      <v-breadcrumbs-item :to="'/account/current_offers'" title="My offers"></v-breadcrumbs-item>
+      <v-breadcrumbs-item :to="'/account/my_offers'" title="My offers"></v-breadcrumbs-item>
       <v-breadcrumbs-divider>
         <v-icon icon="mdi-chevron-right"></v-icon>
       </v-breadcrumbs-divider>
       <v-breadcrumbs-item :title="offer.title"></v-breadcrumbs-item>
     </v-breadcrumbs>
+    <v-form v-model="offerFilled" class="h-100 w-100 d-flex align-center justify-center" ref="form">
     <v-card class="d-flex flex-row rounded-xl h-100" width="60%">
       <v-card class="w-50">
         <v-carousel v-if="image"
                     :show-arrows="[...image].length > 1"
                     :hide-delimiters="[...image].length === 1"
-                    height="600px"
+                    :height="(isEdit)? '700px': '600px'"
                     cycle
         >
           <v-carousel-item
@@ -151,6 +189,7 @@ onMounted(async () => {
           <v-text-field v-model="offerChange.title" flat
                         label="Title"
                         density="compact"
+                        :rules="[value => !!value, value => value.length > 3]"
           ></v-text-field>
         </v-card-title>
 
@@ -163,25 +202,38 @@ onMounted(async () => {
             <v-select label="Coutnry"
                       v-model="offerChange.country"
                       :items="offerCountries"
-                      class="w-100 ma-2"
+                      class="w-100"
                       density="compact"
                       item-title="name"
                       item-value="id"
             ></v-select>
-            <v-text-field label="Town" v-model="offerChange.town" class="w-100 ma-2" density="compact"></v-text-field>
+            <v-text-field label="Town"
+                          v-model="offerChange.town"
+                          class="w-100 ma-2"
+                          density="compact"
+                          :rules="[(value) => !!value, (value) => value.length > 3]"></v-text-field>
           </div>
         </v-card-subtitle>
-        <v-card-subtitle class="mx-0 d-flex ">
+        <v-card-subtitle class="mx-0 d-flex " v-if="!isEdit">
           <div class="font-weight-bold"
                :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
-            {{ (type === "accommodation") ? `Price: ${offer.price} $/day` : `Price: ${offer.price} $` }}
+            {{ (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $` }}
           </div>
 
           <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
-            {{ (type === "accommodation") ? `${priceAfterDiscount} $/day` : `${priceAfterDiscount} $` }}
+            {{ (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $` }}
           </div>
         </v-card-subtitle>
-        <div class="ma-4 text-subtitle-1">
+        <v-card-subtitle class="d-flex align-center" v-else>
+          <v-text-field v-model="offerChange.price"
+                        width="40px"
+                        density="compact"
+                        label="Price"
+                        type="number"
+                        :rules="[(value) => !!value, (value) => value > 0]"
+          ></v-text-field>
+        </v-card-subtitle>
+        <div class="ma-4 text-subtitle-1" v-if="!isEdit">
           <v-chip :prepend-icon="chips.discount.icon"
                   :color="chips.discount.color"
                   variant="flat"
@@ -206,6 +258,29 @@ onMounted(async () => {
             {{ chips?.[offer?.skill].text }}
           </v-chip>
         </div>
+        <div class="d-flex justify-space-between w-100" v-else>
+          <v-text-field v-model="offerChange.discount"
+                        density="compact"
+                        class="pr-1"
+                        label="Discount"
+                        type="number"
+                        :rules="[(value) => value >= 0 && value < 100]"
+          ></v-text-field>
+          <v-select v-model="offerChange.type"
+                    :items="(type === 'event')? eventTypes.map((eventType) => eventType.toLowerCase())
+                    : (type === 'accommodation')? accommodationTypes.map((accommodationType) => accommodationType.toLowerCase())
+                     : activityTypes.map((activityType) => activityType.toLowerCase())"
+                    label="Type"
+                    density="compact"
+          ></v-select>
+          <v-select v-model="offerChange.skill" v-if="type === 'activity'"
+                    label="Skill"
+                    class="pl-1"
+                    density="compact"
+                    :items="skillLevels.map((skillLevel) => skillLevel.toLowerCase())"
+          >
+          </v-select>
+        </div>
         <v-divider></v-divider>
         <v-card-actions>
           <v-btn-toggle block rounded="lg">
@@ -226,24 +301,34 @@ onMounted(async () => {
         </v-card-actions>
 
         <v-card-text v-if="cardPage === 'description'">
-          {{ offer.description }}
+          <div v-if="!isEdit">{{ offer.description }}</div>
+          <v-textarea v-else
+                      density="compact"
+                      v-model="offerChange.description"
+                      :rules="[(values) => values.length > 30]"
+          ></v-textarea>
         </v-card-text>
         <v-card-text v-else-if="cardPage === 'info'">
           <v-list class="h-100 w-100" style="overflow: hidden">
             <v-row cols="2">
               <v-col>
-                <v-list-item
-                    key="standard_price"
-                    title="Standard Price"
-                    :subtitle="`${offer.price} $ ${(type === 'accommodation')? ' per day': ''}`"
+                <v-list-item v-if="!isEdit"
+                             key="capacity"
+                             title="Capacity"
+                             :subtitle="offer.capacity"
                 ></v-list-item>
+                <v-list-item v-else>
+                  <v-text-field
+                      v-model="offerChange.capacity"
+                      density="compact"
+                      label="Capacity"
+                      type="number"
+                      :rules="[(value) => !!value, (value) => value > 0]"
+                  ></v-text-field>
+                </v-list-item>
               </v-col>
               <v-col>
-                <v-list-item
-                    key="capacity"
-                    title="Capacity"
-                    :subtitle="offer.capacity"
-                ></v-list-item>
+
               </v-col>
             </v-row>
             <v-row cols="2" v-if="type === 'accommodation'">
@@ -258,8 +343,18 @@ onMounted(async () => {
                 <v-list-item
                     key="general_facilities"
                     title="General Facilities"
-                    :subtitle="offer?.generalFacilities.join(', ')"
+                    :subtitle="offer?.generalFacilities?.join(', ') || 'None'"
+                    v-if="!isEdit"
                 ></v-list-item>
+                <v-select v-else v-model="offerChange.generalFacilities"
+                          :items="generalFacilities"
+                          label="General facilities"
+                          multiple
+                          chips
+                          clearable
+                          density="compact"
+                >
+                </v-select>
               </v-col>
             </v-row>
             <v-row cols="2" v-if="type === 'event'">
@@ -268,14 +363,42 @@ onMounted(async () => {
                     key="date_from"
                     title="Date From"
                     :subtitle="offer?.dateFrom"
+                    v-if="!isEdit"
                 ></v-list-item>
+                <v-list-item v-else>
+                  <v-text-field v-model="offerChange.dateFrom"
+                                label="Date From"
+                                type="date"
+                                denisty="compact"
+                                :rules="[
+                                  value => !!value || 'Ending date is required',
+                                  value => !offerChange.dateTo || value <= offerChange.dateTo || 'Date must be lower than end date'
+                               ]"
+                  >
+                  </v-text-field>
+                </v-list-item>
               </v-col>
               <v-col>
                 <v-list-item
                     key="date_to"
                     title="Date To"
                     :subtitle="offer?.dateTo"
+                    v-if="!isEdit"
+
                 ></v-list-item>
+                <v-list-item v-else>
+                  <v-text-field v-model="offerChange.dateTo"
+                                label="Date To"
+                                type="date"
+                                denisty="compact"
+                                :rules="[
+                                  value => !!value || 'Ending date is required',
+                                  value => !offerChange.dateFrom || value >= offerChange.dateFrom || 'Date must be grater than starting date',
+                                  value => new Date(value) > new Date()
+                               ]"
+                  >
+                  </v-text-field>
+                </v-list-item>
               </v-col>
             </v-row>
             <v-row cols="2" v-if="type === 'activity'">
@@ -284,33 +407,74 @@ onMounted(async () => {
                     key="date"
                     title="Date"
                     :subtitle="offer?.date"
+                    v-if="!isEdit"
                 ></v-list-item>
+                <v-list-item v-else>
+                  <v-text-field v-model="offerChange.date"
+                                label="Date"
+                                type="date"
+                                denisty="compact"
+                                :rules="[
+                                  value => !!value || 'Ending date is required',
+                                  value => new Date(value) > new Date()
+                               ]"
+                  >
+                  </v-text-field>
+                </v-list-item>
               </v-col>
               <v-col>
                 <v-list-item
                     key="duration"
                     title="Duration"
                     :subtitle="offer?.duration"
+                    v-if="!isEdit"
                 ></v-list-item>
+                <v-list-item v-else>
+                  <v-text-field type="time" v-model="offerChange.duration"></v-text-field>
+                </v-list-item>
               </v-col>
             </v-row>
             <v-row>
               <v-list-item
                   key="general_facilities"
                   title="General Facilities"
-                  v-if="type === 'accommodation'"
+                  v-if="type === 'accommodation' && !isEdit"
               >{{
-                  offer?.generalFacilities.join(', ')
+                  offer?.generalFacilities?.join(', ') || 'None'
                 }}
+              </v-list-item>
+              <v-list-item v-else-if="type === 'accommodation' && isEdit" class="w-100">
+                <v-select v-else v-model="offerChange.generalFacilities"
+                          :items="generalFacilities"
+                          label="General facilities"
+                          multiple
+                          chips
+                          clearable
+                          density="compact"
+                          class="w-100"
+                >
+                </v-select>
               </v-list-item>
               <v-list-item
                   key="equipment"
                   title="Equipment"
-                  v-if="type === 'activity'"
+                  v-if="type === 'activity' && !isEdit"
               >
                 {{
-                  offer?.equipment.join(', ')
+                  offer?.equipment?.join(', ') || 'None'
                 }}
+              </v-list-item>
+              <v-list-item v-else-if="type === 'activity' && isEdit" class="w-100">
+                <v-select v-else v-model="offerChange.equipment"
+                          :items="equipmentList"
+                          label="Equipment"
+                          multiple
+                          chips
+                          clearable
+                          density="compact"
+                          class="w-100"
+                >
+                </v-select>
               </v-list-item>
             </v-row>
           </v-list>
@@ -371,11 +535,12 @@ onMounted(async () => {
                  text="Save"
                  block
                  border
-                 @click="isEdit = !isEdit"
+                 @click="onSave"
           ></v-btn>
         </v-card-actions>
       </v-card>
     </v-card>
+    </v-form>
   </v-sheet>
 </template>
 
