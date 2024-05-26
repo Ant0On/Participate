@@ -1,6 +1,7 @@
 <script setup>
 import {ref} from 'vue';
 import {storeToRefs} from 'pinia';
+import { useWindowSize } from '@vueuse/core'
 
 import LoginSection from "@/components/login/LoginSection.vue";
 import SignUpSection from "@/components/login/SignUpSection.vue";
@@ -14,22 +15,22 @@ const {user: user} = storeToRefs(userStore);
 
 const currentPage = ref('Account Information')
 
-
+const { width, height } = useWindowSize()
 </script>
 
 <template>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-  <div class="logging">
-    <div class="login_container" v-if="!user">
+  <div>
+    <div v-if="!user" class="d-flex justify-center align-center">
       <Transition name="slide-fade">
-        <div class="login" v-if="loginPage">
-          <LoginSection @sign-up-clicked="loginPage = !loginPage"/>
-          <img alt="Image" src="../assets/img/login_image.png"/>
-        </div>
-        <div class="signup" v-else>
-          <img alt="Image" src="../assets/img/login_image.png"/>
-          <SignUpSection/>
-        </div>
+        <v-card v-if="loginPage" class="d-flex flex-row w-75 h-75">
+          <LoginSection @sign-up-clicked="loginPage = !loginPage" class="pa-5"/>
+          <v-img v-if="width > 600" :src="require('@/assets/img/login_image.png')" class="w-50" cover height="700"></v-img>
+        </v-card>
+        <v-card v-else class="d-flex flex-row h-75 w-75">
+          <v-img v-if="width > 600" :src="require('@/assets/img/login_image.png')" class="w-50" height="700" cover></v-img>
+          <SignUpSection class="w-50"/>
+        </v-card>
       </Transition>
     </div>
     <div class="account_container" v-else>
@@ -53,11 +54,6 @@ div.account_data{
   flex-direction: row;
   flex-grow: 1;
 }
-div.data{
-  margin: 2%;
-  display: flex;
-  flex-grow: 1;
-}
 p{
   color: #000000;
   font-family: "Poppins", Helvetica;
@@ -66,26 +62,6 @@ p{
   line-height: normal;
   align-self: center;
 
-}
-.logging {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.login {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin: 30px 9% 10px 9%;
-  background: white;
-}
-.signup {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin: 30px 9% 10px 9%;
-  background: white;
 }
 
 .slide-fade-enter-active {
@@ -100,16 +76,6 @@ p{
 .slide-fade-leave-to {
   transform: translateX(-100%);
   opacity: 0;
-}
-
-@media(max-width: 900px){
-  img{
-    display: none;
-  }
-  .login_container{
-    margin-right: 30px;
-    margin-left: 30px;
-  }
 }
 
 </style>
