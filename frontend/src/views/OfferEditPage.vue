@@ -1,7 +1,6 @@
 <script setup>
 import {computed, defineProps, onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
-import VueDatePicker from '@vuepic/vue-datepicker';
 
 
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -340,21 +339,6 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                 ></v-list-item>
               </v-col>
               <v-col>
-                <v-list-item
-                    key="general_facilities"
-                    title="General Facilities"
-                    :subtitle="offer?.generalFacilities?.join(', ') || 'None'"
-                    v-if="!isEdit"
-                ></v-list-item>
-                <v-select v-else v-model="offerChange.generalFacilities"
-                          :items="generalFacilities"
-                          label="General facilities"
-                          multiple
-                          chips
-                          clearable
-                          density="compact"
-                >
-                </v-select>
               </v-col>
             </v-row>
             <v-row cols="2" v-if="type === 'event'">
