@@ -158,7 +158,7 @@ async function handleAccommodationOffer(townID, imageFiles) {
   });
 
   if (newAccommodation.value.accommodationType !== 'Villa' && newAccommodation.value.accommodationType !== 'Apartment') {
-    await fetchWrapper.post(`/api/room/create`, rooms.value);
+    await fetchWrapper.post(`/api/host/room/create`, rooms.value);
   }
 }
 
@@ -318,6 +318,26 @@ function checkIfOfferInfoIsFilled() {
   }
 
   return true;
+}
+
+function checkIfRoomInfoIsFilled() {
+  let accommodationValues = newAccommodation.value
+  let roomValues = newRoom.value
+  if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
+    return
+  }
+  if (
+      roomValues.number === '' ||
+      roomValues.name === '' ||
+      roomValues.description === '' ||
+      roomValues.capacity === '' ||
+      roomValues.area === ''
+  ) {
+    return false;
+  } else {
+    errors.offerInfo = '';
+    return true;
+  }
 }
 
 async function uploadImage(imageInput) {
