@@ -23,11 +23,11 @@ const { width, height } = useWindowSize()
   <div>
     <div v-if="!user" class="d-flex justify-center align-center">
       <Transition name="slide-fade">
-        <v-card v-if="loginPage" class="d-flex flex-row w-75 h-75">
+        <v-card v-if="loginPage" class="d-flex flex-row w-75 h-75 rounded-xl">
           <LoginSection @sign-up-clicked="loginPage = !loginPage" class="pa-5"/>
           <v-img v-if="width > 600" :src="require('@/assets/img/login_image.png')" class="w-50" cover height="700"></v-img>
         </v-card>
-        <v-card v-else class="d-flex flex-row h-75 w-75">
+        <v-card v-else class="d-flex flex-row h-75 w-75 rounded-xl">
           <v-img v-if="width > 600" :src="require('@/assets/img/login_image.png')" class="w-50" height="700" cover></v-img>
           <SignUpSection class="w-50"/>
         </v-card>
