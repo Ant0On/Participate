@@ -17,6 +17,8 @@ const offerChange = ref(null)
 const offerCountries = ref(null)
 const isEdit = ref(false)
 const offerFilled = ref(true)
+const isAddRoom = ref(false)
+const offerChangeRoom = ref({})
 const form = ref()
 
 const props = defineProps({
@@ -97,7 +99,9 @@ async function getCountries() {
     return {id: country.ID, name: country.Name}
   })
 }
+
 const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
+
 function getOfferChange(offer) {
   let offerChange = {...offer};
   delete offerChange.location;
@@ -106,17 +110,26 @@ function getOfferChange(offer) {
   return offerChange
 }
 
-async function onSave(){
+async function onSave() {
   const {valid} = await form.value.validate()
   isEdit.value = !isEdit.value
 
-  if(valid)
-  {
+  if (valid) {
     offer.value = offerChange.value
-    offer.value.location = `${offerChange.value.country.name}, ${offerChange.value.town}`
+    offer.value.location = `${offerCountries.value.filter(country =>
+        country.id === offerChange.value.country)?.[0]?.name}, ${offerChange.value.town}`
   }
 }
 
+async function saveRoom(){
+  const {valid} = await form.value.validate()
+  if(valid){
+    offerChange.value.rooms = [... offerChange.value?.rooms || [], {... offerChangeRoom.value}]
+    console.log(offerChange.value.rooms)
+    console.log(offerChangeRoom)
+    isAddRoom.value = false
+  }
+}
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
@@ -158,372 +171,484 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
       <v-breadcrumbs-item :title="offer.title"></v-breadcrumbs-item>
     </v-breadcrumbs>
     <v-form v-model="offerFilled" class="h-100 w-100 d-flex align-center justify-center" ref="form">
-    <v-card class="d-flex flex-row rounded-xl h-100" width="60%">
-      <v-card class="w-50">
-        <v-carousel v-if="image"
-                    :show-arrows="[...image].length > 1"
-                    :hide-delimiters="[...image].length === 1"
-                    :height="(isEdit)? '700px': '600px'"
-                    cycle
-        >
-          <v-carousel-item
-              v-for="img in image"
-              :src="img"
-              style="min-height: 100%"
-              cover
+      <v-card class="d-flex flex-row rounded-xl h-100" width="60%">
+        <v-card class="w-50">
+          <v-carousel v-if="image"
+                      :show-arrows="[...image].length > 1"
+                      :hide-delimiters="[...image].length === 1"
+                      :height="(isEdit)? '700px': '600px'"
+                      cycle
           >
-          </v-carousel-item>
-        </v-carousel>
-        <v-img v-else
-               :src="require(`@/assets/img/image_placeholder.png`)"
-               style="min-height: 100%"
-               cover
-        ></v-img>
-      </v-card>
-      <v-card class="w-50 d-flex flex-column">
-        <v-card-title v-if="!isEdit" class="font-weight-black text-center">
-          {{ offer.title }}
-        </v-card-title>
-        <v-card-title v-else class="font-weight-black text-center">
-          <v-text-field v-model="offerChange.title" flat
-                        label="Title"
-                        density="compact"
-                        :rules="[value => !!value, value => value.length > 3]"
-          ></v-text-field>
-        </v-card-title>
+            <v-carousel-item
+                v-for="img in image"
+                :src="img"
+                style="min-height: 100%"
+                cover
+            >
+            </v-carousel-item>
+          </v-carousel>
+          <v-img v-else
+                 :src="require(`@/assets/img/image_placeholder.png`)"
+                 style="min-height: 100%"
+                 cover
+          ></v-img>
+        </v-card>
+        <v-card class="w-50 d-flex flex-column">
+          <v-card-title v-if="!isEdit" class="font-weight-black text-center">
+            {{ offer.title }}
+          </v-card-title>
+          <v-card-title v-else class="font-weight-black text-center">
+            <v-text-field v-model="offerChange.title" flat
+                          label="Title"
+                          density="compact"
+                          :rules="[value => !!value, value => value.length > 3]"
+            ></v-text-field>
+          </v-card-title>
 
-        <v-card-subtitle class="d-flex mb-2">
+          <v-card-subtitle class="d-flex mb-2">
 
           <span v-if="!isEdit" class="me-1">
             {{ offer.location }}
           </span>
-          <div v-else class="d-flex justify-space-between w-100">
-            <v-select label="Coutnry"
-                      v-model="offerChange.country"
-                      :items="offerCountries"
-                      class="w-100"
-                      density="compact"
-                      item-title="name"
-                      item-value="id"
-            ></v-select>
-            <v-text-field label="Town"
-                          v-model="offerChange.town"
-                          class="w-100 ma-2"
-                          density="compact"
-                          :rules="[(value) => !!value, (value) => value.length > 3]"></v-text-field>
-          </div>
-        </v-card-subtitle>
-        <v-card-subtitle class="mx-0 d-flex " v-if="!isEdit">
-          <div class="font-weight-bold"
-               :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
-            {{ (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $` }}
-          </div>
+            <div v-else class="d-flex justify-space-between w-100">
+              <v-select label="Coutnry"
+                        v-model="offerChange.country"
+                        :items="offerCountries"
+                        class="w-100"
+                        density="compact"
+                        item-title="name"
+                        item-value="id"
+              ></v-select>
+              <v-text-field label="Town"
+                            v-model="offerChange.town"
+                            class="w-100 ma-2"
+                            density="compact"
+                            :rules="[(value) => !!value, (value) => value.length > 3]"></v-text-field>
+            </div>
+          </v-card-subtitle>
+          <v-card-subtitle class="mx-0 d-flex " v-if="!isEdit">
+            <div class="font-weight-bold"
+                 :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
+              {{
+                (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $`
+              }}
+            </div>
 
-          <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
-            {{ (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $` }}
+            <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
+              {{
+                (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $`
+              }}
+            </div>
+          </v-card-subtitle>
+          <v-card-subtitle class="d-flex flex-space-between w-100" v-else>
+            <v-text-field v-model="offerChange.price"
+                          width="40px"
+                          density="compact"
+                          label="Price"
+                          type="number"
+                          :rules="[(value) => !!value, (value) => value > 0]"
+            ></v-text-field>
+            <v-text-field v-model="offerChange.discount"
+                          density="compact"
+                          class="pl-1"
+                          label="Discount"
+                          type="number"
+                          :rules="[(value) => value >= 0 && value < 100]"
+            ></v-text-field>
+          </v-card-subtitle>
+          <div class="ma-4 text-subtitle-1" v-if="!isEdit">
+            <v-chip :prepend-icon="chips.discount.icon"
+                    :color="chips.discount.color"
+                    variant="flat"
+                    v-if="offer?.discount > 0"
+                    class="mr-1"
+            >
+              {{ chips.discount.text }}
+            </v-chip>
+            <v-chip :prepend-icon="chips?.[offer?.type].icon"
+                    :color="chips?.[offer?.type].color"
+                    variant="flat"
+                    class="mr-1"
+            >
+              {{ chips?.[offer?.type].text }}
+            </v-chip>
+            <v-chip :prepend-icon="chips?.[offer?.skill].icon"
+                    :color="chips?.[offer?.skill].color"
+                    variant="flat"
+                    class="mr-1"
+                    v-if="type=== 'activity'"
+            >
+              {{ chips?.[offer?.skill].text }}
+            </v-chip>
           </div>
-        </v-card-subtitle>
-        <v-card-subtitle class="d-flex flex-space-between w-100" v-else>
-          <v-text-field v-model="offerChange.price"
-                        width="40px"
-                        density="compact"
-                        label="Price"
-                        type="number"
-                        :rules="[(value) => !!value, (value) => value > 0]"
-          ></v-text-field>
-          <v-text-field v-model="offerChange.discount"
-                        density="compact"
-                        class="pl-1"
-                        label="Discount"
-                        type="number"
-                        :rules="[(value) => value >= 0 && value < 100]"
-          ></v-text-field>
-        </v-card-subtitle>
-        <div class="ma-4 text-subtitle-1" v-if="!isEdit">
-          <v-chip :prepend-icon="chips.discount.icon"
-                  :color="chips.discount.color"
-                  variant="flat"
-                  v-if="offer?.discount > 0"
-                  class="mr-1"
-          >
-            {{ chips.discount.text }}
-          </v-chip>
-          <v-chip :prepend-icon="chips?.[offer?.type].icon"
-                  :color="chips?.[offer?.type].color"
-                  variant="flat"
-                  class="mr-1"
-          >
-            {{ chips?.[offer?.type].text }}
-          </v-chip>
-          <v-chip :prepend-icon="chips?.[offer?.skill].icon"
-                  :color="chips?.[offer?.skill].color"
-                  variant="flat"
-                  class="mr-1"
-                  v-if="type=== 'activity'"
-          >
-            {{ chips?.[offer?.skill].text }}
-          </v-chip>
-        </div>
-        <v-card-subtitle class="d-flex justify-space-between w-100" v-else>
-          <v-select v-model="offerChange.type"
-                    :items="(type === 'event')? eventTypes.map((eventType) => eventType.toLowerCase())
+          <v-card-subtitle class="d-flex justify-space-between w-100" v-else>
+            <v-select v-model="offerChange.type"
+                      :items="(type === 'event')? eventTypes.map((eventType) => eventType.toLowerCase())
                     : (type === 'accommodation')? accommodationTypes.map((accommodationType) => accommodationType.toLowerCase())
                      : activityTypes.map((activityType) => activityType.toLowerCase())"
-                    label="Type"
-                    density="compact"
-          ></v-select>
-          <v-select v-model="offerChange.skill" v-if="type === 'activity'"
-                    label="Skill"
-                    class="pl-1"
-                    density="compact"
-                    :items="skillLevels.map((skillLevel) => skillLevel.toLowerCase())"
-          >
-          </v-select>
-        </v-card-subtitle>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-btn-toggle block rounded="lg">
-            <v-btn @click="cardPage = 'description'">
-              <v-icon icon="mdi-menu"></v-icon>
-            </v-btn>
-            <v-btn @click="cardPage = 'info'">
-              <v-icon icon="mdi-information"></v-icon>
-            </v-btn>
-            <v-btn @click="cardPage = 'accommodation'"
-                   v-if="type === 'accommodation' && ['hotel', 'hostel', 'guesthouse'].includes(offer.type)">
-              <v-icon icon="mdi-home"></v-icon>
-            </v-btn>
-            <v-btn @click="cardPage = 'activity'" v-if="type === 'activity'">
-              <v-icon icon="mdi-run"></v-icon>
-            </v-btn>
-          </v-btn-toggle>
-        </v-card-actions>
-
-        <v-card-text v-if="cardPage === 'description'">
-          <div v-if="!isEdit">{{ offer.description }}</div>
-          <v-textarea v-else
+                      label="Type"
                       density="compact"
-                      v-model="offerChange.description"
-                      :rules="[(values) => values.length > 30]"
-          ></v-textarea>
-        </v-card-text>
-        <v-card-text v-else-if="cardPage === 'info'">
-          <v-list class="h-100 w-100" style="overflow: hidden">
-            <v-row cols="2">
-              <v-col>
-                <v-list-item v-if="!isEdit"
-                             key="capacity"
-                             title="Capacity"
-                             :subtitle="offer.capacity"
-                ></v-list-item>
-                <v-list-item v-else>
-                  <v-text-field
-                      v-model="offerChange.capacity"
+            ></v-select>
+            <v-select v-model="offerChange.skill" v-if="type === 'activity'"
+                      label="Skill"
+                      class="pl-1"
                       density="compact"
-                      label="Capacity"
-                      type="number"
-                      :rules="[(value) => !!value, (value) => value > 0]"
-                  ></v-text-field>
-                </v-list-item>
-              </v-col>
-              <v-col>
+                      :items="skillLevels.map((skillLevel) => skillLevel.toLowerCase())"
+            >
+            </v-select>
+          </v-card-subtitle>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-btn-toggle block rounded="lg">
+              <v-btn @click="cardPage = 'description'">
+                <v-icon icon="mdi-menu"></v-icon>
+              </v-btn>
+              <v-btn @click="cardPage = 'info'">
+                <v-icon icon="mdi-information"></v-icon>
+              </v-btn>
+              <v-btn @click="cardPage = 'accommodation'"
+                     v-if="type === 'accommodation' && ['hotel', 'hostel', 'guesthouse'].includes((isEdit)? offerChange.type : offer.type)">
+                <v-icon icon="mdi-home"></v-icon>
+              </v-btn>
+              <v-btn @click="cardPage = 'activity'" v-if="type === 'activity'">
+                <v-icon icon="mdi-run"></v-icon>
+              </v-btn>
+            </v-btn-toggle>
+          </v-card-actions>
 
-              </v-col>
-            </v-row>
-            <v-row cols="2" v-if="type === 'accommodation'">
-              <v-col>
-                <v-list-item
-                    key="number_of_rooms"
-                    title="Number of rooms"
-                    :subtitle="offer?.numberOfRooms"
-                ></v-list-item>
-              </v-col>
-              <v-col>
-              </v-col>
-            </v-row>
-            <v-row cols="2" v-if="type === 'event'">
-              <v-col>
-                <v-list-item
-                    key="date_from"
-                    title="Date From"
-                    :subtitle="offer?.dateFrom"
-                    v-if="!isEdit"
-                ></v-list-item>
-                <v-list-item v-else>
-                  <v-text-field v-model="offerChange.dateFrom"
-                                label="Date From"
-                                type="date"
-                                denisty="compact"
-                                :rules="[
+          <v-card-text v-if="cardPage === 'description'">
+            <div v-if="!isEdit">{{ offer.description }}</div>
+            <v-textarea v-else
+                        density="compact"
+                        v-model="offerChange.description"
+                        :rules="[(values) => values.length > 30]"
+            ></v-textarea>
+          </v-card-text>
+          <v-card-text v-else-if="cardPage === 'info'">
+            <v-list class="h-100 w-100" style="overflow: hidden">
+              <v-row cols="2">
+                <v-col>
+                  <v-list-item v-if="!isEdit"
+                               key="capacity"
+                               title="Capacity"
+                               :subtitle="offer.capacity"
+                  ></v-list-item>
+                  <v-list-item v-else>
+                    <v-text-field
+                        v-model="offerChange.capacity"
+                        density="compact"
+                        label="Capacity"
+                        type="number"
+                        :rules="[(value) => !!value, (value) => value > 0]"
+                    ></v-text-field>
+                  </v-list-item>
+                </v-col>
+                <v-col>
+
+                </v-col>
+              </v-row>
+              <v-row cols="2" v-if="type === 'accommodation'">
+                <v-col>
+                  <v-list-item
+                      key="number_of_rooms"
+                      title="Number of rooms"
+                      :subtitle="offer?.numberOfRooms || 1"
+                  ></v-list-item>
+                </v-col>
+              </v-row>
+              <v-row cols="2" v-if="type === 'event'">
+                <v-col>
+                  <v-list-item
+                      key="date_from"
+                      title="Date From"
+                      :subtitle="offer?.dateFrom"
+                      v-if="!isEdit"
+                  ></v-list-item>
+                  <v-list-item v-else>
+                    <v-text-field v-model="offerChange.dateFrom"
+                                  label="Date From"
+                                  type="date"
+                                  denisty="compact"
+                                  :rules="[
                                   value => !!value || 'Ending date is required',
                                   value => !offerChange.dateTo || value <= offerChange.dateTo || 'Date must be lower than end date'
                                ]"
-                  >
-                  </v-text-field>
-                </v-list-item>
-              </v-col>
-              <v-col>
-                <v-list-item
-                    key="date_to"
-                    title="Date To"
-                    :subtitle="offer?.dateTo"
-                    v-if="!isEdit"
+                    >
+                    </v-text-field>
+                  </v-list-item>
+                </v-col>
+                <v-col>
+                  <v-list-item
+                      key="date_to"
+                      title="Date To"
+                      :subtitle="offer?.dateTo"
+                      v-if="!isEdit"
 
-                ></v-list-item>
-                <v-list-item v-else>
-                  <v-text-field v-model="offerChange.dateTo"
-                                label="Date To"
-                                type="date"
-                                denisty="compact"
-                                :rules="[
+                  ></v-list-item>
+                  <v-list-item v-else>
+                    <v-text-field v-model="offerChange.dateTo"
+                                  label="Date To"
+                                  type="date"
+                                  denisty="compact"
+                                  :rules="[
                                   value => !!value || 'Ending date is required',
                                   value => !offerChange.dateFrom || value >= offerChange.dateFrom || 'Date must be grater than starting date',
                                   value => new Date(value) > new Date()
                                ]"
-                  >
-                  </v-text-field>
-                </v-list-item>
-              </v-col>
-            </v-row>
-            <v-row cols="2" v-if="type === 'activity'">
-              <v-col>
-                <v-list-item
-                    key="date"
-                    title="Date"
-                    :subtitle="offer?.date"
-                    v-if="!isEdit"
-                ></v-list-item>
-                <v-list-item v-else>
-                  <v-text-field v-model="offerChange.date"
-                                label="Date"
-                                type="date"
-                                denisty="compact"
-                                :rules="[
+                    >
+                    </v-text-field>
+                  </v-list-item>
+                </v-col>
+              </v-row>
+              <v-row cols="2" v-if="type === 'activity'">
+                <v-col>
+                  <v-list-item
+                      key="date"
+                      title="Date"
+                      :subtitle="offer?.date"
+                      v-if="!isEdit"
+                  ></v-list-item>
+                  <v-list-item v-else>
+                    <v-text-field v-model="offerChange.date"
+                                  label="Date"
+                                  type="date"
+                                  denisty="compact"
+                                  :rules="[
                                   value => !!value || 'Ending date is required',
                                   value => new Date(value) > new Date()
                                ]"
-                  >
-                  </v-text-field>
-                </v-list-item>
-              </v-col>
-              <v-col>
+                    >
+                    </v-text-field>
+                  </v-list-item>
+                </v-col>
+                <v-col>
+                  <v-list-item
+                      key="duration"
+                      title="Duration"
+                      :subtitle="offer?.duration"
+                      v-if="!isEdit"
+                  ></v-list-item>
+                  <v-list-item v-else>
+                    <v-text-field type="time" v-model="offerChange.duration"></v-text-field>
+                  </v-list-item>
+                </v-col>
+              </v-row>
+              <v-row>
                 <v-list-item
-                    key="duration"
-                    title="Duration"
-                    :subtitle="offer?.duration"
-                    v-if="!isEdit"
-                ></v-list-item>
-                <v-list-item v-else>
-                  <v-text-field type="time" v-model="offerChange.duration"></v-text-field>
+                    key="general_facilities"
+                    title="General Facilities"
+                    v-if="type === 'accommodation' && !isEdit"
+                >{{
+                    offer?.generalFacilities?.join(', ') || 'None'
+                  }}
                 </v-list-item>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-list-item
-                  key="general_facilities"
-                  title="General Facilities"
-                  v-if="type === 'accommodation' && !isEdit"
-              >{{
-                  offer?.generalFacilities?.join(', ') || 'None'
-                }}
-              </v-list-item>
-              <v-list-item v-else-if="type === 'accommodation' && isEdit" class="w-100">
-                <v-select v-else v-model="offerChange.generalFacilities"
-                          :items="generalFacilities"
-                          label="General facilities"
-                          multiple
-                          chips
-                          clearable
-                          density="compact"
-                          class="w-100"
+                <v-list-item v-else-if="type === 'accommodation' && isEdit" class="w-100">
+                  <v-select v-else v-model="offerChange.generalFacilities"
+                            :items="generalFacilities"
+                            label="General facilities"
+                            multiple
+                            chips
+                            clearable
+                            density="compact"
+                            class="w-100"
+                  >
+                  </v-select>
+                </v-list-item>
+                <v-list-item
+                    key="equipment"
+                    title="Equipment"
+                    v-if="type === 'activity' && !isEdit"
                 >
-                </v-select>
+                  {{
+                    offer?.equipment?.join(', ') || 'None'
+                  }}
+                </v-list-item>
+                <v-list-item v-else-if="type === 'activity' && isEdit" class="w-100">
+                  <v-select v-else v-model="offerChange.equipment"
+                            :items="equipmentList"
+                            label="Equipment"
+                            multiple
+                            chips
+                            clearable
+                            density="compact"
+                            class="w-100"
+                  >
+                  </v-select>
+                </v-list-item>
+              </v-row>
+            </v-list>
+          </v-card-text>
+
+          <v-card-text v-else-if="cardPage === 'accommodation'" class="h-100" style="overflow-y: scroll">
+            <v-card-title>
+              Rooms
+            </v-card-title>
+            <v-list style="overflow: hidden" v-if="!isEdit">
+              <v-list-item v-for="room in offer.rooms" :key="room.roomNumber">
+                <RoomDetail :room="room"/>
               </v-list-item>
-              <v-list-item
-                  key="equipment"
-                  title="Equipment"
-                  v-if="type === 'activity' && !isEdit"
-              >
-                {{
-                  offer?.equipment?.join(', ') || 'None'
-                }}
+              <v-list-item v-if="isEdit">
+                <v-card class="border-s" flat color="grey-lighten-5">
+                  <v-card-title>
+                    Add a room
+                  </v-card-title>
+                  <v-card-actions class="d-flex align-center justify-center">
+                    <v-btn text="Add a room" variant="outlined" @click="console.log('adding a room')">
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
               </v-list-item>
-              <v-list-item v-else-if="type === 'activity' && isEdit" class="w-100">
-                <v-select v-else v-model="offerChange.equipment"
-                          :items="equipmentList"
-                          label="Equipment"
-                          multiple
-                          chips
-                          clearable
+            </v-list>
+            <v-list style="overflow-y: scroll; " v-if="isEdit">
+              <v-list-item v-for="room in offerChange.rooms" :key="room.roomNumber" append-icon="mdi-close">
+                <RoomDetail :room="room"/>
+              </v-list-item>
+              <v-list-item>
+                <v-card class="border-s" flat color="grey-lighten-5">
+                  <v-card-title>
+                    Add a room
+                  </v-card-title>
+                  <v-card-actions class="d-flex align-center justify-center">
+                    <v-btn text="Add a room" variant="outlined" @click="isAddRoom = true">
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-list-item>
+            </v-list>
+            <v-dialog
+                v-model="isAddRoom"
+                width="60%"
+            >
+              <v-card>
+                <v-card-title>
+                  Add a room
+                </v-card-title>
+                <v-card-text>
+                  <v-card>
+                    <v-form v-model="form"></v-form>
+                    <v-card-title>
+                      <v-text-field v-model="offerChangeRoom.roomNumber"
+                                    label="Room number"
+                                    type="number"
+                                    flat
+                                    denisty="compact"
+                                    :rules="[value => !!value, value => value > 0,
+                                    value => !offerChange.rooms || !offerChange.rooms?.some((room) => room.roomNumber === value)]"
+                      ></v-text-field>
+                      <v-text-field v-model="offerChangeRoom.roomName"
+                                    label="Room name"
+                                    flat
+                                    denisty="compact"
+                                    :rules="[value => !!value, value => value?.length > 3]"
+                      ></v-text-field>
+                    </v-card-title>
+                    <v-card-subtitle>
+                      <v-text-field v-model="offerChangeRoom.area"
+                                    label="Room area"
+                                    type="number"
+                                    flat
+                                    denisty="compact"
+                                    :rules="[value => !!value, value => value > 0]"></v-text-field>
+                      <v-text-field v-model="offerChangeRoom.capacity"
+                                    label="Room capacity"
+                                    type="number"
+                                    flat
+                                    denisty="compact"
+                                    :rules="[value => !!value, value => value > 0]"
+                      ></v-text-field>
+                    </v-card-subtitle>
+                    <v-card-text>
+                      <v-textarea
                           density="compact"
-                          class="w-100"
+                          label="Description"
+                          v-model="offerChangeRoom.description"
+                          :rules="[(values) => values?.length > 10]"
+                      ></v-textarea>
+                      <div class="text-subtitle-1 my-1">Room facilities</div>
+                      <v-divider></v-divider>
+                      <div class="my-1">
+                        <v-select v-else v-model="offerChangeRoom.roomFacilities"
+                                  :items="roomFacilities"
+                                  label="Room facilities"
+                                  multiple
+                                  chips
+                                  clearable
+                                  density="compact"
+                                  class="w-100"
+                        ></v-select>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </v-card-text>
+                <v-card-actions class="d-flex justify-space-between">
+                  <v-btn
+                      color="grey-darken-2"
+                      text="Back"
+                      border
+                      class="w-25"
+                      @click="isAddRoom = false"
+                  ></v-btn>
+                  <v-btn
+                      color="grey-darken-2"
+                      class="w-25"
+                      text="Save"
+                      border
+                      @click="saveRoom"
+                  ></v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-card-text>
+
+          <v-card-text v-else-if="cardPage === 'activity'">
+            <v-list style="overflow: hidden;">
+              <v-row>
+                <v-list-item
+                    key="activity_type"
+                    title="Type"
                 >
-                </v-select>
-              </v-list-item>
-            </v-row>
-          </v-list>
-        </v-card-text>
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-tree"></v-icon>
+                  </template>
+                  {{
+                    offer.type
+                  }}
+                </v-list-item>
+              </v-row>
+              <v-row>
+                <v-list-item
+                    key="skill"
+                    title="Skill"
+                >
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-bullseye"></v-icon>
+                  </template>
 
-        <v-card-text v-else-if="cardPage === 'accommodation'" class="h-100" style="overflow-y: scroll">
-          <v-card-title>
-            Rooms
-          </v-card-title>
-          <v-list style="overflow: hidden">
-            <v-list-item v-for="room in offer.rooms" :key="room.roomNumber">
-              <RoomDetail :room="room"/>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-
-        <v-card-text v-else-if="cardPage === 'activity'">
-          <v-list style="overflow: hidden;">
-            <v-row>
-              <v-list-item
-                  key="activity_type"
-                  title="Type"
-              >
-                <template v-slot:prepend>
-                  <v-icon icon="mdi-tree"></v-icon>
-                </template>
-                {{
-                  offer.type
-                }}
-              </v-list-item>
-            </v-row>
-            <v-row>
-              <v-list-item
-                  key="skill"
-                  title="Skill"
-              >
-                <template v-slot:prepend>
-                  <v-icon icon="mdi-bullseye"></v-icon>
-                </template>
-
-                {{
-                  offer.skill
-                }}
-              </v-list-item>
-            </v-row>
-          </v-list>
-        </v-card-text>
-        <v-card-actions class="w-100">
-          <v-btn v-if="!isEdit"
-                 color="blue-darken-2 flex-grow"
-                 text="Edit"
-                 block
-                 border
-                 @click="isEdit = !isEdit"
-          ></v-btn>
-          <v-btn v-else-if="isEdit"
-                 color="blue-darken-2 flex-grow"
-                 text="Save"
-                 block
-                 border
-                 @click="onSave"
-          ></v-btn>
-        </v-card-actions>
+                  {{
+                    offer.skill
+                  }}
+                </v-list-item>
+              </v-row>
+            </v-list>
+          </v-card-text>
+          <v-card-actions class="w-100">
+            <v-btn v-if="!isEdit"
+                   color="blue-darken-2"
+                   text="Edit"
+                   block
+                   border
+                   @click="isEdit = !isEdit"
+            ></v-btn>
+            <v-btn v-else-if="isEdit"
+                   color="blue-darken-2"
+                   text="Save"
+                   block
+                   border
+                   @click="onSave"
+            ></v-btn>
+          </v-card-actions>
+        </v-card>
       </v-card>
-    </v-card>
     </v-form>
   </v-sheet>
 </template>
