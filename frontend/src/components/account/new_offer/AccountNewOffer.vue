@@ -334,6 +334,28 @@ async function uploadImage(imageInput) {
         })
     );
   }
+  Promise.all(promises).then((imageDataArray) => {
+    newOffer.value.images = imageDataArray;
+  });
+}
+
+function dataURLtoFile(dataURL, fileName) {
+  const arr = dataURL.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], fileName, {type: mime});
+}
+
+function dataURLsToFiles(dataURLs, fileNameBase) {
+  return dataURLs.map((dataURL, index) => {
+    const fileName = `${fileNameBase}_${index}.jpeg`;
+    return dataURLtoFile(dataURL, fileName);
+  });
 }
 
 onMounted(async () => {

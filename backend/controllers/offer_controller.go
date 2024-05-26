@@ -38,10 +38,11 @@ func CreateOffer(c *gin.Context, tableName string, offer models.OfferOperations)
 }
 
 type OfferQueryParameters struct {
-	tableName   string
-	model       interface{}
-	dto         interface{}
-	selectQuery string
+	tableName    string
+	model        interface{}
+	dto          interface{}
+	selectQuery  string
+	groupByQuery string
 }
 
 func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
@@ -75,11 +76,18 @@ func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
 
-	result = query.
-		Joins(joinCondition).
-		Select(parameters.selectQuery).
-		Offset(offset).Limit(limit).
-		Find(parameters.dto)
+	if parameters.tableName == "activity" {
+		joinCondition += " LEFT JOIN activity_equipment ON activity.id = activity_equipment.activity_id"
+		joinCondition += " LEFT JOIN equipment ON equipment.id = activity_equipment.equipment_id"
+	}
+
+	query = query.Joins(joinCondition).Select(parameters.selectQuery)
+
+	if parameters.groupByQuery != "" {
+		query = query.Group(parameters.groupByQuery)
+	}
+
+	result = query.Offset(offset).Limit(limit).Find(parameters.dto)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -99,17 +107,20 @@ func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
 func GetOfferByID(c *gin.Context, parameters OfferQueryParameters) {
 	offerID := c.Param("id")
 
-	var result *gorm.DB
-
 	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
 
-	result = models.DB.
+	query := models.DB.
 		Model(parameters.model).
 		Joins(joinCondition).
 		Where(parameters.tableName+".id = ?", offerID).
-		Select(parameters.selectQuery).
-		Find(parameters.dto)
+		Select(parameters.selectQuery)
+
+	if parameters.groupByQuery != "" {
+		query = query.Group(parameters.groupByQuery)
+	}
+
+	result := query.Find(parameters.dto)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -125,7 +136,6 @@ func GetOfferByID(c *gin.Context, parameters OfferQueryParameters) {
 }
 
 func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
-	var result *gorm.DB
 	hostID := c.Param("id")
 
 	page, err := strconv.Atoi(c.Query("page"))
@@ -138,23 +148,33 @@ func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
 	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
 	joinCondition += " JOIN country ON town.country_id = country.id"
 
-	result = models.DB.
+	query := models.DB.
 		Model(parameters.model).
 		Joins(joinCondition).
 		Where(parameters.tableName+".user_id = ?", hostID).
-		Select(parameters.selectQuery).
-		Offset(offset).Limit(limit).
-		Find(parameters.dto)
+		Select(parameters.selectQuery)
+
+	if parameters.groupByQuery != "" {
+		query = query.Group(parameters.groupByQuery)
+	}
+
+	result := query.Offset(offset).Limit(limit).Find(parameters.dto)
 
 	if err := result.Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	totalRecords := result.RowsAffected
+	var totalRecords int64
+	countQuery := models.DB.Model(parameters.model).Joins(joinCondition).Where(parameters.tableName+".user_id = ?", hostID)
+	if parameters.groupByQuery != "" {
+		countQuery = countQuery.Group(parameters.groupByQuery)
+	}
+	countQuery.Count(&totalRecords)
+
 	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
 
-	if totalRecords == 0 {
+	if result.RowsAffected == 0 {
 		c.JSON(http.StatusNoContent, gin.H{
 			"message":      "No offers found",
 			"data":         []interface{}{},

@@ -18,42 +18,64 @@ func CreateActivityOffer(c *gin.Context) {
 func GetActivities(c *gin.Context) {
 	var activityWithLocation []DTO.ActivityWithLocation
 	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
-		"activity.price, activity.capacity, activity.skill_level," +
+		"activity.price, activity.capacity, activity.skill_level as skill, " +
 		"activity.duration, activity.activity_type as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name"
+		"activity.user_id, town.name as town_name, country.name as country_name, " +
+		"STRING_AGG(equipment.name, ', ') as equipment"
+
+	groupByQuery := "activity.id, activity.title, activity.description, " +
+		"activity.price, activity.capacity, activity.skill_level, " +
+		"activity.duration, activity.activity_type, activity.discount, " +
+		"activity.user_id, town.name, country.name"
+
 	GetOffers(c, OfferQueryParameters{
-		tableName:   "activity",
-		model:       &models.Activity{},
-		dto:         &activityWithLocation,
-		selectQuery: selectQuery,
+		tableName:    "activity",
+		model:        &models.Activity{},
+		dto:          &activityWithLocation,
+		selectQuery:  selectQuery,
+		groupByQuery: groupByQuery,
 	})
 }
 
 func GetActivityByID(c *gin.Context) {
 	var activityWithLocation DTO.ActivityWithLocation
 	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
-		"activity.price, activity.capacity, activity.skill_level," +
+		"activity.price, activity.capacity, activity.skill_level as skill," +
 		"activity.duration, activity.activity_type as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name"
+		"activity.user_id, town.name as town_name, country.name as country_name" +
+		"STRING_AGG(equipment.name, ', ') as equipment"
+
+	groupByQuery := "activity.id, activity.title, activity.description, " +
+		"activity.price, activity.capacity, activity.skill_level, " +
+		"activity.duration, activity.activity_type, activity.discount, " +
+		"activity.user_id, town.name, country.name"
+
 	GetOfferByID(c, OfferQueryParameters{
-		tableName:   "activity",
-		model:       &models.Activity{},
-		dto:         &activityWithLocation,
-		selectQuery: selectQuery,
+		tableName:    "activity",
+		model:        &models.Activity{},
+		dto:          &activityWithLocation,
+		selectQuery:  selectQuery,
+		groupByQuery: groupByQuery,
 	})
 }
 
 func GetActivitiesForHost(c *gin.Context) {
 	var activityWithLocation []DTO.ActivityWithLocation
 	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
-		"activity.price, activity.capacity, activity.skill_level," +
+		"activity.price, activity.capacity, activity.skill_level as skill," +
 		"activity.duration, activity.activity_type as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name"
+		"activity.user_id, town.name as town_name, country.name as country_name" +
+		"STRING_AGG(equipment.name, ', ') as equipment"
+	groupByQuery := "activity.id, activity.title, activity.description, " +
+		"activity.price, activity.capacity, activity.skill_level, " +
+		"activity.duration, activity.activity_type, activity.discount, " +
+		"activity.user_id, town.name, country.name"
 	GetOffersForHost(c, OfferQueryParameters{
-		tableName:   "activity",
-		model:       &models.Activity{},
-		dto:         &activityWithLocation,
-		selectQuery: selectQuery,
+		tableName:    "activity",
+		model:        &models.Activity{},
+		dto:          &activityWithLocation,
+		selectQuery:  selectQuery,
+		groupByQuery: groupByQuery,
 	})
 }
 

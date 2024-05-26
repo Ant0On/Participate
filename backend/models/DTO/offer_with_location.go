@@ -26,10 +26,11 @@ type EventWithLocation struct {
 
 type ActivityWithLocation struct {
 	OfferWithLocation
-	Price    float64             `json:"price"`
-	Skill    models.SkillLevel   `json:"skill_level"`
-	Type     models.ActivityType `json:"type"`
-	Duration time.Duration       `json:"duration"`
+	Price     float64             `json:"price"`
+	Skill     models.SkillLevel   `json:"skill_level"`
+	Type      models.ActivityType `json:"type"`
+	Duration  time.Duration       `json:"duration"`
+	Equipment string              `json:"equipment"`
 }
 
 type AccommodationWithLocation struct {
