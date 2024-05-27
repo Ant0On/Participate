@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -16,10 +17,17 @@ type Town struct {
 	Country        Country `gorm:"foreignKey:CountryID"`
 }
 
-func (t *Town) Save() error {
-	if err := DB.Create(t).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+func (t *Town) Save() (bool, error) {
+	existingTown := Town{}
+	if err := DB.Where("country_id = ? AND name = ?", t.CountryID, t.Name).First(&existingTown).Error; err == nil {
+		return false, nil
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, fmt.Errorf("failed to check existing town: %w", err)
 	}
 
-	return nil
+	if err := DB.Create(t).Error; err != nil {
+		return true, fmt.Errorf("DB.Create: %w", err)
+	}
+
+	return true, nil
 }

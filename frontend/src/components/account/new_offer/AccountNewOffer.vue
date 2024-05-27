@@ -104,7 +104,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 
 async function getCountryId(countryName) {
   const response = await fetchWrapper.get('/api/country/get/all')
-  return response.data.filter((country) => country.Name === countryName)[0].ID
+  return response.data.filter((country) => country.CountryName === countryName)[0].ID
 }
 
 async function onSubmit() {
@@ -387,7 +387,7 @@ function dataURLsToFiles(dataURLs, fileNameBase) {
 
 onMounted(async () => {
   const response = await fetchWrapper.get('/api/country/get/all')
-  countries.value = response.data.map(country => country.Name)
+  countries.value = response.data.map(country => country.CountryName)
 })
 </script>
 

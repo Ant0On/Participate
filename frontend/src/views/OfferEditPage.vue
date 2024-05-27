@@ -96,7 +96,7 @@ async function getOfferDetails() {
 async function getCountries() {
   const response = await fetchWrapper.get('/api/country/get/all')
   return response.data.map((country) => {
-    return {id: country.ID, name: country.Name}
+    return {id: country.ID, name: country.CountryName}
   })
 }
 
