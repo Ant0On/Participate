@@ -77,7 +77,7 @@ func GetRoomsForAccommodation(c *gin.Context) {
 	result = query.
 		Select("room.id as room_id, room.room_number, room.room_name, " +
 			"room.room_description, room.capacity, room.area, room.accommodation_id, " +
-			"town.name as town_name, country.name as country_name").
+			"town.name as town_name, country.country_name as country_name").
 		Offset(offset).Limit(limit).
 		Find(&rooms)
 
