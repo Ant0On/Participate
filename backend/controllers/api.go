@@ -41,7 +41,6 @@ func RegisterRoutes(r *gin.Engine) {
 	accommodation.PUT("/update/:id", UpdateAccommodation)
 	accommodation.PUT("/discount/:offerID", DiscountAccommodation)
 	accommodation.GET("/:id/reservations", GetCurrentAccommodationReservations)
-	accommodation.GET("/:id/room", GetAccommodationWithRoomsByID)
 	accommodation.GET("/:id/offers", GetAccommodationsForHost)
 	accommodation.PUT("/price/:id", ChangeAccommodationPrice)
 	accommodation.POST("/:id/facilities/add", AddGeneralFacilities)
