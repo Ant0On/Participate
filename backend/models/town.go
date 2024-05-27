@@ -12,7 +12,8 @@ type Town struct {
 	Accommodations []Accommodation
 	Activities     []Activity
 	Events         []Event
-	CountryID      uint `gorm:"not null" json:"country_id" binding:"required"`
+	CountryID      uint    `gorm:"not null" json:"country_id" binding:"required"`
+	Country        Country `gorm:"foreignKey:CountryID"`
 }
 
 func (t *Town) Save() error {

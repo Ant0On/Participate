@@ -26,6 +26,7 @@ type Offer struct {
 	Discount    float64 `gorm:"not null;default: 0.00" form:"discount"`
 	TownID      uint    `gorm:"not null" form:"town_id" binding:"required"`
 	UserID      uint    `gorm:"not null" form:"user_id" binding:"required"`
+	Town        Town    `gorm:"foreignKey:TownID"`
 }
 
 func (o *Offer) HandleOfferImageUploads(c *gin.Context, tableName string, offerID uint) error {
