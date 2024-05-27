@@ -346,10 +346,8 @@ onMounted(async () => {
                     <v-list-item
                         key="number_of_rooms"
                         title="Number of rooms"
-                        :subtitle="offer?.numberOfRooms"
+                        :subtitle="offer?.numberOfRooms || 1"
                     ></v-list-item>
-                  </v-col>
-                  <v-col>
                   </v-col>
                 </v-row>
                 <v-row cols="2" v-if="type === 'event'">
