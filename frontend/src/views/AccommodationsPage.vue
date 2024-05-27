@@ -3,7 +3,6 @@ import {onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
 import {useOfferStore} from "@/stores/offers.store";

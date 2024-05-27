@@ -17,17 +17,20 @@ const allRooms = ref([]);
 function mapAccommodation(responseData) {
   return responseData.map((data) => {
     return {
-      'offerId': data["accommodation_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'state': data['reservation_state'],
-      'type': data['type'],
-      'capacity': data["capacity"],
-      'dateFrom': data['date_from'],
-      'dateTo': data['dateTo'],
-      'price': data['price_per_day'],
-      'reservationId': data['reservation_id'],
-      'animal_friendly': data['is_animal_friendly'],
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['PricePerDay'],
+      'discount': data['Discount'],
+      'type': data['Type'],
+      'animal_friendly': data['IsAnimalFriendly'],
+      'rating': data['Rating'] || 0,
+      'numberOfRooms': data?.NumberOfRooms,
+      'rooms': data?.Rooms?.map((room) => {return {...room}}),
+      'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
+
     };
   });
 }
@@ -35,17 +38,18 @@ function mapAccommodation(responseData) {
 function mapActivities(responseData) {
   return responseData.map((data) => {
     return {
-      'offerId': data["activity_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'date': data["date"],
-      'capacity': data["capacity"],
-      'price': data['price'],
-      'state': data['reservation_state'],
-      'reservationId': data['reservation_id'],
-      'skill': data['skill_level'],
-      'type': data['type'],
-      'duration': data['duration']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['Price'],
+      'discount': data['Discount'],
+      'skill': data['Skill'],
+      'type': data['Type'],
+      'duration': data['Duration'],
+      'date': data?.Date?.split('T')?.[0],
+      'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
     };
   });
 }
@@ -53,15 +57,16 @@ function mapActivities(responseData) {
 function mapEvents(responseData) {
   return responseData.map((data) => {
     return {
-      'offerId': data["event_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'state': data["reservation_state"],
-      'capacity': data["capacity"],
-      'price': data['price'],
-      'reservationId': data['reservation_id'],
-      'date': data['date'],
-      'type': data['type']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['Price'],
+      'discount': data['Discount'],
+      'type': data['Type'],
+      'dateFrom': data?.DateFrom?.split('T')?.[0],
+      'dateTo': data?.DateTo?.split('T')?.[0]
     };
   });
 }
