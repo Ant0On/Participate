@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"backend/models"
-	"backend/models/DTO"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,42 +12,32 @@ func CreateEventOffer(c *gin.Context) {
 }
 
 func GetEvents(c *gin.Context) {
-	var eventsWithLocation []DTO.EventWithLocation
-	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.event_type as type, event.discount, " +
-		"event.user_id, town.name as town_name, country.name as country_name"
-	GetOffers(c, OfferQueryParameters{
-		tableName:   "event",
-		model:       &models.Event{},
-		dto:         &eventsWithLocation,
-		selectQuery: selectQuery,
-	})
+	params := OfferQueryParameters{
+		Model:    &[]models.Event{},
+		Preloads: []string{"Town.Country"},
+		Filters:  map[string]interface{}{},
+	}
+	FetchOffers(c, params)
 }
 
 func GetEventByID(c *gin.Context) {
-	var eventsWithLocation DTO.EventWithLocation
-	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.event_type as type, event.discount, " +
-		"event.user_id, town.name as town_name, country.name as country_name"
-	GetOfferByID(c, OfferQueryParameters{
-		tableName:   "event",
-		model:       &models.Event{},
-		dto:         &eventsWithLocation,
-		selectQuery: selectQuery,
-	})
+	offerID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Event{},
+		Preloads: []string{"Town.Country"},
+		Filters:  map[string]interface{}{"id": offerID},
+	}
+	FetchOffers(c, params)
 }
 
 func GetEventsForHost(c *gin.Context) {
-	var eventsWithLocation []DTO.EventWithLocation
-	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.event_type as type, event.discount, " +
-		"event.user_id, town.name as town_name, country.name as country_name"
-	GetOffersForHost(c, OfferQueryParameters{
-		tableName:   "event",
-		model:       &models.Event{},
-		dto:         &eventsWithLocation,
-		selectQuery: selectQuery,
-	})
+	hostID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Event{},
+		Preloads: []string{"Town.Country"},
+		Filters:  map[string]interface{}{"user_id": hostID},
+	}
+	FetchOffers(c, params)
 }
 
 func DeleteEvent(c *gin.Context) {

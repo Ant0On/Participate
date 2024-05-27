@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"math"
 	"net/http"
 	"strconv"
 
@@ -9,7 +8,6 @@ import (
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func CreateOffer(c *gin.Context, tableName string, offer models.OfferOperations) {
@@ -38,179 +36,45 @@ func CreateOffer(c *gin.Context, tableName string, offer models.OfferOperations)
 }
 
 type OfferQueryParameters struct {
-	tableName    string
-	model        interface{}
-	dto          interface{}
-	selectQuery  string
-	groupByQuery string
+	Model    interface{}
+	Preloads []string
+	Filters  map[string]interface{}
 }
 
-func GetOffers(c *gin.Context, parameters OfferQueryParameters) {
-	var result *gorm.DB
+func FetchOffers(c *gin.Context, params OfferQueryParameters) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page < 1 {
+	if page < 1 {
 		page = 1
 	}
-	limit := 10
-	offset := (page - 1) * limit
-
-	query := models.DB.Model(parameters.model)
-
-	var totalRecords int64
-	searchQuery := c.Query("name")
-	if searchQuery != "" {
-		query = query.Where("title ILIKE ?", "%"+searchQuery+"%")
+	if pageSize < 1 {
+		pageSize = 10
 	}
 
-	location := c.Query("localization")
-	if location != "" {
-		query = query.Joins("JOIN town AS t ON "+parameters.tableName+".town_id = t.id").
-			Joins("JOIN country AS c ON t.country_id = c.id").
-			Where("t.name ILIKE ? OR c.name ILIKE ?", "%"+location+"%", "%"+location+"%")
+	offset := (page - 1) * pageSize
+
+	query := models.DB
+	for _, preload := range params.Preloads {
+		query = query.Preload(preload)
 	}
 
-	query.Count(&totalRecords)
-	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
-
-	joinCondition := " JOIN town ON " + parameters.tableName + ".town_id = town.id"
-	joinCondition += " JOIN country ON town.country_id = country.id"
-
-	if parameters.tableName == "activity" {
-		joinCondition += " LEFT JOIN activity_equipment ON activity.id = activity_equipment.activity_id"
-		joinCondition += " LEFT JOIN equipment ON equipment.id = activity_equipment.equipment_id"
+	for key, value := range params.Filters {
+		query = query.Where(key+" = ?", value)
 	}
 
-	if parameters.tableName == "accommodation" {
-		joinCondition += " JOIN room ON accommodation.id = room.accommodation_id"
-		joinCondition += " LEFT JOIN room_room_facilities ON room.id = room_room_facilities.room_id"
-		joinCondition += " LEFT JOIN room_facility ON room_room_facilities.room_facility_id = room_facility.id"
-		joinCondition += " LEFT JOIN accommodation_general_facilities ON accommodation.id = accommodation_general_facilities.accommodation_id"
-		joinCondition += " LEFT JOIN general_facility ON accommodation_general_facilities.general_facility_id = general_facility.id"
-	}
+	query = query.Offset(offset).Limit(pageSize).Find(params.Model)
 
-	query = query.Joins(joinCondition).Select(parameters.selectQuery)
-
-	if parameters.groupByQuery != "" {
-		query = query.Group(parameters.groupByQuery)
-	}
-
-	result = query.Offset(offset).Limit(limit).Find(parameters.dto)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if query.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": query.Error.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":      "offers fetched successfully",
-		"data":         parameters.dto,
-		"page":         page,
-		"limit":        limit,
-		"totalPages":   totalPages,
-		"totalRecords": totalRecords,
-	})
-}
-
-func GetOfferByID(c *gin.Context, parameters OfferQueryParameters) {
-	offerID := c.Param("id")
-
-	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
-	joinCondition += " JOIN country ON town.country_id = country.id"
-
-	if parameters.tableName == "activity" {
-		joinCondition += " LEFT JOIN activity_equipment ON activity.id = activity_equipment.activity_id"
-		joinCondition += " LEFT JOIN equipment ON equipment.id = activity_equipment.equipment_id"
-	}
-
-	query := models.DB.
-		Model(parameters.model).
-		Joins(joinCondition).
-		Where(parameters.tableName+".id = ?", offerID).
-		Select(parameters.selectQuery)
-
-	if parameters.groupByQuery != "" {
-		query = query.Group(parameters.groupByQuery)
-	}
-
-	result := query.Find(parameters.dto)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer fetched successfully", "data": parameters.dto})
-}
-
-func GetOffersForHost(c *gin.Context, parameters OfferQueryParameters) {
-	hostID := c.Param("id")
-
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-	limit := 10
-	offset := (page - 1) * limit
-
-	joinCondition := "JOIN town ON " + parameters.tableName + ".town_id = town.id"
-	joinCondition += " JOIN country ON town.country_id = country.id"
-
-	if parameters.tableName == "activity" {
-		joinCondition += " LEFT JOIN activity_equipment ON activity.id = activity_equipment.activity_id"
-		joinCondition += " LEFT JOIN equipment ON equipment.id = activity_equipment.equipment_id"
-	}
-
-	query := models.DB.
-		Model(parameters.model).
-		Joins(joinCondition).
-		Where(parameters.tableName+".user_id = ?", hostID).
-		Select(parameters.selectQuery)
-
-	if parameters.groupByQuery != "" {
-		query = query.Group(parameters.groupByQuery)
-	}
-
-	result := query.Offset(offset).Limit(limit).Find(parameters.dto)
-
-	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var totalRecords int64
-	countQuery := models.DB.Model(parameters.model).Joins(joinCondition).Where(parameters.tableName+".user_id = ?", hostID)
-	if parameters.groupByQuery != "" {
-		countQuery = countQuery.Group(parameters.groupByQuery)
-	}
-	countQuery.Count(&totalRecords)
-
-	totalPages := int(math.Ceil(float64(totalRecords) / float64(limit)))
-
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNoContent, gin.H{
-			"message":      "No offers found",
-			"data":         []interface{}{},
-			"page":         page,
-			"limit":        limit,
-			"totalPages":   totalPages,
-			"totalRecords": totalRecords,
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":      "Offers fetched successfully",
-		"data":         parameters.dto,
-		"page":         page,
-		"limit":        limit,
-		"totalPages":   totalPages,
-		"totalRecords": totalRecords,
+		"message":   "data fetched successfully",
+		"data":      params.Model,
+		"page":      page,
+		"page_size": pageSize,
 	})
 }
 
