@@ -15,6 +15,18 @@ type ReservationRoom struct {
 	RoomID   uint      `gorm:"not null" json:"room_id" binding:"required"`
 }
 
+func (r *ReservationRoom) Validate() error {
+	var offer Room
+	if err := DB.First(&offer, r.RoomID).Error; err != nil {
+		return fmt.Errorf("DB.First: %w", err)
+	}
+
+	if r.NumberOfPeople > offer.Capacity {
+		return fmt.Errorf("too many people added to reservation")
+	}
+	return nil
+}
+
 func (r *ReservationRoom) Save() error {
 	if err := r.Validate(); err != nil {
 		return fmt.Errorf("r.Validate: %v", err)

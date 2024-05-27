@@ -30,19 +30,6 @@ type Reservation struct {
 	PaymentID        uint             `gorm:"not null" json:"payment_id" binding:"required"`
 }
 
-// TODO move validation to specific reservations
-func (r *Reservation) Validate() error {
-	//var offer Offer
-	//if err := DB.First(&offer, r.OfferID).Error; err != nil {
-	//	return fmt.Errorf("DB.First: %w", err)
-	//}
-	//
-	//if r.NumberOfPeople > offer.Capacity {
-	//	return fmt.Errorf("too many people added to reservation")
-	//}
-	return nil
-}
-
 func CheckReservations() error {
 	var activityReservations []ReservationActivity
 	var accommodationReservations []ReservationAccommodation
