@@ -137,47 +137,52 @@ const hostData = ref({
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.type}/${props.id}`)
   if (response?.data) {
-    const data = response.data
+    const data = response.data[0]
     if (props.type === "accommodation") {
       return {
-        'offerId': data["offer_id"],
-        'title': data["title"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'capacity': data["capacity"],
-        'price': data['price_per_day'],
-        'isRecommended': data['is_recommended'],
-        'discount': data['discount'],
-        'type': data['type'],
-        'animal_friendly': data['is_animal_friendly'],
-        'rating': data['rating']
+        'offerId': data["ID"],
+        'title': data["Title"],
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'description': data["Description"],
+        'capacity': data["Capacity"],
+        'price': data['PricePerDay'],
+        'discount': data['Discount'],
+        'type': data['Type'],
+        'animal_friendly': data['IsAnimalFriendly'],
+        'rating': data['Rating'] || 0,
+        'numberOfRooms': data?.NumberOfRooms,
+        'rooms': data?.Rooms?.map((room) => {return {...room}}),
+        'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
+
       }
 
     } else if (props.type === "event") {
       return {
-        'offerId': data["offer_id"],
-        'title': data["title"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'capacity': data["capacity"],
-        'price': data['price'],
-        'isRecommended': data['is_recommended'],
-        'discount': data['discount'],
-        'type': data['type']
+        'offerId': data["ID"],
+        'title': data["Title"],
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'description': data["Description"],
+        'capacity': data["Capacity"],
+        'price': data['Price'],
+        'discount': data['Discount'],
+        'type': data['Type'],
+        'dateFrom': data?.DateFrom?.split('T')?.[0],
+        'dateTo': data?.DateTo?.split('T')?.[0]
       }
     } else if (props.type === "activity") {
       return {
-        'offerId': data["offer_id"],
-        'title': data["title"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'capacity': data["capacity"],
-        'price': data['price'],
-        'isRecommended': data['is_recommended'],
-        'discount': data['discount'],
-        'skill': data['skill_level'],
-        'type': data['type'],
-        'duration': data['duration']
+        'offerId': data["ID"],
+        'title': data["Title"],
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'description': data["Description"],
+        'capacity': data["Capacity"],
+        'price': data['Price'],
+        'discount': data['Discount'],
+        'skill': data['Skill'],
+        'type': data['Type'],
+        'duration': data['Duration'],
+        'date': data?.Date?.split('T')?.[0],
+        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
       }
     }
   }
@@ -198,7 +203,7 @@ async function doesChatExist() {
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
-  // await doesChatExist();
+  console.log(offer.value)
 });
 
 </script>

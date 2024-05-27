@@ -26,7 +26,6 @@ const image = computed(() => {
     return images
   }
 });
-
 const cardPage = ref((props.custom)? 'custom' : 'main');
 </script>
 

@@ -15,17 +15,18 @@ function mapActivities(responseData) {
 
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'capacity': data["capacity"],
-      'price': data['price'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
-      'skill': data['skill_level'],
-      'type': data['type'],
-      'duration': data['duration']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['Price'],
+      'discount': data['Discount'],
+      'skill': data['Skill'],
+      'type': data['Type'],
+      'duration': data['Duration'],
+      'date': data?.Date?.split('T')?.[0],
+      'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
     };
   });
 }
