@@ -28,6 +28,8 @@ type Activity struct {
 	Skill        SkillLevel    `gorm:"type:varchar(255);check:skill_level IN ('beginner', 'intermediate', 'advanced'); column:skill_level; not null" form:"skill_level" binding:"required,oneof=beginner intermediate advanced"`
 	Type         ActivityType  `gorm:"type:varchar(255);check:activity_type IN ('indoor', 'outdoor'); column:activity_type; not null" form:"activity_type" binding:"required,oneof=indoor outdoor"`
 	Price        float64       `gorm:"not null" form:"price" binding:"required,gt=0"`
+	RatingAvg    float64       `gorm:"not null;default: 0.00" form:"-"`
+	RatingCount  int           `gorm:"not null;default: 0" form:"-"`
 	Duration     time.Duration `gorm:"not null" form:"duration" binding:"required"`
 	Equipment    []Equipment   `gorm:"many2many:activity_equipment;"`
 	Reservations []ReservationActivity
@@ -54,6 +56,13 @@ func (a *Activity) Update() error {
 		return err
 	}
 	return nil
+}
+
+func (a *Activity) UpdateRating(rating int) {
+	currentSum := a.RatingAvg * float64(a.RatingCount)
+	currentSum += float64(rating)
+	a.RatingCount += 1
+	a.RatingAvg = currentSum / float64(a.RatingCount)
 }
 
 func (a *Activity) Delete() error {

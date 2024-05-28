@@ -22,6 +22,8 @@ type Accommodation struct {
 	NumberOfRooms     int               `gorm:"not null" form:"number_of_rooms" binding:"required,min=1"`
 	Type              AccommodationType `gorm:"type:varchar(255);check:accommodation_type IN ('hotel', 'hostel', 'apartment', 'villa', 'guesthouse'); column:accommodation_type; not null" form:"type" binding:"required,oneof=hotel hostel apartment villa guesthouse"`
 	IsAnimalFriendly  bool              `gorm:"not null" form:"is_animal_friendly"`
+	RatingAvg         float64           `gorm:"not null;default: 0.00" form:"-"`
+	RatingCount       int               `gorm:"not null;default: 0" form:"-"`
 	PricePerDay       float64           `gorm:"not null" form:"price_per_day" binding:"required,min=1"`
 	GeneralFacilities []GeneralFacility `gorm:"many2many:accommodation_general_facilities;"`
 	Rooms             []Room
@@ -48,6 +50,13 @@ func (a *Accommodation) Update() error {
 		return err
 	}
 	return nil
+}
+
+func (a *Accommodation) UpdateRating(rating int) {
+	currentSum := a.RatingAvg * float64(a.RatingCount)
+	currentSum += float64(rating)
+	a.RatingCount += 1
+	a.RatingAvg = currentSum / float64(a.RatingCount)
 }
 
 func (a *Accommodation) Delete() error {

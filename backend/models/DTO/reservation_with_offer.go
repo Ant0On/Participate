@@ -46,7 +46,6 @@ type ReservationEventWithOffer struct {
 	TownName         string           `json:"town_name"`
 	CountryName      string           `json:"country_name"`
 	EventID          uint             `json:"event_id"`
-	RatingID         uint             `json:"rating_id"`
 	ReservationState string           `json:"reservation_state"`
 }
 
@@ -59,6 +58,5 @@ type ReservationRoomWithOffer struct {
 	DateTo           time.Time `json:"date_to"`
 	IsAnimalFriendly bool      `json:"is_animal_friendly"`
 	RoomID           uint      `json:"room_id"`
-	RatingID         uint      `json:"rating_id"`
 	ReservationState string    `json:"reservation_state"`
 }
