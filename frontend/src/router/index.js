@@ -15,7 +15,7 @@ import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHos
 import AccountHistory from "@/components/account/history/AccountHistory.vue";
 import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
 import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
-import CurrentOffer from "@/components/account/current_offer/CurrentOffer.vue";
+import CurrentReservations from "@/components/account/current_reservations/CurrentReservations.vue";
 
 const routes = [
     {
@@ -77,9 +77,9 @@ const routes = [
         component: AccountNewOffer
     },
      {
-        path: '/account/current_offers',
-        name: "Current offers",
-        component: CurrentOffer
+        path: '/account/current_reservations',
+        name: "Current reservations",
+        component: CurrentReservations
     },
 
 
@@ -91,7 +91,7 @@ export const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-    const hostPages = ['/account/my_offers', '/account/new_offer', '/account/current_offers'];
+    const hostPages = ['/account/my_offers', '/account/new_offer', '/account/current_reservations'];
     const customerPages = ['/account/become_host', '/account/history'];
     const hostRequired = hostPages.includes(to.path);
     const customerRequired = customerPages.includes(to.path);
