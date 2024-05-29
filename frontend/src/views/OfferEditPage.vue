@@ -457,11 +457,15 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                   <v-list-item
                       key="duration"
                       title="Duration"
-                      :subtitle="offer?.duration"
+                      :subtitle="`${offer?.duration} ${(offer?.duration === 1)? 'Hour': 'Hours'} `"
                       v-if="!isEdit"
                   ></v-list-item>
                   <v-list-item v-else>
-                    <v-text-field type="time" v-model="offerChange.duration"></v-text-field>
+                    <v-text-field type="number" v-model="offerChange.duration"
+                                  label="Duration"
+                                  hint="Time in hours"
+                                  persistent-hint
+                                  ></v-text-field>
                   </v-list-item>
                 </v-col>
               </v-row>
