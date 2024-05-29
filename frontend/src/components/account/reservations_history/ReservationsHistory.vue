@@ -7,12 +7,14 @@ import OfferReservationListItem from "@/components/offers/OfferReservationListIt
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const userStore = useAuthStore();
-const {user: user} = storeToRefs(userStore)
+const {user: user} = storeToRefs(userStore);
 
 const allEvents = ref([]);
 const allActivities = ref([]);
 const allAccommodations = ref([]);
 const allRooms = ref([]);
+
+const ratings = ref({});
 
 function mapAccommodation(responseData) {
   return responseData.map((data) => {
@@ -28,7 +30,7 @@ function mapAccommodation(responseData) {
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
       'animal_friendly': data['is_animal_friendly'],
-    }
+    };
   });
 }
 
@@ -78,7 +80,6 @@ function mapRooms(responseData) {
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
       'animal_friendly': data['is_animal_friendly'],
-
     };
   });
 }
@@ -105,14 +106,14 @@ async function loadOffers(generator, offerList, done) {
   done('ok');
 }
 
-async function rateReservation(reservationId, type, reservations){
-  fetchWrapper.post(`/api/customer/offer/${type}/${reservationId}/rate`, {}).then(() => {
-
-  }).catch((err) => {
-
-  })
+async function rateReservation(reservationId, type, rating) {
+  console.log('HELLO')
+  try {
+    await fetchWrapper.post(`/api/customer/offer/${type}/${reservationId}/rate`, {
+      Count: rating });
+  } catch (err) {
+  }
 }
-
 </script>
 
 <template>
@@ -120,7 +121,7 @@ async function rateReservation(reservationId, type, reservations){
     <div>
       <v-infinite-scroll
           :items="allEvents"
-          :onLoad="({done}) => loadOffers(eventsGenerator, allEvents, done)"
+          :onLoad="({ done }) => loadOffers(eventsGenerator, allEvents, done)"
           empty-text="Currently there are no more reservations to display!"
           mode="manual"
           class="w-100"
@@ -130,15 +131,8 @@ async function rateReservation(reservationId, type, reservations){
           <template v-for="event in allEvents.value" :key="event.reservationId">
             <v-col cols="4">
               <OfferReservationListItem v-if="event.state === 'finished'" type="event" :offerItem="event" custom>
-                <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-rating elevation="0" color="yellow-lighten-2" rounded
-                           @click="rateReservation(event.reservationId, 'event', allEvents)">Rate
-                    </v-rating>
-                  </v-card>
-                </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else type="event" :offerItem="event"/>
+              <OfferReservationListItem v-else type="event" :offerItem="event" />
             </v-col>
           </template>
         </v-row>
@@ -147,7 +141,7 @@ async function rateReservation(reservationId, type, reservations){
     <div>
       <v-infinite-scroll
           :items="allAccommodations"
-          :onLoad="({done}) => loadOffers(accommodationsGenerator, allAccommodations, done)"
+          :onLoad="({ done }) => loadOffers(accommodationsGenerator, allAccommodations, done)"
           empty-text="Currently there are no more reservations to display!"
           mode="manual"
           class="w-100"
@@ -157,8 +151,18 @@ async function rateReservation(reservationId, type, reservations){
           <template v-for="accommodation in allAccommodations.value" :key="accommodation.reservationId">
             <v-col cols="4">
               <OfferReservationListItem v-if="accommodation.state === 'finished'" type="accommodation" :offerItem="accommodation" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-rating
+                        v-model="ratings[accommodation.reservationId]"
+                        @click="rateReservation(accommodation.reservationId, 'accommodation', ratings[accommodation.reservationId])"
+                        color="yellow-lighten-2"
+                        hover
+                    ></v-rating>
+                  </v-card>
+                </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else type="accommodation" :offerItem="accommodation"/>
+              <OfferReservationListItem v-else type="accommodation" :offerItem="accommodation" />
             </v-col>
           </template>
         </v-row>
@@ -167,7 +171,7 @@ async function rateReservation(reservationId, type, reservations){
     <div>
       <v-infinite-scroll
           :items="allActivities"
-          :onLoad="({done}) => loadOffers(activitiesGenerator, allActivities, done)"
+          :onLoad="({ done }) => loadOffers(activitiesGenerator, allActivities, done)"
           empty-text="Currently there are no more reservations to display!"
           mode="manual"
           class="w-100"
@@ -177,8 +181,18 @@ async function rateReservation(reservationId, type, reservations){
           <template v-for="activity in allActivities.value" :key="activity.reservationId">
             <v-col cols="4">
               <OfferReservationListItem v-if="activity.state === 'finished'" type="activity" :offerItem="activity" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-rating
+                        v-model="ratings[activity.reservationId]"
+                        @click="rateReservation(activity.reservationId, 'activity', ratings[activity.reservationId])"
+                        color="yellow-lighten-2"
+                        hover
+                    ></v-rating>
+                  </v-card>
+                </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else type="activity" :offerItem="activity"/>
+              <OfferReservationListItem v-else type="activity" :offerItem="activity" />
             </v-col>
           </template>
         </v-row>
@@ -187,7 +201,7 @@ async function rateReservation(reservationId, type, reservations){
     <div>
       <v-infinite-scroll
           :items="allRooms"
-          :onLoad="({done}) => loadOffers(roomsGenerator, allRooms, done)"
+          :onLoad="({ done }) => loadOffers(roomsGenerator, allRooms, done)"
           empty-text="Currently there are no more reservations to display!"
           mode="manual"
           class="w-100"
@@ -197,8 +211,18 @@ async function rateReservation(reservationId, type, reservations){
           <template v-for="room in allRooms.value" :key="room.reservationId">
             <v-col cols="4">
               <OfferReservationListItem v-if="room.state === 'finished'" type="room" :offerItem="room" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-rating
+                        v-model="ratings[room.reservationId]"
+                        @click="rateReservation(room.reservationId, 'accommodation', ratings[room.reservationId])"
+                        color="yellow-lighten-2"
+                        hover
+                    ></v-rating>
+                  </v-card>
+                </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else type="room" :offerItem="room"/>
+              <OfferReservationListItem v-else type="room" :offerItem="room" />
             </v-col>
           </template>
         </v-row>
@@ -206,7 +230,6 @@ async function rateReservation(reservationId, type, reservations){
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .event_page {

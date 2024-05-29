@@ -68,6 +68,7 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.PUT(":id/change/password", ChangePassword)
 	customer.POST("/offer/accommodation/:id/rate", GradeAccommodationReservation)
 	customer.POST("/offer/activity/:id/rate", GradeActivityReservation)
+	customer.POST("/offer/room/:id/rate", GradeRoomReservation)
 	customer.POST(":id/promote", PromoteToHost)
 
 	country := r.Group("/api/country")

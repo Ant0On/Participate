@@ -269,6 +269,10 @@ func gradeReservation(c *gin.Context, reservationType string) {
 		var res models.ReservationActivity
 		err = models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&res).Error
 		reservation = &res
+	case "room":
+		var res models.ReservationRoom
+		err = models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&res).Error
+		reservation = &res
 	}
 
 	if err != nil {
@@ -283,6 +287,11 @@ func gradeReservation(c *gin.Context, reservationType string) {
 			return
 		}
 	case *models.ReservationActivity:
+		if res.ReservationState != models.Finished {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
+			return
+		}
+	case *models.ReservationRoom:
 		if res.ReservationState != models.Finished {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
 			return
@@ -326,6 +335,24 @@ func gradeReservation(c *gin.Context, reservationType string) {
 			return
 		}
 		activity.UpdateRating(request.Count)
+	case *models.ReservationRoom:
+		res.RatingID = rate.ID
+		if err := res.Update(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		room, err := models.GetRoomByID(strconv.Itoa(int(res.RoomID)))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		accommodation, err := models.GetAccommodationById(strconv.Itoa(int(room.AccommodationID)))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		accommodation.UpdateRating(request.Count)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})
@@ -337,6 +364,10 @@ func GradeAccommodationReservation(c *gin.Context) {
 
 func GradeActivityReservation(c *gin.Context) {
 	gradeReservation(c, "activity")
+}
+
+func GradeRoomReservation(c *gin.Context) {
+	gradeReservation(c, "room")
 }
 
 func PromoteToHost(c *gin.Context) {
