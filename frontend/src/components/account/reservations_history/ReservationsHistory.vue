@@ -105,6 +105,14 @@ async function loadOffers(generator, offerList, done) {
   done('ok');
 }
 
+async function rateReservation(reservationId, type, reservations){
+  fetchWrapper.post(`/api/customer/offer/${type}/${reservationId}/rate`, {}).then(() => {
+
+  }).catch((err) => {
+
+  })
+}
+
 </script>
 
 <template>
@@ -121,9 +129,16 @@ async function loadOffers(generator, offerList, done) {
         <v-row class="w-100">
           <template v-for="event in allEvents.value" :key="event.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem v-if="event.state === 'pending' "  type="event" :offerItem="event" custom>
+              <OfferReservationListItem v-if="event.state === 'finished'" type="event" :offerItem="event" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-rating elevation="0" color="yellow-lighten-2" rounded
+                           @click="rateReservation(event.reservationId, 'event', allEvents)">Rate
+                    </v-rating>
+                  </v-card>
+                </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else  type="event" :offerItem="event"/>
+              <OfferReservationListItem v-else type="event" :offerItem="event"/>
             </v-col>
           </template>
         </v-row>
@@ -141,8 +156,9 @@ async function loadOffers(generator, offerList, done) {
         <v-row class="w-100">
           <template v-for="accommodation in allAccommodations.value" :key="accommodation.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem type="accommodation" :offerItem="accommodation" custom>
+              <OfferReservationListItem v-if="accommodation.state === 'finished'" type="accommodation" :offerItem="accommodation" custom>
               </OfferReservationListItem>
+              <OfferReservationListItem v-else type="accommodation" :offerItem="accommodation"/>
             </v-col>
           </template>
         </v-row>
@@ -160,8 +176,9 @@ async function loadOffers(generator, offerList, done) {
         <v-row class="w-100">
           <template v-for="activity in allActivities.value" :key="activity.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem type="activity" :offerItem="activity" custom>
+              <OfferReservationListItem v-if="activity.state === 'finished'" type="activity" :offerItem="activity" custom>
               </OfferReservationListItem>
+              <OfferReservationListItem v-else type="activity" :offerItem="activity"/>
             </v-col>
           </template>
         </v-row>
@@ -179,8 +196,9 @@ async function loadOffers(generator, offerList, done) {
         <v-row class="w-100">
           <template v-for="room in allRooms.value" :key="room.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem type="room" :offerItem="room" custom>
+              <OfferReservationListItem v-if="room.state === 'finished'" type="room" :offerItem="room" custom>
               </OfferReservationListItem>
+              <OfferReservationListItem v-else type="room" :offerItem="room"/>
             </v-col>
           </template>
         </v-row>
@@ -188,6 +206,7 @@ async function loadOffers(generator, offerList, done) {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .event_page {
