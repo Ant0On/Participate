@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps, computed, ref } from 'vue';
-import RateOffer from "@/components/account/history/rate_offer/RateOffer.vue";
+import RateOffer from "@/components/account/reservations_history/rate_offer/RateOffer.vue";
 
 const props = defineProps({
   offersToGrade: {

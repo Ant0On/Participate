@@ -105,28 +105,6 @@ async function loadOffers(generator, offerList, done) {
   done('ok');
 }
 
-function changeListReservationState(reservations, reservationId, state){
-  reservations.value.map((reservation) => {
-    if(reservation.reservationId === reservationId)
-      reservation.state = state
-    return reservation
-  })
-}
-
-async function acceptReservation(reservationId, type, reservations){
-  fetchWrapper.post(`/api/reservation/${type}/${reservationId}/accepted`, {}).then(() => {
-    changeListReservationState(reservations, reservationId, "accepted")
-  }).catch((err) => {
-
-  })
-}
-async function rejectReservation(reservationId, type, reservations){
-  fetchWrapper.post(`/api/reservation/${type}/${reservationId}/rejected`, {}).then(() => {
-    changeListReservationState(reservations, reservationId, "rejected")
-  }).catch((err) => {
-
-  })
-}
 </script>
 
 <template>
@@ -144,16 +122,6 @@ async function rejectReservation(reservationId, type, reservations){
           <template v-for="event in allEvents.value" :key="event.reservationId">
             <v-col cols="4">
               <OfferReservationListItem v-if="event.state === 'pending' "  type="event" :offerItem="event" custom>
-                <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-btn elevation="0" color="green-lighten-2" rounded
-                           @click="acceptReservation(event.reservationId, 'event', allEvents)">Accept
-                    </v-btn>
-                    <v-btn color="red-lighten-2" elevation="0" rounded
-                           @click="rejectReservation(event.reservationId, 'event', allEvents)">Reject
-                    </v-btn>
-                  </v-card>
-                </template>
               </OfferReservationListItem>
               <OfferReservationListItem v-else  type="event" :offerItem="event"/>
             </v-col>
@@ -174,16 +142,6 @@ async function rejectReservation(reservationId, type, reservations){
           <template v-for="accommodation in allAccommodations.value" :key="accommodation.reservationId">
             <v-col cols="4">
               <OfferReservationListItem type="accommodation" :offerItem="accommodation" custom>
-                <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-btn elevation="0" color="green-lighten-2" rounded
-                           @click="acceptReservation(accommodation.reservationId, 'accommodation', allAccommodations)">Accept
-                    </v-btn>
-                    <v-btn color="red-lighten-2" elevation="0" rounded
-                           @click="rejectReservation(accommodation.reservationId, 'accommodation', allAccommodations)">Reject
-                    </v-btn>
-                  </v-card>
-                </template>
               </OfferReservationListItem>
             </v-col>
           </template>
@@ -203,16 +161,6 @@ async function rejectReservation(reservationId, type, reservations){
           <template v-for="activity in allActivities.value" :key="activity.reservationId">
             <v-col cols="4">
               <OfferReservationListItem type="activity" :offerItem="activity" custom>
-                <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-btn elevation="0" color="green-lighten-2" rounded
-                           @click="acceptReservation(activity.reservationId, 'activity', allActivities)">Accept
-                    </v-btn>
-                    <v-btn color="red-lighten-2" elevation="0" rounded
-                           @click="rejectReservation(activity.reservationId, 'activity', allActivities)">Reject
-                    </v-btn>
-                  </v-card>
-                </template>
               </OfferReservationListItem>
             </v-col>
           </template>
@@ -232,16 +180,6 @@ async function rejectReservation(reservationId, type, reservations){
           <template v-for="room in allRooms.value" :key="room.reservationId">
             <v-col cols="4">
               <OfferReservationListItem type="room" :offerItem="room" custom>
-                <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-btn elevation="0" color="green-lighten-2" rounded
-                           @click="acceptReservation(room.reservationId, 'room', allRooms)">Accept
-                    </v-btn>
-                    <v-btn color="red-lighten-2" elevation="0" rounded
-                           @click="rejectReservation(room.reservationId, 'room', allRooms)">Reject
-                    </v-btn>
-                  </v-card>
-                </template>
               </OfferReservationListItem>
             </v-col>
           </template>
