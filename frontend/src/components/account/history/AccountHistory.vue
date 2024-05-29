@@ -1,143 +1,273 @@
 <script setup>
-import {onMounted, ref, reactive} from 'vue';
+import {onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
-
 import {useAuthStore} from "@/stores/auth.store";
-import SwitchListPage from "@/components/common/SwitchListPage.vue";
+import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
+import OfferReservationListItem from "@/components/offers/OfferReservationListItem.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
-import HistoryItem from "@/components/account/history/HistoryItem.vue";
-import RateOfferModal from "@/components/account/history/rate_offer/RateOfferModal.vue";
 
 const userStore = useAuthStore();
-const {user: user} = storeToRefs(userStore);
-const pageSize = 5;
+const {user: user} = storeToRefs(userStore)
 
-const allHistoryItems = ref([])
-const historyItems = ref([])
-const currentPage = ref(1)
-const maxPage = ref(1)
-const offerToGrade = ref([])
+const allEvents = ref([]);
+const allActivities = ref([]);
+const allAccommodations = ref([]);
+const allRooms = ref([]);
 
-const errors = reactive({
-  apiError: ""
-})
-
-async function getHistoryItems() {
-
-  await fetchWrapper.get(`/api/customer/${user.value?.ID}/reservations/history`)
-      .then((response) => {
-        if(response) {
-          const responseData = response.data
-          allHistoryItems.value = responseData.map((data) => {
-            return {
-              'location': data["country_name"] + ', ' + data["town_name"],
-              'name': data["name"],
-              'price': data["price"],
-              'dateFrom': data['date_from'],
-              'dateTo': data['date_to'],
-              'offerType': data['offer_type'],
-              'withAnimals': data['is_animal_friendly'],
-              'reservationState': data['reservation_state'],
-              'reservationId': data['reservation_id'],
-              'offerId': data["offer_id"],
-              'gradeId': data["grade_id"]
-            }
-          })
-          historyItems.value = allHistoryItems.value.slice(0, pageSize);
-          maxPage.value = Math.floor(allHistoryItems.value.length / pageSize) + 1
-          gradeOffers()
-        }
-      })
-      .catch((error) => {
-        errors.apiError = 'Failed to fetch history items. Please try again later. ' + error;
-      })
-}
-function gradeOffers(){
-  const allFinishedItems =  allHistoryItems.value.filter((item) => item.gradeId === 0 && item.reservationState === 'finished')
-  offerToGrade.value =  JSON.parse(JSON.stringify(allFinishedItems.map((item) => JSON.parse(JSON.stringify(item)))))
+function mapAccommodation(responseData) {
+  return responseData.map((data) => {
+    return {
+      'offerId': data["accommodation_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'state': data['reservation_state'],
+      'type': data['type'],
+      'capacity': data["capacity"],
+      'dateFrom': data['date_from'],
+      'dateTo': data['dateTo'],
+      'price': data['price_per_day'],
+      'reservationId': data['reservation_id'],
+      'animal_friendly': data['is_animal_friendly'],
+    }
+  });
 }
 
-function pageBack() {
-  if (currentPage.value > 1) {
-    currentPage.value -= 1;
-    historyItems.value = allHistoryItems.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
-  }
+function mapActivities(responseData) {
+  return responseData.map((data) => {
+    return {
+      'offerId': data["activity_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'date': data["date"],
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'state': data['reservation_state'],
+      'reservationId': data['reservation_id'],
+      'skill': data['skill_level'],
+      'type': data['type'],
+      'duration': data['duration']
+    };
+  });
 }
 
-function pageFroward() {
-  if (currentPage.value < maxPage.value) {
-    currentPage.value += 1;
-    historyItems.value = allHistoryItems.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
-  }
+function mapEvents(responseData) {
+  return responseData.map((data) => {
+    return {
+      'offerId': data["event_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'state': data["reservation_state"],
+      'capacity': data["capacity"],
+      'price': data['price'],
+      'reservationId': data['reservation_id'],
+      'date': data['date'],
+      'type': data['type']
+    };
+  });
 }
+function mapRooms(responseData) {
+  return responseData.map((data) => {
+    return {
+      'offerId': data["room_id"],
+      'title': data["title"],
+      'location': data["country_name"] + ', ' + data["town_name"],
+      'state': data['reservation_state'],
+      'capacity': data["capacity"],
+      'dateFrom': data['date_from'],
+      'dateTo': data['dateTo'],
+      'price': data['price_per_day'],
+      'reservationId': data['reservation_id'],
+      'animal_friendly': data['is_animal_friendly'],
+
+    };
+  });
+}
+
+const eventsGenerator = fetchPaginatedData(`/api/customer/${user.value.ID}/reservations/event/history`, mapEvents);
+const activitiesGenerator = fetchPaginatedData(`/api/customer/${user.value.ID}/reservations/activity/history`, mapActivities);
+const accommodationsGenerator = fetchPaginatedData(`/api/customer/${user.value.ID}/reservations/accommodation/history`, mapAccommodation);
+const roomsGenerator = fetchPaginatedData(`/api/customer/${user.value.ID}/reservations/room/history`, mapRooms);
 
 onMounted(async () => {
-  await getHistoryItems()
-})
+  allAccommodations.value = await accommodationsGenerator.next();
+  allActivities.value = await activitiesGenerator.next();
+  allEvents.value = await eventsGenerator.next();
+  allRooms.value = await roomsGenerator.next();
+});
+
+async function loadOffers(generator, offerList, done) {
+  const response = await generator.next();
+  if (response?.done) {
+    done('empty');
+    return;
+  }
+  offerList.value.push(...response.value);
+  done('ok');
+}
+
+function changeListReservationState(reservations, reservationId, state){
+  reservations.value.map((reservation) => {
+    if(reservation.reservationId === reservationId)
+      reservation.state = state
+    return reservation
+  })
+}
+
+async function acceptReservation(reservationId, type, reservations){
+  fetchWrapper.post(`/api/reservation/${type}/${reservationId}/accepted`, {}).then(() => {
+    changeListReservationState(reservations, reservationId, "accepted")
+  }).catch((err) => {
+
+  })
+}
+async function rejectReservation(reservationId, type, reservations){
+  fetchWrapper.post(`/api/reservation/${type}/${reservationId}/rejected`, {}).then(() => {
+    changeListReservationState(reservations, reservationId, "rejected")
+  }).catch((err) => {
+
+  })
+}
 </script>
 
 <template>
-
-  <div class="account_history">
-    <p>Previously booked offers</p>
-    <div class="items_list">
-      <div v-if="errors.apiError" class="error-message">{{ errors.apiError }}</div>
-      <div class="history_items">
-        <HistoryItem v-for="historyItem in historyItems" :name="historyItem.name" :offer-type="historyItem.offerType"
-                     :date-from="historyItem.dateFrom" :date-to="historyItem.dateTo"
-                     :with-animals="historyItem.withAnimals" :offer-id="historyItem.offerId"
-                     :reservation-state="historyItem.reservationState"/>
-      </div>
-      <div class="navigation">
-        <SwitchListPage v-if="maxPage !== 1" :currentPage="currentPage" :maxPage="maxPage" @page-back="pageBack"
-                        @page-forward="pageFroward"/>
-      </div>
-      <RateOfferModal v-if="offerToGrade.length > 0" :offers-to-grade="offerToGrade"/>
+  <div class="event_page">
+    <div>
+      <v-infinite-scroll
+          :items="allEvents"
+          :onLoad="({done}) => loadOffers(eventsGenerator, allEvents, done)"
+          empty-text="Currently there are no more reservations to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Events</p>
+        <v-row class="w-100">
+          <template v-for="event in allEvents.value" :key="event.reservationId">
+            <v-col cols="4">
+              <OfferReservationListItem v-if="event.state === 'pending' "  type="event" :offerItem="event" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="green-lighten-2" rounded
+                           @click="acceptReservation(event.reservationId, 'event', allEvents)">Accept
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="rejectReservation(event.reservationId, 'event', allEvents)">Reject
+                    </v-btn>
+                  </v-card>
+                </template>
+              </OfferReservationListItem>
+              <OfferReservationListItem v-else  type="event" :offerItem="event"/>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+    </div>
+    <div>
+      <v-infinite-scroll
+          :items="allAccommodations"
+          :onLoad="({done}) => loadOffers(accommodationsGenerator, allAccommodations, done)"
+          empty-text="Currently there are no more reservations to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Accommodations</p>
+        <v-row class="w-100">
+          <template v-for="accommodation in allAccommodations.value" :key="accommodation.reservationId">
+            <v-col cols="4">
+              <OfferReservationListItem type="accommodation" :offerItem="accommodation" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="green-lighten-2" rounded
+                           @click="acceptReservation(accommodation.reservationId, 'accommodation', allAccommodations)">Accept
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="rejectReservation(accommodation.reservationId, 'accommodation', allAccommodations)">Reject
+                    </v-btn>
+                  </v-card>
+                </template>
+              </OfferReservationListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+    </div>
+    <div>
+      <v-infinite-scroll
+          :items="allActivities"
+          :onLoad="({done}) => loadOffers(activitiesGenerator, allActivities, done)"
+          empty-text="Currently there are no more reservations to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Activities</p>
+        <v-row class="w-100">
+          <template v-for="activity in allActivities.value" :key="activity.reservationId">
+            <v-col cols="4">
+              <OfferReservationListItem type="activity" :offerItem="activity" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="green-lighten-2" rounded
+                           @click="acceptReservation(activity.reservationId, 'activity', allActivities)">Accept
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="rejectReservation(activity.reservationId, 'activity', allActivities)">Reject
+                    </v-btn>
+                  </v-card>
+                </template>
+              </OfferReservationListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
+    </div>
+    <div>
+      <v-infinite-scroll
+          :items="allRooms"
+          :onLoad="({done}) => loadOffers(roomsGenerator, allRooms, done)"
+          empty-text="Currently there are no more reservations to display!"
+          mode="manual"
+          class="w-100"
+      >
+        <p class="text-center">Rooms</p>
+        <v-row class="w-100">
+          <template v-for="room in allRooms.value" :key="room.reservationId">
+            <v-col cols="4">
+              <OfferReservationListItem type="room" :offerItem="room" custom>
+                <template v-slot:template>
+                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
+                    <v-btn elevation="0" color="green-lighten-2" rounded
+                           @click="acceptReservation(room.reservationId, 'room', allRooms)">Accept
+                    </v-btn>
+                    <v-btn color="red-lighten-2" elevation="0" rounded
+                           @click="rejectReservation(room.reservationId, 'room', allRooms)">Reject
+                    </v-btn>
+                  </v-card>
+                </template>
+              </OfferReservationListItem>
+            </v-col>
+          </template>
+        </v-row>
+      </v-infinite-scroll>
     </div>
   </div>
-
 </template>
 
 <style scoped>
-div.account_history {
-  display: flex;
-  flex-direction: column;
-  height: max(500px, 80%);
-  flex-grow: 1;
+.event_page {
+  height: 100%;
 }
 
-div.items_list {
+div.event_page {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  justify-content: space-between;
-  padding-top: 2%;
-
-}
-
-div.history_items {
-  display: flex;
-  flex-direction: column;
-  padding-left: 2%;
-}
-
-div.navigation {
-  padding-top: 2%;
 }
 
 p {
   color: #000000;
   font-family: "Poppins", Helvetica;
-  font-size: 1.4rem;
-  padding-bottom: 2%;
-  font-weight: 400;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: normal;
   align-self: center;
+  margin: 1% 1% 1% 1%;
 }
-
-div.error-message {
-  color: red;
-  padding: 1%;
-  text-align: center;
-}
-
 </style>

@@ -113,10 +113,6 @@ func RegisterRoutes(r *gin.Engine) {
 	reservationRoom.POST("/add", middlewares.JwtAuthMiddleware("customer"), AddRoomReservation)
 	reservationRoom.POST("/:id/:state", middlewares.JwtAuthMiddleware("host"), ChangeRoomReservationState)
 
-	protected := r.Group("/api/admin")
-	protected.Use(middlewares.JwtAuthMiddleware("admin"))
-	protected.GET("/user", CurrentUser)
-
 	room := r.Group("/api/host/room")
 	room.Use(middlewares.JwtAuthMiddleware("host"))
 	room.POST("/create", CreateRooms)
