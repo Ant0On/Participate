@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, onMounted, ref} from 'vue';
+import {computed, defineProps, onMounted, ref, watch} from 'vue';
 import {storeToRefs} from 'pinia';
 
 
@@ -120,11 +120,10 @@ function getOfferChange(offer) {
 async function onSave() {
   const {valid} = await form.value.validate()
   isEdit.value = !isEdit.value
-
   if (valid) {
     offer.value = offerChange.value
     offer.value.location = `${offerCountries.value.filter(country =>
-        country.id === offerChange.value.country)?.[0]?.name}, ${offerChange.value.town}`
+        country.id === offerChange.value.country || country.id === offerChange.value.country?.id)?.[0]?.name}, ${offerChange.value.town}`
   }
 }
 
@@ -132,10 +131,13 @@ async function saveRoom(){
   const {valid} = await form.value.validate()
   if(valid){
     offerChange.value.rooms = [... offerChange.value?.rooms || [], {... offerChangeRoom.value}]
-    console.log(offerChange.value.rooms)
-    console.log(offerChangeRoom)
     isAddRoom.value = false
+    offerChange.value.numberOfRooms = offerChange.value.rooms?.length || 1
   }
+}
+
+function deleteRoom(roomNumber){
+  offerChange.value.rooms = offerChange.value.rooms?.filter((room) => room.roomNumber !== roomNumber) || offerChange.value.rooms
 }
 
 onMounted(async () => {
@@ -295,6 +297,11 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                      : activityTypes.map((activityType) => activityType.toLowerCase())"
                       label="Type"
                       density="compact"
+                      @update:menu="() => {
+                        if(['hotel', 'hostel', 'guesthouse'].includes(offerChange.type)){
+                          offerChange.numberOfRooms = offerChange.rooms?.length || 1
+                        }
+                      }"
             ></v-select>
             <v-select v-model="offerChange.skill" v-if="type === 'activity'"
                       label="Skill"
@@ -327,6 +334,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             <div v-if="!isEdit">{{ offer.description }}</div>
             <v-textarea v-else
                         density="compact"
+                        label="Description"
                         v-model="offerChange.description"
                         :rules="[(values) => values.length > 30]"
             ></v-textarea>
@@ -350,9 +358,6 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                     ></v-text-field>
                   </v-list-item>
                 </v-col>
-                <v-col>
-
-                </v-col>
               </v-row>
               <v-row cols="2" v-if="type === 'accommodation'">
                 <v-col>
@@ -360,7 +365,27 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                       key="number_of_rooms"
                       title="Number of rooms"
                       :subtitle="offer?.numberOfRooms || 1"
+                      v-if="!isEdit"
                   ></v-list-item>
+                  <v-list-item
+                      key="number_of_rooms"
+                      title="Number of rooms"
+                      :subtitle="offerChange?.numberOfRooms || 1"
+                      v-else-if="isEdit && ['hotel', 'hostel', 'guesthouse'].includes(offerChange.type)"
+                  ></v-list-item>
+                  <v-list-item
+                      key="number_of_rooms"
+                      title="Number of rooms"
+                      v-else
+                  >
+                    <v-text-field
+                        v-model="offerChange.numberOfRooms"
+                        density="compact"
+                        label="Number of rooms"
+                        type="number"
+                        :rules="[(value) => !!value, (value) => value > 0]"
+                    ></v-text-field>
+                  </v-list-item>
                 </v-col>
               </v-row>
               <v-row cols="2" v-if="type === 'event'">
@@ -486,29 +511,26 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             </v-list>
           </v-card-text>
 
-          <v-card-text v-else-if="cardPage === 'accommodation'" class="h-100" style="overflow-y: scroll">
+          <v-card-text v-else-if="cardPage === 'accommodation'" style="overflow-y: scroll; height: 295px;">
             <v-card-title>
               Rooms
             </v-card-title>
-            <v-list style="overflow: hidden" v-if="!isEdit">
+            <v-list style="overflow-y: scroll" v-if="!isEdit">
               <v-list-item v-for="room in offer.rooms" :key="room.roomNumber">
                 <RoomDetail :room="room"/>
               </v-list-item>
-              <v-list-item v-if="isEdit">
-                <v-card class="border-s" flat color="grey-lighten-5">
-                  <v-card-title>
-                    Add a room
-                  </v-card-title>
-                  <v-card-actions class="d-flex align-center justify-center">
-                    <v-btn text="Add a room" variant="outlined" @click="console.log('adding a room')">
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-list-item>
             </v-list>
             <v-list style="overflow-y: scroll; " v-if="isEdit">
-              <v-list-item v-for="room in offerChange.rooms" :key="room.roomNumber" append-icon="mdi-close">
+              <v-list-item v-for="room in offerChange.rooms" :key="room.roomNumber">
                 <RoomDetail :room="room"/>
+                <template v-slot:append>
+                  <v-btn
+                      color="grey-lighten-1"
+                      icon="mdi-close"
+                      variant="text"
+                      @click="deleteRoom(room.roomNumber)"
+                  ></v-btn>
+                </template>
               </v-list-item>
               <v-list-item>
                 <v-card class="border-s" flat color="grey-lighten-5">
