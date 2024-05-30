@@ -100,9 +100,10 @@ router.beforeEach(async (to) => {
     const {user: user} = storeToRefs(userStore)
 
     if (hostRequired && user.value?.Role !== "host" || customerRequired && user.value?.Role !== "customer") {
-        user.returnUrl = to.fullPath;
+        router.push('/')
+        user.value.returnUrl = to.fullPath;
         navStore.changePage('/')
-        return '/';
+        return
     }
     navStore.changePage(to)
 });
