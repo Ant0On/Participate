@@ -141,7 +141,6 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 	}
 
 	result = query.
-		Debug().
 		Joins(joinCondition).
 		Where(parameters.condition(userID)).
 		Select(parameters.selectQuery).
