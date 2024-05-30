@@ -24,7 +24,7 @@ type Offer struct {
 	Description string  `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=300"`
 	Capacity    int     `gorm:"not null" form:"capacity" binding:"required,gt=0"`
 	Discount    float64 `gorm:"not null;default: 0.00" form:"discount"`
-	TownID      uint    `gorm:"not null" form:"town_id" binding:"required"`
+	TownID      uint    `gorm:"not null" form:"town_id"`
 	UserID      uint    `gorm:"not null" form:"user_id" binding:"required"`
 	Town        Town    `gorm:"foreignKey:TownID"`
 }

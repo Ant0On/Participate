@@ -104,7 +104,7 @@ const cardPage = ref((props.custom)? 'custom' : 'main');
               <v-icon icon="mdi-clock-outline" size="small"></v-icon>
               <span class="me-1">Duration</span>
             </v-col>
-            <v-col><span class="me-1">{{ offerItem.duration }}</span></v-col>
+            <v-col><span class="me-1">{{ `${offerItem?.duration} ${(offerItem?.duration === 1)? 'Hour': 'Hours'} ` }}</span></v-col>
           </v-row>
         </v-container>
       </v-card>
