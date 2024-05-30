@@ -105,12 +105,6 @@ const cardPage = ref((props.custom)? 'custom' : 'info');
                 stateMap[offerItem.state]?.text
           }}
         </v-chip>
-        <v-chip :prepend-icon="chips?.[offerItem?.type]?.icon" :color="chips?.[offerItem?.type]?.color" variant="flat" class="mr-1">
-          {{ chips?.[offerItem?.type]?.text }}
-        </v-chip>
-        <v-chip v-if="type === 'activity'" :prepend-icon="chips?.[offerItem?.skill]?.icon" :color="chips?.[offerItem?.skill]?.color" variant="flat" class="mr-1">
-          {{ chips?.[offerItem?.skill]?.text }}
-        </v-chip>
       </div>
       <slot v-if="cardPage === 'custom'" name="template">
       </slot>

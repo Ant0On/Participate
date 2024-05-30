@@ -30,6 +30,7 @@ function mapAccommodation(responseData) {
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
       'animal_friendly': data['is_animal_friendly'],
+      'ratingId': data['rating_id']
     };
   });
 }
@@ -47,7 +48,9 @@ function mapActivities(responseData) {
       'reservationId': data['reservation_id'],
       'skill': data['skill_level'],
       'type': data['type'],
-      'duration': data['duration']
+      'duration': data['duration'],
+      'ratingId': data['rating_id']
+
     };
   });
 }
@@ -67,6 +70,7 @@ function mapEvents(responseData) {
     };
   });
 }
+
 function mapRooms(responseData) {
   return responseData.map((data) => {
     return {
@@ -80,6 +84,7 @@ function mapRooms(responseData) {
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
       'animal_friendly': data['is_animal_friendly'],
+      'ratingId': data['rating_id']
     };
   });
 }
@@ -106,13 +111,10 @@ async function loadOffers(generator, offerList, done) {
   done('ok');
 }
 
-async function rateReservation(reservationId, type, rating) {
-  console.log('HELLO')
-  try {
-    await fetchWrapper.post(`/api/customer/offer/${type}/${reservationId}/rate`, {
-      Count: rating });
-  } catch (err) {
-  }
+async function rateReservation(reservation, type) {
+  await fetchWrapper.post(`/api/customer/offer/${type}/${reservation.reservationId}/rate`, {
+    Count: reservation.rating
+  });
 }
 </script>
 
@@ -130,9 +132,7 @@ async function rateReservation(reservationId, type, rating) {
         <v-row class="w-100">
           <template v-for="event in allEvents.value" :key="event.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem v-if="event.state === 'finished'" type="event" :offerItem="event" custom>
-              </OfferReservationListItem>
-              <OfferReservationListItem v-else type="event" :offerItem="event" />
+              <OfferReservationListItem v-else type="event" :offerItem="event"/>
             </v-col>
           </template>
         </v-row>
@@ -150,19 +150,47 @@ async function rateReservation(reservationId, type, rating) {
         <v-row class="w-100">
           <template v-for="accommodation in allAccommodations.value" :key="accommodation.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem v-if="accommodation.state === 'finished'" type="accommodation" :offerItem="accommodation" custom>
+              <OfferReservationListItem v-if="accommodation.state === 'finished'" type="accommodation"
+                                        :offerItem="accommodation" custom>
                 <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-rating
-                        v-model="ratings[accommodation.reservationId]"
-                        @click="rateReservation(accommodation.reservationId, 'accommodation', ratings[accommodation.reservationId])"
-                        color="yellow-lighten-2"
-                        hover
-                    ></v-rating>
+                  <v-card v-if="! accommodation.ratingId"
+                          elevation="0"
+                          class="d-flex flex-column justify-space-between align-center"
+                          height="100">
+                    <v-card-title>
+                      Rate your reservation!
+                    </v-card-title>
+                    <v-card-text>
+                      <v-rating
+                          v-model="accommodation.ratingId"
+                          @click="rateReservation(accommodation, 'accommodation')"
+                          color="red-lighten-2"
+                          hover
+                          :disabled="accommodation.ratingId > 0"
+                      ></v-rating>
+                    </v-card-text>
+                  </v-card>
+                  <v-card v-else
+                          elevation="0"
+                          class="d-flex flex-column justify-space-between align-center"
+                          height="100">
+                    <v-card-title>
+                      You rated your reservation:
+                    </v-card-title>
+                    <v-card-text class="d-flex flex-row justify-space-between align-center">
+                      <v-rating
+                          v-model="accommodation.ratingId"
+                          @click="rateReservation(accommodation, 'accommodation')"
+                          color="red-lighten-2"
+                          hover
+                          readonly
+                      ></v-rating>
+                      <span class="ml-4 mt-1"> {{ accommodation.ratingId }} </span>
+                    </v-card-text>
                   </v-card>
                 </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else type="accommodation" :offerItem="accommodation" />
+              <OfferReservationListItem v-else type="accommodation" :offerItem="accommodation"/>
             </v-col>
           </template>
         </v-row>
@@ -180,19 +208,48 @@ async function rateReservation(reservationId, type, rating) {
         <v-row class="w-100">
           <template v-for="activity in allActivities.value" :key="activity.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem v-if="activity.state === 'finished'" type="activity" :offerItem="activity" custom>
+              <OfferReservationListItem v-if="activity.state === 'finished'" type="activity" :offerItem="activity"
+                                        custom>
                 <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-rating
-                        v-model="ratings[activity.reservationId]"
-                        @click="rateReservation(activity.reservationId, 'activity', ratings[activity.reservationId])"
-                        color="yellow-lighten-2"
-                        hover
-                    ></v-rating>
+                  <v-card v-if="! activity.ratingId"
+                          elevation="0"
+                          class="d-flex flex-column justify-space-between align-center"
+                          height="100">
+                    <v-card-title>
+                      Rate your reservation!
+                    </v-card-title>
+                    <v-card-text>
+                      <v-rating
+                          v-model="activity.ratingId"
+                          @click="rateReservation(activity, 'activity')"
+                          color="red-lighten-2"
+                          hover
+                          :disabled="activity.ratingId > 0"
+                      ></v-rating>
+                    </v-card-text>
                   </v-card>
+                  <v-card v-else
+                          elevation="0"
+                          class="d-flex flex-column justify-space-between align-center"
+                          height="100">
+                    <v-card-title>
+                      You rated your reservation:
+                    </v-card-title>
+                    <v-card-text class="d-flex flex-row justify-space-between align-center">
+                      <v-rating
+                          v-model="activity.ratingId"
+                          @click="rateReservation(activity, 'activity')"
+                          color="red-lighten-2"
+                          hover
+                          readonly
+                      ></v-rating>
+                      <span class="ml-4 mt-1"> {{ activity.ratingId }} </span>
+                    </v-card-text>
+                  </v-card>
+
                 </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else type="activity" :offerItem="activity" />
+              <OfferReservationListItem v-else type="activity" :offerItem="activity"/>
             </v-col>
           </template>
         </v-row>
@@ -212,17 +269,44 @@ async function rateReservation(reservationId, type, rating) {
             <v-col cols="4">
               <OfferReservationListItem v-if="room.state === 'finished'" type="room" :offerItem="room" custom>
                 <template v-slot:template>
-                  <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
-                    <v-rating
-                        v-model="ratings[room.reservationId]"
-                        @click="rateReservation(room.reservationId, 'accommodation', ratings[room.reservationId])"
-                        color="yellow-lighten-2"
-                        hover
-                    ></v-rating>
+                  <v-card v-if="! room.ratingId"
+                          elevation="0"
+                          class="d-flex flex-column justify-space-between align-center"
+                          height="100">
+                    <v-card-title>
+                      Rate your reservation!
+                    </v-card-title>
+                    <v-card-text>
+                      <v-rating
+                          v-model="room.ratingId"
+                          @click="rateReservation(room, 'room')"
+                          color="red-lighten-2"
+                          hover
+                          :disabled="room.ratingId > 0"
+                      ></v-rating>
+                    </v-card-text>
+                  </v-card>
+                  <v-card v-else
+                          elevation="0"
+                          class="d-flex flex-column justify-space-between align-center"
+                          height="100">
+                    <v-card-title>
+                      You rated your reservation:
+                    </v-card-title>
+                    <v-card-text class="d-flex flex-row justify-space-between align-center">
+                      <v-rating
+                          v-model="room.ratingId"
+                          @click="rateReservation(room, 'room')"
+                          color="red-lighten-2"
+                          hover
+                          readonly
+                      ></v-rating>
+                      <span class="ml-4 mt-1"> {{ room.ratingId }} </span>
+                    </v-card-text>
                   </v-card>
                 </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else type="room" :offerItem="room" />
+              <OfferReservationListItem v-else type="room" :offerItem="room"/>
             </v-col>
           </template>
         </v-row>
