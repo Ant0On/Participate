@@ -82,7 +82,7 @@ const cardPage = ref((props.custom)? 'custom' : 'info');
 
     <v-card-item>
       <v-card-title class="font-weight-black">{{ offerItem.title }}</v-card-title>
-      <v-card-subtitle>
+      <v-card-subtitle v-if="type !== 'room'">
         <span class="me-1">{{ offerItem.location }}</span>
       </v-card-subtitle>
     </v-card-item>

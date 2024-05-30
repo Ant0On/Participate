@@ -71,9 +71,9 @@ const cardPage = ref((props.custom)? 'custom' : 'main');
         </div>
       </v-row>
 
-      <v-row align="center" class="mx-0" v-if="type === 'accommodation'">
+      <v-row align="center" class="mx-0" v-if="type === 'accommodation' || type==='activity'">
         <v-rating :model-value="offerItem.rating" color="amber" density="compact" size="small" half-increments readonly></v-rating>
-        <div class="text-grey ms-4">{{ offerItem.rating }}</div>
+        <div class="text-grey ms-4">{{ `${offerItem.rating} (${offerItem.ratingCount})` }}</div>
       </v-row>
 
       <div class="my-4 text-subtitle-1">

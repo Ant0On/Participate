@@ -75,7 +75,7 @@ function mapRooms(responseData) {
   return responseData.map((data) => {
     return {
       'offerId': data["room_id"],
-      'title': data["title"],
+      'title': data["name"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'state': data['reservation_state'],
       'capacity': data["capacity"],
@@ -83,7 +83,6 @@ function mapRooms(responseData) {
       'dateTo': data['dateTo'],
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
-      'animal_friendly': data['is_animal_friendly'],
       'ratingId': data['rating_id']
     };
   });

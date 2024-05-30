@@ -157,7 +157,8 @@ async function getOfferDetails() {
         'discount': data['Discount'],
         'type': data['Type'],
         'animal_friendly': data['IsAnimalFriendly'],
-        'rating': data['Rating'] || 0,
+        'rating': data['RatingAvg'] || 0,
+        'ratingCount': data['RatingCount'] || 0,
         'numberOfRooms': data?.NumberOfRooms,
         'rooms':data?.Rooms?.map((room) => {
           return {
@@ -200,7 +201,9 @@ async function getOfferDetails() {
         'type': data['Type'],
         'duration': data['Duration'],
         'date': data?.Date?.split('T')?.[0],
-        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
+        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name),
+        'rating': data['RatingAvg'] || 0,
+        'ratingCount': data['RatingCount'] || 0,
       }
     }
   }
@@ -283,10 +286,10 @@ onMounted(async () => {
                   half-increments
                   readonly
                   class="me-1"
-                  v-if="type === 'accommodation' "
+                  v-if="type === 'accommodation' || type==='activity' "
               ></v-rating>
-              <span class="text-grey me-1" v-if="type === 'accommodation' ">
-              {{ offer.rating }}
+              <span class="text-grey me-1" v-if="type === 'accommodation' || type==='activity' ">
+              {{ `${offer.rating} (${offer.ratingCount})` }}
             </span>
             </v-card-subtitle>
             <v-card-subtitle class="mx-0 d-flex ">
