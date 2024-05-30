@@ -159,7 +159,17 @@ async function getOfferDetails() {
         'animal_friendly': data['IsAnimalFriendly'],
         'rating': data['Rating'] || 0,
         'numberOfRooms': data?.NumberOfRooms,
-        'rooms': data?.Rooms?.map((room) => {return {...room}}),
+        'rooms':data?.Rooms?.map((room) => {
+          return {
+            area: Number(room.area),
+            capacity: Number(room.capacity),
+            description: room.description,
+            roomFacilities: room.room_facilities.map((facility) => facility.Name),
+            roomName: room.name,
+            roomNumber: Number(room.number),
+            ID: room.ID,
+          }
+        }),
         'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
 
       }
