@@ -155,6 +155,7 @@ async function saveEvent(){
 }
 
 async function saveActivity(){
+
   await fetchWrapper.put(`/api/host/activity/update/${offerChange.value.offerId}`, {
     Title: offerChange.value.title,
     Description: offerChange.value.description,
@@ -167,11 +168,10 @@ async function saveActivity(){
     Date: new Date(offerChange.value.date).toJSON(),
     Price: Number(offerChange.value.price),
     Discount: Number(offerChange.value.discount),
-    event_type: offerChange.value.type,
-    skill_level: offerChange.value.skill,
-    activity_type: offerChange.value.type,
-    duration: offerChange.value.duration,
-    images: '',
+    Duration: Number(offerChange.value.duration),
+    Type: offerChange.value.type,
+    Skill: offerChange.value.skill,
+    Equipment: offerChange.value.equipment?.map((equipment)=> {return {Name: equipment}} )
   })
 }
 

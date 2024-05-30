@@ -81,7 +81,7 @@ async function makeReservation() {
   })
 }
 
-const chips = ref(chipsMapper(offer.value?.discount))
+const chips = computed( () => chipsMapper(offer.value?.discount))
 const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
 
 const image = computed(() => {

@@ -69,6 +69,18 @@ func UpdateActivity(c *gin.Context) {
 		return
 	}
 
+	var town models.Town
+	if err := models.DB.Where("name = ? AND country_id = ?", inputActivity.Town.Name, inputActivity.Town.CountryID).First(&town).Error; err != nil {
+		town = inputActivity.Town
+		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			return
+		}
+	}
+
+	inputActivity.Town = town
+	inputActivity.TownID = town.ID
+
 	if err := tx.Model(&existingActivity).Updates(inputActivity).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update activity"})
