@@ -19,6 +19,7 @@ const isEdit = ref(false)
 const offerFilled = ref(true)
 const isAddRoom = ref(false)
 const offerChangeRoom = ref({})
+const deletedRooms = ref([])
 const form = ref()
 
 const props = defineProps({
@@ -139,6 +140,7 @@ async function onSave() {
       await saveActivity()
     }
     if(props.type === 'accommodation'){
+      await deletedRooms.value?.forEach((roomId) => fetchWrapper.delete(`/api/host/room/delete/${roomId}`))
       await saveAccommodation()
     }
     offer.value = offerChange.value
@@ -231,8 +233,12 @@ async function saveRoom(){
   }
 }
 
-function deleteRoom(roomNumber){
-  offerChange.value.rooms = offerChange.value.rooms?.filter((room) => room.roomNumber !== roomNumber) || offerChange.value.rooms
+function deleteRoom(deletedRoom){
+  offerChange.value.rooms = offerChange.value.rooms?.filter((room) => room.roomNumber !== deletedRoom.roomNumber) || offerChange.value.rooms
+  if(deletedRoom.ID)
+  {
+    deletedRooms.value.push(deletedRoom.ID)
+  }
 }
 
 onMounted(async () => {
@@ -627,7 +633,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                       color="grey-lighten-1"
                       icon="mdi-close"
                       variant="text"
-                      @click="deleteRoom(room.roomNumber)"
+                      @click="deleteRoom(room)"
                   ></v-btn>
                 </template>
               </v-list-item>
