@@ -70,10 +70,18 @@ async function makeReservation() {
   }else if(props.type === "accommodation"){
     reservationBody.date_from = new Date(reservation.value.dateFrom).toISOString()
     reservationBody.date_to = new Date(reservation.value.dateTo).toISOString()
-    reservationBody.accommodation_id = Number(props.id)
+    if(['hotel', 'hostel', 'guesthouse'].includes(offer.value.type))
+    {
+      reservationBody.room_id = Number(reservation.value.room)
+
+    }else{
+      reservationBody.accommodation_id = Number(props.id)
+    }
   }
 
-  fetchWrapper.post(`/api/reservation/${props.type}/add`, reservationBody).then((resp) => {
+  fetchWrapper.post(`/api/reservation/${(props.type === 'accommodation'
+      && ['hotel', 'hostel', 'guesthouse'].includes(offer.value.type)? 'room': props.type)}/add`,
+      reservationBody).then((resp) => {
     router.push('/');
     window.open(paymentType.value[chosenPayment.value].url, '_blank');
   }).catch((error) => {
@@ -552,7 +560,7 @@ onMounted(async () => {
                     persistent-hint
                     :items="offer.rooms"
                     item-title="roomName"
-                    item-value="roomNumber"
+                    item-value="ID"
                     v-model="reservation.room"
                     v-if="['hotel', 'hostel', 'guesthouse'].includes(offer.type)"
                     @click:prepend="() => openRoomDialog = true"
