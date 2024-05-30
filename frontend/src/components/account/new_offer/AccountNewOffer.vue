@@ -409,7 +409,17 @@ onMounted(async () => {
     <Transition name="bounce">
       <div v-if="isOfferTypeFilled" class="new_offer_info">
         <TextInput v-model="newOffer.title" label-text="Title" :isRequired="true" :min="2" :max="100"/>
-        <TextInput v-model="newOffer.description" label-text="Description" :isRequired="true" :min="30" :max="300"/>
+        <v-textarea v-model="newOffer.description" label="Description"
+                    :rules="[
+                        value=> !!value,
+                        value => value.length > 30 || 'Description to short',
+                        value => value.length < 300 || 'Description too long'
+         ]"
+                    clearable
+                    class="w-100"
+                    counter
+        >
+        </v-textarea>
         <NumberInput v-model="newOffer.capacity" label-text="Capacity" :isRequired="true" :min="1"/>
         <div v-if="isOfferTypeAccommodation" class="w-100">
           <NumberInput v-model="newAccommodation.numberOfRooms" label-text="Number of rooms" :isRequired="true"
@@ -419,7 +429,8 @@ onMounted(async () => {
           <CheckButtonInput :model-value="newAccommodation.isAnimalFriendly"
                             @changed-value="newAccommodation.isAnimalFriendly = !newAccommodation.isAnimalFriendly"
                             label-text="Is animal friendly?" width="100%"/>
-          <NumberInput v-model="newAccommodation.pricePerDay" label-text="Price per day in $" :isRequired="true" :min="1"/>
+          <NumberInput v-model="newAccommodation.pricePerDay" label-text="Price per day in $" :isRequired="true"
+                       :min="1"/>
           <CheckboxesInput v-model="newAccommodation.generalFacilities" label-text="Select general facilities"
                            placeholder="Facilities" :items="generalFacilities"/>
           <div v-if="isAccommodationTypeWithSelectableRooms" class="w-100 room-info-container">
@@ -427,8 +438,8 @@ onMounted(async () => {
             <v-text-field v-model="newRoom.number" label="Room number" clearable placeholder="Number" class="w-100"
                           type="number"/>
             <v-text-field v-model="newRoom.name" label="Room name" clearable placeholder="Name" class="w-100"/>
-            <v-text-field v-model="newRoom.description" label="Room description" clearable placeholder="Description"
-                          class="w-100"/>
+            <v-textarea v-model="newRoom.description" label="Room description" clearable placeholder="Description"
+                        class="w-100"/>
             <v-text-field v-model="newRoom.capacity" label="Room capacity" clearable placeholder="Capacity"
                           class="w-100" type="number"/>
             <v-text-field v-model="newRoom.area" label="Room area in m2" clearable placeholder="Area"
@@ -447,7 +458,8 @@ onMounted(async () => {
           <SelectionInput v-model="newActivity.activityType" label-text="Activity type" placeholder="Type"
                           :items="activityTypes" :isRequired="true"/>
           <NumberInput v-model="newActivity.price" label-text="Price in $" :isRequired="true" :min="1"/>
-          <VueDatePicker v-model="newActivity.dateRange" placeholder="Select date range" range :model-config="{ format: 'YYYY-MM-DD' }"
+          <VueDatePicker v-model="newActivity.dateRange" placeholder="Select date range" range
+                         :model-config="{ format: 'YYYY-MM-DD' }"
                          :isRequired="true"/>
           <br>
           <CheckboxesInput v-model="newActivity.equipment" label-text="Select equipment needed" placeholder="Equipment"
