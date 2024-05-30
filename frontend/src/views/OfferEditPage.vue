@@ -62,7 +62,15 @@ async function getOfferDetails() {
         'rating': data['Rating'] || 0,
         'numberOfRooms': data?.NumberOfRooms,
         'rooms': data?.Rooms?.map((room) => {
-          return {...room}
+          return {
+            area: Number(room.area),
+            capacity: Number(room.capacity),
+            description: room.description,
+            roomFacilities: room.room_facilities.map((facility) => facility.Name),
+            roomName: room.name,
+            roomNumber: Number(room.number),
+            ID: room.ID,
+          }
         }),
         'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
 
@@ -130,6 +138,9 @@ async function onSave() {
     if(props.type === 'activity'){
       await saveActivity()
     }
+    if(props.type === 'accommodation'){
+      await saveAccommodation()
+    }
     offer.value = offerChange.value
     offer.value.location = `${offerCountries.value.filter(country =>
         country.id === offerChange.value.country || country.id === offerChange.value.country?.id)?.[0]?.name}, ${offerChange.value.town}`
@@ -172,6 +183,42 @@ async function saveActivity(){
     Type: offerChange.value.type,
     Skill: offerChange.value.skill,
     Equipment: offerChange.value.equipment?.map((equipment)=> {return {Name: equipment}} )
+  })
+}
+
+async function saveAccommodation(){
+  await fetchWrapper.put(`/api/host/accommodation/update/${offerChange.value.offerId}`, {
+    Title: offerChange.value.title,
+    Description: offerChange.value.description,
+    Capacity: Number(offerChange.value.capacity),
+    Town: {
+      name: offerChange.value.town,
+      country_id: Number(offerChange.value?.country?.id) || Number(offerChange.value.country),
+    },
+    UserID: user.value?.ID,
+    PricePerDay: Number(offerChange.value.price),
+    NumberOfRooms: Number(offerChange.value.numberOfRooms),
+    IsAnimalFriendly: offerChange.value.isAnimalFriendly || false,
+    Discount: Number(offerChange.value.discount),
+    Type: offerChange.value.type,
+    Skill: offerChange.value.skill,
+    GeneralFacilities: offerChange.value.generalFacilities?.map((generalFacility)=> {return {Name: generalFacility}} ),
+    rooms: offerChange.value.rooms?.map((room) => {
+      return {
+        area: Number(room.area),
+        capacity: Number(room.capacity),
+        description: room.description,
+        room_facilities: room.roomFacilities.map((roomFacility) => {
+          return {
+            name: roomFacility
+          }
+        }),
+        name: room.roomName,
+        number: Number(room.roomNumber),
+        accommodation_id: offerChange.value.offerId,
+        ID: room.ID,
+      }
+    })
   })
 }
 
