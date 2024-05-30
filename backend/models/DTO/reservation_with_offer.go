@@ -51,12 +51,13 @@ type ReservationEventWithOffer struct {
 
 type ReservationRoomWithOffer struct {
 	ReservationID    uint      `json:"reservation_id"`
-	Title            string    `json:"title"`
+	Name             string    `json:"name"`
 	PricePerDay      float64   `json:"price_per_day"`
 	Capacity         int       `json:"capacity"`
 	DateFrom         time.Time `json:"date_from"`
 	DateTo           time.Time `json:"date_to"`
 	IsAnimalFriendly bool      `json:"is_animal_friendly"`
 	RoomID           uint      `json:"room_id"`
+	RatingID         uint      `json:"rating_id"`
 	ReservationState string    `json:"reservation_state"`
 }

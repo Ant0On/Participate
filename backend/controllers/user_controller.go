@@ -322,7 +322,10 @@ func gradeReservation(c *gin.Context, reservationType string) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		accommodation.UpdateRating(request.Count)
+		if err := accommodation.UpdateRating(request.Count); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	case *models.ReservationActivity:
 		res.RatingID = rate.ID
 		if err := res.Update(); err != nil {
@@ -334,7 +337,10 @@ func gradeReservation(c *gin.Context, reservationType string) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		activity.UpdateRating(request.Count)
+		if err := activity.UpdateRating(request.Count); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	case *models.ReservationRoom:
 		res.RatingID = rate.ID
 		if err := res.Update(); err != nil {
@@ -352,7 +358,10 @@ func gradeReservation(c *gin.Context, reservationType string) {
 			return
 		}
 
-		accommodation.UpdateRating(request.Count)
+		if err := accommodation.UpdateRating(request.Count); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})

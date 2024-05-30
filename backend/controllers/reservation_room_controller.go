@@ -28,8 +28,8 @@ func ChangeRoomReservationState(c *gin.Context) {
 func GetCurrentRoomReservations(c *gin.Context) {
 	var pendingReservations []DTO.ReservationRoomWithOffer
 	selectQuery := "reservation_room.id as reservation_id, reservation_room.date_from," +
-		" reservation_room.date_to, room.capacity," +
-		" room.room_name, reservation_room.reservation_state, room.id as room_id"
+		" reservation_room.date_to, room.capacity, accommodation.price_per_day as price_per_day," +
+		" room.room_name as name, reservation_room.reservation_state, room.id as room_id"
 	GetDTOReservation(c, ReservationQueryParameters{
 		offerTableName:       "room",
 		reservationTableName: "reservation_room",
@@ -45,8 +45,8 @@ func GetCurrentRoomReservations(c *gin.Context) {
 func GetReservationsRoomHistory(c *gin.Context) {
 	var reservationsHistory []DTO.ReservationRoomWithOffer
 	selectQuery := "reservation_room.id as reservation_id, reservation_room.date_from," +
-		" reservation_room.date_to, room.capacity," +
-		" room.room_name, reservation_room.reservation_state, room.id as room_id"
+		" reservation_room.date_to, room.capacity, reservation_room.rating_id, accommodation.price_per_day as price_per_day," +
+		" room.room_name as name, reservation_room.reservation_state, room.id as room_id"
 	GetDTOReservation(c, ReservationQueryParameters{
 		offerTableName:       "room",
 		reservationTableName: "reservation_room",

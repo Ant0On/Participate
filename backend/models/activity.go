@@ -58,11 +58,15 @@ func (a *Activity) Update() error {
 	return nil
 }
 
-func (a *Activity) UpdateRating(rating int) {
+func (a *Activity) UpdateRating(rating int) error {
 	currentSum := a.RatingAvg * float64(a.RatingCount)
 	currentSum += float64(rating)
 	a.RatingCount += 1
 	a.RatingAvg = currentSum / float64(a.RatingCount)
+	if err := DB.Save(a).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *Activity) Delete() error {
