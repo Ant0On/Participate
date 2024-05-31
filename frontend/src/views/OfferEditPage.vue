@@ -311,31 +311,33 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             <v-text-field v-model="offerChange.title" flat
                           label="Title"
                           density="compact"
-                          :rules="[value => !!value, value => value.length > 3]"
+                          :rules="[value => !!value || 'Title must be filled!',
+                           value => value.length > 3 || 'Title must be longer than 3!']"
             ></v-text-field>
           </v-card-title>
 
-          <v-card-subtitle class="d-flex mb-2">
+          <v-card-subtitle class="d-flex mb-2" v-if="!isEdit">
 
-          <span v-if="!isEdit" class="me-1">
+          <span class="me-1">
             {{ offer.location }}
           </span>
-            <div v-else class="d-flex justify-space-between w-100">
-              <v-select label="Coutnry"
-                        v-model="offerChange.country"
-                        :items="offerCountries"
-                        class="w-100"
-                        density="compact"
-                        item-title="name"
-                        item-value="id"
-              ></v-select>
-              <v-text-field label="Town"
-                            v-model="offerChange.town"
-                            class="w-100 ma-2"
-                            density="compact"
-                            :rules="[(value) => !!value, (value) => value.length > 3]"></v-text-field>
-            </div>
           </v-card-subtitle>
+          <div v-else class="d-flex justify-space-between w-100 px-4">
+            <v-select label="Country"
+                      v-model="offerChange.country"
+                      :items="offerCountries"
+                      class="w-100 text-black"
+                      density="compact"
+                      item-title="name"
+                      item-value="id"
+            ></v-select>
+            <v-text-field label="Town"
+                          v-model="offerChange.town"
+                          class="w-100 ma-2 text-black"
+                          density="compact"
+                          :rules="[(value) => !!value || 'Town must be filled',
+                           (value) => value.length > 3 || 'Town must be longer than 3 !']"></v-text-field>
+          </div>
           <v-card-subtitle class="mx-0 d-flex " v-if="!isEdit">
             <div class="font-weight-bold"
                  :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
@@ -350,22 +352,23 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
               }}
             </div>
           </v-card-subtitle>
-          <v-card-subtitle class="d-flex flex-space-between w-100" v-else>
+          <div class="d-flex flex-space-between w-100 px-4" v-else>
             <v-text-field v-model="offerChange.price"
                           width="40px"
                           density="compact"
                           label="Price"
                           type="number"
-                          :rules="[(value) => !!value, (value) => value > 0]"
+                          :rules="[(value) => !!value || 'Price must be filled',
+                          (value) => value > 0 || 'Price must be greater than 0!']"
             ></v-text-field>
             <v-text-field v-model="offerChange.discount"
                           density="compact"
                           class="pl-1"
                           label="Discount"
                           type="number"
-                          :rules="[(value) => value >= 0 && value < 100]"
+                          :rules="[(value) => value >= 0 && value < 100 || 'Discount must be in range 0-100!']"
             ></v-text-field>
-          </v-card-subtitle>
+          </div>
           <div class="ma-4 text-subtitle-1" v-if="!isEdit">
             <v-chip :prepend-icon="chips.discount.icon"
                     :color="chips.discount.color"
@@ -391,7 +394,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
               {{ chips?.[offer?.skill].text }}
             </v-chip>
           </div>
-          <v-card-subtitle class="d-flex justify-space-between w-100" v-else>
+          <div class="d-flex justify-space-between w-100 px-4" v-else>
             <v-select v-model="offerChange.type"
                       :items="(type === 'event')? eventTypes.map((eventType) => eventType.toLowerCase())
                     : (type === 'accommodation')? accommodationTypes.map((accommodationType) => accommodationType.toLowerCase())
@@ -411,7 +414,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                       :items="skillLevels.map((skillLevel) => skillLevel.toLowerCase())"
             >
             </v-select>
-          </v-card-subtitle>
+          </div>
           <v-divider></v-divider>
           <v-card-actions>
             <v-btn-toggle block rounded="lg">
@@ -437,7 +440,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                         density="compact"
                         label="Description"
                         v-model="offerChange.description"
-                        :rules="[(values) => values.length > 30]"
+                        :rules="[(values) => values.length > 30 || 'Description must be longer than 30!']"
             ></v-textarea>
           </v-card-text>
           <v-card-text v-else-if="cardPage === 'info'">
@@ -455,7 +458,8 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                         density="compact"
                         label="Capacity"
                         type="number"
-                        :rules="[(value) => !!value, (value) => value > 0]"
+                        :rules="[(value) => !!value || 'Capacity must be filled!',
+                         (value) => value > 0 || 'Capacity must be greater than 0!']"
                     ></v-text-field>
                   </v-list-item>
                 </v-col>
@@ -484,7 +488,8 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                         density="compact"
                         label="Number of rooms"
                         type="number"
-                        :rules="[(value) => !!value, (value) => value > 0]"
+                        :rules="[(value) => !!value || 'Number of rooms must be filled!',
+                        (value) => value > 0 || 'Number of rooms must be greater than 0!']"
                     ></v-text-field>
                   </v-list-item>
                 </v-col>
@@ -526,7 +531,6 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                   :rules="[
                                   value => !!value || 'Ending date is required',
                                   value => !offerChange.dateFrom || value >= offerChange.dateFrom || 'Date must be grater than starting date',
-                                  value => new Date(value) > new Date()
                                ]"
                     >
                     </v-text-field>
@@ -548,7 +552,6 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                   denisty="compact"
                                   :rules="[
                                   value => !!value || 'Ending date is required',
-                                  value => new Date(value) > new Date()
                                ]"
                     >
                     </v-text-field>
@@ -666,14 +669,17 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                     type="number"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value > 0,
-                                    value => !offerChange.rooms || !offerChange.rooms?.some((room) => room.roomNumber === value)]"
+                                    :rules="[value => !!value || 'Room number must be filled!',
+                                     value => value > 0 || 'Room number must be greater than 0',
+                                    value => !offerChange.rooms || !offerChange.rooms?.some((room) => room.roomNumber === value) || 'Room number must be unique!'
+                                    ]"
                       ></v-text-field>
                       <v-text-field v-model="offerChangeRoom.roomName"
                                     label="Room name"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value?.length > 3]"
+                                    :rules="[value => !!value || 'Room name must be filled!',
+                                     value => value?.length > 3 || 'Room name must be greater than 3!']"
                       ></v-text-field>
                     </v-card-title>
                     <v-card-subtitle>
@@ -682,13 +688,17 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                     type="number"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value > 0]"></v-text-field>
+                                    :rules="[value => !!value || 'Room area must be filled!',
+                                     value => value > 0 || 'Room area must be greater than 0!'
+                                     ]"></v-text-field>
                       <v-text-field v-model="offerChangeRoom.capacity"
                                     label="Room capacity"
                                     type="number"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value > 0]"
+                                    :rules="[value => !!value || 'Room capacity must be filled!',
+                                     value => value > 0 || 'Room capacity must be greater than 0!'
+                                     ]"
                       ></v-text-field>
                     </v-card-subtitle>
                     <v-card-text>
@@ -696,7 +706,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                           density="compact"
                           label="Description"
                           v-model="offerChangeRoom.description"
-                          :rules="[(values) => values?.length > 10]"
+                          :rules="[(values) => values?.length > 10 || 'Description must be longer than 10!']"
                       ></v-textarea>
                       <div class="text-subtitle-1 my-1">Room facilities</div>
                       <v-divider></v-divider>
