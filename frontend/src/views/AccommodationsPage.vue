@@ -3,7 +3,6 @@ import {onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 import OfferListItem from "@/components/offers/OfferListItem.vue";
-import calculatePriceAfterDiscount from "@/_helpers/calculate-price-after-discount";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import SearchBar from "@/components/layout/SearchBar.vue";
 import {useOfferStore} from "@/stores/offers.store";
@@ -17,17 +16,19 @@ function mapAccommodation(responseData) {
 
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'capacity': data["capacity"],
-      'price': data['price_per_day'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
-      'type': data['type'],
-      'animal_friendly': data['is_animal_friendly'],
-      'rating': data['rating']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['PricePerDay'],
+      'discount': data['Discount'],
+      'type': data['Type'],
+      'animal_friendly': data['IsAnimalFriendly'],
+      'rating': data['Rating'] || 0,
+      'numberOfRooms': data?.NumberOfRooms,
+      'rooms': data?.Rooms?.map((room) => {return {...room}}),
+      'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
     };
   });
 }

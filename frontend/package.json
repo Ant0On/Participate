@@ -18,7 +18,8 @@
     "pinia": "2.1.7",
     "yup": "^1.3.2",
     "vee-validate": "^4.11.8",
-    "@mdi/font": "^7.4.47"
+    "@mdi/font": "^7.4.47",
+    "@vueuse/core": "^10.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -32,7 +33,8 @@
     "eslint-plugin-vue": "^8.0.3",
     "vue-template-compiler": "2.6.11",
     "vue-star-rating": "next",
-    "@mdi/font": "^7.4.47"
+    "@mdi/font": "^7.4.47",
+    "@vueuse/core": "^10.9.0"
   },
   "eslintConfig": {
     "root": true,

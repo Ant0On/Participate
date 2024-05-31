@@ -59,19 +59,18 @@ async function makeReservation() {
     'reservation_state': 'pending',
     'number_of_people': Number(reservation.value.numberOfPeople),
     'user_id': Number(user.value.ID),
-    'offer_id': Number(props.id),
     'payment_id': paymentType.value[chosenPayment.value].id
   }
   if(props.type === "event"){
-    reservationBody.date = reservation.value.dateTo
-    reservation.event_id = Number(props.id)
+    reservationBody.date = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.event_id = Number(props.id)
   }else if(props.type === "activity"){
-    reservationBody.date = reservation.value.dateTo
-    reservation.activity_id = Number(props.id)
+    reservationBody.date = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.activity_id = Number(props.id)
   }else if(props.type === "accommodation"){
-    reservationBody.date_from = reservation.value.dateFrom
-    reservationBody.date_to = reservation.value.dateTo
-    reservation.accommodation_id = Number(props.id)
+    reservationBody.date_from = new Date(reservation.value.dateFrom).toISOString()
+    reservationBody.date_to = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.accommodation_id = Number(props.id)
   }
 
   fetchWrapper.post(`/api/reservation/${props.type}/add`, reservationBody).then((resp) => {
@@ -82,7 +81,8 @@ async function makeReservation() {
   })
 }
 
-const chips = ref(chipsMapper(offer.value?.discount))
+const chips = computed( () => chipsMapper(offer.value?.discount))
+const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
 
 const image = computed(() => {
   const images = []
@@ -137,47 +137,62 @@ const hostData = ref({
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.type}/${props.id}`)
   if (response?.data) {
-    const data = response.data
+    const data = response.data[0]
     if (props.type === "accommodation") {
       return {
-        'offerId': data["offer_id"],
-        'title': data["title"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'capacity': data["capacity"],
-        'price': data['price_per_day'],
-        'isRecommended': data['is_recommended'],
-        'discount': data['discount'],
-        'type': data['type'],
-        'animal_friendly': data['is_animal_friendly'],
-        'rating': data['rating']
+        'offerId': data["ID"],
+        'title': data["Title"],
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'description': data["Description"],
+        'capacity': data["Capacity"],
+        'price': data['PricePerDay'],
+        'discount': data['Discount'],
+        'type': data['Type'],
+        'animal_friendly': data['IsAnimalFriendly'],
+        'rating': data['Rating'] || 0,
+        'numberOfRooms': data?.NumberOfRooms,
+        'rooms': data?.Rooms?.map((room) => {
+          return {
+            area: Number(room.area),
+            capacity: Number(room.capacity),
+            description: room.description,
+            roomFacilities: room.room_facilities.map((facility) => facility.Name),
+            roomName: room.name,
+            roomNumber: Number(room.number),
+            ID: room.ID,
+          }
+        }),
+        'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
+
       }
 
     } else if (props.type === "event") {
       return {
-        'offerId': data["offer_id"],
-        'title': data["title"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'capacity': data["capacity"],
-        'price': data['price'],
-        'isRecommended': data['is_recommended'],
-        'discount': data['discount'],
-        'type': data['type']
+        'offerId': data["ID"],
+        'title': data["Title"],
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'description': data["Description"],
+        'capacity': data["Capacity"],
+        'price': data['Price'],
+        'discount': data['Discount'],
+        'type': data['Type'],
+        'dateFrom': data?.DateFrom?.split('T')?.[0],
+        'dateTo': data?.DateTo?.split('T')?.[0]
       }
     } else if (props.type === "activity") {
       return {
-        'offerId': data["offer_id"],
-        'title': data["title"],
-        'location': data["country_name"] + ', ' + data["town_name"],
-        'description': data["description"],
-        'capacity': data["capacity"],
-        'price': data['price'],
-        'isRecommended': data['is_recommended'],
-        'discount': data['discount'],
-        'skill': data['skill_level'],
-        'type': data['type'],
-        'duration': data['duration']
+        'offerId': data["ID"],
+        'title': data["Title"],
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'description': data["Description"],
+        'capacity': data["Capacity"],
+        'price': data['Price'],
+        'discount': data['Discount'],
+        'skill': data['Skill'],
+        'type': data['Type'],
+        'duration': data['Duration'],
+        'date': data?.Date?.split('T')?.[0],
+        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
       }
     }
   }
@@ -198,7 +213,7 @@ async function doesChatExist() {
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
-  // await doesChatExist();
+  console.log(offer.value)
 });
 
 </script>
@@ -269,11 +284,11 @@ onMounted(async () => {
             <v-card-subtitle class="mx-0 d-flex ">
               <div class="font-weight-bold"
                    :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
-                {{ (type === "accommodation") ? `Price: ${offer.price} $/day` : `Price: ${offer.price} $` }}
+                {{ (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $` }}
               </div>
 
               <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
-                {{ (type === "accommodation") ? `${priceAfterDiscount} $/day` : `${priceAfterDiscount} $` }}
+                {{ (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $` }}
               </div>
             </v-card-subtitle>
             <div class="ma-4 text-subtitle-1">
@@ -346,14 +361,7 @@ onMounted(async () => {
                     <v-list-item
                         key="number_of_rooms"
                         title="Number of rooms"
-                        :subtitle="offer?.numberOfRooms"
-                    ></v-list-item>
-                  </v-col>
-                  <v-col>
-                    <v-list-item
-                        key="general_facilities"
-                        title="General Facilities"
-                        :subtitle="offer?.generalFacilities.join(', ')"
+                        :subtitle="offer?.numberOfRooms || 1"
                     ></v-list-item>
                   </v-col>
                 </v-row>
@@ -395,7 +403,7 @@ onMounted(async () => {
                       title="General Facilities"
                       v-if="type === 'accommodation'"
                   >{{
-                      offer?.generalFacilities.join(', ')
+                      offer?.generalFacilities?.join(', ') || 'None'
                     }}
                   </v-list-item>
                   <v-list-item
@@ -404,7 +412,7 @@ onMounted(async () => {
                       v-if="type === 'activity'"
                   >
                     {{
-                      offer?.equipment.join(', ')
+                      offer?.equipment?.join(', ') || 'None'
                     }}
                   </v-list-item>
                 </v-row>

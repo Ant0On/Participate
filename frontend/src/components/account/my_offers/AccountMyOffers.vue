@@ -5,6 +5,7 @@ import {useAuthStore} from "@/stores/auth.store";
 import fetchPaginatedData from "@/_helpers/fetchPaginatedData";
 import OfferListItem from "@/components/offers/OfferListItem.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
+import {router} from "@/router";
 
 const userStore = useAuthStore();
 
@@ -20,56 +21,58 @@ const confirmDelete = ref(false);
 const offerToDelete = ref(null);
 
 function mapAccommodation(responseData) {
-
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'capacity': data["capacity"],
-      'price': data['price_per_day'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
-      'type': data['type'],
-      'animal_friendly': data['is_animal_friendly'],
-      'rating': data['rating']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['PricePerDay'],
+      'discount': data['Discount'],
+      'type': data['Type'],
+      'animal_friendly': data['IsAnimalFriendly'],
+      'rating': data['Rating'] || 0,
+      'numberOfRooms': data?.NumberOfRooms,
+      'rooms': data?.Rooms?.map((room) => {return {...room}}),
+      'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
+
     };
   });
 }
 
 function mapActivities(responseData) {
-
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'capacity': data["capacity"],
-      'price': data['price'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
-      'skill': data['skill_level'],
-      'type': data['type'],
-      'duration': data['duration']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['Price'],
+      'discount': data['Discount'],
+      'skill': data['Skill'],
+      'type': data['Type'],
+      'duration': data['Duration'],
+      'date': data?.Date?.split('T')?.[0],
+      'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
     };
   });
 }
 
 function mapEvents(responseData) {
-
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'capacity': data["capacity"],
-      'price': data['price'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
-      'type': data['type']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['Price'],
+      'discount': data['Discount'],
+      'type': data['Type'],
+      'dateFrom': data?.DateFrom?.split('T')?.[0],
+      'dateTo': data?.DateTo?.split('T')?.[0]
     };
   });
 }
@@ -128,6 +131,10 @@ function handleDeleteConfirmation(result) {
   confirmDelete.value = false;
   offerToDelete.value = null;
 }
+
+function editOffer(offerId, type){
+  router.push(`/offers/${type}/edit/${offerId}`)
+}
 </script>
 
 <template>
@@ -142,16 +149,16 @@ function handleDeleteConfirmation(result) {
       >
         <p class="text-center">Events</p>
         <v-row class="w-100">
-          <template v-for="event in allEvents.value" :key="event.offerID">
+          <template v-for="event in allEvents.value" :key="event.offerId">
             <v-col cols="4">
               <OfferListItem type="event" :offerItem="event" custom>
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="blue-grey-lighten-2" rounded
-                           @click="editOffer(event.offerID)">Edit
+                           @click="editOffer(event.offerId, 'event')">Edit
                     </v-btn>
                     <v-btn color="red-lighten-2" elevation="0" rounded
-                           @click="confirmDeleteOffer(event.offerID, 'event')">Delete
+                           @click="confirmDeleteOffer(event.offerId, 'event')">Delete
                     </v-btn>
                   </v-card>
                 </template>
@@ -171,16 +178,16 @@ function handleDeleteConfirmation(result) {
       >
         <p class="text-center">Accommodations</p>
         <v-row class="w-100">
-          <template v-for="accommodation in allAccommodations.value" :key="accommodation.offerID">
+          <template v-for="accommodation in allAccommodations.value" :key="accommodation.offerId">
             <v-col cols="4">
               <OfferListItem type="accommodation" :offerItem="accommodation" custom>
                 <template v-slot:template>
                   <v-card elevation="0" class=" d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="blue-grey-lighten-2" rounded
-                           @click="editOffer(accommodation.offerID)">Edit
+                           @click="editOffer(accommodation.offerId, 'accommodation')">Edit
                     </v-btn>
                     <v-btn color="red-lighten-2" elevation="0" rounded
-                           @click="confirmDeleteOffer(accommodation.offerID, 'accommodation')">Delete
+                           @click="confirmDeleteOffer(accommodation.offerId, 'accommodation')">Delete
                     </v-btn>
                   </v-card>
                 </template>
@@ -200,16 +207,16 @@ function handleDeleteConfirmation(result) {
       >
         <p class="text-center">Activities</p>
         <v-row class="w-100">
-          <template v-for="activity in allActivities.value" :key="activity.offerID">
+          <template v-for="activity in allActivities.value" :key="activity.offerId">
             <v-col cols="4">
               <OfferListItem type="activity" :offerItem="activity" custom>
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="blue-grey-lighten-2" rounded
-                           @click="editOffer(activity.offerID)">Edit
+                           @click="editOffer(activity.offerId, 'activity')">Edit
                     </v-btn>
                     <v-btn color="red-lighten-2" elevation="0" rounded
-                           @click="confirmDeleteOffer(activity.offerID, 'activity')">Delete
+                           @click="confirmDeleteOffer(activity.offerId, 'activity')">Delete
                     </v-btn>
                   </v-card>
                 </template>

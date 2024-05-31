@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import TextInput from "@/components/ui/TextInput.vue";
 import PasswordInput from "@/components/ui/PasswordInput.vue";
 import {useAuthStore} from "@/stores/auth.store";
-import LoginButton from "@/components/login/LoginButton.vue";
 
 
 const signUpData = ref({
@@ -66,7 +65,7 @@ const schema = Yup.object().shape({
       <PasswordInput v-model="signUpData.Password" :labelText="'Your password'" @keyup.enter="onSubmit" :isRequired="true"/>
       <PasswordInput v-model="signUpData.ConfirmPassword" :labelText="'Confirm your password'"
                      :placeholder="'Type your password again'" @keyup.enter="onSubmit" :isRequired="true"/>
-      <LoginButton text="Sign up" @button-clicked="onSubmit" @keyup.enter="onSubmit"/>
+      <v-btn text="Sign up" @click="onSubmit" @keyup.enter="onSubmit"></v-btn>
     </form>
   </div>
 </template>
@@ -76,7 +75,6 @@ div.signup_section {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  row-gap: 40px;
   flex-grow: 1;
   padding: 5%;
 }
@@ -88,7 +86,6 @@ div.errors {
 .signup_form {
   display: flex;
   flex-direction: column;
-  row-gap: 40px;
 }
 
 p {

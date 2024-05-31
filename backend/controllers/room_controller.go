@@ -54,7 +54,7 @@ func CreateRooms(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "rooms created successfully!", "rooms": rooms})
 }
 
-func GetRooms(c *gin.Context) {
+func GetRoomsForAccommodation(c *gin.Context) {
 	var rooms []models.Room
 	var result *gorm.DB
 	accommodationId := c.Query("id")
@@ -77,7 +77,7 @@ func GetRooms(c *gin.Context) {
 	result = query.
 		Select("room.id as room_id, room.room_number, room.room_name, " +
 			"room.room_description, room.capacity, room.area, room.accommodation_id, " +
-			"town.name as town_name, country.name as country_name").
+			"town.name as town_name, country.country_name as country_name").
 		Offset(offset).Limit(limit).
 		Find(&rooms)
 
@@ -94,4 +94,21 @@ func GetRooms(c *gin.Context) {
 		"totalPages":   totalPages,
 		"totalRecords": totalRecords,
 	})
+}
+
+func DeleteRoom(c *gin.Context) {
+	roomID := c.Param("id")
+
+	var room models.Room
+	if err := models.DB.First(&room, roomID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Room not found"})
+		return
+	}
+
+	if err := room.Delete(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete room"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Room deleted successfully"})
 }

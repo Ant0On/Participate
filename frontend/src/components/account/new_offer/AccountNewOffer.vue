@@ -104,7 +104,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 
 async function getCountryId(countryName) {
   const response = await fetchWrapper.get('/api/country/get/all')
-  return response.data.filter((country) => country.Name === countryName)[0].ID
+  return response.data.filter((country) => country.CountryName === countryName)[0].ID
 }
 
 async function onSubmit() {
@@ -142,6 +142,8 @@ async function handleAccommodationOffer(townID, imageFiles) {
     capacity: newOffer.value.capacity,
     town_id: townID,
     user_id: user.ID,
+    Name: newOffer.value.city,
+    CountryID: await getCountryId(newOffer.value.country),
     number_of_rooms: newAccommodation.value.numberOfRooms,
     type: newAccommodation.value.accommodationType.toLowerCase(),
     is_animal_friendly: newAccommodation.value.isAnimalFriendly,
@@ -158,7 +160,7 @@ async function handleAccommodationOffer(townID, imageFiles) {
   });
 
   if (newAccommodation.value.accommodationType !== 'Villa' && newAccommodation.value.accommodationType !== 'Apartment') {
-    await fetchWrapper.post(`/api/room/create`, rooms.value);
+    await fetchWrapper.post(`/api/host/room/create`, rooms.value);
   }
 }
 
@@ -168,6 +170,9 @@ async function handleActivityOffer(townID, imageFiles) {
     description: newOffer.value.description,
     capacity: newOffer.value.capacity,
     town_id: townID,
+    country_id: 1,
+    Name: newOffer.value.city,
+    CountryID: await getCountryId(newOffer.value.country),
     user_id: user.ID,
     date: new Date(newActivity.value.dateRange[0]).toJSON(),
     skill_level: newActivity.value.skillLevel.toLowerCase(),
@@ -189,6 +194,8 @@ async function handleEventOffer(townID, imageFiles) {
     capacity: newOffer.value.capacity,
     town_id: townID,
     user_id: user.ID,
+    Name: newOffer.value.city,
+    CountryID: await getCountryId(newOffer.value.country),
     date_from: new Date(newEvent.value.dateFrom).toJSON(),
     date_to: new Date(newEvent.value.dateTo).toJSON(),
     price: newEvent.value.price,
@@ -320,6 +327,26 @@ function checkIfOfferInfoIsFilled() {
   return true;
 }
 
+function checkIfRoomInfoIsFilled() {
+  let accommodationValues = newAccommodation.value
+  let roomValues = newRoom.value
+  if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
+    return
+  }
+  if (
+      roomValues.number === '' ||
+      roomValues.name === '' ||
+      roomValues.description === '' ||
+      roomValues.capacity === '' ||
+      roomValues.area === ''
+  ) {
+    return false;
+  } else {
+    errors.offerInfo = '';
+    return true;
+  }
+}
+
 async function uploadImage(imageInput) {
   const images = imageInput.target.files;
   const promises = [];
@@ -334,11 +361,33 @@ async function uploadImage(imageInput) {
         })
     );
   }
+  Promise.all(promises).then((imageDataArray) => {
+    newOffer.value.images = imageDataArray;
+  });
+}
+
+function dataURLtoFile(dataURL, fileName) {
+  const arr = dataURL.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], fileName, {type: mime});
+}
+
+function dataURLsToFiles(dataURLs, fileNameBase) {
+  return dataURLs.map((dataURL, index) => {
+    const fileName = `${fileNameBase}_${index}.jpeg`;
+    return dataURLtoFile(dataURL, fileName);
+  });
 }
 
 onMounted(async () => {
   const response = await fetchWrapper.get('/api/country/get/all')
-  countries.value = response.data.map(country => country.Name)
+  countries.value = response.data.map(country => country.CountryName)
 })
 </script>
 

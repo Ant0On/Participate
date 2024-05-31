@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"backend/models"
-	"backend/models/DTO"
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -16,45 +15,32 @@ func CreateAccommodationOffer(c *gin.Context) {
 }
 
 func GetAccommodations(c *gin.Context) {
-	var accommodationWithLocation []DTO.AccommodationWithLocation
-	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.accommodation_type as type, accommodation.discount, " +
-		"accommodation.user_id, town.name as town_name, country.name as country_name"
-	GetOffers(c, OfferQueryParameters{
-		tableName:   "accommodation",
-		model:       &models.Accommodation{},
-		dto:         &accommodationWithLocation,
-		selectQuery: selectQuery,
-	})
+	params := OfferQueryParameters{
+		Model:    &[]models.Accommodation{},
+		Preloads: []string{"Rooms.RoomFacilities", "Town.Country", "GeneralFacilities"},
+		Filters:  map[string]interface{}{},
+	}
+	FetchOffers(c, params)
 }
 
 func GetAccommodationByID(c *gin.Context) {
-	var accommodationWithLocation DTO.AccommodationWithLocation
-	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.accommodation_type as type, accommodation.discount, " +
-		"accommodation.user_id, town.name as town_name, country.name as country_name"
-	GetOfferByID(c, OfferQueryParameters{
-		tableName:   "accommodation",
-		model:       &models.Accommodation{},
-		dto:         &accommodationWithLocation,
-		selectQuery: selectQuery,
-	})
+	offerID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Accommodation{},
+		Preloads: []string{"Rooms.RoomFacilities", "Town.Country", "GeneralFacilities"},
+		Filters:  map[string]interface{}{"id": offerID},
+	}
+	FetchOffers(c, params)
 }
 
 func GetAccommodationsForHost(c *gin.Context) {
-	var accommodationWithLocation []DTO.AccommodationWithLocation
-	selectQuery := "accommodation.id as offer_id, accommodation.title, accommodation.description, " +
-		"accommodation.price_per_day, accommodation.capacity, accommodation.is_animal_friendly," +
-		"accommodation.accommodation_type as type, accommodation.discount, " +
-		"accommodation.user_id, town.name as town_name, country.name as country_name"
-	GetOffersForHost(c, OfferQueryParameters{
-		tableName:   "accommodation",
-		model:       &models.Accommodation{},
-		dto:         &accommodationWithLocation,
-		selectQuery: selectQuery,
-	})
+	hostID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Accommodation{},
+		Preloads: []string{"Rooms.RoomFacilities", "Town.Country", "GeneralFacilities"},
+		Filters:  map[string]interface{}{"user_id": hostID},
+	}
+	FetchOffers(c, params)
 }
 
 func DeleteAccommodation(c *gin.Context) {
@@ -62,7 +48,113 @@ func DeleteAccommodation(c *gin.Context) {
 }
 
 func UpdateAccommodation(c *gin.Context) {
-	UpdateOffer(c, models.GetAccommodationByID)
+	accommodationID := c.Param("id")
+
+	var inputAccommodation models.Accommodation
+
+	if err := c.ShouldBindJSON(&inputAccommodation); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var existingAccommodation models.Accommodation
+	if err := models.DB.Preload("Rooms.RoomFacilities").
+		Preload("GeneralFacilities").
+		First(&existingAccommodation, accommodationID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Accommodation not found"})
+		return
+	}
+
+	tx := models.DB.Begin()
+	if tx.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+
+	var town models.Town
+	if err := models.DB.Where("name = ? AND country_id = ?", inputAccommodation.Town.Name, inputAccommodation.Town.CountryID).First(&town).Error; err != nil {
+		town = inputAccommodation.Town
+		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			return
+		}
+	}
+
+	inputAccommodation.Town = town
+	inputAccommodation.TownID = town.ID
+
+	if err := tx.Model(&existingAccommodation).Updates(inputAccommodation).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update activity"})
+		return
+	}
+
+	if err := tx.Model(&existingAccommodation).Association("GeneralFacilities").Clear(); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing general facilities"})
+		return
+	}
+
+	for _, facility := range inputAccommodation.GeneralFacilities {
+		var existingFacility models.GeneralFacility
+		if err := tx.Where("name = ?", facility.Name).First(&existingFacility).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if err := tx.Model(&existingAccommodation).Association("GeneralFacilities").Append(&existingFacility); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	for _, room := range inputAccommodation.Rooms {
+		var existingRoom models.Room
+		if err := tx.Where("id = ?", room.ID).First(&existingRoom).Error; err != nil {
+			if err := tx.Create(&room).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create room"})
+				return
+			}
+			if err := tx.Where("id = ?", room.ID).First(&existingRoom).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to re-fetch newly created room"})
+				return
+			}
+		} else {
+			if err := tx.Model(&existingRoom).Updates(room).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update room"})
+				return
+			}
+		}
+		if err := tx.Model(&existingRoom).Association("RoomFacilities").Clear(); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing room facilities"})
+			return
+		}
+		for _, facility := range room.RoomFacilities {
+			var existingFacility models.RoomFacility
+			if err := tx.Where("name = ?", facility.Name).First(&existingFacility).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			if err := tx.Model(&existingRoom).Association("RoomFacilities").Append(&existingFacility); err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Accommodation updated successfully!", "accommodation": existingAccommodation})
 }
 
 func DiscountAccommodation(c *gin.Context) {

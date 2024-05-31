@@ -20,7 +20,7 @@ const rules = ref({
 <template>
   <v-text-field
       v-model="modelValue"
-      :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+      :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
       :rules="[rules.required, rules.min]"
       :type="show ? 'text' : 'password'"
       hint="At least 8 characters"
@@ -28,7 +28,7 @@ const rules = ref({
       name="input-10-1"
       counter
       clearable
-      @click:append="show = !show"
+      @click:append-inner="show = !show"
       :disabled="!isActive"
       @input="$emit('update:modelValue', $event.target.value)"
   ></v-text-field>

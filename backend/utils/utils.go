@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 func CheckState(state string) bool {
 	switch state {
 	case "pending":
@@ -19,6 +21,14 @@ func CheckState(state string) bool {
 
 type ChangePriceReq struct {
 	Price float64 `json:"price" binding:"required,gt=1"`
+}
+
+func HistoryWhereCondition(userID string) string {
+	return fmt.Sprintf("app_user.id = '%s' AND reservation_state in ('finished', 'accepted', 'rejected')", userID)
+}
+
+func CurrentWhereCondition(userID string) string {
+	return fmt.Sprintf("app_user.id = '%s' AND reservation_state in ('pending', 'accepted')", userID)
 }
 
 type DiscountRequest struct {

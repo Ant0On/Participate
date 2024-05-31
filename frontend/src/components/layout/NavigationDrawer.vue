@@ -79,8 +79,8 @@ const userName = computed(() => {
             <v-list-item prepend-icon="mdi-invoice-text-plus" title="New offer" value="new_offer"
                          @click=""></v-list-item>
           </router-link>
-          <router-link to="/account/current_offers">
-            <v-list-item prepend-icon="mdi-account-group-outline" title="Current offers" value="current_offers"
+          <router-link to="/account/current_reservations">
+            <v-list-item prepend-icon="mdi-account-group-outline" title="Current reservations" value="current_reservations"
                          @click=""></v-list-item>
           </router-link>
         </div>

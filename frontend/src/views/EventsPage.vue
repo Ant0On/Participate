@@ -18,15 +18,16 @@ function mapEvents(responseData) {
 
   return responseData.map((data) => {
     return {
-      'offerId': data["offer_id"],
-      'title': data["title"],
-      'location': data["country_name"] + ', ' + data["town_name"],
-      'description': data["description"],
-      'capacity': data["capacity"],
-      'price': data['price'],
-      'isRecommended': data['is_recommended'],
-      'discount': data['discount'],
-      'type': data['type']
+      'offerId': data["ID"],
+      'title': data["Title"],
+      'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+      'description': data["Description"],
+      'capacity': data["Capacity"],
+      'price': data['Price'],
+      'discount': data['Discount'],
+      'type': data['Type'],
+      'dateFrom': data?.DateFrom?.split('T')?.[0],
+      'dateTo': data?.DateTo?.split('T')?.[0]
     };
   });
 }

@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"backend/models"
-	"backend/models/DTO"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,42 +13,32 @@ func CreateEventOffer(c *gin.Context) {
 }
 
 func GetEvents(c *gin.Context) {
-	var eventsWithLocation []DTO.EventWithLocation
-	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.event_type as type, event.discount, " +
-		"event.user_id, town.name as town_name, country.name as country_name"
-	GetOffers(c, OfferQueryParameters{
-		tableName:   "event",
-		model:       &models.Event{},
-		dto:         &eventsWithLocation,
-		selectQuery: selectQuery,
-	})
+	params := OfferQueryParameters{
+		Model:    &[]models.Event{},
+		Preloads: []string{"Town.Country"},
+		Filters:  map[string]interface{}{},
+	}
+	FetchOffers(c, params)
 }
 
 func GetEventByID(c *gin.Context) {
-	var eventsWithLocation DTO.EventWithLocation
-	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.event_type as type, event.discount, " +
-		"event.user_id, town.name as town_name, country.name as country_name"
-	GetOfferByID(c, OfferQueryParameters{
-		tableName:   "event",
-		model:       &models.Event{},
-		dto:         &eventsWithLocation,
-		selectQuery: selectQuery,
-	})
+	offerID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Event{},
+		Preloads: []string{"Town.Country"},
+		Filters:  map[string]interface{}{"id": offerID},
+	}
+	FetchOffers(c, params)
 }
 
 func GetEventsForHost(c *gin.Context) {
-	var eventsWithLocation []DTO.EventWithLocation
-	selectQuery := "event.id as offer_id, event.title, event.description, " +
-		"event.price, event.capacity, event.event_type as type, event.discount, " +
-		"event.user_id, town.name as town_name, country.name as country_name"
-	GetOffersForHost(c, OfferQueryParameters{
-		tableName:   "event",
-		model:       &models.Event{},
-		dto:         &eventsWithLocation,
-		selectQuery: selectQuery,
-	})
+	hostID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Event{},
+		Preloads: []string{"Town.Country"},
+		Filters:  map[string]interface{}{"user_id": hostID},
+	}
+	FetchOffers(c, params)
 }
 
 func DeleteEvent(c *gin.Context) {
@@ -56,7 +46,39 @@ func DeleteEvent(c *gin.Context) {
 }
 
 func UpdateEvent(c *gin.Context) {
-	UpdateOffer(c, models.GetEventByID)
+	eventID := c.Param("id")
+
+	var inputEvent models.Event
+
+	if err := c.ShouldBindJSON(&inputEvent); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var existingEvent models.Event
+	if err := models.DB.First(&existingEvent, eventID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		return
+	}
+
+	var town models.Town
+	if err := models.DB.Where("name = ? AND country_id = ?", inputEvent.Town.Name, inputEvent.Town.CountryID).First(&town).Error; err != nil {
+		town = inputEvent.Town
+		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			return
+		}
+	}
+
+	inputEvent.Town = town
+	inputEvent.TownID = town.ID
+
+	if err := models.DB.Model(&existingEvent).Updates(inputEvent).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update event"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!", "event": existingEvent})
 }
 
 func DiscountEvent(c *gin.Context) {

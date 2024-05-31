@@ -239,7 +239,7 @@ func ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
-func GradeAccommodationReservation(c *gin.Context) {
+func gradeReservation(c *gin.Context, reservationType string) {
 	reservationId := c.Param("id")
 	if reservationId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID"})
@@ -258,16 +258,35 @@ func GradeAccommodationReservation(c *gin.Context) {
 		return
 	}
 
-	var reservation models.ReservationAccommodation
-	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
+	var err error
+	var reservation interface{}
+	switch reservationType {
+	case "accommodation":
+		var res models.ReservationAccommodation
+		err = models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&res).Error
+		reservation = &res
+	case "activity":
+		var res models.ReservationActivity
+		err = models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&res).Error
+		reservation = &res
+	}
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
 		return
 	}
 
-	if reservation.ReservationState != models.Finished {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
-		return
+	switch res := reservation.(type) {
+	case *models.ReservationAccommodation:
+		if res.ReservationState != models.Finished {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
+			return
+		}
+	case *models.ReservationActivity:
+		if res.ReservationState != models.Finished {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
+			return
+		}
 	}
 
 	var request models.Rating
@@ -279,68 +298,45 @@ func GradeAccommodationReservation(c *gin.Context) {
 	rate, err := models.GetGradeByCount(strconv.Itoa(request.Count))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	reservation.RatingID = rate.ID
-
-	if err := reservation.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	switch res := reservation.(type) {
+	case *models.ReservationAccommodation:
+		res.RatingID = rate.ID
+		if err := res.Update(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		accommodation, err := models.GetAccommodationById(strconv.Itoa(int(res.AccommodationID)))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		accommodation.UpdateRating(request.Count)
+	case *models.ReservationActivity:
+		res.RatingID = rate.ID
+		if err := res.Update(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		activity, err := models.GetActivityById(strconv.Itoa(int(res.ActivityID)))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		activity.UpdateRating(request.Count)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})
 }
 
+func GradeAccommodationReservation(c *gin.Context) {
+	gradeReservation(c, "accommodation")
+}
+
 func GradeActivityReservation(c *gin.Context) {
-	reservationId := c.Param("id")
-	if reservationId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID"})
-		return
-	}
-
-	customer, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	customerObj, ok := customer.(*models.User)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		return
-	}
-
-	var reservation models.ReservationActivity
-	err := models.DB.Where("user_id = ? AND ID = ?", customerObj.ID, reservationId).First(&reservation).Error
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Reservation not found"})
-		return
-	}
-
-	if reservation.ReservationState != models.Finished {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot grade a reservation that is not finished"})
-		return
-	}
-
-	var request models.Rating
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	rate, err := models.GetGradeByCount(strconv.Itoa(request.Count))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-
-	reservation.RatingID = rate.ID
-
-	if err := reservation.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Reservation graded successfully"})
+	gradeReservation(c, "activity")
 }
 
 func PromoteToHost(c *gin.Context) {

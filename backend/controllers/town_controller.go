@@ -16,9 +16,11 @@ func AddTown(c *gin.Context) {
 		return
 	}
 
-	if err := town.Save(); err != nil {
+	err := town.Save()
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"town.Save error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "town added successfully!", "town": town})
 }

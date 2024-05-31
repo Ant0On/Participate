@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"backend/models"
-	"backend/models/DTO"
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -16,45 +15,32 @@ func CreateActivityOffer(c *gin.Context) {
 }
 
 func GetActivities(c *gin.Context) {
-	var activityWithLocation []DTO.ActivityWithLocation
-	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
-		"activity.price, activity.capacity, activity.skill_level," +
-		"activity.duration, activity.activity_type as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name"
-	GetOffers(c, OfferQueryParameters{
-		tableName:   "activity",
-		model:       &models.Activity{},
-		dto:         &activityWithLocation,
-		selectQuery: selectQuery,
-	})
+	params := OfferQueryParameters{
+		Model:    &[]models.Activity{},
+		Preloads: []string{"Town.Country", "Equipment"},
+		Filters:  map[string]interface{}{},
+	}
+	FetchOffers(c, params)
 }
 
 func GetActivityByID(c *gin.Context) {
-	var activityWithLocation DTO.ActivityWithLocation
-	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
-		"activity.price, activity.capacity, activity.skill_level," +
-		"activity.duration, activity.activity_typ as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name"
-	GetOfferByID(c, OfferQueryParameters{
-		tableName:   "activity",
-		model:       &models.Activity{},
-		dto:         &activityWithLocation,
-		selectQuery: selectQuery,
-	})
+	offerID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Activity{},
+		Preloads: []string{"Town.Country", "Equipment"},
+		Filters:  map[string]interface{}{"id": offerID},
+	}
+	FetchOffers(c, params)
 }
 
 func GetActivitiesForHost(c *gin.Context) {
-	var activityWithLocation []DTO.ActivityWithLocation
-	selectQuery := "activity.id as offer_id, activity.title, activity.description, " +
-		"activity.price, activity.capacity, activity.skill_level," +
-		"activity.duration, activity.activity_type as type, activity.discount, " +
-		"activity.user_id, town.name as town_name, country.name as country_name"
-	GetOffersForHost(c, OfferQueryParameters{
-		tableName:   "activity",
-		model:       &models.Activity{},
-		dto:         &activityWithLocation,
-		selectQuery: selectQuery,
-	})
+	hostID := c.Param("id")
+	params := OfferQueryParameters{
+		Model:    &[]models.Activity{},
+		Preloads: []string{"Town.Country", "Equipment"},
+		Filters:  map[string]interface{}{"user_id": hostID},
+	}
+	FetchOffers(c, params)
 }
 
 func DeleteActivity(c *gin.Context) {
@@ -62,7 +48,72 @@ func DeleteActivity(c *gin.Context) {
 }
 
 func UpdateActivity(c *gin.Context) {
-	UpdateOffer(c, models.GetActivityByID)
+	activityID := c.Param("id")
+
+	var inputActivity models.Activity
+
+	if err := c.ShouldBindJSON(&inputActivity); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var existingActivity models.Activity
+	if err := models.DB.Preload("Equipment").First(&existingActivity, activityID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Activity not found"})
+		return
+	}
+
+	tx := models.DB.Begin()
+	if tx.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+
+	var town models.Town
+	if err := models.DB.Where("name = ? AND country_id = ?", inputActivity.Town.Name, inputActivity.Town.CountryID).First(&town).Error; err != nil {
+		town = inputActivity.Town
+		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			return
+		}
+	}
+
+	inputActivity.Town = town
+	inputActivity.TownID = town.ID
+
+	if err := tx.Model(&existingActivity).Updates(inputActivity).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update activity"})
+		return
+	}
+
+	if err := tx.Model(&existingActivity).Association("Equipment").Clear(); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing equipment"})
+		return
+	}
+
+	for _, equipment := range inputActivity.Equipment {
+		var existingEquipment models.Equipment
+		if err := tx.Where("name = ?", equipment.Name).First(&existingEquipment).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if err := tx.Model(&existingActivity).Association("Equipment").Append(&existingEquipment); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Activity updated successfully!", "activity": existingActivity})
 }
 
 func DiscountActivity(c *gin.Context) {
