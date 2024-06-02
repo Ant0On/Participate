@@ -59,4 +59,5 @@ type ReservationRoomWithOffer struct {
 	IsAnimalFriendly bool      `json:"is_animal_friendly"`
 	RoomID           uint      `json:"room_id"`
 	ReservationState string    `json:"reservation_state"`
+	RatingID         uint      `json:"rating_id"`
 }
