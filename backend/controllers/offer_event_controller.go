@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"backend/models"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,7 +46,39 @@ func DeleteEvent(c *gin.Context) {
 }
 
 func UpdateEvent(c *gin.Context) {
-	UpdateOffer(c, models.GetEventByID)
+	eventID := c.Param("id")
+
+	var inputEvent models.Event
+
+	if err := c.ShouldBindJSON(&inputEvent); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var existingEvent models.Event
+	if err := models.DB.First(&existingEvent, eventID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		return
+	}
+
+	var town models.Town
+	if err := models.DB.Where("name = ? AND country_id = ?", inputEvent.Town.Name, inputEvent.Town.CountryID).First(&town).Error; err != nil {
+		town = inputEvent.Town
+		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			return
+		}
+	}
+
+	inputEvent.Town = town
+	inputEvent.TownID = town.ID
+
+	if err := models.DB.Model(&existingEvent).Updates(inputEvent).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update event"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!", "event": existingEvent})
 }
 
 func DiscountEvent(c *gin.Context) {

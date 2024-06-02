@@ -120,4 +120,5 @@ func RegisterRoutes(r *gin.Engine) {
 	room.GET("/:id/get", GetRoomsForAccommodation)
 	room.GET("/:id/reservations", GetCurrentRoomReservations)
 	room.POST("/:id/facilities/add", AddRoomFacilities)
+	room.DELETE("/delete/:id", DeleteRoom)
 }

@@ -48,7 +48,72 @@ func DeleteActivity(c *gin.Context) {
 }
 
 func UpdateActivity(c *gin.Context) {
-	UpdateOffer(c, models.GetActivityByID)
+	activityID := c.Param("id")
+
+	var inputActivity models.Activity
+
+	if err := c.ShouldBindJSON(&inputActivity); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var existingActivity models.Activity
+	if err := models.DB.Preload("Equipment").First(&existingActivity, activityID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Activity not found"})
+		return
+	}
+
+	tx := models.DB.Begin()
+	if tx.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+
+	var town models.Town
+	if err := models.DB.Where("name = ? AND country_id = ?", inputActivity.Town.Name, inputActivity.Town.CountryID).First(&town).Error; err != nil {
+		town = inputActivity.Town
+		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			return
+		}
+	}
+
+	inputActivity.Town = town
+	inputActivity.TownID = town.ID
+
+	if err := tx.Model(&existingActivity).Updates(inputActivity).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update activity"})
+		return
+	}
+
+	if err := tx.Model(&existingActivity).Association("Equipment").Clear(); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing equipment"})
+		return
+	}
+
+	for _, equipment := range inputActivity.Equipment {
+		var existingEquipment models.Equipment
+		if err := tx.Where("name = ?", equipment.Name).First(&existingEquipment).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if err := tx.Model(&existingActivity).Association("Equipment").Append(&existingEquipment); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Activity updated successfully!", "activity": existingActivity})
 }
 
 func DiscountActivity(c *gin.Context) {

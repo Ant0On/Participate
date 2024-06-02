@@ -109,11 +109,11 @@ func UpdateOffer(c *gin.Context, getByID func(string) (models.OfferOperations, e
 	}
 
 	if err = offer.Update(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"offer.Update: ": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
+	c.JSON(http.StatusOK, gin.H{"message": "offer updated", "data": offer})
 }
 
 func DiscountOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {

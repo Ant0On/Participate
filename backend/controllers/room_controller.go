@@ -95,3 +95,20 @@ func GetRoomsForAccommodation(c *gin.Context) {
 		"totalRecords": totalRecords,
 	})
 }
+
+func DeleteRoom(c *gin.Context) {
+	roomID := c.Param("id")
+
+	var room models.Room
+	if err := models.DB.First(&room, roomID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Room not found"})
+		return
+	}
+
+	if err := room.Delete(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete room"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Room deleted successfully"})
+}

@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, onMounted, ref} from 'vue';
+import {computed, defineProps, onMounted, ref, watch} from 'vue';
 import {storeToRefs} from 'pinia';
 
 
@@ -19,6 +19,7 @@ const isEdit = ref(false)
 const offerFilled = ref(true)
 const isAddRoom = ref(false)
 const offerChangeRoom = ref({})
+const deletedRooms = ref([])
 const form = ref()
 
 const props = defineProps({
@@ -62,7 +63,15 @@ async function getOfferDetails() {
         'rating': data['Rating'] || 0,
         'numberOfRooms': data?.NumberOfRooms,
         'rooms': data?.Rooms?.map((room) => {
-          return {...room}
+          return {
+            area: Number(room.area),
+            capacity: Number(room.capacity),
+            description: room.description,
+            roomFacilities: room.room_facilities.map((facility) => facility.Name),
+            roomName: room.name,
+            roomNumber: Number(room.number),
+            ID: room.ID,
+          }
         }),
         'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
 
@@ -79,7 +88,9 @@ async function getOfferDetails() {
         'discount': data['Discount'],
         'type': data['Type'],
         'dateFrom': data?.DateFrom?.split('T')?.[0],
-        'dateTo': data?.DateTo?.split('T')?.[0]
+        'dateTo': data?.DateTo?.split('T')?.[0],
+        'townId': data?.TownID,
+        'townName': data?.Town?.name,
       }
     } else if (props.type === "activity") {
       return {
@@ -94,7 +105,8 @@ async function getOfferDetails() {
         'type': data['Type'],
         'duration': data['Duration'],
         'date': data?.Date?.split('T')?.[0],
-        'equipment': data?.Equipment?.map((equipment) => equipment?.Name)
+        'equipment': data?.Equipment?.map((equipment) => equipment?.Name),
+        'townId': data?.TownID
       }
     }
   }
@@ -120,21 +132,112 @@ function getOfferChange(offer) {
 async function onSave() {
   const {valid} = await form.value.validate()
   isEdit.value = !isEdit.value
-
   if (valid) {
+    if(props.type === 'event'){
+      await saveEvent()
+    }
+    if(props.type === 'activity'){
+      await saveActivity()
+    }
+    if(props.type === 'accommodation'){
+      await deletedRooms.value?.forEach((roomId) => fetchWrapper.delete(`/api/host/room/delete/${roomId}`))
+      await saveAccommodation()
+    }
     offer.value = offerChange.value
     offer.value.location = `${offerCountries.value.filter(country =>
-        country.id === offerChange.value.country)?.[0]?.name}, ${offerChange.value.town}`
+        country.id === offerChange.value.country || country.id === offerChange.value.country?.id)?.[0]?.name}, ${offerChange.value.town}`
   }
+}
+
+async function saveEvent(){
+  await fetchWrapper.put(`/api/host/event/update/${offerChange.value.offerId}`, {
+    Title: offerChange.value.title,
+    Description: offerChange.value.description,
+    Capacity: Number(offerChange.value.capacity),
+    Town: {
+      name: offerChange.value.town,
+      country_id: Number(offerChange.value?.country?.id) || Number(offerChange.value.country),
+    },
+    UserID: user.value?.ID,
+    DateFrom: new Date(offerChange.value.dateFrom).toJSON(),
+    DateTo: new Date(offerChange.value.dateTo).toJSON(),
+    Price: Number(offerChange.value.price),
+    Discount: Number(offerChange.value.discount),
+    Type: offerChange.value.type,
+  })
+}
+
+async function saveActivity(){
+
+  await fetchWrapper.put(`/api/host/activity/update/${offerChange.value.offerId}`, {
+    Title: offerChange.value.title,
+    Description: offerChange.value.description,
+    Capacity: Number(offerChange.value.capacity),
+    Town: {
+      name: offerChange.value.town,
+      country_id: Number(offerChange.value?.country?.id) || Number(offerChange.value.country),
+    },
+    UserID: user.value?.ID,
+    Date: new Date(offerChange.value.date).toJSON(),
+    Price: Number(offerChange.value.price),
+    Discount: Number(offerChange.value.discount),
+    Duration: Number(offerChange.value.duration),
+    Type: offerChange.value.type,
+    Skill: offerChange.value.skill,
+    Equipment: offerChange.value.equipment?.map((equipment)=> {return {Name: equipment}} )
+  })
+}
+
+async function saveAccommodation(){
+  await fetchWrapper.put(`/api/host/accommodation/update/${offerChange.value.offerId}`, {
+    Title: offerChange.value.title,
+    Description: offerChange.value.description,
+    Capacity: Number(offerChange.value.capacity),
+    Town: {
+      name: offerChange.value.town,
+      country_id: Number(offerChange.value?.country?.id) || Number(offerChange.value.country),
+    },
+    UserID: user.value?.ID,
+    PricePerDay: Number(offerChange.value.price),
+    NumberOfRooms: Number(offerChange.value.numberOfRooms),
+    IsAnimalFriendly: offerChange.value.isAnimalFriendly || false,
+    Discount: Number(offerChange.value.discount),
+    Type: offerChange.value.type,
+    Skill: offerChange.value.skill,
+    GeneralFacilities: offerChange.value.generalFacilities?.map((generalFacility)=> {return {Name: generalFacility}} ),
+    rooms: offerChange.value.rooms?.map((room) => {
+      return {
+        area: Number(room.area),
+        capacity: Number(room.capacity),
+        description: room.description,
+        room_facilities: room.roomFacilities.map((roomFacility) => {
+          return {
+            name: roomFacility
+          }
+        }),
+        name: room.roomName,
+        number: Number(room.roomNumber),
+        accommodation_id: offerChange.value.offerId,
+        ID: room.ID,
+      }
+    })
+  })
 }
 
 async function saveRoom(){
   const {valid} = await form.value.validate()
   if(valid){
     offerChange.value.rooms = [... offerChange.value?.rooms || [], {... offerChangeRoom.value}]
-    console.log(offerChange.value.rooms)
-    console.log(offerChangeRoom)
     isAddRoom.value = false
+    offerChange.value.numberOfRooms = offerChange.value.rooms?.length || 1
+  }
+}
+
+function deleteRoom(deletedRoom){
+  offerChange.value.rooms = offerChange.value.rooms?.filter((room) => room.roomNumber !== deletedRoom.roomNumber) || offerChange.value.rooms
+  if(deletedRoom.ID)
+  {
+    deletedRooms.value.push(deletedRoom.ID)
   }
 }
 
@@ -208,31 +311,33 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             <v-text-field v-model="offerChange.title" flat
                           label="Title"
                           density="compact"
-                          :rules="[value => !!value, value => value.length > 3]"
+                          :rules="[value => !!value || 'Title must be filled!',
+                           value => value.length > 3 || 'Title must be longer than 3!']"
             ></v-text-field>
           </v-card-title>
 
-          <v-card-subtitle class="d-flex mb-2">
+          <v-card-subtitle class="d-flex mb-2" v-if="!isEdit">
 
-          <span v-if="!isEdit" class="me-1">
+          <span class="me-1">
             {{ offer.location }}
           </span>
-            <div v-else class="d-flex justify-space-between w-100">
-              <v-select label="Coutnry"
-                        v-model="offerChange.country"
-                        :items="offerCountries"
-                        class="w-100"
-                        density="compact"
-                        item-title="name"
-                        item-value="id"
-              ></v-select>
-              <v-text-field label="Town"
-                            v-model="offerChange.town"
-                            class="w-100 ma-2"
-                            density="compact"
-                            :rules="[(value) => !!value, (value) => value.length > 3]"></v-text-field>
-            </div>
           </v-card-subtitle>
+          <div v-else class="d-flex justify-space-between w-100 px-4">
+            <v-select label="Country"
+                      v-model="offerChange.country"
+                      :items="offerCountries"
+                      class="w-100 text-black"
+                      density="compact"
+                      item-title="name"
+                      item-value="id"
+            ></v-select>
+            <v-text-field label="Town"
+                          v-model="offerChange.town"
+                          class="w-100 ma-2 text-black"
+                          density="compact"
+                          :rules="[(value) => !!value || 'Town must be filled',
+                           (value) => value.length > 3 || 'Town must be longer than 3 !']"></v-text-field>
+          </div>
           <v-card-subtitle class="mx-0 d-flex " v-if="!isEdit">
             <div class="font-weight-bold"
                  :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
@@ -247,22 +352,23 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
               }}
             </div>
           </v-card-subtitle>
-          <v-card-subtitle class="d-flex flex-space-between w-100" v-else>
+          <div class="d-flex flex-space-between w-100 px-4" v-else>
             <v-text-field v-model="offerChange.price"
                           width="40px"
                           density="compact"
                           label="Price"
                           type="number"
-                          :rules="[(value) => !!value, (value) => value > 0]"
+                          :rules="[(value) => !!value || 'Price must be filled',
+                          (value) => value > 0 || 'Price must be greater than 0!']"
             ></v-text-field>
             <v-text-field v-model="offerChange.discount"
                           density="compact"
                           class="pl-1"
                           label="Discount"
                           type="number"
-                          :rules="[(value) => value >= 0 && value < 100]"
+                          :rules="[(value) => value >= 0 && value < 100 || 'Discount must be in range 0-100!']"
             ></v-text-field>
-          </v-card-subtitle>
+          </div>
           <div class="ma-4 text-subtitle-1" v-if="!isEdit">
             <v-chip :prepend-icon="chips.discount.icon"
                     :color="chips.discount.color"
@@ -288,13 +394,18 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
               {{ chips?.[offer?.skill].text }}
             </v-chip>
           </div>
-          <v-card-subtitle class="d-flex justify-space-between w-100" v-else>
+          <div class="d-flex justify-space-between w-100 px-4" v-else>
             <v-select v-model="offerChange.type"
                       :items="(type === 'event')? eventTypes.map((eventType) => eventType.toLowerCase())
                     : (type === 'accommodation')? accommodationTypes.map((accommodationType) => accommodationType.toLowerCase())
                      : activityTypes.map((activityType) => activityType.toLowerCase())"
                       label="Type"
                       density="compact"
+                      @update:menu="() => {
+                        if(['hotel', 'hostel', 'guesthouse'].includes(offerChange.type)){
+                          offerChange.numberOfRooms = offerChange.rooms?.length || 1
+                        }
+                      }"
             ></v-select>
             <v-select v-model="offerChange.skill" v-if="type === 'activity'"
                       label="Skill"
@@ -303,7 +414,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                       :items="skillLevels.map((skillLevel) => skillLevel.toLowerCase())"
             >
             </v-select>
-          </v-card-subtitle>
+          </div>
           <v-divider></v-divider>
           <v-card-actions>
             <v-btn-toggle block rounded="lg">
@@ -327,8 +438,9 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             <div v-if="!isEdit">{{ offer.description }}</div>
             <v-textarea v-else
                         density="compact"
+                        label="Description"
                         v-model="offerChange.description"
-                        :rules="[(values) => values.length > 30]"
+                        :rules="[(values) => values.length > 30 || 'Description must be longer than 30!']"
             ></v-textarea>
           </v-card-text>
           <v-card-text v-else-if="cardPage === 'info'">
@@ -346,12 +458,10 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                         density="compact"
                         label="Capacity"
                         type="number"
-                        :rules="[(value) => !!value, (value) => value > 0]"
+                        :rules="[(value) => !!value || 'Capacity must be filled!',
+                         (value) => value > 0 || 'Capacity must be greater than 0!']"
                     ></v-text-field>
                   </v-list-item>
-                </v-col>
-                <v-col>
-
                 </v-col>
               </v-row>
               <v-row cols="2" v-if="type === 'accommodation'">
@@ -360,7 +470,28 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                       key="number_of_rooms"
                       title="Number of rooms"
                       :subtitle="offer?.numberOfRooms || 1"
+                      v-if="!isEdit"
                   ></v-list-item>
+                  <v-list-item
+                      key="number_of_rooms"
+                      title="Number of rooms"
+                      :subtitle="offerChange?.numberOfRooms || 1"
+                      v-else-if="isEdit && ['hotel', 'hostel', 'guesthouse'].includes(offerChange.type)"
+                  ></v-list-item>
+                  <v-list-item
+                      key="number_of_rooms"
+                      title="Number of rooms"
+                      v-else
+                  >
+                    <v-text-field
+                        v-model="offerChange.numberOfRooms"
+                        density="compact"
+                        label="Number of rooms"
+                        type="number"
+                        :rules="[(value) => !!value || 'Number of rooms must be filled!',
+                        (value) => value > 0 || 'Number of rooms must be greater than 0!']"
+                    ></v-text-field>
+                  </v-list-item>
                 </v-col>
               </v-row>
               <v-row cols="2" v-if="type === 'event'">
@@ -400,7 +531,6 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                   :rules="[
                                   value => !!value || 'Ending date is required',
                                   value => !offerChange.dateFrom || value >= offerChange.dateFrom || 'Date must be grater than starting date',
-                                  value => new Date(value) > new Date()
                                ]"
                     >
                     </v-text-field>
@@ -422,7 +552,6 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                   denisty="compact"
                                   :rules="[
                                   value => !!value || 'Ending date is required',
-                                  value => new Date(value) > new Date()
                                ]"
                     >
                     </v-text-field>
@@ -432,11 +561,15 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                   <v-list-item
                       key="duration"
                       title="Duration"
-                      :subtitle="offer?.duration"
+                      :subtitle="`${offer?.duration} ${(offer?.duration === 1)? 'Hour': 'Hours'} `"
                       v-if="!isEdit"
                   ></v-list-item>
                   <v-list-item v-else>
-                    <v-text-field type="time" v-model="offerChange.duration"></v-text-field>
+                    <v-text-field type="number" v-model="offerChange.duration"
+                                  label="Duration"
+                                  hint="Time in hours"
+                                  persistent-hint
+                                  ></v-text-field>
                   </v-list-item>
                 </v-col>
               </v-row>
@@ -486,29 +619,26 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
             </v-list>
           </v-card-text>
 
-          <v-card-text v-else-if="cardPage === 'accommodation'" class="h-100" style="overflow-y: scroll">
+          <v-card-text v-else-if="cardPage === 'accommodation'" style="overflow-y: scroll; height: 295px;">
             <v-card-title>
               Rooms
             </v-card-title>
-            <v-list style="overflow: hidden" v-if="!isEdit">
+            <v-list style="overflow-y: scroll" v-if="!isEdit">
               <v-list-item v-for="room in offer.rooms" :key="room.roomNumber">
                 <RoomDetail :room="room"/>
               </v-list-item>
-              <v-list-item v-if="isEdit">
-                <v-card class="border-s" flat color="grey-lighten-5">
-                  <v-card-title>
-                    Add a room
-                  </v-card-title>
-                  <v-card-actions class="d-flex align-center justify-center">
-                    <v-btn text="Add a room" variant="outlined" @click="console.log('adding a room')">
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-list-item>
             </v-list>
             <v-list style="overflow-y: scroll; " v-if="isEdit">
-              <v-list-item v-for="room in offerChange.rooms" :key="room.roomNumber" append-icon="mdi-close">
+              <v-list-item v-for="room in offerChange.rooms" :key="room.roomNumber">
                 <RoomDetail :room="room"/>
+                <template v-slot:append>
+                  <v-btn
+                      color="grey-lighten-1"
+                      icon="mdi-close"
+                      variant="text"
+                      @click="deleteRoom(room)"
+                  ></v-btn>
+                </template>
               </v-list-item>
               <v-list-item>
                 <v-card class="border-s" flat color="grey-lighten-5">
@@ -539,14 +669,17 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                     type="number"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value > 0,
-                                    value => !offerChange.rooms || !offerChange.rooms?.some((room) => room.roomNumber === value)]"
+                                    :rules="[value => !!value || 'Room number must be filled!',
+                                     value => value > 0 || 'Room number must be greater than 0',
+                                    value => !offerChange.rooms || !offerChange.rooms?.some((room) => room.roomNumber === value) || 'Room number must be unique!'
+                                    ]"
                       ></v-text-field>
                       <v-text-field v-model="offerChangeRoom.roomName"
                                     label="Room name"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value?.length > 3]"
+                                    :rules="[value => !!value || 'Room name must be filled!',
+                                     value => value?.length > 3 || 'Room name must be greater than 3!']"
                       ></v-text-field>
                     </v-card-title>
                     <v-card-subtitle>
@@ -555,13 +688,17 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                                     type="number"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value > 0]"></v-text-field>
+                                    :rules="[value => !!value || 'Room area must be filled!',
+                                     value => value > 0 || 'Room area must be greater than 0!'
+                                     ]"></v-text-field>
                       <v-text-field v-model="offerChangeRoom.capacity"
                                     label="Room capacity"
                                     type="number"
                                     flat
                                     denisty="compact"
-                                    :rules="[value => !!value, value => value > 0]"
+                                    :rules="[value => !!value || 'Room capacity must be filled!',
+                                     value => value > 0 || 'Room capacity must be greater than 0!'
+                                     ]"
                       ></v-text-field>
                     </v-card-subtitle>
                     <v-card-text>
@@ -569,7 +706,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                           density="compact"
                           label="Description"
                           v-model="offerChangeRoom.description"
-                          :rules="[(values) => values?.length > 10]"
+                          :rules="[(values) => values?.length > 10 || 'Description must be longer than 10!']"
                       ></v-textarea>
                       <div class="text-subtitle-1 my-1">Room facilities</div>
                       <v-divider></v-divider>

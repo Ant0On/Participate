@@ -89,7 +89,7 @@ async function makeReservation() {
   })
 }
 
-const chips = ref(chipsMapper(offer.value?.discount))
+const chips = computed( () => chipsMapper(offer.value?.discount))
 const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
 
 const image = computed(() => {
@@ -224,7 +224,6 @@ async function doesChatExist() {
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
-  console.log(offer.value)
 });
 
 </script>
