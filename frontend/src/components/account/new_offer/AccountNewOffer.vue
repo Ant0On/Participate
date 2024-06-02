@@ -481,12 +481,12 @@ onMounted(async () => {
       </div>
     </Transition>
     <Transition name="bounce">
-      <div v-if="isOfferCountryFilled" class="new_offer_image">
+      <div v-if="isOfferCountryFilled" class="d-flex flex-column align-center justify-center">
         <div class="upload_image">
           <div v-for="(image, index) in newOffer.images" :key="index" class="image_preview">
             <img :src="image" class="preview_image" alt="offerImage"/>
           </div>
-          <div id="image_input">
+          <div id="image_input" class="d-flex align-center justify-center">
             <label for="image_upload">Add photos</label>
             <input id="image_upload" type="file" accept="image/jpeg, image/png, image/jpg" multiple
                    @change="uploadImage"/>
@@ -542,11 +542,6 @@ onMounted(async () => {
 div.submit_container {
   display: flex;
   align-items: center;
-  flex-direction: column;
-}
-
-div.new_offer_image {
-  display: flex;
   flex-direction: column;
 }
 
