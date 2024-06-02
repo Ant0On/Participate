@@ -288,7 +288,7 @@ onMounted(async () => {
                   v-if="type === 'accommodation' || type==='activity' "
               ></v-rating>
               <span class="text-grey me-1" v-if="type === 'accommodation' || type==='activity' ">
-              {{ `${offer.rating} (${offer.ratingCount})` }}
+              {{ `${formatDecimalPlaces(offer?.rating || 0)} (${offer.ratingCount})` }}
             </span>
             </v-card-subtitle>
             <v-card-subtitle class="mx-0 d-flex ">

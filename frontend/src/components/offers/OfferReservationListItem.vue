@@ -108,7 +108,7 @@ const cardPage = ref((props.custom)? 'custom' : 'info');
       </div>
       <slot v-if="cardPage === 'custom'" name="template">
       </slot>
-      <v-card v-if="cardPage === 'info'" height="100" elevation="0">
+      <v-card v-if="cardPage === 'info'" height="150" elevation="0">
         <v-container cols="2">
           <v-row class="font-weight-bold">
             <v-col>
@@ -116,13 +116,6 @@ const cardPage = ref((props.custom)? 'custom' : 'info');
               <span class="me-1">Capacity</span>
             </v-col>
             <v-col><span class="me-1">{{ offerItem.capacity }}</span></v-col>
-          </v-row>
-          <v-row class="font-weight-bold" v-if="type === 'activity'">
-            <v-col>
-              <v-icon icon="mdi-clock-outline" size="small"></v-icon>
-              <span class="me-1">Duration</span>
-            </v-col>
-            <v-col><span class="me-1">{{ offerItem.duration }}</span></v-col>
           </v-row>
           <v-row class="font-weight-bold" v-if="type !== 'activity' && type !== 'event'">
             <v-col>
