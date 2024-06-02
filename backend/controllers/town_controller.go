@@ -16,8 +16,7 @@ func AddTown(c *gin.Context) {
 		return
 	}
 
-	err := town.Save()
-	if err != nil {
+	if err := town.Save(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"town.Save error": err.Error()})
 		return
 	}

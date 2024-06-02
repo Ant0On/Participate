@@ -22,11 +22,7 @@ func GenerateToken(id uint, email, role string) (string, error) {
 	claims["authorized"] = true
 	claims["email"] = email
 	claims["user_id"] = id
-	if email == "admin@participate.com" {
-		claims["role"] = "admin"
-	} else {
-		claims["role"] = role
-	}
+	claims["role"] = role
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(tokenLifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 

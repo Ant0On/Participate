@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"backend/models"
 	"backend/utils"
@@ -104,6 +105,21 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 		return
 	}
 
+	page := c.DefaultQuery("page", "1")
+	pageSize := c.DefaultQuery("page_size", "10")
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt <= 0 {
+		pageInt = 1
+	}
+
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil || pageSizeInt <= 0 {
+		pageSizeInt = 10
+	}
+
+	offset := (pageInt - 1) * pageSizeInt
+
 	var result *gorm.DB
 
 	query := models.DB.Model(parameters.model)
@@ -125,10 +141,11 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 	}
 
 	result = query.
-		Debug().
 		Joins(joinCondition).
 		Where(parameters.condition(userID)).
 		Select(parameters.selectQuery).
+		Offset(offset).
+		Limit(pageSizeInt).
 		Find(parameters.dto)
 
 	if err := result.Error; err != nil {
@@ -141,5 +158,10 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "reservations fetched successfully", "data": parameters.dto})
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "reservations fetched successfully",
+		"data":      parameters.dto,
+		"page":      pageInt,
+		"page_size": pageSizeInt,
+	})
 }

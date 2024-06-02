@@ -25,7 +25,8 @@ function mapAccommodation(responseData) {
       'discount': data['Discount'],
       'type': data['Type'],
       'animal_friendly': data['IsAnimalFriendly'],
-      'rating': data['Rating'] || 0,
+      'rating': data['RatingAvg'] || 0,
+      'ratingCount': data['RatingCount'] || 0,
       'numberOfRooms': data?.NumberOfRooms,
       'rooms': data?.Rooms?.map((room) => {return {...room}}),
       'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)

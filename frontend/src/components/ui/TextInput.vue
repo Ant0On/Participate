@@ -39,6 +39,7 @@ const rules = ref({
       clearable
       :placeholder="placeholder"
       class="w-100"
+      counter
   >
 
   </v-text-field>

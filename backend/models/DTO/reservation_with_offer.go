@@ -51,7 +51,7 @@ type ReservationEventWithOffer struct {
 
 type ReservationRoomWithOffer struct {
 	ReservationID    uint      `json:"reservation_id"`
-	Title            string    `json:"title"`
+	Name             string    `json:"name"`
 	PricePerDay      float64   `json:"price_per_day"`
 	Capacity         int       `json:"capacity"`
 	DateFrom         time.Time `json:"date_from"`

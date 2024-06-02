@@ -4,29 +4,9 @@ import (
 	"net/http"
 
 	"backend/models"
-	"backend/utils/token"
 
 	"github.com/gin-gonic/gin"
 )
-
-func CurrentUser(c *gin.Context) {
-	userEmail, err := token.ExtractTokenEmail(c)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"token.ExtractTokenEmail error": err.Error()})
-		return
-	}
-
-	u, err := models.GetUserByEmail(userEmail)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.GetUserByEmail error": err.Error()})
-		return
-	}
-
-	u.Password = ""
-
-	c.JSON(http.StatusOK, gin.H{"message": "success", "user": u})
-}
 
 type registerInput struct {
 	FirstName            string `form:"first_name" binding:"required,min=2,max=30"`

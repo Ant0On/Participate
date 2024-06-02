@@ -26,7 +26,9 @@ function mapActivities(responseData) {
       'type': data['Type'],
       'duration': data['Duration'],
       'date': data?.Date?.split('T')?.[0],
-      'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
+      'equipment': data?.Equipment?.map((equipment)=> equipment?.Name),
+      'rating': data['RatingAvg'] || 0,
+      'ratingCount': data['RatingCount'] || 0,
     };
   });
 }

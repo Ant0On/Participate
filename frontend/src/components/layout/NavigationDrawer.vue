@@ -63,8 +63,8 @@ const userName = computed(() => {
           <v-list-item prepend-icon="mdi-account" title="My Account" value="account" @click=""></v-list-item>
         </router-link>
         <div v-if="user.Role === 'customer'">
-          <router-link to="/account/history">
-            <v-list-item prepend-icon="mdi-account-box" title="History" value="history"></v-list-item>
+          <router-link to="/account/reservations_history">
+            <v-list-item prepend-icon="mdi-account-box" title="Reservations history" value="reservations_history"></v-list-item>
           </router-link>
           <router-link to="/account/become_host">
             <v-list-item prepend-icon="mdi-account-plus" title="Become a host" value="become_host"

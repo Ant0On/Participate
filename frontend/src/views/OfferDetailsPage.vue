@@ -70,10 +70,18 @@ async function makeReservation() {
   }else if(props.type === "accommodation"){
     reservationBody.date_from = new Date(reservation.value.dateFrom).toISOString()
     reservationBody.date_to = new Date(reservation.value.dateTo).toISOString()
-    reservationBody.accommodation_id = Number(props.id)
+    if(['hotel', 'hostel', 'guesthouse'].includes(offer.value.type))
+    {
+      reservationBody.room_id = Number(reservation.value.room)
+
+    }else{
+      reservationBody.accommodation_id = Number(props.id)
+    }
   }
 
-  fetchWrapper.post(`/api/reservation/${props.type}/add`, reservationBody).then((resp) => {
+  fetchWrapper.post(`/api/reservation/${(props.type === 'accommodation'
+      && ['hotel', 'hostel', 'guesthouse'].includes(offer.value.type)? 'room': props.type)}/add`,
+      reservationBody).then((resp) => {
     router.push('/');
     window.open(paymentType.value[chosenPayment.value].url, '_blank');
   }).catch((error) => {
@@ -149,9 +157,10 @@ async function getOfferDetails() {
         'discount': data['Discount'],
         'type': data['Type'],
         'animal_friendly': data['IsAnimalFriendly'],
-        'rating': data['Rating'] || 0,
+        'rating': data['RatingAvg'] || 0,
+        'ratingCount': data['RatingCount'] || 0,
         'numberOfRooms': data?.NumberOfRooms,
-        'rooms': data?.Rooms?.map((room) => {
+        'rooms':data?.Rooms?.map((room) => {
           return {
             area: Number(room.area),
             capacity: Number(room.capacity),
@@ -192,7 +201,9 @@ async function getOfferDetails() {
         'type': data['Type'],
         'duration': data['Duration'],
         'date': data?.Date?.split('T')?.[0],
-        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
+        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name),
+        'rating': data['RatingAvg'] || 0,
+        'ratingCount': data['RatingCount'] || 0,
       }
     }
   }
@@ -213,7 +224,6 @@ async function doesChatExist() {
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
-  console.log(offer.value)
 });
 
 </script>
@@ -275,10 +285,10 @@ onMounted(async () => {
                   half-increments
                   readonly
                   class="me-1"
-                  v-if="type === 'accommodation' "
+                  v-if="type === 'accommodation' || type==='activity' "
               ></v-rating>
-              <span class="text-grey me-1" v-if="type === 'accommodation' ">
-              {{ offer.rating }}
+              <span class="text-grey me-1" v-if="type === 'accommodation' || type==='activity' ">
+              {{ `${offer.rating} (${offer.ratingCount})` }}
             </span>
             </v-card-subtitle>
             <v-card-subtitle class="mx-0 d-flex ">
@@ -562,7 +572,7 @@ onMounted(async () => {
                     persistent-hint
                     :items="offer.rooms"
                     item-title="roomName"
-                    item-value="roomNumber"
+                    item-value="ID"
                     v-model="reservation.room"
                     v-if="['hotel', 'hostel', 'guesthouse'].includes(offer.type)"
                     @click:prepend="() => openRoomDialog = true"

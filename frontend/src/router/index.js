@@ -12,7 +12,7 @@ import Activities from "@/views/ActivitiesPage.vue";
 import Offer from "@/views/OfferDetailsPage.vue";
 import OfferEdit from '@/views/OfferEditPage.vue';
 import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
-import AccountHistory from "@/components/account/history/AccountHistory.vue";
+import ReservationsHistory from "@/components/account/reservations_history/ReservationsHistory.vue";
 import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
 import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
 import CurrentReservations from "@/components/account/current_reservations/CurrentReservations.vue";
@@ -62,9 +62,9 @@ const routes = [
         component: AccountBecomeHost
     },
     {
-        path: '/account/history',
-        name: "History",
-        component: AccountHistory
+        path: '/account/reservations_history',
+        name: "Reservations History",
+        component: ReservationsHistory
     },
     {
         path: '/account/my_offers',
@@ -92,7 +92,7 @@ export const router = createRouter({
 
 router.beforeEach(async (to) => {
     const hostPages = ['/account/my_offers', '/account/new_offer', '/account/current_reservations'];
-    const customerPages = ['/account/become_host', '/account/history'];
+    const customerPages = ['/account/become_host', '/account/reservations_history'];
     const hostRequired = hostPages.includes(to.path);
     const customerRequired = customerPages.includes(to.path);
     const userStore = useAuthStore();
@@ -100,9 +100,10 @@ router.beforeEach(async (to) => {
     const {user: user} = storeToRefs(userStore)
 
     if (hostRequired && user.value?.Role !== "host" || customerRequired && user.value?.Role !== "customer") {
-        user.returnUrl = to.fullPath;
+        router.push('/')
+        user.value.returnUrl = to.fullPath;
         navStore.changePage('/')
-        return '/';
+        return
     }
     navStore.changePage(to)
 });

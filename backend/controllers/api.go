@@ -68,6 +68,7 @@ func RegisterRoutes(r *gin.Engine) {
 	customer.PUT(":id/change/password", ChangePassword)
 	customer.POST("/offer/accommodation/:id/rate", GradeAccommodationReservation)
 	customer.POST("/offer/activity/:id/rate", GradeActivityReservation)
+	customer.POST("/offer/room/:id/rate", GradeRoomReservation)
 	customer.POST(":id/promote", PromoteToHost)
 
 	country := r.Group("/api/country")
@@ -112,10 +113,6 @@ func RegisterRoutes(r *gin.Engine) {
 	reservationRoom.GET("/:state", GetRoomReservationsByState)
 	reservationRoom.POST("/add", middlewares.JwtAuthMiddleware("customer"), AddRoomReservation)
 	reservationRoom.POST("/:id/:state", middlewares.JwtAuthMiddleware("host"), ChangeRoomReservationState)
-
-	protected := r.Group("/api/admin")
-	protected.Use(middlewares.JwtAuthMiddleware("admin"))
-	protected.GET("/user", CurrentUser)
 
 	room := r.Group("/api/host/room")
 	room.Use(middlewares.JwtAuthMiddleware("host"))

@@ -69,7 +69,7 @@ function mapRooms(responseData) {
   return responseData.map((data) => {
     return {
       'offerId': data["room_id"],
-      'title': data["title"],
+      'title': data["name"],
       'location': data["country_name"] + ', ' + data["town_name"],
       'state': data['reservation_state'],
       'capacity': data["capacity"],
@@ -77,8 +77,7 @@ function mapRooms(responseData) {
       'dateTo': data['dateTo'],
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
-      'animal_friendly': data['is_animal_friendly'],
-
+      'ratingId': data['rating_id']
     };
   });
 }
@@ -143,7 +142,7 @@ async function rejectReservation(reservationId, type, reservations){
         <v-row class="w-100">
           <template v-for="event in allEvents.value" :key="event.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem v-if="event.state === 'pending' "  type="event" :offerItem="event" custom>
+              <OfferReservationListItem v-if="event.state === 'pending'" type="event" :offerItem="event" custom>
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="green-lighten-2" rounded
@@ -155,7 +154,7 @@ async function rejectReservation(reservationId, type, reservations){
                   </v-card>
                 </template>
               </OfferReservationListItem>
-              <OfferReservationListItem v-else  type="event" :offerItem="event"/>
+              <OfferReservationListItem v-else type="event" :offerItem="event"/>
             </v-col>
           </template>
         </v-row>
@@ -173,7 +172,7 @@ async function rejectReservation(reservationId, type, reservations){
         <v-row class="w-100">
           <template v-for="accommodation in allAccommodations.value" :key="accommodation.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem type="accommodation" :offerItem="accommodation" custom>
+              <OfferReservationListItem v-if="accommodation.state === 'pending'" type="accommodation" :offerItem="accommodation" custom>
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="green-lighten-2" rounded
@@ -185,6 +184,7 @@ async function rejectReservation(reservationId, type, reservations){
                   </v-card>
                 </template>
               </OfferReservationListItem>
+              <OfferReservationListItem v-else type="accommodation" :offerItem="accommodation"/>
             </v-col>
           </template>
         </v-row>
@@ -202,7 +202,7 @@ async function rejectReservation(reservationId, type, reservations){
         <v-row class="w-100">
           <template v-for="activity in allActivities.value" :key="activity.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem type="activity" :offerItem="activity" custom>
+              <OfferReservationListItem v-if="activity.state === 'pending'" type="activity" :offerItem="activity" custom>
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="green-lighten-2" rounded
@@ -214,6 +214,7 @@ async function rejectReservation(reservationId, type, reservations){
                   </v-card>
                 </template>
               </OfferReservationListItem>
+              <OfferReservationListItem v-else type="activity" :offerItem="activity"/>
             </v-col>
           </template>
         </v-row>
@@ -231,7 +232,7 @@ async function rejectReservation(reservationId, type, reservations){
         <v-row class="w-100">
           <template v-for="room in allRooms.value" :key="room.reservationId">
             <v-col cols="4">
-              <OfferReservationListItem type="room" :offerItem="room" custom>
+              <OfferReservationListItem v-if="room.state === 'pending'" type="room" :offerItem="room" custom>
                 <template v-slot:template>
                   <v-card elevation="0" class="d-flex justify-space-between align-center" height="100">
                     <v-btn elevation="0" color="green-lighten-2" rounded
@@ -243,6 +244,7 @@ async function rejectReservation(reservationId, type, reservations){
                   </v-card>
                 </template>
               </OfferReservationListItem>
+              <OfferReservationListItem v-else type="room" :offerItem="room"/>
             </v-col>
           </template>
         </v-row>

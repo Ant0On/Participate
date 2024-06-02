@@ -53,8 +53,8 @@ const schema = Yup.object().shape({
 
 <template>
   <div class="signup_section">
+    <v-alert v-if="errors.apiError" text="Email is already taken!" tile="Email error" color="error"></v-alert>
     <p>Create new account</p>
-    <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
     <form class="signup_form" @submit.prevent>
       <TextInput labelText="Your first name" placeholder="Type your first name" :isRequired="true"
                  v-model="signUpData.FirstName"/>

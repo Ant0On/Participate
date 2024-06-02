@@ -12,6 +12,7 @@ type ReservationRoom struct {
 	Reservation
 	DateFrom time.Time `gorm:"not null" json:"date_from" binding:"required"`
 	DateTo   time.Time `gorm:"not null" json:"date_to" binding:"required,gtfield=DateFrom"`
+	RatingID uint      `json:"rating_id"`
 	RoomID   uint      `gorm:"not null" json:"room_id" binding:"required"`
 }
 
