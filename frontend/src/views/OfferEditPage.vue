@@ -21,6 +21,7 @@ const isAddRoom = ref(false)
 const offerChangeRoom = ref({})
 const deletedRooms = ref([])
 const form = ref()
+const validationError = ref(false)
 
 const props = defineProps({
   type: String,
@@ -131,8 +132,13 @@ function getOfferChange(offer) {
 
 async function onSave() {
   const {valid} = await form.value.validate()
-  isEdit.value = !isEdit.value
+  if (!valid) {
+    validationError.value = true
+    return
+  }
   if (valid) {
+    isEdit.value = !isEdit.value
+    validationError.value = false
     if(props.type === 'event'){
       await saveEvent()
     }
@@ -271,6 +277,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
   <v-progress-circular v-if="!offer"
                        color="primary"
                        indeterminate
+                       class="d-flex align-center justify-center"
   ></v-progress-circular>
   <v-sheet v-else class="d-flex flex-column align-center justify-center">
     <v-breadcrumbs class="align-self-start">
@@ -304,6 +311,7 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
           ></v-img>
         </v-card>
         <v-card class="w-50 d-flex flex-column">
+          <v-alert v-model="validationError" text="Incorrect data!" title="Error!" color="error" class="w-100" closable/>
           <v-card-title v-if="!isEdit" class="font-weight-black text-center">
             {{ offer.title }}
           </v-card-title>
