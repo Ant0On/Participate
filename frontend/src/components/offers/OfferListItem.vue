@@ -13,6 +13,8 @@ const props = defineProps({
 });
 const chips = ref(chipsMapper(props.offerItem?.discount));
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(props.offerItem.price, props.offerItem?.discount));
+const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
+
 const image = computed(() => {
   const images = []
   let number = 0
@@ -73,7 +75,7 @@ const cardPage = ref((props.custom)? 'custom' : 'main');
 
       <v-row align="center" class="mx-0" v-if="type === 'accommodation' || type==='activity'">
         <v-rating :model-value="offerItem.rating" color="amber" density="compact" size="small" half-increments readonly></v-rating>
-        <div class="text-grey ms-4">{{ `${offerItem.rating} (${offerItem.ratingCount})` }}</div>
+        <div class="text-grey ms-4">{{ `${formatDecimalPlaces(offerItem.rating || 0)} (${offerItem.ratingCount})` }}</div>
       </v-row>
 
       <div class="my-4 text-subtitle-1">

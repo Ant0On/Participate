@@ -23,8 +23,8 @@ function mapAccommodation(responseData) {
       'state': data['reservation_state'],
       'type': data['type'],
       'capacity': data["capacity"],
-      'dateFrom': data['date_from'],
-      'dateTo': data['dateTo'],
+      'dateFrom': data['date_from']?.split('T')?.[0],
+      'dateTo': data['date_to']?.split('T')?.[0],
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
       'animal_friendly': data['is_animal_friendly'],
@@ -38,7 +38,7 @@ function mapActivities(responseData) {
       'offerId': data["activity_id"],
       'title': data["title"],
       'location': data["country_name"] + ', ' + data["town_name"],
-      'date': data["date"],
+      'date': data["date"]?.split('T')?.[0],
       'capacity': data["capacity"],
       'price': data['price'],
       'state': data['reservation_state'],
@@ -60,7 +60,7 @@ function mapEvents(responseData) {
       'capacity': data["capacity"],
       'price': data['price'],
       'reservationId': data['reservation_id'],
-      'date': data['date'],
+      'date': data['date']?.split('T')?.[0],
       'type': data['type']
     };
   });
@@ -73,8 +73,8 @@ function mapRooms(responseData) {
       'location': data["country_name"] + ', ' + data["town_name"],
       'state': data['reservation_state'],
       'capacity': data["capacity"],
-      'dateFrom': data['date_from'],
-      'dateTo': data['dateTo'],
+      'dateFrom': data['date_from']?.split('T')?.[0],
+      'dateTo': data['date_to']?.split('T')?.[0],
       'price': data['price_per_day'],
       'reservationId': data['reservation_id'],
       'ratingId': data['rating_id']

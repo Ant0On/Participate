@@ -32,10 +32,12 @@ function mapAccommodation(responseData) {
       'discount': data['Discount'],
       'type': data['Type'],
       'animal_friendly': data['IsAnimalFriendly'],
-      'rating': data['Rating'] || 0,
+      'rating': data['RatingAvg'] || 0,
+      'ratingCount': data['RatingCount'] || 0,
       'numberOfRooms': data?.NumberOfRooms,
       'rooms': data?.Rooms?.map((room) => {return {...room}}),
-      'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
+      'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name),
+
 
     };
   });
@@ -55,7 +57,9 @@ function mapActivities(responseData) {
       'type': data['Type'],
       'duration': data['Duration'],
       'date': data?.Date?.split('T')?.[0],
-      'equipment': data?.Equipment?.map((equipment)=> equipment?.Name)
+      'equipment': data?.Equipment?.map((equipment)=> equipment?.Name),
+      'rating': data['RatingAvg'] || 0,
+      'ratingCount': data['RatingCount'] || 0,
     };
   });
 }

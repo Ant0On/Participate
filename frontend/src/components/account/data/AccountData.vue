@@ -96,7 +96,7 @@ async function onSubmit() {
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
     errors.apiError = null
-
+    await userStore.saveToLocalStorage()
     if (isImageUploaded.value) {
       const imageFile = dataURLtoFile(uploadedImage.value, 'image.jpeg');
       uploadedImage.value = null
@@ -174,14 +174,75 @@ function dataURLtoFile(dataURL, fileName) {
       <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
       <div class="user_fields">
         <div class="customer_fields">
-          <TextInput label-text="Name" :isActive="isSubmitMode" v-model="customerData.Name"/>
-          <TextInput label-text="Last Name" :isActive="isSubmitMode" v-model="customerData.LastName" />
-          <TextInput label-text="Email" :isActive="isSubmitMode" v-model="customerData.Email"/>
+          <v-text-field label="Name"
+                        :disabled="!isSubmitMode"
+                        :rules="[
+                            (value) => !!value || 'Name is required!',
+                            (value) => value.length >= 2 && value.length <= 30 || 'Name must be between 2-30 long!'
+                        ]"
+                        v-model="customerData.Name"
+                        clearable
+                        class="w-100"
+                        counter
+          ></v-text-field>
+          <v-text-field label="Last Name"
+                        :disabled="!isSubmitMode"
+                        :rules="[
+                            (value) => !!value || 'Last name is required!',
+                            (value) => value.length <= 100 || 'Name must be shorten than 100!'
+                        ]"
+                        v-model="customerData.LastName"
+                        clearable
+                        class="w-100"
+                        counter
+          ></v-text-field>
+          <v-text-field label="Email"
+                        :disabled="!isSubmitMode"
+                        :rules="[
+                            (value) => !!value || 'Email is required!',
+                            (value) => /.+@.+/.test(value) || 'Invalid Email address'
+                        ]"
+                        v-model="customerData.Email"
+                        clearable
+                        class="w-100"
+                        counter
+          ></v-text-field>
         </div>
         <div class="host_fields" v-if="user.Role === 'host'">
-          <TextInput label-text="Description" :is-active="isSubmitMode" v-model="hostData.Description" />
-          <TextInput label-text="Phone number" :is-active="isSubmitMode" v-model="hostData.PhoneNumber"/>
-          <TextInput label-text="Bank account" :is-active="isSubmitMode" v-model="hostData.BankAccount" />
+          <v-text-field label="Description"
+                        :disabled="!isSubmitMode"
+                        :rules="[
+                            (value) => !!value || 'Description is required!',
+                        ]"
+                        v-model="hostData.Description"
+                        clearable
+                        class="w-100"
+                        counter
+          ></v-text-field>
+          <v-text-field label="Phone number"
+                        :disabled="!isSubmitMode"
+                        :rules="[
+                            (value) => !!value || 'Phone number is required!',
+                            (value) => value.length >= 9 && value.length <= 12 || 'Phone number has to be between 9 to 12 digits!',
+                            (value) =>  /^\d+$/.test(value) || 'Phone number can contain only numbers!'
+                        ]"
+                        v-model="hostData.PhoneNumber"
+                        clearable
+                        class="w-100"
+                        counter
+          ></v-text-field>
+          <v-text-field label="Bank account"
+                        :disabled="!isSubmitMode"
+                        :rules="[
+                            (value) => !!value || 'Bank account is required!',
+                            (value) => value.length >= 23 && value.length <= 31 || 'Bank account has to be between 23 to 31 digits!',
+                            (value) =>  /^\d+$/.test(value) || 'Bank account can contain only numbers!'
+                        ]"
+                        v-model="hostData.BankAccount"
+                        clearable
+                        class="w-100"
+                        counter
+          ></v-text-field>
         </div>
       </div>
       <div id="upload_image" class="customer_fields">

@@ -43,6 +43,9 @@ export const useAuthStore = defineStore({
                 alert('Registration successful! You will now be redirected to the homepage.');
                 router.push('/')
             }
+        },
+        async saveToLocalStorage(){
+            localStorage.setItem('user', JSON.stringify(this.user));
         }
     }
 });
