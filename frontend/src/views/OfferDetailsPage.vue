@@ -446,11 +446,6 @@ onMounted(async () => {
                   </v-card>
                 </v-col>
               </v-row>
-              <v-row cols="1">
-                <v-col>
-
-                </v-col>
-              </v-row>
 
             </v-card-text>
 
