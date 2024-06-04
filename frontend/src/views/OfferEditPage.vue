@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, onMounted, ref, watch} from 'vue';
+import {computed, defineProps, onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 

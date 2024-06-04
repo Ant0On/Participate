@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, onMounted, ref, toRef} from 'vue';
+import {computed, defineProps, onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
