@@ -101,7 +101,6 @@ router.beforeEach(async (to) => {
 
     if (hostRequired && user.value?.Role !== "host" || customerRequired && user.value?.Role !== "customer") {
         router.push('/')
-        user.value.returnUrl = to.fullPath;
         navStore.changePage('/')
         return
     }

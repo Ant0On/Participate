@@ -15,14 +15,31 @@ const errors = reactive({
   oldPassword: ""
 })
 
-const isUserImage = computed(() => {
-  try {
-    require(`@/../images/customers/${user.value?.ID}.jpeg`)
-    return true
-  } catch {
-    return false
+const userImageSource = computed(() => {
+  if (user.value.Role === 'host') {
+    return require(`@/../images/hosts/${user.value.ID}.jpeg`);
+  } else {
+    return require(`@/../images/customers/${user.value.ID}.jpeg`);
   }
-})
+});
+
+const isUserImage = computed(() => {
+  if (user.value.Role === 'host') {
+    try {
+      require(`@/../images/hosts/${user.value.ID}.jpeg`);
+      return true;
+    } catch {
+      return false;
+    }
+  } else {
+    try {
+      require(`@/../images/customers/${user.value.ID}.jpeg`);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+});
 
 const isImageUploaded = ref(false)
 const uploadedImage = ref({})
@@ -105,6 +122,7 @@ async function onSubmit() {
           image: imageFile
         }, "multipart/form-data")
     }
+    window.location.reload();
   }).catch((customerErrors) => {
     errors.apiError = formatErrors(customerErrors.errors);
   })
@@ -249,8 +267,7 @@ function dataURLtoFile(dataURL, fileName) {
         <div class="image_container">
           <p class="image_input">User image</p>
           <img v-if="isImageUploaded" :src="uploadedImage" class="preview_image" alt="offerImage"/>
-          <img v-else-if="isUserImage" :src="require(`@/../images/customers/${user.ID}.jpeg`)" class="preview_image"
-               alt="offerImage"/>
+          <img v-else-if="isUserImage" :src="userImageSource" class="preview_image" alt="offerImage"/>
           <img v-else :src="require(`@/../images/customers/default_image.png`)" class="preview_image" alt="offerImage"/>
         </div>
         <div id="image_input" v-if="isSubmitMode">
