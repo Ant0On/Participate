@@ -157,14 +157,6 @@ func UpdateAccommodation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Accommodation updated successfully!", "accommodation": existingAccommodation})
 }
 
-func DiscountAccommodation(c *gin.Context) {
-	DiscountOffer(c, models.GetAccommodationByID)
-}
-
-func ChangeAccommodationPrice(c *gin.Context) {
-	ChangeOfferPrice(c, models.GetAccommodationByID)
-}
-
 func AddGeneralFacilities(c *gin.Context) {
 	id := c.Param("id")
 	var req utils.FacilitiesRequest
@@ -197,40 +189,5 @@ func AddGeneralFacilities(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Facilities added to accommodation successful", "data": id})
-
-}
-
-func AddRoomFacilities(c *gin.Context) {
-	id := c.Param("id")
-	var req utils.FacilitiesRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	room, err := models.GetRoomByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var facilities []models.RoomFacility
-
-	for i := 0; i < len(req.Facilities); i++ {
-		facility, err := models.GetRoomFacilityByName(req.Facilities[i])
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"models.GetRoomFacilityByName": err.Error()})
-			return
-		}
-		facilities = append(facilities, facility)
-	}
-	err = room.AddFacilities(facilities)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"room.AddFacilities: ": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Facilities added to room successful", "data": id})
 
 }

@@ -33,8 +33,6 @@ const props = defineProps({
   padding: 4px 16px;
   border: 1px solid;
   border-color: var(--text-link);
-  border-radius: 6px;
-
   width: 100px;
   height: 35px;
   display: flex;

@@ -16,11 +16,7 @@ type ReservationOperations interface {
 }
 
 const (
-	Pending  ReservationState = "pending"
-	Accepted ReservationState = "accepted"
-	Ongoing  ReservationState = "ongoing"
 	Finished ReservationState = "finished"
-	Rejected ReservationState = "rejected"
 )
 
 type Reservation struct {

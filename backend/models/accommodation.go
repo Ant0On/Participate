@@ -6,21 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type AccommodationType string
-
-const (
-	Hotel      AccommodationType = "hotel"
-	Hostel     AccommodationType = "hostel"
-	Apartment  AccommodationType = "apartment"
-	Villa      AccommodationType = "villa"
-	Guesthouse AccommodationType = "guesthouse"
-)
-
 type Accommodation struct {
 	gorm.Model
 	Offer
 	NumberOfRooms     int               `gorm:"not null" form:"number_of_rooms" binding:"required,min=1"`
-	Type              AccommodationType `gorm:"type:varchar(255);check:accommodation_type IN ('hotel', 'hostel', 'apartment', 'villa', 'guesthouse'); column:accommodation_type; not null" form:"type" binding:"required,oneof=hotel hostel apartment villa guesthouse"`
+	Type              string            `gorm:"type:varchar(255);check:accommodation_type IN ('hotel', 'hostel', 'apartment', 'villa', 'guesthouse'); column:accommodation_type; not null" form:"type" binding:"required,oneof=hotel hostel apartment villa guesthouse"`
 	IsAnimalFriendly  bool              `gorm:"not null" form:"is_animal_friendly"`
 	RatingAvg         float64           `gorm:"not null;default: 0.00" form:"-"`
 	RatingCount       int               `gorm:"not null;default: 0" form:"-"`

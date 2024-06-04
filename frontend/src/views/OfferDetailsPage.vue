@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, onMounted, ref, toRef} from 'vue';
+import {computed, defineProps, onMounted, ref} from 'vue';
 import {storeToRefs} from 'pinia';
 
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
@@ -14,16 +14,34 @@ const {user: user} = storeToRefs(userStore)
 const offer = ref(null)
 const props = defineProps({
   type: String,
-  id: String,
-  chatID: String
+  id: String
 })
+
+const hostData = ref()
+
+const userImageSource = computed(() => {
+  return require(`@/../images/users/${hostData.value.hostId}.jpeg`);
+})
+
+const defaultImageSource = computed(() => {
+  return require(`@/../images/users/default_image.png`);
+})
+
+const isUserImage = computed(() => {
+  try {
+    require(`@/../images/users/${hostData.value.hostId}.jpeg`);
+    return true;
+  } catch {
+    return false;
+  }
+});
 
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.value?.price, offer.value?.discount))
 const cardPage = ref('description')
 const offerPage = ref('description')
 const chosenPayment = ref(null)
 const paymentType = ref({
-  'paypal': {id:1, url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
+  'paypal': {id: 1, url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
   'credit_card': {id: 2, url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
   'bitcoin': {id: 3, url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
 })
@@ -61,26 +79,25 @@ async function makeReservation() {
     'user_id': Number(user.value.ID),
     'payment_id': paymentType.value[chosenPayment.value].id
   }
-  if(props.type === "event"){
+  if (props.type === "event") {
     reservationBody.date = new Date(reservation.value.dateTo).toISOString()
     reservationBody.event_id = Number(props.id)
-  }else if(props.type === "activity"){
+  } else if (props.type === "activity") {
     reservationBody.date = new Date(reservation.value.dateTo).toISOString()
     reservationBody.activity_id = Number(props.id)
-  }else if(props.type === "accommodation"){
+  } else if (props.type === "accommodation") {
     reservationBody.date_from = new Date(reservation.value.dateFrom).toISOString()
     reservationBody.date_to = new Date(reservation.value.dateTo).toISOString()
-    if(['hotel', 'hostel', 'guesthouse'].includes(offer.value.type))
-    {
+    if (['hotel', 'hostel', 'guesthouse'].includes(offer.value.type)) {
       reservationBody.room_id = Number(reservation.value.room)
 
-    }else{
+    } else {
       reservationBody.accommodation_id = Number(props.id)
     }
   }
 
   fetchWrapper.post(`/api/reservation/${(props.type === 'accommodation'
-      && ['hotel', 'hostel', 'guesthouse'].includes(offer.value.type)? 'room': props.type)}/add`,
+      && ['hotel', 'hostel', 'guesthouse'].includes(offer.value.type) ? 'room' : props.type)}/add`,
       reservationBody).then((resp) => {
     router.push('/');
     window.open(paymentType.value[chosenPayment.value].url, '_blank');
@@ -89,7 +106,7 @@ async function makeReservation() {
   })
 }
 
-const chips = computed( () => chipsMapper(offer.value?.discount))
+const chips = computed(() => chipsMapper(offer.value?.discount))
 const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
 
 const image = computed(() => {
@@ -106,42 +123,6 @@ const image = computed(() => {
   }
 })
 
-
-const isChatAlreadyCreated = ref(false)
-const showChat = ref(false);
-
-function createChatHost() {
-  if (isChatAlreadyCreated.value) {
-    openChatCustomer()
-  }
-  if (user.Role === 'host' && offer.value?.userID !== user.ID) {
-    console.error('You are not the owner of this offer!')
-  } else {
-    fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
-          isChatAlreadyCreated.value = true;
-          showChat.value = true
-          window.location.reload();
-        }
-    ).catch()
-  }
-}
-
-const chatID = toRef(props.chatID)
-
-function openChatCustomer() {
-  showChat.value = true
-}
-
-function closeChat() {
-  showChat.value = false;
-}
-
-const hostData = ref({
-  firstName: '',
-  detail: '',
-  imagePath: '',
-})
-
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.type}/${props.id}`)
   if (response?.data) {
@@ -149,8 +130,9 @@ async function getOfferDetails() {
     if (props.type === "accommodation") {
       return {
         'offerId': data["ID"],
+        'hostId': data["UserID"],
         'title': data["Title"],
-        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name || 'city'}`,
         'description': data["Description"],
         'capacity': data["Capacity"],
         'price': data['PricePerDay'],
@@ -160,7 +142,7 @@ async function getOfferDetails() {
         'rating': data['RatingAvg'] || 0,
         'ratingCount': data['RatingCount'] || 0,
         'numberOfRooms': data?.NumberOfRooms,
-        'rooms':data?.Rooms?.map((room) => {
+        'rooms': data?.Rooms?.map((room) => {
           return {
             area: Number(room.area),
             capacity: Number(room.capacity),
@@ -178,8 +160,9 @@ async function getOfferDetails() {
     } else if (props.type === "event") {
       return {
         'offerId': data["ID"],
+        'hostId': data["UserID"],
         'title': data["Title"],
-        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name || 'city'}`,
         'description': data["Description"],
         'capacity': data["Capacity"],
         'price': data['Price'],
@@ -191,8 +174,9 @@ async function getOfferDetails() {
     } else if (props.type === "activity") {
       return {
         'offerId': data["ID"],
+        'hostId': data["UserID"],
         'title': data["Title"],
-        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name || 'city'}`,
         'description': data["Description"],
         'capacity': data["Capacity"],
         'price': data['Price'],
@@ -201,7 +185,7 @@ async function getOfferDetails() {
         'type': data['Type'],
         'duration': data['Duration'],
         'date': data?.Date?.split('T')?.[0],
-        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name),
+        'equipment': data?.Equipment?.map((equipment) => equipment?.Name),
         'rating': data['RatingAvg'] || 0,
         'ratingCount': data['RatingCount'] || 0,
       }
@@ -209,29 +193,28 @@ async function getOfferDetails() {
   }
 }
 
-async function doesChatExist() {
-  return fetchWrapper.get(`/api/chat/offer/${props.id}`).then((response) => {
-    if (!response) {
-      isChatAlreadyCreated.value = false
-    } else {
-      chatID.value = response.data["ID"]
-      isChatAlreadyCreated.value = true
+async function getHostDetails(hostId) {
+  const response = await fetchWrapper.get(`/api/host/${hostId}`)
+  if (response) {
+    return {
+      'hostId': response["ID"],
+      'description': response["Description"],
+      'firstName': response["FirstName"]
     }
-  }).catch(error => {
-    console.log(error)
-  })
+  }
 }
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
+  hostData.value = await getHostDetails(offer.value.hostId)
 });
 
 </script>
 
 <template>
   <v-progress-circular v-if="!offer"
-      color="primary"
-      indeterminate
+                       color="primary"
+                       indeterminate
   ></v-progress-circular>
   <v-sheet v-else class="d-flex flex-column">
     <v-breadcrumbs>
@@ -294,11 +277,15 @@ onMounted(async () => {
             <v-card-subtitle class="mx-0 d-flex ">
               <div class="font-weight-bold"
                    :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
-                {{ (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $` }}
+                {{
+                  (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $`
+                }}
               </div>
 
               <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
-                {{ (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $` }}
+                {{
+                  (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $`
+                }}
               </div>
             </v-card-subtitle>
             <div class="ma-4 text-subtitle-1">
@@ -334,6 +321,9 @@ onMounted(async () => {
                 </v-btn>
                 <v-btn @click="cardPage = 'info'">
                   <v-icon icon="mdi-information"></v-icon>
+                </v-btn>
+                <v-btn @click="cardPage = 'host_info'">
+                  <v-icon icon="mdi-account"></v-icon>
                 </v-btn>
                 <v-btn @click="cardPage = 'accommodation'"
                        v-if="type === 'accommodation' && ['hotel', 'hostel', 'guesthouse'].includes(offer.type)">
@@ -427,6 +417,36 @@ onMounted(async () => {
                   </v-list-item>
                 </v-row>
               </v-list>
+            </v-card-text>
+
+            <v-card-text v-else-if="cardPage === 'host_info'" class="h-100" style="overflow-y: scroll">
+              <v-row cols="1">
+                <v-col>
+                  <v-card>
+                    <v-avatar v-if="isUserImage"
+                              size="150"
+                              text="HELLO"
+                              density="comfortable"
+                              :image="userImageSource"
+                    ></v-avatar>
+                    <v-avatar v-else
+                              size="150"
+                              :text="hostData.firstName"
+                              density="comfortable"
+                              :image="defaultImageSource"
+                    ></v-avatar>
+                    <v-list-item
+                        :title="hostData.firstName"
+                    ></v-list-item>
+                    <v-list-item
+                        key="about"
+                        title="About the host"
+                        :subtitle="hostData.description"
+                    ></v-list-item>
+                  </v-card>
+                </v-col>
+              </v-row>
+
             </v-card-text>
 
             <v-card-text v-else-if="cardPage === 'accommodation'" class="h-100" style="overflow-y: scroll">

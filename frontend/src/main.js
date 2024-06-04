@@ -10,6 +10,20 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 
+function clearLocalStorage() {
+    localStorage.clear();
+}
+
+function handleBeforeUnload(event) {
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon('/clear-local-storage');
+    } else {
+        clearLocalStorage();
+    }
+}
+
+window.addEventListener('beforeunload', handleBeforeUnload);
+
 const vuetify = createVuetify({
     components,
     directives,

@@ -113,14 +113,6 @@ export default {
   flex-direction: column;
 }
 
-.welcome {
-  display: flex;
-  flex-direction: row;
-  gap: 15%;
-  flex-grow: 1;
-  width: 95%;
-}
-
 .image_container {
   display: flex;
   flex-direction: row;

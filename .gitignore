@@ -24,7 +24,6 @@ database/
 .idea
 frontend/node_modules
 backend/tmp/*
-images/customers/*
-images/hosts/*
+images/users/*
 images/offers/*
-!images/customers/default_image.png
+!images/users/default_image.png

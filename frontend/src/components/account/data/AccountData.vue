@@ -4,25 +4,31 @@ import * as Yup from 'yup';
 import {storeToRefs} from 'pinia';
 
 import {useAuthStore} from "@/stores/auth.store";
-import TextInput from "@/components/ui/TextInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
 
 const errors = reactive({
-  apiError: "",
-  oldPassword: ""
+  apiError: ""
+})
+
+const userImageSource = computed(() => {
+    return require(`@/../images/users/${user.value.ID}.jpeg`);
+})
+
+const defaultImageSource = computed(() => {
+  return require(`@/../images/users/default_image.png`);
 })
 
 const isUserImage = computed(() => {
-  try {
-    require(`@/../images/customers/${user.value?.ID}.jpeg`)
-    return true
-  } catch {
-    return false
+    try {
+      require(`@/../images/users/${user.value.ID}.jpeg`);
+      return true;
+    } catch {
+      return false;
   }
-})
+});
 
 const isImageUploaded = ref(false)
 const uploadedImage = ref({})
@@ -105,6 +111,7 @@ async function onSubmit() {
           image: imageFile
         }, "multipart/form-data")
     }
+    window.location.reload();
   }).catch((customerErrors) => {
     errors.apiError = formatErrors(customerErrors.errors);
   })
@@ -249,9 +256,8 @@ function dataURLtoFile(dataURL, fileName) {
         <div class="image_container">
           <p class="image_input">User image</p>
           <img v-if="isImageUploaded" :src="uploadedImage" class="preview_image" alt="offerImage"/>
-          <img v-else-if="isUserImage" :src="require(`@/../images/customers/${user.ID}.jpeg`)" class="preview_image"
-               alt="offerImage"/>
-          <img v-else :src="require(`@/../images/customers/default_image.png`)" class="preview_image" alt="offerImage"/>
+          <img v-else-if="isUserImage" :src="userImageSource" class="preview_image" alt="offerImage"/>
+          <img v-else :src="defaultImageSource" class="preview_image" alt="offerImage"/>
         </div>
         <div id="image_input" v-if="isSubmitMode">
           <label for="image_upload">
@@ -314,7 +320,6 @@ img.preview_image {
   width: 100px;
   height: 100px;
   align-self: flex-start;
-
 }
 
 div.account_data_component {
@@ -351,18 +356,6 @@ div.host_fields {
   padding: 2% 5%;
 }
 
-div.logout_button_container {
-  margin-right: 10%;
-  margin-left: 5%;
-}
-
-div.line {
-  display: flex;
-  flex-direction: row;
-  color: black;
-  border-right: 1px solid;
-}
-
 div.buttons {
   align-self: flex-end;
   display: flex;
@@ -379,8 +372,6 @@ div.buttons {
   box-sizing: border-box;
   padding: 4px 16px;
   border: 1px solid #808080;
-  border-radius: 6px;
-
   width: 150px;
   height: 35px;
   display: flex;
@@ -405,12 +396,4 @@ div.errors {
   margin-bottom: 10px;
 }
 
-p.error-label {
-  font-weight: bold;
-  color: #ff0000;
-}
-
-p.error-message {
-  color: #ff0000;
-}
 </style>
