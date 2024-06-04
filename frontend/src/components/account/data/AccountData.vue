@@ -17,6 +17,10 @@ const userImageSource = computed(() => {
     return require(`@/../images/users/${user.value.ID}.jpeg`);
 })
 
+const defaultImageSource = computed(() => {
+  return require(`@/../images/users/default_image.png`);
+})
+
 const isUserImage = computed(() => {
     try {
       require(`@/../images/users/${user.value.ID}.jpeg`);
@@ -253,7 +257,7 @@ function dataURLtoFile(dataURL, fileName) {
           <p class="image_input">User image</p>
           <img v-if="isImageUploaded" :src="uploadedImage" class="preview_image" alt="offerImage"/>
           <img v-else-if="isUserImage" :src="userImageSource" class="preview_image" alt="offerImage"/>
-          <img v-else :src="require(`@/../images/users/default_image.png`)" class="preview_image" alt="offerImage"/>
+          <img v-else :src="defaultImageSource" class="preview_image" alt="offerImage"/>
         </div>
         <div id="image_input" v-if="isSubmitMode">
           <label for="image_upload">
@@ -316,7 +320,6 @@ img.preview_image {
   width: 100px;
   height: 100px;
   align-self: flex-start;
-
 }
 
 div.account_data_component {

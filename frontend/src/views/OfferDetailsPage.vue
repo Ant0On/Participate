@@ -18,6 +18,23 @@ const props = defineProps({
   chatID: String
 })
 
+const userImageSource = computed(() => {
+  return require(`@/../images/users/${user.value.ID}.jpeg`);
+})
+
+const defaultImageSource = computed(() => {
+  return require(`@/../images/users/default_image.png`);
+})
+
+const isUserImage = computed(() => {
+  try {
+    require(`@/../images/users/${user.value.ID}.jpeg`);
+    return true;
+  } catch {
+    return false;
+  }
+});
+
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.value?.price, offer.value?.discount))
 const cardPage = ref('description')
 const offerPage = ref('description')
@@ -224,6 +241,7 @@ async function doesChatExist() {
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
+  console.log(user.value)
 });
 
 </script>
@@ -335,6 +353,9 @@ onMounted(async () => {
                 <v-btn @click="cardPage = 'info'">
                   <v-icon icon="mdi-information"></v-icon>
                 </v-btn>
+                <v-btn @click="cardPage = 'host_info'">
+                  <v-icon icon="mdi-account"></v-icon>
+                </v-btn>
                 <v-btn @click="cardPage = 'accommodation'"
                        v-if="type === 'accommodation' && ['hotel', 'hostel', 'guesthouse'].includes(offer.type)">
                   <v-icon icon="mdi-home"></v-icon>
@@ -427,6 +448,38 @@ onMounted(async () => {
                   </v-list-item>
                 </v-row>
               </v-list>
+            </v-card-text>
+
+            <v-card-text v-else-if="cardPage === 'host_info'" class="h-100" style="overflow-y: scroll">
+              <v-row cols="2">
+                <v-col>
+                  <v-img v-if="isUserImage"
+                      :width="150"
+                      aspect-ratio="16/9"
+                      cover
+                      :src="userImageSource"
+                  ></v-img>
+                  <v-img v-else
+                         :width="150"
+                         aspect-ratio="16/9"
+                         cover
+                         :src="defaultImageSource"
+                  ></v-img>
+                  <v-list-item
+                      :title="user.FirstName"
+                  ></v-list-item>
+                </v-col>
+              </v-row>
+              <v-row cols="1">
+                <v-col>
+                  <v-list-item
+                      key="about"
+                      title="About the host"
+                      :subtitle="user.Description"
+                  ></v-list-item>
+                </v-col>
+              </v-row>
+
             </v-card-text>
 
             <v-card-text v-else-if="cardPage === 'accommodation'" class="h-100" style="overflow-y: scroll">
