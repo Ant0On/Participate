@@ -98,7 +98,7 @@ export const router = createRouter({
 
 router.beforeEach(async (to) => {
     const hostPages = ['/account/my_offers', '/account/new_offer', '/account/current_reservations'];
-    const customerPages = ['/account/become_host', '/account/reservations_history'];
+    const customerPages = ['/account/become_host'];
     const hostRequired = hostPages.includes(to.path);
     const customerRequired = customerPages.includes(to.path);
     const userStore = useAuthStore();

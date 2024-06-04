@@ -64,10 +64,10 @@ const userName = computed(() => {
         <router-link to="/account/change_password">
           <v-list-item prepend-icon="mdi-account-key" title="Change password" value="change_password" @click=""></v-list-item>
         </router-link>
+        <router-link to="/account/reservations_history">
+          <v-list-item prepend-icon="mdi-account-box" title="Reservations history" value="reservations_history"></v-list-item>
+        </router-link>
         <div v-if="user.Role === 'customer'">
-          <router-link to="/account/reservations_history">
-            <v-list-item prepend-icon="mdi-account-box" title="Reservations history" value="reservations_history"></v-list-item>
-          </router-link>
           <router-link to="/account/become_host">
             <v-list-item prepend-icon="mdi-account-plus" title="Become a host" value="become_host"
                          @click=""></v-list-item>
