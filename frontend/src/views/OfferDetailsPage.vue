@@ -41,7 +41,7 @@ const cardPage = ref('description')
 const offerPage = ref('description')
 const chosenPayment = ref(null)
 const paymentType = ref({
-  'paypal': {id:1, url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
+  'paypal': {id: 1, url: 'https://paypal.com', img: '@/assets/img/paypal.png'},
   'credit_card': {id: 2, url: 'https://www.przelewy24.pl', img: '@/assets/img/credit_card.png'},
   'bitcoin': {id: 3, url: 'https://bitcoin.org/', img: '@/assets/img/bitcoin.png'},
 })
@@ -79,26 +79,25 @@ async function makeReservation() {
     'user_id': Number(user.value.ID),
     'payment_id': paymentType.value[chosenPayment.value].id
   }
-  if(props.type === "event"){
+  if (props.type === "event") {
     reservationBody.date = new Date(reservation.value.dateTo).toISOString()
     reservationBody.event_id = Number(props.id)
-  }else if(props.type === "activity"){
+  } else if (props.type === "activity") {
     reservationBody.date = new Date(reservation.value.dateTo).toISOString()
     reservationBody.activity_id = Number(props.id)
-  }else if(props.type === "accommodation"){
+  } else if (props.type === "accommodation") {
     reservationBody.date_from = new Date(reservation.value.dateFrom).toISOString()
     reservationBody.date_to = new Date(reservation.value.dateTo).toISOString()
-    if(['hotel', 'hostel', 'guesthouse'].includes(offer.value.type))
-    {
+    if (['hotel', 'hostel', 'guesthouse'].includes(offer.value.type)) {
       reservationBody.room_id = Number(reservation.value.room)
 
-    }else{
+    } else {
       reservationBody.accommodation_id = Number(props.id)
     }
   }
 
   fetchWrapper.post(`/api/reservation/${(props.type === 'accommodation'
-      && ['hotel', 'hostel', 'guesthouse'].includes(offer.value.type)? 'room': props.type)}/add`,
+      && ['hotel', 'hostel', 'guesthouse'].includes(offer.value.type) ? 'room' : props.type)}/add`,
       reservationBody).then((resp) => {
     router.push('/');
     window.open(paymentType.value[chosenPayment.value].url, '_blank');
@@ -107,7 +106,7 @@ async function makeReservation() {
   })
 }
 
-const chips = computed( () => chipsMapper(offer.value?.discount))
+const chips = computed(() => chipsMapper(offer.value?.discount))
 const formatDecimalPlaces = (num) => (Math.round(num * 100) / 100).toFixed(2)
 
 const image = computed(() => {
@@ -133,7 +132,7 @@ async function getOfferDetails() {
         'offerId': data["ID"],
         'hostId': data["UserID"],
         'title': data["Title"],
-        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name || 'city'}`,
         'description': data["Description"],
         'capacity': data["Capacity"],
         'price': data['PricePerDay'],
@@ -143,7 +142,7 @@ async function getOfferDetails() {
         'rating': data['RatingAvg'] || 0,
         'ratingCount': data['RatingCount'] || 0,
         'numberOfRooms': data?.NumberOfRooms,
-        'rooms':data?.Rooms?.map((room) => {
+        'rooms': data?.Rooms?.map((room) => {
           return {
             area: Number(room.area),
             capacity: Number(room.capacity),
@@ -163,7 +162,7 @@ async function getOfferDetails() {
         'offerId': data["ID"],
         'hostId': data["UserID"],
         'title': data["Title"],
-        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name || 'city'}`,
         'description': data["Description"],
         'capacity': data["Capacity"],
         'price': data['Price'],
@@ -177,7 +176,7 @@ async function getOfferDetails() {
         'offerId': data["ID"],
         'hostId': data["UserID"],
         'title': data["Title"],
-        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
+        'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name || 'city'}`,
         'description': data["Description"],
         'capacity': data["Capacity"],
         'price': data['Price'],
@@ -186,7 +185,7 @@ async function getOfferDetails() {
         'type': data['Type'],
         'duration': data['Duration'],
         'date': data?.Date?.split('T')?.[0],
-        'equipment': data?.Equipment?.map((equipment)=> equipment?.Name),
+        'equipment': data?.Equipment?.map((equipment) => equipment?.Name),
         'rating': data['RatingAvg'] || 0,
         'ratingCount': data['RatingCount'] || 0,
       }
@@ -214,8 +213,8 @@ onMounted(async () => {
 
 <template>
   <v-progress-circular v-if="!offer"
-      color="primary"
-      indeterminate
+                       color="primary"
+                       indeterminate
   ></v-progress-circular>
   <v-sheet v-else class="d-flex flex-column">
     <v-breadcrumbs>
@@ -278,11 +277,15 @@ onMounted(async () => {
             <v-card-subtitle class="mx-0 d-flex ">
               <div class="font-weight-bold"
                    :class="(offer?.discount > 0)? 'text-decoration-line-through text-red-lighten-1': ''">
-                {{ (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $` }}
+                {{
+                  (type === "accommodation") ? `Price: ${formatDecimalPlaces(offer.price)} $/day` : `Price: ${formatDecimalPlaces(offer.price)} $`
+                }}
               </div>
 
               <div class="font-weight-black ml-1" v-if="offer?.discount > 0">
-                {{ (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $` }}
+                {{
+                  (type === "accommodation") ? `${formatDecimalPlaces(priceAfterDiscount)} $/day` : `${formatDecimalPlaces(priceAfterDiscount)} $`
+                }}
               </div>
             </v-card-subtitle>
             <div class="ma-4 text-subtitle-1">
@@ -417,32 +420,35 @@ onMounted(async () => {
             </v-card-text>
 
             <v-card-text v-else-if="cardPage === 'host_info'" class="h-100" style="overflow-y: scroll">
-              <v-row cols="2">
+              <v-row cols="1">
                 <v-col>
-                  <v-img v-if="isUserImage"
-                      :width="150"
-                      aspect-ratio="16/9"
-                      cover
-                      :src="userImageSource"
-                  ></v-img>
-                  <v-img v-else
-                         :width="150"
-                         aspect-ratio="16/9"
-                         cover
-                         :src="defaultImageSource"
-                  ></v-img>
-                  <v-list-item
-                      :title="hostData.firstName"
-                  ></v-list-item>
+                  <v-card>
+                    <v-avatar v-if="isUserImage"
+                              size="150"
+                              text="HELLO"
+                              density="comfortable"
+                              :image="userImageSource"
+                    ></v-avatar>
+                    <v-avatar v-else
+                              size="150"
+                              :text="hostData.firstName"
+                              density="comfortable"
+                              :image="defaultImageSource"
+                    ></v-avatar>
+                    <v-list-item
+                        :title="hostData.firstName"
+                    ></v-list-item>
+                    <v-list-item
+                        key="about"
+                        title="About the host"
+                        :subtitle="hostData.description"
+                    ></v-list-item>
+                  </v-card>
                 </v-col>
               </v-row>
               <v-row cols="1">
                 <v-col>
-                  <v-list-item
-                      key="about"
-                      title="About the host"
-                      :subtitle="hostData.description"
-                  ></v-list-item>
+
                 </v-col>
               </v-row>
 
