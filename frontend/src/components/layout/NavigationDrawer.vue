@@ -14,8 +14,7 @@ const {
 
 const userImage = computed(() => {
   try {
-    const image = require(`@/../images/customers/${user.value?.ID}.jpeg`)
-    return image
+    return require(`@/../images/users/${user.value?.ID}.jpeg`)
   } catch {
     return undefined
   }

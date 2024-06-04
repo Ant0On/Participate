@@ -176,7 +176,7 @@ func ChangeImage(c *gin.Context) {
 		return
 	}
 
-	dst, wasImageUploaded, err := user.HandleUserImageUploads(c, user.ID, user.Role)
+	dst, wasImageUploaded, err := user.HandleUserImageUploads(c, user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
 		return

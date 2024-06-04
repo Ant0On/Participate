@@ -16,28 +16,15 @@ const errors = reactive({
 })
 
 const userImageSource = computed(() => {
-  if (user.value.Role === 'host') {
-    return require(`@/../images/hosts/${user.value.ID}.jpeg`);
-  } else {
-    return require(`@/../images/customers/${user.value.ID}.jpeg`);
-  }
-});
+    return require(`@/../images/users/${user.value.ID}.jpeg`);
+})
 
 const isUserImage = computed(() => {
-  if (user.value.Role === 'host') {
     try {
-      require(`@/../images/hosts/${user.value.ID}.jpeg`);
+      require(`@/../images/users/${user.value.ID}.jpeg`);
       return true;
     } catch {
       return false;
-    }
-  } else {
-    try {
-      require(`@/../images/customers/${user.value.ID}.jpeg`);
-      return true;
-    } catch {
-      return false;
-    }
   }
 });
 
@@ -268,7 +255,7 @@ function dataURLtoFile(dataURL, fileName) {
           <p class="image_input">User image</p>
           <img v-if="isImageUploaded" :src="uploadedImage" class="preview_image" alt="offerImage"/>
           <img v-else-if="isUserImage" :src="userImageSource" class="preview_image" alt="offerImage"/>
-          <img v-else :src="require(`@/../images/customers/default_image.png`)" class="preview_image" alt="offerImage"/>
+          <img v-else :src="require(`@/../images/users/default_image.png`)" class="preview_image" alt="offerImage"/>
         </div>
         <div id="image_input" v-if="isSubmitMode">
           <label for="image_upload">

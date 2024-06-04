@@ -12,7 +12,8 @@ const signUpData = ref({
   LastName: '',
   Login: '',
   Password: '',
-  ConfirmPassword: ''
+  ConfirmPassword: '',
+  Image: null
 })
 
 const errors = reactive({
@@ -22,7 +23,8 @@ const errors = reactive({
 async function onSubmit() {
   const authStore = useAuthStore();
   await schema.validate(signUpData.value).then(() => {
-    return authStore.signUp(signUpData.value.FirstName, signUpData.value.LastName, signUpData.value.Login, signUpData.value.Password, signUpData.value.ConfirmPassword)
+    return authStore.signUp(signUpData.value.FirstName, signUpData.value.LastName, signUpData.value.Login,
+        signUpData.value.Password, signUpData.value.ConfirmPassword, signUpData.value.Image)
   }).catch(error => {
           errors.apiError = "Incorrect sign up data! " + error
       }
@@ -65,6 +67,7 @@ const schema = Yup.object().shape({
       <PasswordInput v-model="signUpData.Password" :labelText="'Your password'" @keyup.enter="onSubmit" :isRequired="true"/>
       <PasswordInput v-model="signUpData.ConfirmPassword" :labelText="'Confirm your password'"
                      :placeholder="'Type your password again'" @keyup.enter="onSubmit" :isRequired="true"/>
+      <v-file-input v-model="signUpData.Image" label="Upload profile image" filled prepend-icon="mdi-camera"/>
       <v-btn text="Sign up" @click="onSubmit" @keyup.enter="onSubmit"></v-btn>
     </form>
   </div>
