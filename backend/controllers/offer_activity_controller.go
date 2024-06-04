@@ -116,14 +116,6 @@ func UpdateActivity(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Activity updated successfully!", "activity": existingActivity})
 }
 
-func DiscountActivity(c *gin.Context) {
-	DiscountOffer(c, models.GetActivityByID)
-}
-
-func ChangeActivityPrice(c *gin.Context) {
-	ChangeOfferPrice(c, models.GetActivityByID)
-}
-
 func AddEquipment(c *gin.Context) {
 	id := c.Param("id")
 	var req utils.EquipmentRequest

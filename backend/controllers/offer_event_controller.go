@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	"backend/models"
 	"net/http"
+
+	"backend/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -79,12 +80,4 @@ func UpdateEvent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!", "event": existingEvent})
-}
-
-func DiscountEvent(c *gin.Context) {
-	DiscountOffer(c, models.GetEventByID)
-}
-
-func ChangeEventPrice(c *gin.Context) {
-	ChangeOfferPrice(c, models.GetEventByID)
 }

@@ -25,8 +25,7 @@ const validationError = ref(false)
 
 const props = defineProps({
   type: String,
-  id: String,
-  chatID: String
+  id: String
 })
 const priceAfterDiscount = computed(() => calculatePriceAfterDiscount(offer.value?.price, offer.value?.discount))
 const cardPage = ref('description')

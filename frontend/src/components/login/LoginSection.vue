@@ -62,12 +62,6 @@ const emits = defineEmits(['signUpClicked'])
 </template>
 
 <style scoped>
-div.login_section {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  row-gap: 40px;
-}
 div.errors{
   font-family: "Sarabun", Helvetica;
 
@@ -86,11 +80,5 @@ p {
   line-height: normal;
   margin-bottom: 20px;
   margin-top: 80px;
-}
-
-@media (max-width: 900px) {
-  div.login_section {
-    margin-left: 5%;
-  }
 }
 </style>

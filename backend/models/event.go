@@ -9,13 +9,6 @@ import (
 
 type EventType string
 
-const (
-	Conference  EventType = "conference"
-	Concert     EventType = "concert"
-	Festival    EventType = "festival"
-	SportsEvent EventType = "sports event"
-)
-
 type Event struct {
 	gorm.Model
 	Offer

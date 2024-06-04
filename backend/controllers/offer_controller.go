@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"backend/models"
-	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -94,77 +93,4 @@ func DeleteOffer(c *gin.Context, getByID func(string) (models.OfferOperations, e
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
-}
-
-func UpdateOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
-	id := c.Params.ByName("id")
-
-	offer, err := getByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.OfferByID:": err.Error()})
-		return
-	}
-
-	if err = offer.Update(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Update: ": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "offer updated", "data": offer})
-}
-
-func DiscountOffer(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
-	id := c.Params.ByName("id")
-	var req utils.DiscountRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	offer, err := getByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if offer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
-		return
-	}
-
-	if err := offer.AddDiscount(req.Discount); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
-}
-
-func ChangeOfferPrice(c *gin.Context, getByID func(string) (models.OfferOperations, error)) {
-	id := c.Params.ByName("id")
-	var req utils.ChangePriceReq
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	offer, err := getByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if offer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "offer not found"})
-		return
-	}
-
-	if err := offer.UpdatePrice(req.Price); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "success", "data": offer})
 }

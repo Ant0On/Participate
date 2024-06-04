@@ -118,8 +118,6 @@ div.join_info{
   box-sizing: border-box;
   padding: 4px 16px;
   border: 1px solid #808080;
-  border-radius: 6px;
-
   width: 150px;
   height: 35px;
   display: flex;

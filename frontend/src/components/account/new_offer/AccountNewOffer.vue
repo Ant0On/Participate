@@ -623,7 +623,6 @@ p.new_offer_text {
   box-sizing: border-box;
   padding: 4px 16px;
   border: 1px solid #808080;
-  border-radius: 6px;
   width: 150px;
   height: 35px;
   display: flex;
@@ -655,7 +654,7 @@ div.errors {
   border: 2px solid #333;
   padding: 20px;
   border-radius: 5px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 </style>

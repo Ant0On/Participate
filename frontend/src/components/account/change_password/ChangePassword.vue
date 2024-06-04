@@ -154,11 +154,6 @@ div.customer_fields {
   padding: 2% 5%;
 }
 
-div.logout_button_container {
-  margin-right: 10%;
-  margin-left: 5%;
-}
-
 div.line {
   display: flex;
   flex-direction: row;
@@ -182,8 +177,6 @@ div.buttons {
   box-sizing: border-box;
   padding: 4px 16px;
   border: 1px solid #808080;
-  border-radius: 6px;
-
   width: 150px;
   height: 35px;
   display: flex;
@@ -206,11 +199,6 @@ div.errors {
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
-}
-
-p.error-label {
-  font-weight: bold;
-  color: #ff0000;
 }
 
 p.error-message {

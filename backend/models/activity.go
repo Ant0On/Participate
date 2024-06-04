@@ -10,17 +10,6 @@ import (
 type SkillLevel string
 type ActivityType string
 
-const (
-	Beginner     SkillLevel = "beginner"
-	Intermediate SkillLevel = "intermediate"
-	Advanced     SkillLevel = "advanced"
-)
-
-const (
-	Indoor  ActivityType = "indoor"
-	Outdoor ActivityType = "outdoor"
-)
-
 type Activity struct {
 	gorm.Model
 	Offer

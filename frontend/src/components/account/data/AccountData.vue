@@ -356,18 +356,6 @@ div.host_fields {
   padding: 2% 5%;
 }
 
-div.logout_button_container {
-  margin-right: 10%;
-  margin-left: 5%;
-}
-
-div.line {
-  display: flex;
-  flex-direction: row;
-  color: black;
-  border-right: 1px solid;
-}
-
 div.buttons {
   align-self: flex-end;
   display: flex;
@@ -384,8 +372,6 @@ div.buttons {
   box-sizing: border-box;
   padding: 4px 16px;
   border: 1px solid #808080;
-  border-radius: 6px;
-
   width: 150px;
   height: 35px;
   display: flex;
@@ -410,12 +396,4 @@ div.errors {
   margin-bottom: 10px;
 }
 
-p.error-label {
-  font-weight: bold;
-  color: #ff0000;
-}
-
-p.error-message {
-  color: #ff0000;
-}
 </style>

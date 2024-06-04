@@ -14,12 +14,13 @@ const {user: user} = storeToRefs(userStore)
 const offer = ref(null)
 const props = defineProps({
   type: String,
-  id: String,
-  chatID: String
+  id: String
 })
 
+const hostData = ref()
+
 const userImageSource = computed(() => {
-  return require(`@/../images/users/${user.value.ID}.jpeg`);
+  return require(`@/../images/users/${hostData.value.hostId}.jpeg`);
 })
 
 const defaultImageSource = computed(() => {
@@ -28,7 +29,7 @@ const defaultImageSource = computed(() => {
 
 const isUserImage = computed(() => {
   try {
-    require(`@/../images/users/${user.value.ID}.jpeg`);
+    require(`@/../images/users/${hostData.value.hostId}.jpeg`);
     return true;
   } catch {
     return false;
@@ -123,42 +124,6 @@ const image = computed(() => {
   }
 })
 
-
-const isChatAlreadyCreated = ref(false)
-const showChat = ref(false);
-
-function createChatHost() {
-  if (isChatAlreadyCreated.value) {
-    openChatCustomer()
-  }
-  if (user.Role === 'host' && offer.value?.userID !== user.ID) {
-    console.error('You are not the owner of this offer!')
-  } else {
-    fetchWrapper.post(`/api/host/${props.id}/chat/create`).then(() => {
-          isChatAlreadyCreated.value = true;
-          showChat.value = true
-          window.location.reload();
-        }
-    ).catch()
-  }
-}
-
-const chatID = toRef(props.chatID)
-
-function openChatCustomer() {
-  showChat.value = true
-}
-
-function closeChat() {
-  showChat.value = false;
-}
-
-const hostData = ref({
-  firstName: '',
-  detail: '',
-  imagePath: '',
-})
-
 async function getOfferDetails() {
   const response = await fetchWrapper.get(`/api/offers/${props.type}/${props.id}`)
   if (response?.data) {
@@ -166,6 +131,7 @@ async function getOfferDetails() {
     if (props.type === "accommodation") {
       return {
         'offerId': data["ID"],
+        'hostId': data["UserID"],
         'title': data["Title"],
         'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
         'description': data["Description"],
@@ -195,6 +161,7 @@ async function getOfferDetails() {
     } else if (props.type === "event") {
       return {
         'offerId': data["ID"],
+        'hostId': data["UserID"],
         'title': data["Title"],
         'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
         'description': data["Description"],
@@ -208,6 +175,7 @@ async function getOfferDetails() {
     } else if (props.type === "activity") {
       return {
         'offerId': data["ID"],
+        'hostId': data["UserID"],
         'title': data["Title"],
         'location': `${data?.Town?.Country?.CountryName || 'Country'}, ${data?.Town?.name|| 'city'}`,
         'description': data["Description"],
@@ -226,22 +194,20 @@ async function getOfferDetails() {
   }
 }
 
-async function doesChatExist() {
-  return fetchWrapper.get(`/api/chat/offer/${props.id}`).then((response) => {
-    if (!response) {
-      isChatAlreadyCreated.value = false
-    } else {
-      chatID.value = response.data["ID"]
-      isChatAlreadyCreated.value = true
+async function getHostDetails(hostId) {
+  const response = await fetchWrapper.get(`/api/host/${hostId}`)
+  if (response) {
+    return {
+      'hostId': response["ID"],
+      'description': response["Description"],
+      'firstName': response["FirstName"]
     }
-  }).catch(error => {
-    console.log(error)
-  })
+  }
 }
 
 onMounted(async () => {
   offer.value = await getOfferDetails();
-  console.log(user.value)
+  hostData.value = await getHostDetails(offer.value.hostId)
 });
 
 </script>
@@ -466,7 +432,7 @@ onMounted(async () => {
                          :src="defaultImageSource"
                   ></v-img>
                   <v-list-item
-                      :title="user.FirstName"
+                      :title="hostData.firstName"
                   ></v-list-item>
                 </v-col>
               </v-row>
@@ -475,7 +441,7 @@ onMounted(async () => {
                   <v-list-item
                       key="about"
                       title="About the host"
-                      :subtitle="user.Description"
+                      :subtitle="hostData.description"
                   ></v-list-item>
                 </v-col>
               </v-row>

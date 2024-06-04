@@ -8,14 +8,6 @@ import (
 
 type AccommodationType string
 
-const (
-	Hotel      AccommodationType = "hotel"
-	Hostel     AccommodationType = "hostel"
-	Apartment  AccommodationType = "apartment"
-	Villa      AccommodationType = "villa"
-	Guesthouse AccommodationType = "guesthouse"
-)
-
 type Accommodation struct {
 	gorm.Model
 	Offer
