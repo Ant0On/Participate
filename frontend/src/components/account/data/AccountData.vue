@@ -4,15 +4,13 @@ import * as Yup from 'yup';
 import {storeToRefs} from 'pinia';
 
 import {useAuthStore} from "@/stores/auth.store";
-import TextInput from "@/components/ui/TextInput.vue";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 
 const userStore = useAuthStore();
 const {user: user} = storeToRefs(userStore)
 
 const errors = reactive({
-  apiError: "",
-  oldPassword: ""
+  apiError: ""
 })
 
 const userImageSource = computed(() => {

@@ -1,13 +1,14 @@
 <script setup>
 import {reactive, ref} from 'vue';
 import * as Yup from 'yup';
+import {storeToRefs} from 'pinia';
 
 import {useAuthStore} from "@/stores/auth.store";
 import {fetchWrapper} from "@/_helpers/fetch-wrapper";
 import PasswordInput from "@/components/ui/PasswordInput.vue";
 
-const auth = useAuthStore();
-const user = auth.user;
+const userStore = useAuthStore();
+const {user: user} = storeToRefs(userStore)
 
 const errors = reactive({
   apiError: "",
@@ -28,7 +29,7 @@ async function onSubmit() {
     isSubmitMode.value = false;
 
     if (passwordData.value.OldPassword) {
-      await fetchWrapper.put(`/api/customer/${user.ID}/change/password`, {
+      await fetchWrapper.put(`/api/customer/${user.value.ID}/change/password`, {
         old_password: passwordData.value.OldPassword.trim(),
         new_password: passwordData.value.NewPassword.trim(),
         confirm_password: passwordData.value.ConfirmNewPassword.trim(),
@@ -41,6 +42,7 @@ async function onSubmit() {
     errors.apiError = 'Password changed successfully!';
 
     user.Password = passwordData.value.NewPassword;
+    window.location.reload();
   } catch (error) {
     errors.apiError = formatErrors(error.errors);
   }
@@ -89,11 +91,11 @@ const schemaPassword = Yup.object().shape({
       <div class="user_fields">
         <div class="customer_fields">
           <PasswordInput :label-text="'Old Password'" :isActive="isSubmitMode" v-model="passwordData.OldPassword"
-                         type="password" width="100%"/>
+                         width="100%"/>
           <PasswordInput :label-text="'New Password'" :isActive="isSubmitMode" v-model="passwordData.NewPassword"
-                         type="password" width="100%"/>
+                         width="100%"/>
           <PasswordInput :label-text="'Confirm New Password'" :isActive="isSubmitMode"
-                         v-model="passwordData.ConfirmNewPassword" type="password" width="100%"/>
+                         v-model="passwordData.ConfirmNewPassword" width="100%"/>
           <p class="error-message" v-if="errors.oldPassword">{{ errors.oldPassword }}</p>
           <p class="error-message" v-if="errors.newPassword">{{ errors.newPassword }}</p>
           <p class="error-message" v-if="errors.confirmNewPassword">{{ errors.confirmNewPassword }}</p>

@@ -12,6 +12,7 @@ import Activities from "@/views/ActivitiesPage.vue";
 import Offer from "@/views/OfferDetailsPage.vue";
 import OfferEdit from '@/views/OfferEditPage.vue';
 import AccountBecomeHost from "@/components/account/become_host/AccountBecomeHost.vue";
+import ChangePassword from "@/components/account/change_password/ChangePassword.vue";
 import ReservationsHistory from "@/components/account/reservations_history/ReservationsHistory.vue";
 import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
 import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
@@ -55,6 +56,11 @@ const routes = [
         name: 'Offer Edit',
         component: OfferEdit,
         props: true
+    },
+    {
+        path: '/account/change_password',
+        name: "Change password",
+        component: ChangePassword
     },
     {
         path: '/account/become_host',
