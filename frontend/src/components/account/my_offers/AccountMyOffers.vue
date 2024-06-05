@@ -117,7 +117,7 @@ async function deleteOffer(offerID, offerType) {
       accommodation: allAccommodations
     };
 
-    offerListMap[offerType].value.value = offerListMap[offerType].value.value.filter(offer => offer.offerID !== offerID);
+    offerListMap[offerType].value.value = offerListMap[offerType].value.value.filter(offer => offer.offerId !== offerID);
   } catch (error) {
     console.error('Error deleting the offer:', error);
   }
