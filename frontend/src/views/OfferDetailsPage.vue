@@ -80,10 +80,10 @@ async function makeReservation() {
     'payment_id': paymentType.value[chosenPayment.value].id
   }
   if (props.type === "event") {
-    reservationBody.date = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.date = new Date(offer.value.dateFrom).toISOString()
     reservationBody.event_id = Number(props.id)
   } else if (props.type === "activity") {
-    reservationBody.date = new Date(reservation.value.dateTo).toISOString()
+    reservationBody.date = new Date(offer.value.date).toISOString()
     reservationBody.activity_id = Number(props.id)
   } else if (props.type === "accommodation") {
     reservationBody.date_from = new Date(reservation.value.dateFrom).toISOString()
@@ -425,7 +425,7 @@ onMounted(async () => {
                   <v-card>
                     <v-avatar v-if="isUserImage"
                               size="150"
-                              text="HELLO"
+                              :text="hostData.firstName"
                               density="comfortable"
                               :image="userImageSource"
                     ></v-avatar>
@@ -517,6 +517,7 @@ onMounted(async () => {
                       class="w-75 d-flex align-center justify-center flex-column"
                       ref="form"
               >
+                {{console.log(type)}}
                 <v-text-field
                     label="Number of people"
                     class="w-100"
@@ -528,17 +529,28 @@ onMounted(async () => {
                     value => value <= offer?.capacity || 'Number of people must be lower than capacity',
                     ]"
                 ></v-text-field>
-                <v-text-field
+                <v-text-field v-if="type === 'event'"
                     label="Date"
                     class="w-100"
-                    clearable
+                              readonly
                     type="date"
                     variant="outlined"
-                    v-model="reservation.dateTo"
+                    v-model="offer.dateFrom"
                     :rules="[value => !!value || 'Date is required',
-                    value => new Date(value) >= new Date() || 'Date can\'t be smaller than today\'s date',
+                    value => new Date(value) >= new Date() || 'Date can\'t be before today\'s date',
                     ]"
                 ></v-text-field>
+                  <v-text-field v-else
+                                label="Date"
+                                class="w-100"
+                                readonly
+                                type="date"
+                                variant="outlined"
+                                v-model="offer.date"
+                                :rules="[value => !!value || 'Date is required',
+                    value => new Date(value) >= new Date() || 'Date can\'t be before today\'s date',
+                    ]"
+                  />
               </v-form>
               <v-form v-else-if="type === 'accommodation'" v-model="reservationCreated"
                       class="w-75 d-flex flex-column align-center justify-center"
