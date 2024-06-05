@@ -46,16 +46,6 @@ func (e *Event) Delete() error {
 	return nil
 }
 
-func (e *Event) UpdatePrice(price float64) error {
-	e.Price = price
-	return e.Update()
-}
-
-func (e *Event) AddDiscount(discount float64) error {
-	e.Discount = discount
-	return e.Update()
-}
-
 func GetEventByID(id string) (OfferOperations, error) {
 	var e *Event
 	if err := DB.First(&e, id).Error; err != nil {

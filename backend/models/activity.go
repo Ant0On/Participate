@@ -62,16 +62,6 @@ func (a *Activity) Delete() error {
 	return nil
 }
 
-func (a *Activity) UpdatePrice(price float64) error {
-	a.Price = price
-	return a.Update()
-}
-
-func (a *Activity) AddDiscount(discount float64) error {
-	a.Discount = discount
-	return a.Update()
-}
-
 func GetActivityByID(id string) (OfferOperations, error) {
 	var a *Activity
 	if err := DB.First(&a, id).Error; err != nil {

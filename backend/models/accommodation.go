@@ -60,16 +60,6 @@ func (a *Accommodation) Delete() error {
 	return nil
 }
 
-func (a *Accommodation) UpdatePrice(price float64) error {
-	a.PricePerDay = price
-	return a.Update()
-}
-
-func (a *Accommodation) AddDiscount(discount float64) error {
-	a.Discount = discount
-	return a.Update()
-}
-
 func GetAccommodationByID(id string) (OfferOperations, error) {
 	var a *Accommodation
 	if err := DB.First(&a, id).Error; err != nil {

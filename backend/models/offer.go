@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +14,6 @@ type OfferOperations interface {
 	Save() error
 	Update() error
 	Delete() error
-	UpdatePrice(price float64) error
-	AddDiscount(discount float64) error
 	GetID() (uint, error)
 	HandleOfferImageUploads(c *gin.Context, tableName string, id uint) error
 }
@@ -27,6 +26,36 @@ type Offer struct {
 	TownID      uint    `gorm:"not null" form:"town_id"`
 	UserID      uint    `gorm:"not null" form:"user_id" binding:"required"`
 	Town        Town    `gorm:"foreignKey:TownID"`
+}
+
+func CheckOffers() error {
+	var activities []Activity
+	var events []Event
+
+	if err := DB.Model(&Activity{}).Scan(&activities).Error; err != nil {
+		return fmt.Errorf("activities not found: %w", err)
+	}
+	if err := DB.Model(&Event{}).Scan(&events).Error; err != nil {
+		return fmt.Errorf("events not found: %w", err)
+	}
+
+	now := time.Now()
+
+	for _, activity := range activities {
+		if activity.Date.After(now) && now.Format("2006-01-02") == activity.Date.Format("2006-01-02") {
+			if err := activity.Delete(); err != nil {
+				return fmt.Errorf("activity delete: %w", err)
+			}
+		}
+	}
+	for _, event := range events {
+		if event.DateTo.After(now) && now.Format("2006-01-02") == event.DateTo.Format("2006-01-02") {
+			if err := event.Delete(); err != nil {
+				return fmt.Errorf("event delete: %w", err)
+			}
+		}
+	}
+	return nil
 }
 
 func (o *Offer) HandleOfferImageUploads(c *gin.Context, tableName string, offerID uint) error {
