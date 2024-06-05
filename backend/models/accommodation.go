@@ -20,6 +20,16 @@ type Accommodation struct {
 	Reservations      []ReservationAccommodation
 }
 
+func (a *Accommodation) BeforeDelete(tx *gorm.DB) (err error) {
+	if err = tx.Where("accommodation_id = ?", a.ID).Delete(&ReservationActivity{}).Error; err != nil {
+		return fmt.Errorf("error deleting associated reservations: %w", err)
+	}
+	if err = tx.Where("accommodation_id = ?", a.ID).Delete(&Room{}).Error; err != nil {
+		return fmt.Errorf("error deleting associated rooms: %w", err)
+	}
+	return nil
+}
+
 func (a *Accommodation) Save() error {
 	if err := DB.Create(&a).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)

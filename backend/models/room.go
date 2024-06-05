@@ -15,6 +15,14 @@ type Room struct {
 	Area            int            `gorm:"not null" json:"area" binding:"required,gt=0"`
 	AccommodationID uint           `gorm:"not null" json:"accommodation_id" binding:"required"`
 	RoomFacilities  []RoomFacility `gorm:"many2many:room_room_facilities;" json:"room_facilities"`
+	Reservations    []ReservationRoom
+}
+
+func (r *Room) BeforeDelete(tx *gorm.DB) (err error) {
+	if err = tx.Where("room_id = ?", r.ID).Delete(&ReservationRoom{}).Error; err != nil {
+		return fmt.Errorf("error deleting associated reservations: %w", err)
+	}
+	return nil
 }
 
 func (r *Room) Save() error {

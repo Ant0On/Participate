@@ -17,6 +17,13 @@ type Event struct {
 	Reservations []ReservationEvent
 }
 
+func (e *Event) BeforeDelete(tx *gorm.DB) (err error) {
+	if err = tx.Where("event_id = ?", e.ID).Delete(&ReservationEvent{}).Error; err != nil {
+		return fmt.Errorf("error deleting associated reservations: %w", err)
+	}
+	return nil
+}
+
 func (e *Event) Save() error {
 	if err := DB.Create(e).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
