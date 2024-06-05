@@ -62,10 +62,14 @@ func main() {
 			return
 		}
 	})
+	_, err = c.AddFunc("@daily", func() {
+		err := models.CheckOffers()
+		if err != nil {
+			return
+		}
+	})
 	if err != nil {
 		return
 	}
 	c.Start()
-
-	select {}
 }

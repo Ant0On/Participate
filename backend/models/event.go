@@ -17,6 +17,13 @@ type Event struct {
 	Reservations []ReservationEvent
 }
 
+func (e *Event) BeforeDelete(tx *gorm.DB) (err error) {
+	if err = tx.Where("event_id = ?", e.ID).Delete(&ReservationEvent{}).Error; err != nil {
+		return fmt.Errorf("error deleting associated reservations: %w", err)
+	}
+	return nil
+}
+
 func (e *Event) Save() error {
 	if err := DB.Create(e).Error; err != nil {
 		return fmt.Errorf("DB.Create: %w", err)
@@ -44,16 +51,6 @@ func (e *Event) Delete() error {
 		return fmt.Errorf("DB.Delete: %w", err)
 	}
 	return nil
-}
-
-func (e *Event) UpdatePrice(price float64) error {
-	e.Price = price
-	return e.Update()
-}
-
-func (e *Event) AddDiscount(discount float64) error {
-	e.Discount = discount
-	return e.Update()
 }
 
 func GetEventByID(id string) (OfferOperations, error) {

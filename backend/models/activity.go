@@ -21,6 +21,13 @@ type Activity struct {
 	Reservations []ReservationActivity
 }
 
+func (a *Activity) BeforeDelete(tx *gorm.DB) (err error) {
+	if err = tx.Where("activity_id = ?", a.ID).Delete(&ReservationActivity{}).Error; err != nil {
+		return fmt.Errorf("error deleting associated reservations: %w", err)
+	}
+	return nil
+}
+
 func (a *Activity) Save() error {
 	a.Duration = a.Duration / time.Hour
 	if err := DB.Create(a).Error; err != nil {
@@ -60,16 +67,6 @@ func (a *Activity) Delete() error {
 		return fmt.Errorf("DB.Delete: %w", err)
 	}
 	return nil
-}
-
-func (a *Activity) UpdatePrice(price float64) error {
-	a.Price = price
-	return a.Update()
-}
-
-func (a *Activity) AddDiscount(discount float64) error {
-	a.Discount = discount
-	return a.Update()
 }
 
 func GetActivityByID(id string) (OfferOperations, error) {
