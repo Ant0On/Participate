@@ -493,7 +493,7 @@ onMounted(async () => {
             </v-card-text>
 
             <v-divider></v-divider>
-            <v-card-actions class="align-self-end w-100">
+            <v-card-actions v-if="user !== null" class="align-self-end w-100">
               <v-btn
                   color="blue-darken-2 flex-grow"
                   text="Reserve"
@@ -517,7 +517,6 @@ onMounted(async () => {
                       class="w-75 d-flex align-center justify-center flex-column"
                       ref="form"
               >
-                {{console.log(type)}}
                 <v-text-field
                     label="Number of people"
                     class="w-100"
