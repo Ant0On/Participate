@@ -69,13 +69,13 @@ func RegisterRoutes(r *gin.Engine) {
 	country.GET("/get/all", GetAllCountries)
 
 	generalFacility := r.Group("/api/general_facility")
-	generalFacility.POST("/get", GetAllGeneralFacilities)
+	generalFacility.GET("/get", GetAllGeneralFacilities)
 
 	roomFacility := r.Group("/api/room_facility")
-	roomFacility.POST("/get", GetAllRoomFacilities)
+	roomFacility.GET("/get", GetAllRoomFacilities)
 
 	equipment := r.Group("/api/equipment")
-	equipment.POST("/get", GetAllEquipment)
+	equipment.GET("/get", GetAllEquipment)
 
 	payment := r.Group("/api/payment")
 	payment.GET("/get", GetAllPayments)

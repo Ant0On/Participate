@@ -32,7 +32,7 @@ function mapEvents(responseData) {
 
 function getQuery() {
   if (inputValue.value) {
-    return (isLocalization.value) ? `/?localization=${inputValue.value}` : `/?name=${inputValue.value}`
+    return (isLocalization.value) ? `/?localisation=${inputValue.value}` : `/?title=${inputValue.value}`
   }
   return ''
 }

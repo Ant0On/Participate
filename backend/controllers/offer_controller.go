@@ -62,6 +62,30 @@ func FetchOffers(c *gin.Context, params OfferQueryParameters) {
 		query = query.Where(key+" = ?", value)
 	}
 
+	name := c.Query("title")
+	if name != "" {
+		query = query.Where("title ILIKE ?", "%"+name+"%")
+	}
+
+	var tableName string
+	switch params.Model.(type) {
+	case *[]models.Event:
+		tableName = "event"
+	case *[]models.Activity:
+		tableName = "activity"
+	case *[]models.Accommodation:
+		tableName = "accommodation"
+	default:
+		tableName = ""
+	}
+
+	localisation := c.Query("localisation")
+	if localisation != "" {
+		query = query.Joins("JOIN town ON town.id = "+tableName+".town_id").
+			Joins("JOIN country ON country.id = town.country_id").
+			Where("town.name ILIKE ? OR country.country_name ILIKE ?", "%"+localisation+"%", "%"+localisation+"%")
+	}
+
 	query = query.Offset(offset).Limit(pageSize).Find(params.Model)
 
 	if query.Error != nil {

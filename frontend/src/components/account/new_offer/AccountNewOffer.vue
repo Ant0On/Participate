@@ -84,22 +84,12 @@ const addedNewOffer = ref(false)
 const countries = ref([])
 const offerTypes = ['Accommodation', 'Activity', 'Event']
 const accommodationTypes = ['Hotel', 'Hostel', 'Apartment', 'Villa', 'Guesthouse']
-const generalFacilities = ["Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
-  "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
-  "Concierge Service", "Outdoor Pool", "Children's Playground", "Tennis Court", "Library", "Garden", "Sauna",
-  "Jacuzzi", "Billiards Room", "Cinema", "Karaoke Room", "Bowling Alley", "BBQ Area", "Shuttle Service"]
-const roomFacilities = ["Television", "Air Conditioning", "Mini Fridge", "Safe", "Coffee Maker", "Microwave",
-  "Kettle", "Iron and Ironing Board", "Hair Dryer", "Desk", "Ocean View", "Mountain View", "Balcony", "Bathtub",
-  "Shower", "WiFi", "Room Service", "Breakfast Included", "In-Room Safe", "Telephone", "DVD Player", "Alarm Clock",
-  "Robes", "Slippers", "Toiletries", "Work Desk", "Sofa Bed", "Fireplace", "Refrigerator", "Dining Area"
-];
+const generalFacilities = ref([])
+const roomFacilities = ref([])
+const equipmentList = ref([])
 
 const skillLevels = ['Beginner', 'Intermediate', 'Advanced']
 const activityTypes = ['Indoor', 'Outdoor']
-const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", "Sled", "Snowshoes", "Tent",
-  "Sleeping Bag", "Backpack", "Hiking Boots", "Compass", "Map", "Binoculars", "Flashlight", "First Aid Kit",
-  "Water Bottle", "Climbing Harness", "Climbing Rope", "Carabiners", "Rock Climbing Shoes", "Fishing Rod",
-  "Bait", "Camera", "Swimsuit", "Snorkel Gear", "Tennis Racket", "Golf Clubs", "Bicycle"];
 const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 
 async function getCountryId(countryName) {
@@ -170,7 +160,6 @@ async function handleActivityOffer(townID, imageFiles) {
     description: newOffer.value.description,
     capacity: newOffer.value.capacity,
     town_id: townID,
-    country_id: 1,
     Name: newOffer.value.city,
     CountryID: await getCountryId(newOffer.value.country),
     user_id: user.ID,
@@ -386,8 +375,14 @@ function dataURLsToFiles(dataURLs, fileNameBase) {
 }
 
 onMounted(async () => {
-  const response = await fetchWrapper.get('/api/country/get/all')
-  countries.value = response.data.map(country => country.CountryName)
+  const countryData = await fetchWrapper.get('/api/country/get/all')
+  countries.value = countryData.data.map(country => country.CountryName)
+  const generalFacilitiesData = await fetchWrapper.get('/api/general_facility/get')
+  generalFacilities.value = generalFacilitiesData.data.map(facility => facility.Name)
+  const roomFacilitiesData = await fetchWrapper.get('/api/room_facility/get')
+  roomFacilities.value = roomFacilitiesData.data.map(facility => facility.Name)
+  const equipmentData = await fetchWrapper.get('/api/equipment/get')
+  equipmentList.value = equipmentData.data.map(equipment => equipment.Name)
 })
 </script>
 
@@ -412,7 +407,7 @@ onMounted(async () => {
         <v-textarea v-model="newOffer.description" label="Description"
                     :rules="[
                         value=> !!value,
-                        value => value.length > 30 || 'Description to short',
+                        value => value.length > 30 || 'Description too short',
                         value => value.length < 300 || 'Description too long'
          ]"
                     clearable
