@@ -12,7 +12,8 @@ export default async function* fetchPaginatedData(url, onMap=(data)=>data){
 
         page += 1;
         while(page <= totalPages) {
-            yield onMap(await fetchPage(url, page)?.data)
+            response = await fetchPage(url, page)
+            yield onMap(response?.data)
             page += 1;
         }
     }

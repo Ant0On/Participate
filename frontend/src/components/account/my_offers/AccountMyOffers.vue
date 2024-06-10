@@ -42,7 +42,6 @@ function mapAccommodation(responseData) {
 }
 
 function mapActivities(responseData) {
-  console.log(responseData)
   return responseData.map((data) => {
     return {
       'offerId': data["ID"],
