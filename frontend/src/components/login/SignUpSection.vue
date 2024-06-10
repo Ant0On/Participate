@@ -26,7 +26,7 @@ async function onSubmit() {
     return authStore.signUp(signUpData.value.FirstName, signUpData.value.LastName, signUpData.value.Login,
         signUpData.value.Password, signUpData.value.ConfirmPassword, signUpData.value.Image)
   }).catch(error => {
-    if (error) {
+    if (typeof error === 'string') {
       if (error.includes('SQLSTATE 23505')) {
         errors.apiError = "Email is already taken!";
       }
