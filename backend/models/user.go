@@ -46,9 +46,9 @@ func GetUserByEmail(email string) (*User, error) {
 
 	if err := DB.Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("user with email %s not found: %w", email, err)
+			return nil, fmt.Errorf("user with email %s not found", email)
 		}
-		return nil, fmt.Errorf("failed to get user by email: %w", err)
+		return nil, fmt.Errorf("failed to get user by email")
 	}
 
 	return &u, nil
@@ -89,16 +89,16 @@ func (u *User) Delete() error {
 func LoginCheck(email, password string) (string, *User, error) {
 	user, err := GetUserByEmail(email)
 	if err != nil {
-		return "", nil, fmt.Errorf("email does not exist: %w", err)
+		return "", nil, fmt.Errorf("user with given email does not exist")
 	}
 
 	if err := passHelper.VerifyPassword(password, user.Password); err != nil {
-		return "", nil, fmt.Errorf("wrong password: %w", err)
+		return "", nil, fmt.Errorf("wrong password")
 	}
 
 	t, err := token.GenerateToken(user.ID, email, user.Role)
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to generate token: %w", err)
+		return "", nil, fmt.Errorf("failed to generate token")
 	}
 
 	return t, user, nil
@@ -107,7 +107,7 @@ func LoginCheck(email, password string) (string, *User, error) {
 func (u *User) HashPassword() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
+		return fmt.Errorf("failed to hash password")
 	}
 	u.Password = string(hashedPassword)
 
