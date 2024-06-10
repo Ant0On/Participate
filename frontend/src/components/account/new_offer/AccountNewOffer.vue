@@ -77,7 +77,7 @@ const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'Activit
 const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'Event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
 const isRoomInfoFilled = computed(() => checkIfRoomInfoIsFilled())
-const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
+const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '' && newOffer.value.city.length > 1)
 const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
 const addedNewOffer = ref(false)
@@ -268,6 +268,16 @@ function checkIfOfferInfoIsFilled() {
 
   if (newOffer.value.title === '' || newOffer.value.description === '' || newOffer.value.capacity === '') {
     errors.offerInfo = 'Please fill out all required offer information.';
+    return false;
+  }
+
+  if (newOffer.value.title.length < 2 || newOffer.value.title.length > 100) {
+    errors.offerInfo = 'Title must be between 2 and 100 characters.';
+    return false;
+  }
+
+  if (newOffer.value.description.length < 30 || newOffer.value.description.length > 300) {
+    errors.offerInfo = 'Description must be between 30 and 300 characters.';
     return false;
   }
 
