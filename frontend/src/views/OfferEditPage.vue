@@ -250,25 +250,21 @@ onMounted(async () => {
   offer.value = await getOfferDetails();
   offerCountries.value = await getCountries();
   offerChange.value = getOfferChange(offer.value);
+  const generalFacilitiesData = await fetchWrapper.get('/api/general_facility/get')
+  generalFacilities.value = generalFacilitiesData.data.map(facility => facility.Name)
+  const roomFacilitiesData = await fetchWrapper.get('/api/room_facility/get')
+  roomFacilities.value = roomFacilitiesData.data.map(facility => facility.Name)
+  const equipmentData = await fetchWrapper.get('/api/equipment/get')
+  equipmentList.value = equipmentData.data.map(equipment => equipment.Name)
 });
 
 const accommodationTypes = ['Hotel', 'Hostel', 'Apartment', 'Villa', 'Guesthouse']
-const generalFacilities = ["Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
-  "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
-  "Concierge Service", "Outdoor Pool", "Children's Playground", "Tennis Court", "Library", "Garden", "Sauna",
-  "Jacuzzi", "Billiards Room", "Cinema", "Karaoke Room", "Bowling Alley", "BBQ Area", "Shuttle Service"]
-const roomFacilities = ["Television", "Air Conditioning", "Mini Fridge", "Safe", "Coffee Maker", "Microwave",
-  "Kettle", "Iron and Ironing Board", "Hair Dryer", "Desk", "Ocean View", "Mountain View", "Balcony", "Bathtub",
-  "Shower", "WiFi", "Room Service", "Breakfast Included", "In-Room Safe", "Telephone", "DVD Player", "Alarm Clock",
-  "Robes", "Slippers", "Toiletries", "Work Desk", "Sofa Bed", "Fireplace", "Refrigerator", "Dining Area"
-];
+const generalFacilities = ref([])
+const roomFacilities = ref([])
 
 const skillLevels = ['Beginner', 'Intermediate', 'Advanced']
 const activityTypes = ['Indoor', 'Outdoor']
-const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", "Sled", "Snowshoes", "Tent",
-  "Sleeping Bag", "Backpack", "Hiking Boots", "Compass", "Map", "Binoculars", "Flashlight", "First Aid Kit",
-  "Water Bottle", "Climbing Harness", "Climbing Rope", "Carabiners", "Rock Climbing Shoes", "Fishing Rod",
-  "Bait", "Camera", "Swimsuit", "Snorkel Gear", "Tennis Racket", "Golf Clubs", "Bicycle"];
+const equipmentList = ref([])
 const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 </script>
 

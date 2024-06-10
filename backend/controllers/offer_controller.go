@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"math"
 	"net/http"
 	"strconv"
 
@@ -86,18 +87,28 @@ func FetchOffers(c *gin.Context, params OfferQueryParameters) {
 			Where("town.name ILIKE ? OR country.country_name ILIKE ?", "%"+localisation+"%", "%"+localisation+"%")
 	}
 
-	query = query.Offset(offset).Limit(pageSize).Find(params.Model)
+	var totalItems int64
+	query.Model(params.Model).Count(&totalItems)
 
+	var totalPages int
+	if totalItems > 0 {
+		totalPages = int(math.Ceil(float64(totalItems) / float64(pageSize)))
+	} else {
+		totalPages = 0
+	}
+
+	query = query.Offset(offset).Limit(pageSize).Find(params.Model)
 	if query.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": query.Error.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "Data fetched successfully",
-		"data":      params.Model,
-		"page":      page,
-		"page_size": pageSize,
+		"message":     "Data fetched successfully",
+		"data":        params.Model,
+		"page":        page,
+		"page_size":   pageSize,
+		"total_pages": totalPages,
 	})
 }
 

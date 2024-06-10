@@ -36,14 +36,13 @@ function mapAccommodation(responseData) {
       'ratingCount': data['RatingCount'] || 0,
       'numberOfRooms': data?.NumberOfRooms,
       'rooms': data?.Rooms?.map((room) => {return {...room}}),
-      'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name),
-
-
+      'generalFacilities': data?.GeneralFacilities?.map((generalFacility) => generalFacility.Name)
     };
   });
 }
 
 function mapActivities(responseData) {
+  console.log(responseData)
   return responseData.map((data) => {
     return {
       'offerId': data["ID"],

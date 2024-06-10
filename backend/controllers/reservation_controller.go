@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -154,15 +155,20 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 		return
 	}
 
+	var totalCount int64
+	models.DB.Model(parameters.model).Joins(joinCondition).Where(parameters.condition(userID)).Count(&totalCount)
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pageSizeInt)))
+
 	if result.RowsAffected == 0 {
 		c.JSON(http.StatusNoContent, gin.H{"message": "No reservations found"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "Reservations fetched successfully",
-		"data":      parameters.dto,
-		"page":      pageInt,
-		"page_size": pageSizeInt,
+		"message":     "Reservations fetched successfully",
+		"data":        parameters.dto,
+		"page":        pageInt,
+		"page_size":   pageSizeInt,
+		"total_pages": totalPages,
 	})
 }
