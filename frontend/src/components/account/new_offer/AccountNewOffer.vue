@@ -37,7 +37,7 @@ const newActivity = ref({
   price: '',
   activityType: '',
   dateRange: [],
-  equipment: '',
+  equipment: [],
 })
 
 const newEvent = ref({
