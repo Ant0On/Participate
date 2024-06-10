@@ -46,7 +46,7 @@ var EquipmentList = []Equipment{
 
 func (e *Equipment) save() error {
 	if err := DB.Create(&e).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to create equipment: %w", err)
 	}
 	return nil
 }
@@ -54,7 +54,7 @@ func (e *Equipment) save() error {
 func AddEquipment() error {
 	for _, equipment := range EquipmentList {
 		if err := equipment.save(); err != nil {
-			return fmt.Errorf("country.Save: %w", err)
+			return fmt.Errorf("failed to add equipment: %w", err)
 		}
 	}
 	return nil
@@ -64,7 +64,7 @@ func GetAllEquipment() ([]Equipment, error) {
 	var equipment []Equipment
 
 	if err := DB.Order("name").Find(&equipment).Error; err != nil {
-		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
+		return nil, fmt.Errorf("failed to retrieve equipment: %w", err)
 	}
 	return equipment, nil
 }
@@ -73,7 +73,7 @@ func GetEquipmentByName(name string) (Equipment, error) {
 	var equipment Equipment
 
 	if err := DB.Model(&Equipment{}).Where("name = ?", name).Scan(&equipment).Error; err != nil {
-		return Equipment{}, fmt.Errorf("DB.First: %w", err)
+		return Equipment{}, fmt.Errorf("failed to get equipment by name: %w", err)
 	}
 	return equipment, nil
 }

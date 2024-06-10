@@ -33,10 +33,10 @@ func CheckOffers() error {
 	var events []Event
 
 	if err := DB.Model(&Activity{}).Scan(&activities).Error; err != nil {
-		return fmt.Errorf("activities not found: %w", err)
+		return fmt.Errorf("failed to retrieve activities: %w", err)
 	}
 	if err := DB.Model(&Event{}).Scan(&events).Error; err != nil {
-		return fmt.Errorf("events not found: %w", err)
+		return fmt.Errorf("failed to retrieve events: %w", err)
 	}
 
 	now := time.Now()
@@ -44,14 +44,14 @@ func CheckOffers() error {
 	for _, activity := range activities {
 		if activity.Date.After(now) && now.Format("2006-01-02") == activity.Date.Format("2006-01-02") {
 			if err := activity.Delete(); err != nil {
-				return fmt.Errorf("activity delete: %w", err)
+				return fmt.Errorf("failed to delete activity: %w", err)
 			}
 		}
 	}
 	for _, event := range events {
 		if event.DateTo.After(now) && now.Format("2006-01-02") == event.DateTo.Format("2006-01-02") {
 			if err := event.Delete(); err != nil {
-				return fmt.Errorf("event delete: %w", err)
+				return fmt.Errorf("failed to delete event: %w", err)
 			}
 		}
 	}
@@ -61,7 +61,7 @@ func CheckOffers() error {
 func (o *Offer) HandleOfferImageUploads(c *gin.Context, tableName string, offerID uint) error {
 	form, err := c.MultipartForm()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to parse multipart form: %w", err)
 	}
 
 	files := form.File["images"]
@@ -71,7 +71,7 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, tableName string, offerI
 
 	offerFolder := filepath.Join(fmt.Sprintf("images/offers/%s/%d", tableName, offerID))
 	if err := os.MkdirAll(offerFolder, os.ModePerm); err != nil {
-		return err
+		return fmt.Errorf("failed to create offer image folder: %w", err)
 	}
 
 	for i, file := range files {
@@ -79,7 +79,7 @@ func (o *Offer) HandleOfferImageUploads(c *gin.Context, tableName string, offerI
 		dst := filepath.Join(offerFolder, filename)
 
 		if err := c.SaveUploadedFile(file, dst); err != nil {
-			return err
+			return fmt.Errorf("failed to save uploaded file: %w", err)
 		}
 	}
 

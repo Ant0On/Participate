@@ -8,7 +8,7 @@ import {useAuthStore} from "@/stores/auth.store";
 
 
 const loginData = ref({
-  Login: '',
+  Email: '',
   Password: ''
 })
 const errors = reactive({
@@ -18,22 +18,15 @@ const errors = reactive({
 async function onSubmit() {
   const authStore = useAuthStore();
   await schema.validate(loginData.value).then(() => {
-    return authStore.login(loginData.value.Login, loginData.value.Password)
+    return authStore.login(loginData.value.Email, loginData.value.Password)
   }).catch(error =>{
-        if(error === "Bad Request")
-        {
-          errors.apiError = "Incorrect login data! " + error
-        }
-        else{
-          errors.apiError = error.message
-        }
-      }
-  )
+    errors.apiError = "Incorrect sign up data! " + error;
+  })
 }
 
 const schema = Yup.object().shape({
-  Login: Yup.string().required('Login is required'),
-  Password: Yup.string().when('Login', {
+  Email: Yup.string().required('Email is required'),
+  Password: Yup.string().when('Email', {
     is: (value) => value !== '' || typeof value !== 'undefined',
     then: schema => schema.required('Password is required')
   } )
@@ -49,9 +42,9 @@ const emits = defineEmits(['signUpClicked'])
 <template>
   <div class="d-flex flex-column justify-start h-100" style="min-width: 300px">
     <p>Welcome back. Please log in to your account</p>
-    <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+    <v-alert v-if="errors.apiError" text tile="Login error" color="error">{{ errors.apiError }}</v-alert>
     <form class="login_form" @submit.prevent>
-      <TextInput labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.Login"/>
+      <TextInput labelText="Your email" placeholder="Type your email" :isRequired="true" v-model="loginData.Email"/>
       <PasswordInput v-model="loginData.Password" :labelText="'Your password'" @keyup.enter="onSubmit"/>
       <div class="d-flex justify-space-evenly">
         <v-btn text="Sign up" @click="onSignUp"></v-btn>
@@ -62,10 +55,6 @@ const emits = defineEmits(['signUpClicked'])
 </template>
 
 <style scoped>
-div.errors{
-  font-family: "Sarabun", Helvetica;
-
-}
 
 .login_form {
   display: flex;

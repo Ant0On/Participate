@@ -45,7 +45,7 @@ var GeneralFacilitiesList = []GeneralFacility{
 
 func (gf *GeneralFacility) save() error {
 	if err := DB.Create(&gf).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to create general facility: %w", err)
 	}
 	return nil
 }
@@ -53,7 +53,7 @@ func (gf *GeneralFacility) save() error {
 func AddGeneralFacilities() error {
 	for _, facility := range GeneralFacilitiesList {
 		if err := facility.save(); err != nil {
-			return fmt.Errorf("country.Save: %w", err)
+			return fmt.Errorf("failed to add general facility: %w", err)
 		}
 	}
 	return nil
@@ -63,7 +63,7 @@ func GetAllGeneralFacilities() ([]GeneralFacility, error) {
 	var generalFacilities []GeneralFacility
 
 	if err := DB.Order("name").Find(&generalFacilities).Error; err != nil {
-		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
+		return nil, fmt.Errorf("failed to get all general facilities: %w", err)
 	}
 	return generalFacilities, nil
 }
@@ -72,7 +72,7 @@ func GetFacilityByName(name string) (GeneralFacility, error) {
 	var facility GeneralFacility
 
 	if err := DB.Model(&GeneralFacility{}).Where("name = ?", name).Scan(&facility).Error; err != nil {
-		return GeneralFacility{}, fmt.Errorf("DB.First: %w", err)
+		return GeneralFacility{}, fmt.Errorf("failed to get facility by name: %w", err)
 	}
 	return facility, nil
 }

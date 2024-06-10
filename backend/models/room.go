@@ -27,14 +27,15 @@ func (r *Room) BeforeDelete(tx *gorm.DB) (err error) {
 
 func (r *Room) Save() error {
 	if err := DB.Create(&r).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to save room: %w", err)
 	}
 
 	return nil
 }
+
 func (r *Room) Update() error {
 	if err := DB.Save(&r).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to update room: %w", err)
 	}
 	return nil
 }
@@ -42,14 +43,14 @@ func (r *Room) Update() error {
 func GetRoomByID(id string) (*Room, error) {
 	var r Room
 	if err := DB.First(&r, id).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
+		return nil, fmt.Errorf("failed to retrieve room: %w", err)
 	}
 	return &r, nil
 }
 
 func (r *Room) Delete() error {
 	if err := DB.Delete(&r).Error; err != nil {
-		return fmt.Errorf("DB.Delete: %w", err)
+		return fmt.Errorf("failed to delete room: %w", err)
 	}
 	return nil
 }

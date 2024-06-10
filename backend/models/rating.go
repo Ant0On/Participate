@@ -24,7 +24,7 @@ var RatingList = []Rating{
 
 func (r *Rating) save() error {
 	if err := DB.Create(&r).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to save rating: %w", err)
 	}
 	return nil
 }
@@ -32,25 +32,25 @@ func (r *Rating) save() error {
 func AddGrades() error {
 	for _, rating := range RatingList {
 		if err := rating.save(); err != nil {
-			return fmt.Errorf("grades.Save: %w", err)
+			return fmt.Errorf("failed to add rating: %w", err)
 		}
 	}
 	return nil
 }
 
 func GetGrades() ([]Rating, error) {
-	var rating []Rating
+	var ratings []Rating
 
-	if err := DB.Model([]Rating{}).Scan(&rating).Error; err != nil {
-		return rating, fmt.Errorf("DB.Model([]Rating{}).Scan: %w", err)
+	if err := DB.Model(&Rating{}).Scan(&ratings).Error; err != nil {
+		return ratings, fmt.Errorf("failed to get ratings: %w", err)
 	}
-	return rating, nil
+	return ratings, nil
 }
 
 func GetGradeByCount(count string) (*Rating, error) {
-	var r *Rating
-	if err := DB.Where("count = ?", count).First(&r).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
+	var rating *Rating
+	if err := DB.Where("count = ?", count).First(&rating).Error; err != nil {
+		return nil, fmt.Errorf("failed to get rating by count: %w", err)
 	}
-	return r, nil
+	return rating, nil
 }

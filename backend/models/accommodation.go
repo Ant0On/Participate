@@ -32,7 +32,7 @@ func (a *Accommodation) BeforeDelete(tx *gorm.DB) (err error) {
 
 func (a *Accommodation) Save() error {
 	if err := DB.Create(&a).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to create accommodation: %w", err)
 	}
 
 	return nil
@@ -40,14 +40,14 @@ func (a *Accommodation) Save() error {
 
 func (a *Accommodation) GetID() (uint, error) {
 	if err := DB.First(&a).Error; err != nil {
-		return 0, fmt.Errorf("DB.First: %w", err)
+		return 0, fmt.Errorf("failed to retrieve accommodation ID: %w", err)
 	}
 	return a.ID, nil
 }
 
 func (a *Accommodation) Update() error {
 	if err := DB.Save(&a).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to update accommodation: %w", err)
 	}
 	return nil
 }
@@ -58,14 +58,14 @@ func (a *Accommodation) UpdateRating(rating int) error {
 	a.RatingCount += 1
 	a.RatingAvg = currentSum / float64(a.RatingCount)
 	if err := DB.Save(a).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to update accommodation rating: %w", err)
 	}
 	return nil
 }
 
 func (a *Accommodation) Delete() error {
 	if err := DB.Delete(&a).Error; err != nil {
-		return fmt.Errorf("DB.Delete: %w", err)
+		return fmt.Errorf("failed to delete accommodation: %w", err)
 	}
 	return nil
 }
@@ -73,7 +73,7 @@ func (a *Accommodation) Delete() error {
 func GetAccommodationByID(id string) (OfferOperations, error) {
 	var a *Accommodation
 	if err := DB.First(&a, id).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
+		return nil, fmt.Errorf("failed to retrieve accommodation by ID: %w", err)
 	}
 	return OfferOperations(a), nil
 }
@@ -81,7 +81,7 @@ func GetAccommodationByID(id string) (OfferOperations, error) {
 func GetAccommodationById(id string) (*Accommodation, error) {
 	var a Accommodation
 	if err := DB.First(&a, id).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
+		return nil, fmt.Errorf("failed to retrieve accommodation by ID: %w", err)
 	}
 	return &a, nil
 }

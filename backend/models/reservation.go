@@ -32,13 +32,13 @@ func CheckReservations() error {
 	var eventReservations []ReservationEvent
 
 	if err := DB.Model(&ReservationActivity{}).Scan(&activityReservations).Error; err != nil {
-		return fmt.Errorf("activity reservations not found: %w", err)
+		return fmt.Errorf("failed to retrieve activity reservations: %w", err)
 	}
 	if err := DB.Model(&ReservationAccommodation{}).Scan(&accommodationReservations).Error; err != nil {
-		return fmt.Errorf("accommodation reservations not found: %w", err)
+		return fmt.Errorf("failed to retrieve accommodation reservations: %w", err)
 	}
 	if err := DB.Model(&ReservationEvent{}).Scan(&eventReservations).Error; err != nil {
-		return fmt.Errorf("event reservations not found: %w", err)
+		return fmt.Errorf("failed to retrieve event reservations: %w", err)
 	}
 
 	now := time.Now()
@@ -47,12 +47,12 @@ func CheckReservations() error {
 		if reservation.ReservationState == "accepted" && now.Format("2006-01-02") == reservation.Date.Format("2006-01-02") {
 			reservation.ReservationState = "ongoing"
 			if err := reservation.Update(); err != nil {
-				return fmt.Errorf("reservation update: %w", err)
+				return fmt.Errorf("failed to update activity reservation: %w", err)
 			}
 		} else if reservation.ReservationState == "ongoing" && now.After(reservation.Date) {
 			reservation.ReservationState = "finished"
 			if err := reservation.Update(); err != nil {
-				return fmt.Errorf("reservation update: %w", err)
+				return fmt.Errorf("failed to update activity reservation: %w", err)
 			}
 		}
 	}
@@ -60,12 +60,12 @@ func CheckReservations() error {
 		if reservation.ReservationState == "accepted" && now.Format("2006-01-02") == reservation.DateFrom.Format("2006-01-02") {
 			reservation.ReservationState = "ongoing"
 			if err := reservation.Update(); err != nil {
-				return fmt.Errorf("reservation update: %w", err)
+				return fmt.Errorf("failed to update accommodation reservation: %w", err)
 			}
 		} else if reservation.ReservationState == "ongoing" && now.After(reservation.DateTo) {
 			reservation.ReservationState = "finished"
 			if err := reservation.Update(); err != nil {
-				return fmt.Errorf("reservation update: %w", err)
+				return fmt.Errorf("failed to update accommodation reservation: %w", err)
 			}
 		}
 	}
@@ -73,12 +73,12 @@ func CheckReservations() error {
 		if reservation.ReservationState == "accepted" && now.Format("2006-01-02") == reservation.Date.Format("2006-01-02") {
 			reservation.ReservationState = "ongoing"
 			if err := reservation.Update(); err != nil {
-				return fmt.Errorf("reservation update: %w", err)
+				return fmt.Errorf("failed to update event reservation: %w", err)
 			}
 		} else if reservation.ReservationState == "ongoing" && now.After(reservation.Date) {
 			reservation.ReservationState = "finished"
 			if err := reservation.Update(); err != nil {
-				return fmt.Errorf("reservation update: %w", err)
+				return fmt.Errorf("failed to update event reservation: %w", err)
 			}
 		}
 	}

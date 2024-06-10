@@ -75,7 +75,7 @@ const schema = Yup.object().shape({
       <PasswordInput v-model="signUpData.Password" :labelText="'Your password'" @keyup.enter="onSubmit" :isRequired="true"/>
       <PasswordInput v-model="signUpData.ConfirmPassword" :labelText="'Confirm your password'"
                      :placeholder="'Type your password again'" @keyup.enter="onSubmit" :isRequired="true"/>
-      <v-file-input v-model="signUpData.Image" label="Upload profile image" filled prepend-icon="mdi-camera"/>
+      <v-file-input v-model="signUpData.Image" label="Upload profile image" filled prepend-icon="mdi-camera" accept="image/png, image/jpeg, image/jpg"/>
       <v-btn text="Sign up" @click="onSubmit" @keyup.enter="onSubmit"></v-btn>
     </form>
   </div>
@@ -88,10 +88,6 @@ div.signup_section {
   justify-content: flex-start;
   flex-grow: 1;
   padding: 5%;
-}
-
-div.errors {
-  font-family: "Sarabun", Helvetica;
 }
 
 .signup_form {

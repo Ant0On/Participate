@@ -26,29 +26,28 @@ func (e *Event) BeforeDelete(tx *gorm.DB) (err error) {
 
 func (e *Event) Save() error {
 	if err := DB.Create(e).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to create event: %w", err)
 	}
-
 	return nil
 }
 
 func (e *Event) GetID() (uint, error) {
 	if err := DB.First(&e).Error; err != nil {
-		return 0, fmt.Errorf("DB.First: %w", err)
+		return 0, fmt.Errorf("failed to get event ID: %w", err)
 	}
 	return e.ID, nil
 }
 
 func (e *Event) Update() error {
 	if err := DB.Save(e).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to update event: %w", err)
 	}
 	return nil
 }
 
 func (e *Event) Delete() error {
 	if err := DB.Delete(e).Error; err != nil {
-		return fmt.Errorf("DB.Delete: %w", err)
+		return fmt.Errorf("failed to delete event: %w", err)
 	}
 	return nil
 }
@@ -56,7 +55,7 @@ func (e *Event) Delete() error {
 func GetEventByID(id string) (OfferOperations, error) {
 	var e *Event
 	if err := DB.First(&e, id).Error; err != nil {
-		return nil, fmt.Errorf("DB.First: %w", err)
+		return nil, fmt.Errorf("failed to get event by ID: %w", err)
 	}
 	return OfferOperations(e), nil
 }

@@ -117,7 +117,7 @@ var CountryList = []Country{
 
 func (c *Country) save() error {
 	if err := DB.Create(&c).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to create country: %w", err)
 	}
 	return nil
 }
@@ -125,7 +125,7 @@ func (c *Country) save() error {
 func AddCountries() error {
 	for _, country := range CountryList {
 		if err := country.save(); err != nil {
-			return fmt.Errorf("country.Save: %w", err)
+			return fmt.Errorf("failed to add countries: %w", err)
 		}
 	}
 	return nil
@@ -135,7 +135,7 @@ func GetAllCountries() ([]Country, error) {
 	var countries []Country
 
 	if err := DB.Order("country_name").Find(&countries).Error; err != nil {
-		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
+		return nil, fmt.Errorf("failed to retrieve countries: %w", err)
 	}
 	return countries, nil
 }

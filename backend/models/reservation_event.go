@@ -17,7 +17,7 @@ type ReservationEvent struct {
 func (r *ReservationEvent) Validate() error {
 	var offer Event
 	if err := DB.First(&offer, r.EventID).Error; err != nil {
-		return fmt.Errorf("DB.First: %w", err)
+		return fmt.Errorf("failed to retrieve event: %w", err)
 	}
 
 	if r.NumberOfPeople > offer.Capacity {
@@ -28,11 +28,11 @@ func (r *ReservationEvent) Validate() error {
 
 func (r *ReservationEvent) Save() error {
 	if err := r.Validate(); err != nil {
-		return fmt.Errorf("r.Validate: %v", err)
+		return fmt.Errorf("reservation validation failed: %v", err)
 	}
 
-	if err := DB.Create(&r).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+	if err := DB.Create(r).Error; err != nil {
+		return fmt.Errorf("failed to save reservation: %w", err)
 	}
 
 	return nil
@@ -40,16 +40,17 @@ func (r *ReservationEvent) Save() error {
 
 func (r *ReservationEvent) Update() error {
 	if err := r.Validate(); err != nil {
-		return fmt.Errorf("r.Validate: %v", err)
+		return fmt.Errorf("reservation validation failed: %v", err)
 	}
-	if err := DB.Save(&r).Error; err != nil {
-		return err
+	if err := DB.Save(r).Error; err != nil {
+		return fmt.Errorf("failed to update reservation: %w", err)
 	}
 	return nil
 }
+
 func (r *ReservationEvent) Delete() error {
 	if err := DB.Delete(&r).Error; err != nil {
-		return fmt.Errorf("DB.Delete: %w", err)
+		return fmt.Errorf("failed to delete reservation: %w", err)
 	}
 	return nil
 }
@@ -65,7 +66,7 @@ func GetEventReservationById(id string) (ReservationOperations, error) {
 func GetEventReservationsByState(state string) ([]ReservationOperations, error) {
 	var reservations []ReservationEvent
 	if err := DB.Model(&ReservationEvent{}).Where("reservation_state = ?", state).Scan(reservations).Error; err != nil {
-		return nil, fmt.Errorf("reservation not found: %w", err)
+		return nil, fmt.Errorf("failed to retrieve reservations: %w", err)
 	}
 	var ops []ReservationOperations
 	for _, r := range reservations {
@@ -83,8 +84,11 @@ func (r *ReservationEvent) ChangeState(state string) error {
 func (r *ReservationEvent) ChangeCapacity() error {
 	var e Event
 	if err := DB.First(&e, r.EventID).Error; err != nil {
-		return fmt.Errorf("DB.First: %w", err)
+		return fmt.Errorf("failed to retrieve event: %w", err)
 	}
 	e.Capacity -= r.NumberOfPeople
+	if err := DB.Save(&e).Error; err != nil {
+		return fmt.Errorf("failed to update event capacity: %w", err)
+	}
 	return nil
 }
