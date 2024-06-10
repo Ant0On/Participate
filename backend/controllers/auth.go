@@ -21,7 +21,7 @@ func Register(c *gin.Context) {
 	var input registerInput
 
 	if err := c.ShouldBind(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error with registerInput": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Validation failed: " + err.Error()})
 		return
 	}
 
@@ -31,25 +31,25 @@ func Register(c *gin.Context) {
 	user.Password = input.Password
 
 	if err := user.HashPassword(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"user.HashPassword error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to hash user password: " + err.Error()})
 		return
 	}
 
 	if err := user.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "user.Save error", "message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to save user: " + err.Error()})
 		return
 	}
 
 	dst, wasImageUploaded, err := user.HandleUserImageUploads(c, user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to upload user image: " + err.Error()})
 		return
 	}
 
 	if wasImageUploaded {
 		user.ImagePath = dst
 		if err := user.Update(); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"user.Update error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update user image path: " + err.Error()})
 			return
 		}
 	}
@@ -67,14 +67,14 @@ func Login(c *gin.Context) {
 	var input loginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error with loginInput": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to login: " + err.Error()})
 		return
 	}
 
 	t, user, err := models.LoginCheck(input.Email, input.Password)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"loginCheck: username or password is incorrect": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to login: " + err.Error()})
 		return
 	}
 	user.Password = ""

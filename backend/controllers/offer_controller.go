@@ -11,27 +11,27 @@ import (
 
 func CreateOffer(c *gin.Context, tableName string, offer models.OfferOperations) {
 	if err := c.ShouldBind(offer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	if err := offer.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Save: ": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	id, err := offer.GetID()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"GetID error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "GetID error: " + err.Error()})
 		return
 	}
 
 	if err := offer.HandleOfferImageUploads(c, tableName, id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"offer.HandleOfferImageUploads: ": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to handle offer image uploads: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer created successfully!", "offer": offer})
+	c.JSON(http.StatusOK, gin.H{"message": "Offer created successfully!", "offer": offer})
 }
 
 type OfferQueryParameters struct {
@@ -89,12 +89,12 @@ func FetchOffers(c *gin.Context, params OfferQueryParameters) {
 	query = query.Offset(offset).Limit(pageSize).Find(params.Model)
 
 	if query.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": query.Error.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": query.Error.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "data fetched successfully",
+		"message":   "Data fetched successfully",
 		"data":      params.Model,
 		"page":      page,
 		"page_size": pageSize,
@@ -107,14 +107,14 @@ func DeleteOffer(c *gin.Context, getByID func(string) (models.OfferOperations, e
 	offer, err := getByID(id)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.OfferByID:": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to get offer by ID: " + err.Error()})
 		return
 	}
 
 	if err = offer.Delete(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"offer.Delete: ": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to delete offer: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "offer deleted", "data": offer})
+	c.JSON(http.StatusOK, gin.H{"message": "Offer deleted", "data": offer})
 }

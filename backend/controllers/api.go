@@ -77,9 +77,6 @@ func RegisterRoutes(r *gin.Engine) {
 	equipment := r.Group("/api/equipment")
 	equipment.GET("/get", GetAllEquipment)
 
-	payment := r.Group("/api/payment")
-	payment.GET("/get", GetAllPayments)
-
 	town := r.Group("/api/town")
 	town.Use(middlewares.JwtAuthMiddleware("host"))
 	town.POST("/add", AddTown)
@@ -111,7 +108,6 @@ func RegisterRoutes(r *gin.Engine) {
 	room := r.Group("/api/host/room")
 	room.Use(middlewares.JwtAuthMiddleware("host"))
 	room.POST("/create", CreateRooms)
-	room.GET("/:id/get", GetRoomsForAccommodation)
 	room.GET("/:id/reservations", GetCurrentRoomReservations)
 	room.DELETE("/delete/:id", DeleteRoom)
 }

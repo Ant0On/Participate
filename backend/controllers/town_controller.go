@@ -12,14 +12,14 @@ func AddTown(c *gin.Context) {
 	var town *models.Town
 
 	if err := c.ShouldBindJSON(&town); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error with AddTown": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to bind JSON for AddTown: " + err.Error()})
 		return
 	}
 
 	if err := town.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"town.Save error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to save town: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "town added successfully!", "town": town})
+	c.JSON(http.StatusOK, gin.H{"message": "Town added successfully!", "town": town})
 }

@@ -29,18 +29,6 @@ func GenerateToken(id uint, email, role string) (string, error) {
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
 }
 
-func IsTokenValid(c *gin.Context, role string) error {
-	token, err := GetToken(c)
-	if err != nil {
-		return fmt.Errorf("IsTokenValid: %w", err)
-	}
-	extractedRole, err := extractRole(token)
-	if extractedRole != role {
-		return fmt.Errorf("unauthorized role - expected: %s, got: %s", role, extractedRole)
-	}
-	return nil
-}
-
 func GetToken(c *gin.Context) (*jwt.Token, error) {
 	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -72,19 +60,6 @@ func extractRole(token *jwt.Token) (string, error) {
 	if ok && token.Valid {
 		uRole := fmt.Sprintf("%s", claims["role"])
 		return uRole, nil
-	}
-	return "", nil
-}
-
-func ExtractTokenEmail(c *gin.Context) (string, error) {
-	token, err := GetToken(c)
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		uEmail := fmt.Sprintf("%s", claims["email"])
-		if err != nil {
-			return "", fmt.Errorf("strconv.ParseUint: %w", err)
-		}
-		return uEmail, nil
 	}
 	return "", nil
 }

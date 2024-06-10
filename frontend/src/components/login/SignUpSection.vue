@@ -30,6 +30,9 @@ async function onSubmit() {
       if (error.includes('SQLSTATE 23505')) {
         errors.apiError = "Email is already taken!";
       }
+      else {
+        errors.apiError = "Incorrect sign up data! " + error;
+      }
     } else {
       errors.apiError = "Incorrect sign up data! " + error;
     }
