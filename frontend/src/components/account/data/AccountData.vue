@@ -393,12 +393,4 @@ div.buttons {
   background-color: rgba(255, 0, 0, 60%);
 }
 
-div.errors {
-  font-family: "Sarabun", Helvetica;
-  border: 1px solid #ff0000;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-}
-
 </style>
