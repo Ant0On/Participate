@@ -82,7 +82,6 @@ async function onSubmit() {
       });
 
     }
-    isSubmitMode.value = false;
     if (customerData.value.Name !== currentCustomerData.value.Name)
       await fetchWrapper.put(`/api/customer/${user.value.ID}/change/first_name`, {
         value: customerData.value.Name.trim()
@@ -102,6 +101,7 @@ async function onSubmit() {
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
     errors.apiError = null
+    isSubmitMode.value = false;
     await userStore.saveToLocalStorage()
     if (isImageUploaded.value) {
       const imageFile = dataURLtoFile(uploadedImage.value, 'image.jpeg');
@@ -113,7 +113,12 @@ async function onSubmit() {
     }
     window.location.reload();
   }).catch((customerErrors) => {
-    errors.apiError = formatErrors(customerErrors.errors);
+    if (typeof customerErrors === 'string' && customerErrors.includes('SQLSTATE 23505')) {
+      errors.apiError = "Incorrect data! Please check the following errors: Email is already in use!"
+    }
+    else {
+      errors.apiError = formatErrors(customerErrors.errors)
+    }
   })
 }
 
@@ -178,14 +183,14 @@ function dataURLtoFile(dataURL, fileName) {
 <template>
   <div class="account_data_component">
     <div class="user_data">
-      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+      <v-alert v-if="errors.apiError" text tile="Edit error" color="error">{{ errors.apiError }}</v-alert>
       <div class="user_fields">
         <div class="customer_fields">
           <v-text-field label="Name"
                         :disabled="!isSubmitMode"
                         :rules="[
                             (value) => !!value || 'Name is required!',
-                            (value) => value.length >= 2 && value.length <= 30 || 'Name must be between 2-30 long!'
+                            (value) => value.length >= 2 && value.length <= 30 || 'Name must be between 2 and 30 characters!'
                         ]"
                         v-model="customerData.Name"
                         clearable
@@ -196,7 +201,7 @@ function dataURLtoFile(dataURL, fileName) {
                         :disabled="!isSubmitMode"
                         :rules="[
                             (value) => !!value || 'Last name is required!',
-                            (value) => value.length <= 100 || 'Name must be shorten than 100!'
+                            (value) => value.length >= 2 && value.length <= 100 || 'Name must be between 2 and 100 characters!'
                         ]"
                         v-model="customerData.LastName"
                         clearable
