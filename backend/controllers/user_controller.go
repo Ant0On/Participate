@@ -17,7 +17,7 @@ type fieldChangeRequest struct {
 }
 
 type promoteRequest struct {
-	Password    string `json:"password" binding:"required,min=8"`
+	Password    string `json:"password" binding:"required"`
 	Description string `json:"description" binding:"required,min=15,max=255"`
 	PhoneNumber string `json:"phone_number" binding:"required,numeric,min=9,max=15"`
 	BankAccount string `json:"bank_account" binding:"required,numeric,min=16,max=40"`
@@ -406,7 +406,7 @@ func PromoteToHost(c *gin.Context) {
 	}
 
 	if err := passHelper.VerifyPassword(promoteReq.Password, user.Password); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Password Verification Failed", "message": "Passwords do not match"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Password Verification Failed", "message": "Incorrect password!"})
 		return
 	}
 

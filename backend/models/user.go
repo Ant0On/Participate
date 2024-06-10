@@ -27,8 +27,8 @@ type User struct {
 	PasswordConfirmation      string `gorm:"-" form:"password_confirmation" binding:"required,eqfield=Password"`
 	Role                      string `gorm:"size:20;not null;default:'customer'" form:"-" validate:"required,oneof=customer host"`
 	Description               string `gorm:"not null;" form:"description"`
-	PhoneNumber               string `gorm:"size:12;not null" form:"phone_number"`
-	BankAccount               string `gorm:"size:31;not null" form:"bank_account"`
+	PhoneNumber               string `gorm:"size:12;not null;unique" form:"phone_number"`
+	BankAccount               string `gorm:"size:31;not null;unique" form:"bank_account"`
 	Accommodations            []Accommodation
 	Activities                []Activity
 	Events                    []Event
