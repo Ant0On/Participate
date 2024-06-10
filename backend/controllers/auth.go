@@ -36,7 +36,7 @@ func Register(c *gin.Context) {
 	}
 
 	if err := user.Save(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"user.SaveCustomer error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user.Save error", "message": err.Error()})
 		return
 	}
 

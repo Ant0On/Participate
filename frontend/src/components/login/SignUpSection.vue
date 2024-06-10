@@ -26,9 +26,14 @@ async function onSubmit() {
     return authStore.signUp(signUpData.value.FirstName, signUpData.value.LastName, signUpData.value.Login,
         signUpData.value.Password, signUpData.value.ConfirmPassword, signUpData.value.Image)
   }).catch(error => {
-          errors.apiError = "Incorrect sign up data! " + error
+    if (error) {
+      if (error.includes('SQLSTATE 23505')) {
+        errors.apiError = "Email is already taken!";
       }
-  )
+    } else {
+      errors.apiError = "Incorrect sign up data! " + error;
+    }
+  })
 }
 
 const schema = Yup.object().shape({
@@ -55,7 +60,7 @@ const schema = Yup.object().shape({
 
 <template>
   <div class="signup_section">
-    <v-alert v-if="errors.apiError" text="Email is already taken!" tile="Email error" color="error"></v-alert>
+    <v-alert v-if="errors.apiError" text tile="Email error" color="error">{{ errors.apiError }}</v-alert>
     <p>Create new account</p>
     <form class="signup_form" @submit.prevent>
       <TextInput labelText="Your first name" placeholder="Type your first name" :isRequired="true"
