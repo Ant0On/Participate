@@ -40,7 +40,6 @@ async function onSubmit(){
     alert("Soon you will be logged out. Please log in again!")
     await auth.logout()
   }).catch(error =>{
-    console.log(error)
     if (typeof error === 'string') {
       if (error.includes('SQLSTATE 23505')) {
         errors.apiError = "Bank account or phone number is already in use!";
