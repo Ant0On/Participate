@@ -78,7 +78,12 @@ async function onSubmit() {
         user.value.PhoneNumber = hostData.value.PhoneNumber
         user.value.BankAccount = hostData.value.BankAccount
       }).catch((hostErrors) => {
-        errors.apiError = formatErrors(hostErrors.errors);
+        if (typeof hostErrors === 'string' && hostErrors.includes('SQLSTATE 23505')) {
+          errors.apiError = "Incorrect data! Please check the following errors: Phone number or bank account is already in use!"
+        }
+        else {
+          errors.apiError = formatErrors(hostErrors.errors)
+        }
       });
 
     }
