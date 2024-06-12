@@ -2,7 +2,9 @@ package middlewares
 
 import (
 	"net/http"
+	"time"
 
+	"backend/logger"
 	"backend/models"
 	"backend/utils/token"
 
@@ -24,6 +26,14 @@ func JwtAuthMiddleware(requiredRole string) gin.HandlerFunc {
 			c.String(http.StatusUnauthorized, "Unauthorized")
 			c.Abort()
 			return
+		}
+
+		if exp, ok := claims["exp"].(float64); ok {
+			if int64(exp) < time.Now().Unix() {
+				c.String(http.StatusUnauthorized, "Token expired")
+				c.Abort()
+				return
+			}
 		}
 
 		userID := claims["user_id"].(float64)
@@ -50,6 +60,34 @@ func JwtAuthMiddleware(requiredRole string) gin.HandlerFunc {
 		}
 		c.Set("user", &user)
 		c.Set("role", userRole)
+		c.Next()
+	}
+}
+
+func TokenCheckAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Logger.Info("Hello from Optional")
+		getToken, err := token.GetToken(c)
+		if err != nil {
+			c.String(http.StatusUnauthorized, "Unauthorized")
+			c.Abort()
+			return
+		}
+
+		claims, ok := getToken.Claims.(jwt.MapClaims)
+		if !ok || !getToken.Valid {
+			c.String(http.StatusUnauthorized, "Unauthorized")
+			c.Abort()
+			return
+		}
+
+		if exp, ok := claims["exp"].(float64); ok {
+			if int64(exp) < time.Now().Unix() {
+				c.Next()
+				return
+			}
+		}
+
 		c.Next()
 	}
 }

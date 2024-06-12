@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"backend/middlewares"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterRoutes(r *gin.Engine) {
 	public := r.Group("/api")
+	public.GET("/check-token", middlewares.TokenCheckAuthMiddleware(), utils.CheckToken)
 	public.POST("/login", Login)
 	public.POST("/register", Register)
 	public.GET("/host/:id", GetHostByID)
@@ -19,6 +21,7 @@ func RegisterRoutes(r *gin.Engine) {
 	public.GET("/offers/event/:id", GetEventByID)
 
 	host := r.Group("/api/host")
+	host.Use(middlewares.JwtAuthMiddleware("host"))
 	host.PUT("/:id/change/description", ChangeDescription)
 	host.PUT("/:id/change/phone_number", ChangePhoneNumber)
 	host.PUT("/:id/change/bank_account", ChangeBankAccount)

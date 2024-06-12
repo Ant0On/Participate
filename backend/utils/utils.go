@@ -1,6 +1,11 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 func CheckState(state string) bool {
 	switch state {
@@ -29,6 +34,10 @@ func HistoryWhereCondition(userID string) string {
 
 func CurrentWhereCondition(userID string) string {
 	return fmt.Sprintf("app_user.id = '%s' AND reservation_state in ('pending', 'accepted')", userID)
+}
+
+func CheckToken(c *gin.Context) {
+	c.String(http.StatusOK, "Token is valid")
 }
 
 type DiscountRequest struct {

@@ -3,6 +3,15 @@
 import FooterBar from "@/components/layout/FooterBar.vue";
 import HeaderBar from "@/components/layout/HeaderBar.vue";
 import NavigationDrawer from "@/components/layout/NavigationDrawer.vue";
+import {onMounted} from 'vue';
+import {validateToken} from "@/_helpers/token-validator"
+
+onMounted(() => {
+  validateToken()
+})
+
+setInterval(validateToken, 120000);
+
 </script>
 
 <template>
