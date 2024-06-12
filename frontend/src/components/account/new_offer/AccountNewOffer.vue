@@ -266,7 +266,11 @@ function checkIfOfferInfoIsFilled() {
   errors.offerInfo = '';
   errors.dateRange = '';
 
-  if (newOffer.value.title === '' || newOffer.value.description === '' || newOffer.value.capacity === '') {
+  if (newOffer.value.title === '' ||
+      newOffer.value.description === '' ||
+      newOffer.value.capacity === '' ||
+      newOffer.value.offerType === '' ||
+      newOffer.value.offerType === null) {
     errors.offerInfo = 'Please fill out all required offer information.';
     return false;
   }
@@ -281,10 +285,43 @@ function checkIfOfferInfoIsFilled() {
     return false;
   }
 
+  if (isOfferTypeAccommodation.value) {
+    if (newAccommodation.value.numberOfRooms === ''
+        || newAccommodation.value.accommodationType === ''
+        || newAccommodation.value.accommodationType === null
+        || newAccommodation.value.pricePerDay === '') {
+      errors.offerInfo = 'Please fill out all required accommodation information.';
+      return false;
+    }
+  }
+
+  if (isAccommodationTypeWithSelectableRooms.value) {
+    let roomValues = newRoom.value
+    if (
+        (roomValues.number === '' ||
+        roomValues.name === '' ||
+        roomValues.description === '' ||
+        roomValues.capacity === '' ||
+        roomValues.area === '') && rooms.value.length === 0
+    ) {
+      errors.offerInfo = 'Fill all room information';
+      return false;
+    }
+    if (rooms.value.length === 0) {
+      errors.offerInfo = 'Add at least one room';
+      return false;
+    }
+  }
+
   const now = new Date();
 
   if (isOfferTypeActivity.value) {
-    if (newActivity.value.skillLevel === '' || newActivity.value.price === '' || newActivity.value.activityType === '' || newActivity.value.dateRange.length === 0) {
+    if (newActivity.value.skillLevel === '' ||
+        newActivity.value.skillLevel === null ||
+        newActivity.value.price === '' ||
+        newActivity.value.activityType === '' ||
+        newActivity.value.activityType === null ||
+        newActivity.value.dateRange.length === 0) {
       errors.offerInfo = 'Please fill out all required activity information.';
       return false;
     }
@@ -307,7 +344,12 @@ function checkIfOfferInfoIsFilled() {
   }
 
   if (isOfferTypeEvent.value) {
-    if (newEvent.value.dateFrom === '' || newEvent.value.dateTo === '' || newEvent.value.price === '' || newEvent.value.eventType === '') {
+    if (newEvent.value.dateFrom === '' ||
+        newEvent.value.dateTo === '' ||
+        newEvent.value.price === '' ||
+        newEvent.value.eventType === '' ||
+        newEvent.value.eventType === null
+    ) {
       errors.offerInfo = 'Please fill out all required event information.';
       return false;
     }
@@ -341,7 +383,7 @@ function checkIfRoomInfoIsFilled() {
   ) {
     return false;
   } else {
-    errors.offerInfo = '';
+    errors.offerInfo = 'Fill room information';
     return true;
   }
 }
@@ -420,7 +462,6 @@ onMounted(async () => {
                         value => value.length > 30 || 'Description too short',
                         value => value.length < 300 || 'Description too long'
          ]"
-                    clearable
                     class="w-100"
                     counter
         >
@@ -440,15 +481,27 @@ onMounted(async () => {
                            placeholder="Facilities" :items="generalFacilities"/>
           <div v-if="isAccommodationTypeWithSelectableRooms" class="w-100 room-info-container">
             <p class="new_offer_text">Add rooms to your accommodation</p>
-            <v-text-field v-model="newRoom.number" label="Room number" clearable placeholder="Number" class="w-100"
-                          type="number"/>
-            <v-text-field v-model="newRoom.name" label="Room name" clearable placeholder="Name" class="w-100"/>
-            <v-textarea v-model="newRoom.description" label="Room description" clearable placeholder="Description"
-                        class="w-100"/>
-            <v-text-field v-model="newRoom.capacity" label="Room capacity" clearable placeholder="Capacity"
-                          class="w-100" type="number"/>
-            <v-text-field v-model="newRoom.area" label="Room area in m2" clearable placeholder="Area"
-                          class="w-100" type="number"/>
+            <v-text-field v-model="newRoom.number" label="Room number" placeholder="Number" class="w-100"
+                          :rules="[
+                        value=> !!value]" type="number"/>
+            <v-text-field v-model="newRoom.name" label="Room name" placeholder="Name" class="w-100"
+                          :rules="[
+                        value=> !!value,
+                        value => value.length > 3 || 'Name too short',
+                        value => value.length < 300 || 'Name too long'
+         ]"/>
+            <v-textarea v-model="newRoom.description" label="Room description" placeholder="Description"
+                        class="w-100" :rules="[
+                        value=> !!value,
+                        value => value.length > 10 || 'Description too short',
+                        value => value.length < 300 || 'Description too long'
+         ]"/>
+            <v-text-field v-model="newRoom.capacity" label="Room capacity" placeholder="Capacity"
+                          class="w-100" type="number" :rules="[
+                        value=> !!value]"/>
+            <v-text-field v-model="newRoom.area" label="Room area in m2" placeholder="Area"
+                          class="w-100" type="number" :rules="[
+                        value=> !!value]"/>
             <v-select v-model="newRoom.roomFacilities" label="Select room facilities"
                       class="w-100" clearable chips multiple :items="roomFacilities"/>
             <button :disabled="!isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }"

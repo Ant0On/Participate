@@ -158,8 +158,8 @@ const schemaCustomer = Yup.object().shape({
 
 const schemaHost = Yup.object().shape({
   Description: Yup.string().required('Description is required'),
-  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
-  bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
+  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(12, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
+  bankAccount: Yup.string().min(23, 'Bank account must be at least 16 characters').max(31, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
 });
 
 async function uploadImage(imageInput) {

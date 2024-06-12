@@ -26,7 +26,7 @@ func ChangeEventReservationState(c *gin.Context) {
 }
 
 func GetCurrentEventReservations(c *gin.Context) {
-	var pendingReservations []DTO.ReservationEventWithOffer
+	var currentReservations []DTO.ReservationEventWithOffer
 	selectQuery := "reservation_event.id as reservation_id, reservation_event.date," +
 		" event.capacity, event.title, event.price, " +
 		"event.event_type, town.name as town_name, country.country_name as country_name, reservation_event.reservation_state, event.id as event_id"
@@ -35,7 +35,7 @@ func GetCurrentEventReservations(c *gin.Context) {
 		reservationTableName: "reservation_event",
 		offerID:              "event_id",
 		model:                &models.ReservationEvent{},
-		dto:                  &pendingReservations,
+		dto:                  &currentReservations,
 		selectQuery:          selectQuery,
 		condition:            utils.CurrentWhereCondition,
 		userRole:             "host",
@@ -43,7 +43,7 @@ func GetCurrentEventReservations(c *gin.Context) {
 }
 
 func GetReservationsEventHistory(c *gin.Context) {
-	var pendingReservations []DTO.ReservationEventWithOffer
+	var reservationsHistory []DTO.ReservationEventWithOffer
 	selectQuery := "reservation_event.id as reservation_id, reservation_event.date," +
 		" event.capacity, event.title, event.price, " +
 		"event.event_type, town.name as town_name, country.country_name as country_name, reservation_event.reservation_state, event.id as event_id"
@@ -52,7 +52,7 @@ func GetReservationsEventHistory(c *gin.Context) {
 		reservationTableName: "reservation_event",
 		offerID:              "event_id",
 		model:                &models.ReservationEvent{},
-		dto:                  &pendingReservations,
+		dto:                  &reservationsHistory,
 		selectQuery:          selectQuery,
 		condition:            utils.HistoryWhereCondition,
 		userRole:             "customer",
