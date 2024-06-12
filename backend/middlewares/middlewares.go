@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"backend/logger"
 	"backend/models"
 	"backend/utils/token"
 
@@ -66,7 +65,6 @@ func JwtAuthMiddleware(requiredRole string) gin.HandlerFunc {
 
 func TokenCheckAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Logger.Info("Hello from Optional")
 		getToken, err := token.GetToken(c)
 		if err != nil {
 			c.String(http.StatusUnauthorized, "Unauthorized")
