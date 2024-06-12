@@ -16,7 +16,7 @@ type ReservationRoom struct {
 	RoomID   uint      `gorm:"not null" json:"room_id" binding:"required"`
 }
 
-func (r *ReservationRoom) Validate() error {
+func (r *ReservationRoom) validate() error {
 	var offer Room
 	if err := DB.First(&offer, r.RoomID).Error; err != nil {
 		return fmt.Errorf("failed to retrieve room: %w", err)
@@ -29,7 +29,7 @@ func (r *ReservationRoom) Validate() error {
 }
 
 func (r *ReservationRoom) Save() error {
-	if err := r.Validate(); err != nil {
+	if err := r.validate(); err != nil {
 		return fmt.Errorf("reservation validation failed: %v", err)
 	}
 
@@ -41,7 +41,7 @@ func (r *ReservationRoom) Save() error {
 }
 
 func (r *ReservationRoom) Update() error {
-	if err := r.Validate(); err != nil {
+	if err := r.validate(); err != nil {
 		return fmt.Errorf("reservation validation failed: %v", err)
 	}
 	if err := DB.Save(r).Error; err != nil {

@@ -376,7 +376,7 @@ function checkIfRoomInfoIsFilled() {
     return
   }
 
-  if (rooms.value.length === Number(newAccommodation.value.numberOfRooms)) {
+  if (rooms.value.length >= Number(newAccommodation.value.numberOfRooms)) {
     // TODO make it log, the error doesn't appear anywhere
     errors.roomInfo = 'You have reached the maximum number of rooms';
     return false;

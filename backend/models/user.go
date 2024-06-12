@@ -25,7 +25,7 @@ type User struct {
 	ImagePath                 string `gorm:"default:images/users/default_image.png" form:"image_path" binding:"omitempty,url"`
 	Password                  string `gorm:"size:100;not null" form:"password" binding:"required,min=8"`
 	PasswordConfirmation      string `gorm:"-" form:"password_confirmation" binding:"required,eqfield=Password"`
-	Role                      string `gorm:"size:20;not null;default:'customer'" form:"-" validate:"required,oneof=customer host"`
+	Role                      string `gorm:"size:20;not null;default:'customer'" form:"-" binding:"required,oneof=customer host"`
 	Description               string `gorm:"not null;" form:"description"`
 	PhoneNumber               string `gorm:"size:12;not null;unique" form:"phone_number"`
 	BankAccount               string `gorm:"size:31;not null;unique" form:"bank_account"`
@@ -35,6 +35,7 @@ type User struct {
 	ReservationsAccommodation []ReservationAccommodation
 	ReservationsActivity      []ReservationActivity
 	ReservationsEvent         []ReservationEvent
+	ReservationsRoom          []ReservationRoom
 }
 
 func (*User) TableName() string {
