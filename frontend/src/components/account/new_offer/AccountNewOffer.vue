@@ -63,6 +63,7 @@ const errors = reactive({
   country: '',
   image: '',
   dateRange: '',
+  roomInfo: '',
 });
 
 const userStore = useAuthStore();
@@ -374,6 +375,13 @@ function checkIfRoomInfoIsFilled() {
   if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
     return
   }
+
+  if (rooms.value.length === Number(newAccommodation.value.numberOfRooms)) {
+    // TODO make it log, the error doesn't appear anywhere
+    errors.roomInfo = 'You have reached the maximum number of rooms';
+    return false;
+  }
+
   if (
       roomValues.number === '' ||
       roomValues.name === '' ||
@@ -383,7 +391,6 @@ function checkIfRoomInfoIsFilled() {
   ) {
     return false;
   } else {
-    errors.offerInfo = 'Fill room information';
     return true;
   }
 }
@@ -557,6 +564,7 @@ onMounted(async () => {
         <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
         <div class="errors" v-if="errors.offerType">{{ errors.offerType }}</div>
         <div class="errors" v-if="errors.offerInfo">{{ errors.offerInfo }}</div>
+        <div class="errors" v-if="errors.offerInfo">{{ errors.roomInfo }}</div>
         <div class="errors" v-if="errors.country">{{ errors.country }}</div>
         <div class="errors" v-if="errors.image">{{ errors.image }}</div>
         <div class="errors" v-if="errors.dateRange">{{ errors.dateRange }}</div>

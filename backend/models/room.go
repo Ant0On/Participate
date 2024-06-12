@@ -9,8 +9,8 @@ import (
 type Room struct {
 	gorm.Model
 	RoomNumber      int            `gorm:"not null" json:"number" binding:"required,gt=0"`
-	RoomName        string         `gorm:"not null" json:"name" binding:"required,min=3"`
-	RoomDescription string         `gorm:"not null" json:"description" binding:"required,min=10"`
+	RoomName        string         `gorm:"not null" json:"name" binding:"required,min=3,max=300"`
+	RoomDescription string         `gorm:"not null" json:"description" binding:"required,min=10,max=300"`
 	Capacity        int            `gorm:"not null" json:"capacity" binding:"required,gt=0"`
 	Area            int            `gorm:"not null" json:"area" binding:"required,gt=0"`
 	AccommodationID uint           `gorm:"not null" json:"accommodation_id" binding:"required"`
