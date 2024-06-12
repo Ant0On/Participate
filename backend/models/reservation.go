@@ -20,7 +20,7 @@ const (
 )
 
 type Reservation struct {
-	ReservationState ReservationState `gorm:"type:varchar(255);check:reservation_state IN ('pending', 'accepted', 'ongoing', 'finished', 'rejected'); column:reservation_state; not null; default:'pending'" json:"-"`
+	ReservationState ReservationState `gorm:"type:text;check:reservation_state IN ('pending', 'accepted', 'ongoing', 'finished', 'rejected'); column:reservation_state; not null; default:'pending'" json:"-"`
 	NumberOfPeople   int              `gorm:"not null" json:"number_of_people" binding:"required,gt=0"`
 	UserID           uint             `gorm:"not null" json:"user_id" binding:"required"`
 	PaymentID        uint             `gorm:"not null" json:"payment_id" binding:"required"`

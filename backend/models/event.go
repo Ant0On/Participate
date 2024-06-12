@@ -13,7 +13,7 @@ type Event struct {
 	DateFrom     time.Time `gorm:"not null" form:"date_from" binding:"required"`
 	DateTo       time.Time `gorm:"not null" form:"date_to" binding:"required"`
 	Price        float64   `gorm:"not null" form:"price" binding:"required,gt=0"`
-	Type         string    `gorm:"type:varchar(255);check:event_type IN ('conference', 'concert', 'festival', 'sports event'); column:event_type; not null" form:"event_type" binding:"required,oneof=conference concert festival 'sports event'"`
+	Type         string    `gorm:"type:text;check:event_type IN ('conference', 'concert', 'festival', 'sports event'); column:event_type; not null" form:"event_type" binding:"required,oneof=conference concert festival 'sports event'"`
 	Reservations []ReservationEvent
 }
 
