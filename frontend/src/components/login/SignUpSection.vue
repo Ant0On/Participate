@@ -26,9 +26,17 @@ async function onSubmit() {
     return authStore.signUp(signUpData.value.FirstName, signUpData.value.LastName, signUpData.value.Login,
         signUpData.value.Password, signUpData.value.ConfirmPassword, signUpData.value.Image)
   }).catch(error => {
-          errors.apiError = "Incorrect sign up data! " + error
+    if (typeof error === 'string') {
+      if (error.includes('SQLSTATE 23505')) {
+        errors.apiError = "Email is already taken!";
       }
-  )
+      else {
+        errors.apiError = "Incorrect sign up data! " + error;
+      }
+    } else {
+      errors.apiError = "Incorrect sign up data! " + error;
+    }
+  })
 }
 
 const schema = Yup.object().shape({
@@ -55,7 +63,7 @@ const schema = Yup.object().shape({
 
 <template>
   <div class="signup_section">
-    <v-alert v-if="errors.apiError" text="Email is already taken!" tile="Email error" color="error"></v-alert>
+    <v-alert v-if="errors.apiError" text tile="Email error" color="error">{{ errors.apiError }}</v-alert>
     <p>Create new account</p>
     <form class="signup_form" @submit.prevent>
       <TextInput labelText="Your first name" placeholder="Type your first name" :isRequired="true"
@@ -67,7 +75,7 @@ const schema = Yup.object().shape({
       <PasswordInput v-model="signUpData.Password" :labelText="'Your password'" @keyup.enter="onSubmit" :isRequired="true"/>
       <PasswordInput v-model="signUpData.ConfirmPassword" :labelText="'Confirm your password'"
                      :placeholder="'Type your password again'" @keyup.enter="onSubmit" :isRequired="true"/>
-      <v-file-input v-model="signUpData.Image" label="Upload profile image" filled prepend-icon="mdi-camera"/>
+      <v-file-input v-model="signUpData.Image" label="Upload profile image" filled prepend-icon="mdi-camera" accept="image/png, image/jpeg, image/jpg"/>
       <v-btn text="Sign up" @click="onSubmit" @keyup.enter="onSubmit"></v-btn>
     </form>
   </div>
@@ -80,10 +88,6 @@ div.signup_section {
   justify-content: flex-start;
   flex-grow: 1;
   padding: 5%;
-}
-
-div.errors {
-  font-family: "Sarabun", Helvetica;
 }
 
 .signup_form {

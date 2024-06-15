@@ -16,43 +16,43 @@ type ReservationAccommodation struct {
 	AccommodationID uint      `gorm:"not null" json:"accommodation_id" binding:"required"`
 }
 
-func (r *ReservationAccommodation) Validate() error {
-	var offer Accommodation
-	if err := DB.First(&offer, r.AccommodationID).Error; err != nil {
-		return fmt.Errorf("DB.First: %w", err)
+func (r *ReservationAccommodation) validate() error {
+	var accommodation Accommodation
+	if err := DB.First(&accommodation, r.AccommodationID).Error; err != nil {
+		return fmt.Errorf("failed to retrieve accommodation: %w", err)
 	}
 
-	if r.NumberOfPeople > offer.Capacity {
+	if r.NumberOfPeople > accommodation.Capacity {
 		return fmt.Errorf("too many people added to reservation")
 	}
 	return nil
 }
 
 func (r *ReservationAccommodation) Save() error {
-	if err := r.Validate(); err != nil {
-		return fmt.Errorf("r.Validate: %v", err)
+	if err := r.validate(); err != nil {
+		return fmt.Errorf("reservation validation failed: %v", err)
 	}
 
 	if err := DB.Create(r).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to save reservation: %w", err)
 	}
 
 	return nil
 }
 
 func (r *ReservationAccommodation) Update() error {
-	if err := r.Validate(); err != nil {
-		return fmt.Errorf("r.Validate: %v", err)
+	if err := r.validate(); err != nil {
+		return fmt.Errorf("reservation validation failed: %v", err)
 	}
 	if err := DB.Save(r).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to update reservation: %w", err)
 	}
 	return nil
 }
 
 func (r *ReservationAccommodation) Delete() error {
 	if err := DB.Delete(&r).Error; err != nil {
-		return fmt.Errorf("DB.Delete: %w", err)
+		return fmt.Errorf("failed to delete reservation: %w", err)
 	}
 	return nil
 }
@@ -68,7 +68,7 @@ func GetAccommodationReservationById(id string) (ReservationOperations, error) {
 func GetAccommodationReservationsByState(state string) ([]ReservationOperations, error) {
 	var reservations []ReservationAccommodation
 	if err := DB.Model(&ReservationAccommodation{}).Where("reservation_state = ?", state).Scan(reservations).Error; err != nil {
-		return nil, fmt.Errorf("reservation not found: %w", err)
+		return nil, fmt.Errorf("failed to retrieve reservations: %w", err)
 	}
 	var ops []ReservationOperations
 	for _, r := range reservations {

@@ -78,11 +78,15 @@ async function onSubmit() {
         user.value.PhoneNumber = hostData.value.PhoneNumber
         user.value.BankAccount = hostData.value.BankAccount
       }).catch((hostErrors) => {
-        errors.apiError = formatErrors(hostErrors.errors);
+        if (typeof hostErrors === 'string' && hostErrors.includes('SQLSTATE 23505')) {
+          errors.apiError = "Incorrect data! Please check the following errors: Phone number or bank account is already in use!"
+        }
+        else {
+          errors.apiError = formatErrors(hostErrors.errors)
+        }
       });
 
     }
-    isSubmitMode.value = false;
     if (customerData.value.Name !== currentCustomerData.value.Name)
       await fetchWrapper.put(`/api/customer/${user.value.ID}/change/first_name`, {
         value: customerData.value.Name.trim()
@@ -102,6 +106,7 @@ async function onSubmit() {
     currentHostData.value = hostData.value
     currentCustomerData.value = customerData.value
     errors.apiError = null
+    isSubmitMode.value = false;
     await userStore.saveToLocalStorage()
     if (isImageUploaded.value) {
       const imageFile = dataURLtoFile(uploadedImage.value, 'image.jpeg');
@@ -113,7 +118,12 @@ async function onSubmit() {
     }
     window.location.reload();
   }).catch((customerErrors) => {
-    errors.apiError = formatErrors(customerErrors.errors);
+    if (typeof customerErrors === 'string' && customerErrors.includes('SQLSTATE 23505')) {
+      errors.apiError = "Incorrect data! Please check the following errors: Email is already in use!"
+    }
+    else {
+      errors.apiError = formatErrors(customerErrors.errors)
+    }
   })
 }
 
@@ -148,8 +158,8 @@ const schemaCustomer = Yup.object().shape({
 
 const schemaHost = Yup.object().shape({
   Description: Yup.string().required('Description is required'),
-  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
-  bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
+  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(12, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
+  bankAccount: Yup.string().min(23, 'Bank account must be at least 16 characters').max(31, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
 });
 
 async function uploadImage(imageInput) {
@@ -178,14 +188,14 @@ function dataURLtoFile(dataURL, fileName) {
 <template>
   <div class="account_data_component">
     <div class="user_data">
-      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+      <v-alert v-if="errors.apiError" text tile="Edit error" color="error">{{ errors.apiError }}</v-alert>
       <div class="user_fields">
         <div class="customer_fields">
           <v-text-field label="Name"
                         :disabled="!isSubmitMode"
                         :rules="[
                             (value) => !!value || 'Name is required!',
-                            (value) => value.length >= 2 && value.length <= 30 || 'Name must be between 2-30 long!'
+                            (value) => value.length >= 2 && value.length <= 30 || 'Name must be between 2 and 30 characters!'
                         ]"
                         v-model="customerData.Name"
                         clearable
@@ -196,7 +206,7 @@ function dataURLtoFile(dataURL, fileName) {
                         :disabled="!isSubmitMode"
                         :rules="[
                             (value) => !!value || 'Last name is required!',
-                            (value) => value.length <= 100 || 'Name must be shorten than 100!'
+                            (value) => value.length >= 2 && value.length <= 100 || 'Name must be between 2 and 100 characters!'
                         ]"
                         v-model="customerData.LastName"
                         clearable
@@ -386,14 +396,6 @@ div.buttons {
 
 .button_cancel {
   background-color: rgba(255, 0, 0, 60%);
-}
-
-div.errors {
-  font-family: "Sarabun", Helvetica;
-  border: 1px solid #ff0000;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
 }
 
 </style>

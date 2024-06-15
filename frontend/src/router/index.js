@@ -17,6 +17,7 @@ import ReservationsHistory from "@/components/account/reservations_history/Reser
 import AccountMyOffers from "@/components/account/my_offers/AccountMyOffers.vue";
 import AccountNewOffer from "@/components/account/new_offer/AccountNewOffer.vue";
 import CurrentReservations from "@/components/account/current_reservations/CurrentReservations.vue";
+import {validateToken} from "@/_helpers/token-validator";
 
 const routes = [
     {
@@ -104,6 +105,8 @@ router.beforeEach(async (to) => {
     const userStore = useAuthStore();
     const navStore = useNavStore();
     const {user: user} = storeToRefs(userStore)
+
+    validateToken()
 
     if (hostRequired && user.value?.Role !== "host" || customerRequired && user.value?.Role !== "customer") {
         router.push('/')

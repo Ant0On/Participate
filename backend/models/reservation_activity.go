@@ -18,7 +18,7 @@ type ReservationActivity struct {
 func (r *ReservationActivity) Validate() error {
 	var offer Activity
 	if err := DB.First(&offer, r.ActivityID).Error; err != nil {
-		return fmt.Errorf("DB.First: %w", err)
+		return fmt.Errorf("failed to retrieve activity: %w", err)
 	}
 
 	if r.NumberOfPeople > offer.Capacity {
@@ -29,11 +29,11 @@ func (r *ReservationActivity) Validate() error {
 
 func (r *ReservationActivity) Save() error {
 	if err := r.Validate(); err != nil {
-		return fmt.Errorf("r.Validate: %v", err)
+		return fmt.Errorf("reservation validation failed: %v", err)
 	}
 
 	if err := DB.Create(r).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to save reservation: %w", err)
 	}
 
 	return nil
@@ -41,17 +41,17 @@ func (r *ReservationActivity) Save() error {
 
 func (r *ReservationActivity) Update() error {
 	if err := r.Validate(); err != nil {
-		return fmt.Errorf("r.Validate: %v", err)
+		return fmt.Errorf("reservation validation failed: %v", err)
 	}
 	if err := DB.Save(r).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to update reservation: %w", err)
 	}
 	return nil
 }
 
 func (r *ReservationActivity) Delete() error {
 	if err := DB.Delete(&r).Error; err != nil {
-		return fmt.Errorf("DB.Delete: %w", err)
+		return fmt.Errorf("failed to delete reservation: %w", err)
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func GetActivityReservationById(id string) (ReservationOperations, error) {
 func GetActivityReservationsByState(state string) ([]ReservationOperations, error) {
 	var reservations []ReservationActivity
 	if err := DB.Model(&ReservationActivity{}).Where("reservation_state = ?", state).Scan(reservations).Error; err != nil {
-		return nil, fmt.Errorf("reservation not found: %w", err)
+		return nil, fmt.Errorf("failed to retrieve reservations: %w", err)
 	}
 	var ops []ReservationOperations
 	for _, r := range reservations {
@@ -85,8 +85,11 @@ func (r *ReservationActivity) ChangeState(state string) error {
 func (r *ReservationActivity) ChangeCapacity() error {
 	var a Activity
 	if err := DB.First(&a, r.ActivityID).Error; err != nil {
-		return fmt.Errorf("DB.First: %w", err)
+		return fmt.Errorf("failed to retrieve activity: %w", err)
 	}
 	a.Capacity -= r.NumberOfPeople
+	if err := DB.Save(&a).Error; err != nil {
+		return fmt.Errorf("failed to update activity capacity: %w", err)
+	}
 	return nil
 }

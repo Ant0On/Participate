@@ -24,8 +24,8 @@ const errors = reactive({
 
 const schemaHost = Yup.object().shape({
   description: Yup.string().required('Description is required'),
-  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(15, 'Phone number must be at most 15 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
-  bankAccount: Yup.string().min(16, 'Bank account must be at least 16 characters').max(40, 'Bank account must be at most 40 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
+  phoneNumber: Yup.string().min(9, 'Phone number must be at least 9 characters').max(12, 'Phone number must be at most 12 characters').matches(/^\d+$/, 'Phone number must contain only digits'),
+  bankAccount: Yup.string().min(23, 'Bank account must be at least 23 characters').max(31, 'Bank account must be at most 31 characters').matches(/^\d+$/, 'Bank account must contain only digits'),
   password: Yup.string().required('Password is required')
 });
 
@@ -40,9 +40,15 @@ async function onSubmit(){
     alert("Soon you will be logged out. Please log in again!")
     await auth.logout()
   }).catch(error =>{
-    errors.apiError = "Incorrect data! Please check the following errors:";
-    for (const field in error.errors) {
-      errors.apiError += `\n- ${error.errors[field]}`;
+    if (typeof error === 'string') {
+      if (error.includes('SQLSTATE 23505')) {
+        errors.apiError = "Bank account or phone number is already in use!";
+      }
+      else {
+        errors.apiError = "Incorrect data! Please check the following errors: " + error;
+      }
+    } else {
+      errors.apiError = "Incorrect data! Please check the following errors: " + error
     }
   });
 }
@@ -58,7 +64,7 @@ async function onSubmit(){
   </div>
   <div v-else class="host_info">
     <p class="host_info_description"> Please fill all your data to become a host!</p>
-    <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+    <v-alert v-if="errors.apiError" text tile="Form error" color="error">{{ errors.apiError }}</v-alert>
     <div class="host_info_fields">
       <v-textarea v-model="hostData.description" label="Description"
                   :rules="[
@@ -145,7 +151,5 @@ p.host_info_description{
   line-height: normal;
   align-self: center;
 }
-div.errors{
-  font-family: "Sarabun", Helvetica;
-}
+
 </style>

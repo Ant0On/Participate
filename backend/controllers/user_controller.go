@@ -17,7 +17,7 @@ type fieldChangeRequest struct {
 }
 
 type promoteRequest struct {
-	Password    string `json:"password" binding:"required,min=8"`
+	Password    string `json:"password" binding:"required"`
 	Description string `json:"description" binding:"required,min=15,max=255"`
 	PhoneNumber string `json:"phone_number" binding:"required,numeric,min=9,max=15"`
 	BankAccount string `json:"bank_account" binding:"required,numeric,min=16,max=40"`
@@ -33,19 +33,19 @@ func GetHostByID(c *gin.Context) {
 	hostID := c.Param("id")
 
 	if hostID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Host ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Host ID is required"})
 		return
 	}
 
 	host, err := models.GetUserById(hostID)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Host not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found", "message": "Host not found"})
 		return
 	}
 
 	if host.Role != "host" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User's role should be host"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "User's role should be host"})
 		return
 	}
 
@@ -58,28 +58,28 @@ func getFieldChangeResponse(c *gin.Context, id string, updateFunc func(*models.U
 	var req fieldChangeRequest
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "User ID is required"})
 		return
 	}
 
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found", "message": "User not found"})
 		return
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	if err := updateFunc(user, req.Value); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	if err := user.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": err.Error()})
 		return
 	}
 
@@ -166,32 +166,32 @@ func ChangeImage(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "User ID is required"})
 		return
 	}
 
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found", "message": "User not found"})
 		return
 	}
 
 	dst, wasImageUploaded, err := user.HandleUserImageUploads(c, user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"image upload error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Image upload error: " + err.Error()})
 		return
 	}
 
 	if wasImageUploaded {
 		user.ImagePath = dst
 		if err := user.Update(); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"user.Update error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update user: " + err.Error()})
 			return
 		}
 	}
 
 	if err := user.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update user: " + err.Error()})
 		return
 	}
 
@@ -203,35 +203,35 @@ func ChangePassword(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "User ID is required"})
 		return
 	}
 
 	user, err := models.GetUserById(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found", "message": "User not found"})
 		return
 	}
 
 	if err := c.ShouldBindJSON(&passwordReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	if err := passHelper.VerifyPassword(passwordReq.OldPassword, user.Password); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Old password is incorrect!"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Old password is incorrect!"})
 		return
 	}
 
 	user.Password = passwordReq.NewPassword
 
 	if err := user.HashPassword(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"user.HashPassword": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to hash password", "details": err.Error()})
 		return
 	}
 
 	if err := user.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"user.Update": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update user", "details": err.Error()})
 		return
 	}
 
@@ -384,29 +384,29 @@ func PromoteToHost(c *gin.Context) {
 	var promoteReq promoteRequest
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Customer ID is required", "message": "Please provide the customer ID"})
 		return
 	}
 
 	user, err := models.GetUserById(id)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found", "message": "User with the provided ID does not exist"})
 		return
 	}
 
 	if user.Role != "customer" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Only customer can be promoted to host"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User Role", "message": "Only customers can be promoted to hosts"})
 		return
 	}
 
 	if err := c.ShouldBindJSON(&promoteReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	if err := passHelper.VerifyPassword(promoteReq.Password, user.Password); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Passwords do not match"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Password Verification Failed", "message": "Incorrect password!"})
 		return
 	}
 
@@ -416,7 +416,7 @@ func PromoteToHost(c *gin.Context) {
 	user.BankAccount = promoteReq.BankAccount
 
 	if err := user.Update(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update user: " + err.Error()})
 		return
 	}
 

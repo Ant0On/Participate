@@ -26,7 +26,7 @@ func ChangeRoomReservationState(c *gin.Context) {
 }
 
 func GetCurrentRoomReservations(c *gin.Context) {
-	var pendingReservations []DTO.ReservationRoomWithOffer
+	var currentReservations []DTO.ReservationRoomWithOffer
 	selectQuery := "reservation_room.id as reservation_id, reservation_room.date_from," +
 		" reservation_room.date_to, room.capacity, accommodation.price_per_day as price_per_day," +
 		" room.room_name as name, reservation_room.reservation_state, room.id as room_id"
@@ -35,7 +35,7 @@ func GetCurrentRoomReservations(c *gin.Context) {
 		reservationTableName: "reservation_room",
 		offerID:              "room_id",
 		model:                &models.ReservationRoom{},
-		dto:                  &pendingReservations,
+		dto:                  &currentReservations,
 		selectQuery:          selectQuery,
 		condition:            utils.CurrentWhereCondition,
 		userRole:             "host",

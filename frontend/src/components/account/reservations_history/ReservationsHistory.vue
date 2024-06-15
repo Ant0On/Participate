@@ -111,7 +111,6 @@ async function loadOffers(generator, offerList, done) {
 }
 
 async function rateReservation(reservation, type) {
-  console.log(reservation)
   await fetchWrapper.post(`/api/customer/offer/${type}/${reservation.reservationId}/rate`, {
     Count: reservation.ratingId
   });

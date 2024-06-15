@@ -47,7 +47,7 @@ var RoomFacilitiesList = []RoomFacility{
 
 func (rf *RoomFacility) save() error {
 	if err := DB.Create(&rf).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to save room facility: %w", err)
 	}
 	return nil
 }
@@ -55,7 +55,7 @@ func (rf *RoomFacility) save() error {
 func AddRoomFacilities() error {
 	for _, facility := range RoomFacilitiesList {
 		if err := facility.save(); err != nil {
-			return fmt.Errorf("country.Save: %w", err)
+			return fmt.Errorf("failed to add room facility: %w", err)
 		}
 	}
 	return nil
@@ -65,7 +65,7 @@ func GetAllRoomFacilities() ([]RoomFacility, error) {
 	var roomFacilities []RoomFacility
 
 	if err := DB.Order("name").Find(&roomFacilities).Error; err != nil {
-		return nil, fmt.Errorf("DB.Order().Find(): %w", err)
+		return nil, fmt.Errorf("failed to retrieve all room facilities: %w", err)
 	}
 	return roomFacilities, nil
 }

@@ -53,7 +53,7 @@ func UpdateAccommodation(c *gin.Context) {
 	var inputAccommodation models.Accommodation
 
 	if err := c.ShouldBindJSON(&inputAccommodation); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Validation failed: " + err.Error()})
 		return
 	}
 
@@ -61,13 +61,13 @@ func UpdateAccommodation(c *gin.Context) {
 	if err := models.DB.Preload("Rooms.RoomFacilities").
 		Preload("GeneralFacilities").
 		First(&existingAccommodation, accommodationID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Accommodation not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found", "message": "Accommodation not found: " + err.Error()})
 		return
 	}
 
 	tx := models.DB.Begin()
 	if tx.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to start transaction"})
 		return
 	}
 
@@ -75,7 +75,7 @@ func UpdateAccommodation(c *gin.Context) {
 	if err := models.DB.Where("name = ? AND country_id = ?", inputAccommodation.Town.Name, inputAccommodation.Town.CountryID).First(&town).Error; err != nil {
 		town = inputAccommodation.Town
 		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to create or find town: " + err.Error()})
 			return
 		}
 	}
@@ -85,13 +85,13 @@ func UpdateAccommodation(c *gin.Context) {
 
 	if err := tx.Model(&existingAccommodation).Updates(inputAccommodation).Error; err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update activity"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update accommodation: " + err.Error()})
 		return
 	}
 
 	if err := tx.Model(&existingAccommodation).Association("GeneralFacilities").Clear(); err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing general facilities"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to clear existing general facilities: " + err.Error()})
 		return
 	}
 
@@ -99,12 +99,12 @@ func UpdateAccommodation(c *gin.Context) {
 		var existingFacility models.GeneralFacility
 		if err := tx.Where("name = ?", facility.Name).First(&existingFacility).Error; err != nil {
 			tx.Rollback()
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to fetch general facilities: " + err.Error()})
 			return
 		}
 		if err := tx.Model(&existingAccommodation).Association("GeneralFacilities").Append(&existingFacility); err != nil {
 			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to append general facilities: " + err.Error()})
 			return
 		}
 	}
@@ -114,43 +114,43 @@ func UpdateAccommodation(c *gin.Context) {
 		if err := tx.Where("id = ?", room.ID).First(&existingRoom).Error; err != nil {
 			if err := tx.Create(&room).Error; err != nil {
 				tx.Rollback()
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create room"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to create room: " + err.Error()})
 				return
 			}
 			if err := tx.Where("id = ?", room.ID).First(&existingRoom).Error; err != nil {
 				tx.Rollback()
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to re-fetch newly created room"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to re-fetch newly created room: " + err.Error()})
 				return
 			}
 		} else {
 			if err := tx.Model(&existingRoom).Updates(room).Error; err != nil {
 				tx.Rollback()
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update room"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update room: " + err.Error()})
 				return
 			}
 		}
 		if err := tx.Model(&existingRoom).Association("RoomFacilities").Clear(); err != nil {
 			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear existing room facilities"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to clear existing room facilities: " + err.Error()})
 			return
 		}
 		for _, facility := range room.RoomFacilities {
 			var existingFacility models.RoomFacility
 			if err := tx.Where("name = ?", facility.Name).First(&existingFacility).Error; err != nil {
 				tx.Rollback()
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 				return
 			}
 			if err := tx.Model(&existingRoom).Association("RoomFacilities").Append(&existingFacility); err != nil {
 				tx.Rollback()
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": err.Error()})
 				return
 			}
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to commit transaction"})
 		return
 	}
 
@@ -162,13 +162,13 @@ func AddGeneralFacilities(c *gin.Context) {
 	var req utils.FacilitiesRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	accommodation, err := models.GetAccommodationById(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
@@ -177,17 +177,16 @@ func AddGeneralFacilities(c *gin.Context) {
 	for i := 0; i < len(req.Facilities); i++ {
 		facility, err := models.GetFacilityByName(req.Facilities[i])
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"models.GetFacilityByName": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": err.Error()})
 			return
 		}
 		facilities = append(facilities, facility)
 	}
 	err = accommodation.AddFacilities(facilities)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"accommodation.UpdateFacilities: ": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update facilities for accommodation: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Facilities added to accommodation successful", "data": id})
-
+	c.JSON(http.StatusOK, gin.H{"message": "Facilities added to accommodation successfully", "data": id})
 }

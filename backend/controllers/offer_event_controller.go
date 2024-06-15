@@ -52,13 +52,13 @@ func UpdateEvent(c *gin.Context) {
 	var inputEvent models.Event
 
 	if err := c.ShouldBindJSON(&inputEvent); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
 
 	var existingEvent models.Event
 	if err := models.DB.First(&existingEvent, eventID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found", "message": "Event not found"})
 		return
 	}
 
@@ -66,7 +66,7 @@ func UpdateEvent(c *gin.Context) {
 	if err := models.DB.Where("name = ? AND country_id = ?", inputEvent.Town.Name, inputEvent.Town.CountryID).First(&town).Error; err != nil {
 		town = inputEvent.Town
 		if err := models.DB.FirstOrCreate(&town, models.Town{Name: town.Name, CountryID: town.CountryID}).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or find town"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to create or find town"})
 			return
 		}
 	}
@@ -75,7 +75,7 @@ func UpdateEvent(c *gin.Context) {
 	inputEvent.TownID = town.ID
 
 	if err := models.DB.Model(&existingEvent).Updates(inputEvent).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update event"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to update event"})
 		return
 	}
 

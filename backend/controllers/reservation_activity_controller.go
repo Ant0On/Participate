@@ -26,9 +26,9 @@ func ChangeActivityReservationState(c *gin.Context) {
 }
 
 func GetCurrentActivityReservations(c *gin.Context) {
-	var pendingReservations []DTO.ReservationActivityWithOffer
+	var currentReservations []DTO.ReservationActivityWithOffer
 	selectQuery := "reservation_activity.id as reservation_id, reservation_activity.date, activity.capacity," +
-		" reservation_activity.rating_id, activity.title, activity.price, activity.skill_level as skill, activity.activity_type as type," +
+		" reservation_activity.rating_id, activity.title, activity.price, activity.skill_level as skill, activity.activity_type," +
 		" town.name as town_name, country.country_name as country_name, reservation_activity.reservation_state, activity.id as activity_id"
 
 	GetDTOReservation(c, ReservationQueryParameters{
@@ -36,16 +36,16 @@ func GetCurrentActivityReservations(c *gin.Context) {
 		reservationTableName: "reservation_activity",
 		offerID:              "activity_id",
 		model:                &models.ReservationActivity{},
-		dto:                  &pendingReservations,
+		dto:                  &currentReservations,
 		selectQuery:          selectQuery,
 		condition:            utils.CurrentWhereCondition,
 		userRole:             "host",
 	})
 }
 func GetReservationsActivityHistory(c *gin.Context) {
-	var pendingReservations []DTO.ReservationActivityWithOffer
+	var reservationsHistory []DTO.ReservationActivityWithOffer
 	selectQuery := "reservation_activity.id as reservation_id, reservation_activity.date, activity.capacity," +
-		" reservation_activity.rating_id, activity.title, activity.price, activity.skill_level as skill, activity.activity_type as type," +
+		" reservation_activity.rating_id, activity.title, activity.price, activity.skill_level as skill, activity.activity_type," +
 		" town.name as town_name, country.country_name as country_name, reservation_activity.reservation_state, activity.id as activity_id"
 
 	GetDTOReservation(c, ReservationQueryParameters{
@@ -53,7 +53,7 @@ func GetReservationsActivityHistory(c *gin.Context) {
 		reservationTableName: "reservation_activity",
 		offerID:              "activity_id",
 		model:                &models.ReservationActivity{},
-		dto:                  &pendingReservations,
+		dto:                  &reservationsHistory,
 		selectQuery:          selectQuery,
 		condition:            utils.HistoryWhereCondition,
 		userRole:             "customer",

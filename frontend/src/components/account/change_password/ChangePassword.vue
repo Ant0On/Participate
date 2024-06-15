@@ -26,7 +26,6 @@ const passwordData = ref({
 async function onSubmit() {
   try {
     await schemaPassword.validate(passwordData.value)
-    isSubmitMode.value = false;
 
     if (passwordData.value.OldPassword) {
       await fetchWrapper.put(`/api/customer/${user.value.ID}/change/password`, {
@@ -35,6 +34,7 @@ async function onSubmit() {
         confirm_password: passwordData.value.ConfirmNewPassword.trim(),
       });
     }
+    isSubmitMode.value = false;
     passwordData.value.OldPassword = '';
     passwordData.value.NewPassword = '';
     passwordData.value.ConfirmNewPassword = '';
@@ -44,7 +44,12 @@ async function onSubmit() {
     user.Password = passwordData.value.NewPassword;
     window.location.reload();
   } catch (error) {
-    errors.apiError = formatErrors(error.errors);
+    if (typeof error === 'string') {
+      errors.apiError = "Incorrect data! Please check the following errors: " + error
+    }
+    else {
+      errors.apiError = formatErrors(error.errors);
+    }
   }
 }
 
@@ -87,7 +92,7 @@ const schemaPassword = Yup.object().shape({
 <template>
   <div class="account_data_component">
     <div class="user_data">
-      <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
+      <v-alert v-if="errors.apiError" text tile="Password error" color="error">{{ errors.apiError }}</v-alert>
       <div class="user_fields">
         <div class="customer_fields">
           <PasswordInput :label-text="'Old Password'" :isActive="isSubmitMode" v-model="passwordData.OldPassword"
@@ -154,13 +159,6 @@ div.customer_fields {
   padding: 2% 5%;
 }
 
-div.line {
-  display: flex;
-  flex-direction: row;
-  color: black;
-  border-right: 1px solid;
-}
-
 div.buttons {
   align-self: flex-end;
   display: flex;
@@ -191,14 +189,6 @@ div.buttons {
 
 .button_cancel {
   background-color: rgba(255, 0, 0, 60%);
-}
-
-div.errors {
-  font-family: "Sarabun", Helvetica;
-  border: 1px solid #ff0000;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
 }
 
 p.error-message {

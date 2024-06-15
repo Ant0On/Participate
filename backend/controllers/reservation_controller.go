@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -11,80 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
-
-func CreateReservation(c *gin.Context, reservation models.ReservationOperations) {
-	if err := c.ShouldBindJSON(reservation); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"c.ShouldBind: ": err.Error()})
-		return
-	}
-
-	if err := reservation.ChangeCapacity(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"reservation.ChangeCapacity: ": err.Error()})
-		return
-	}
-
-	if err := reservation.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"offer.Save: ": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "reservation created successfully!", "reservation": reservation})
-}
-
-func GetReservationById(c *gin.Context, getByID func(string) (models.ReservationOperations, error)) {
-	id := c.Params.ByName("id")
-
-	reservation, err := getByID(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"models.getReservationByID:": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": reservation})
-}
-
-func GetReservationByState(c *gin.Context, getByState func(string) ([]models.ReservationOperations, error)) {
-	state := c.Param("state")
-
-	reservation, err := getByState(state)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"models.getReservationByState": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": reservation})
-}
-
-func ChangeReservationState(c *gin.Context, getByID func(string) (models.ReservationOperations, error)) {
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
-		return
-	}
-
-	state := c.Param("state")
-	if state == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "state is required"})
-		return
-	}
-
-	if !utils.CheckState(state) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong state"})
-		return
-	}
-
-	reservation, err := getByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error: ": err.Error()})
-		return
-	}
-
-	if err := reservation.ChangeState(state); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "success", "reservation": reservation})
-}
 
 type ReservationQueryParameters struct {
 	offerTableName       string
@@ -97,11 +24,86 @@ type ReservationQueryParameters struct {
 	userRole             string
 }
 
+func CreateReservation(c *gin.Context, reservation models.ReservationOperations) {
+	if err := c.ShouldBindJSON(reservation); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
+		return
+	}
+
+	if err := reservation.ChangeCapacity(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to change capacity: " + err.Error()})
+		return
+	}
+
+	if err := reservation.Save(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to save reservation: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Reservation created successfully!", "reservation": reservation})
+}
+
+func GetReservationById(c *gin.Context, getByID func(string) (models.ReservationOperations, error)) {
+	id := c.Param("id")
+
+	reservation, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to get reservation by ID: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": reservation})
+}
+
+func GetReservationByState(c *gin.Context, getByState func(string) ([]models.ReservationOperations, error)) {
+	state := c.Param("state")
+
+	reservation, err := getByState(state)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Failed to get reservation by state: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": reservation})
+}
+
+func ChangeReservationState(c *gin.Context, getByID func(string) (models.ReservationOperations, error)) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "ID is required"})
+		return
+	}
+
+	state := c.Param("state")
+	if state == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "State is required"})
+		return
+	}
+
+	if !utils.CheckState(state) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "Wrong state"})
+		return
+	}
+
+	reservation, err := getByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found", "message": "Failed to get reservation by ID: " + err.Error()})
+		return
+	}
+
+	if err := reservation.ChangeState(state); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error", "message": "Failed to change reservation state: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Success", "reservation": reservation})
+}
+
 func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 	userID := c.Param("id")
 
 	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "app_user ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": "App user ID is required"})
 		return
 	}
 
@@ -149,9 +151,13 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 		Find(parameters.dto)
 
 	if err := result.Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request", "message": err.Error()})
 		return
 	}
+
+	var totalCount int64
+	models.DB.Model(parameters.model).Joins(joinCondition).Where(parameters.condition(userID)).Count(&totalCount)
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pageSizeInt)))
 
 	if result.RowsAffected == 0 {
 		c.JSON(http.StatusNoContent, gin.H{"message": "No reservations found"})
@@ -159,9 +165,10 @@ func GetDTOReservation(c *gin.Context, parameters ReservationQueryParameters) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "reservations fetched successfully",
-		"data":      parameters.dto,
-		"page":      pageInt,
-		"page_size": pageSizeInt,
+		"message":     "Reservations fetched successfully",
+		"data":        parameters.dto,
+		"page":        pageInt,
+		"page_size":   pageSizeInt,
+		"total_pages": totalPages,
 	})
 }

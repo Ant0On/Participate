@@ -18,7 +18,7 @@ type Town struct {
 
 func (t *Town) Save() error {
 	if err := DB.Create(t).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to create town: %w", err)
 	}
 
 	return nil

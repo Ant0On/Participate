@@ -13,9 +13,8 @@ import (
 
 func GenerateToken(id uint, email, role string) (string, error) {
 	tokenLifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
-
 	if err != nil {
-		return "", fmt.Errorf("strconv.Atoi: %w", err)
+		return "", fmt.Errorf("failed to convert token lifespan to integer: %w", err)
 	}
 
 	claims := jwt.MapClaims{}
@@ -29,18 +28,6 @@ func GenerateToken(id uint, email, role string) (string, error) {
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
 }
 
-func IsTokenValid(c *gin.Context, role string) error {
-	token, err := GetToken(c)
-	if err != nil {
-		return fmt.Errorf("IsTokenValid: %w", err)
-	}
-	extractedRole, err := extractRole(token)
-	if extractedRole != role {
-		return fmt.Errorf("unauthorized role - expected: %s, got: %s", role, extractedRole)
-	}
-	return nil
-}
-
 func GetToken(c *gin.Context) (*jwt.Token, error) {
 	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -50,7 +37,7 @@ func GetToken(c *gin.Context) (*jwt.Token, error) {
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("jwt.Parse: %w", err)
+		return nil, fmt.Errorf("failed to parse JWT token: %w", err)
 	}
 	return token, nil
 }
@@ -65,26 +52,4 @@ func extractToken(c *gin.Context) string {
 		return strings.Split(bearerToken, " ")[1]
 	}
 	return ""
-}
-
-func extractRole(token *jwt.Token) (string, error) {
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		uRole := fmt.Sprintf("%s", claims["role"])
-		return uRole, nil
-	}
-	return "", nil
-}
-
-func ExtractTokenEmail(c *gin.Context) (string, error) {
-	token, err := GetToken(c)
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		uEmail := fmt.Sprintf("%s", claims["email"])
-		if err != nil {
-			return "", fmt.Errorf("strconv.ParseUint: %w", err)
-		}
-		return uEmail, nil
-	}
-	return "", nil
 }

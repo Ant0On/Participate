@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"backend/middlewares"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterRoutes(r *gin.Engine) {
 	public := r.Group("/api")
+	public.GET("/check-token", middlewares.TokenCheckAuthMiddleware(), utils.CheckToken)
 	public.POST("/login", Login)
 	public.POST("/register", Register)
 	public.GET("/host/:id", GetHostByID)
@@ -19,6 +21,7 @@ func RegisterRoutes(r *gin.Engine) {
 	public.GET("/offers/event/:id", GetEventByID)
 
 	host := r.Group("/api/host")
+	host.Use(middlewares.JwtAuthMiddleware("host"))
 	host.PUT("/:id/change/description", ChangeDescription)
 	host.PUT("/:id/change/phone_number", ChangePhoneNumber)
 	host.PUT("/:id/change/bank_account", ChangeBankAccount)
@@ -69,16 +72,13 @@ func RegisterRoutes(r *gin.Engine) {
 	country.GET("/get/all", GetAllCountries)
 
 	generalFacility := r.Group("/api/general_facility")
-	generalFacility.POST("/get", GetAllGeneralFacilities)
+	generalFacility.GET("/get", GetAllGeneralFacilities)
 
 	roomFacility := r.Group("/api/room_facility")
-	roomFacility.POST("/get", GetAllRoomFacilities)
+	roomFacility.GET("/get", GetAllRoomFacilities)
 
 	equipment := r.Group("/api/equipment")
-	equipment.POST("/get", GetAllEquipment)
-
-	payment := r.Group("/api/payment")
-	payment.GET("/get", GetAllPayments)
+	equipment.GET("/get", GetAllEquipment)
 
 	town := r.Group("/api/town")
 	town.Use(middlewares.JwtAuthMiddleware("host"))
@@ -111,7 +111,6 @@ func RegisterRoutes(r *gin.Engine) {
 	room := r.Group("/api/host/room")
 	room.Use(middlewares.JwtAuthMiddleware("host"))
 	room.POST("/create", CreateRooms)
-	room.GET("/:id/get", GetRoomsForAccommodation)
 	room.GET("/:id/reservations", GetCurrentRoomReservations)
 	room.DELETE("/delete/:id", DeleteRoom)
 }

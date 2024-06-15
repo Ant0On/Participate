@@ -37,7 +37,7 @@ const newActivity = ref({
   price: '',
   activityType: '',
   dateRange: [],
-  equipment: '',
+  equipment: [],
 })
 
 const newEvent = ref({
@@ -63,6 +63,7 @@ const errors = reactive({
   country: '',
   image: '',
   dateRange: '',
+  roomInfo: '',
 });
 
 const userStore = useAuthStore();
@@ -77,29 +78,19 @@ const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'Activit
 const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'Event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
 const isRoomInfoFilled = computed(() => checkIfRoomInfoIsFilled())
-const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '')
+const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '' && newOffer.value.city.length > 1)
 const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
 const addedNewOffer = ref(false)
 const countries = ref([])
 const offerTypes = ['Accommodation', 'Activity', 'Event']
 const accommodationTypes = ['Hotel', 'Hostel', 'Apartment', 'Villa', 'Guesthouse']
-const generalFacilities = ["Swimming Pool", "Gym", "Spa", "Restaurant", "Bar", "Lounge", "Conference Room",
-  "Business Center", "WiFi", "Parking", "24-Hour Front Desk", "Fitness Center", "Laundry Service", "Room Service",
-  "Concierge Service", "Outdoor Pool", "Children's Playground", "Tennis Court", "Library", "Garden", "Sauna",
-  "Jacuzzi", "Billiards Room", "Cinema", "Karaoke Room", "Bowling Alley", "BBQ Area", "Shuttle Service"]
-const roomFacilities = ["Television", "Air Conditioning", "Mini Fridge", "Safe", "Coffee Maker", "Microwave",
-  "Kettle", "Iron and Ironing Board", "Hair Dryer", "Desk", "Ocean View", "Mountain View", "Balcony", "Bathtub",
-  "Shower", "WiFi", "Room Service", "Breakfast Included", "In-Room Safe", "Telephone", "DVD Player", "Alarm Clock",
-  "Robes", "Slippers", "Toiletries", "Work Desk", "Sofa Bed", "Fireplace", "Refrigerator", "Dining Area"
-];
+const generalFacilities = ref([])
+const roomFacilities = ref([])
+const equipmentList = ref([])
 
 const skillLevels = ['Beginner', 'Intermediate', 'Advanced']
 const activityTypes = ['Indoor', 'Outdoor']
-const equipmentList = ["Life Jacket", "Kayak", "Paddle", "Helmet", "Snowboard", "Sled", "Snowshoes", "Tent",
-  "Sleeping Bag", "Backpack", "Hiking Boots", "Compass", "Map", "Binoculars", "Flashlight", "First Aid Kit",
-  "Water Bottle", "Climbing Harness", "Climbing Rope", "Carabiners", "Rock Climbing Shoes", "Fishing Rod",
-  "Bait", "Camera", "Swimsuit", "Snorkel Gear", "Tennis Racket", "Golf Clubs", "Bicycle"];
 const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
 
 async function getCountryId(countryName) {
@@ -170,7 +161,6 @@ async function handleActivityOffer(townID, imageFiles) {
     description: newOffer.value.description,
     capacity: newOffer.value.capacity,
     town_id: townID,
-    country_id: 1,
     Name: newOffer.value.city,
     CountryID: await getCountryId(newOffer.value.country),
     user_id: user.ID,
@@ -277,15 +267,62 @@ function checkIfOfferInfoIsFilled() {
   errors.offerInfo = '';
   errors.dateRange = '';
 
-  if (newOffer.value.title === '' || newOffer.value.description === '' || newOffer.value.capacity === '') {
+  if (newOffer.value.title === '' ||
+      newOffer.value.description === '' ||
+      newOffer.value.capacity === '' ||
+      newOffer.value.offerType === '' ||
+      newOffer.value.offerType === null) {
     errors.offerInfo = 'Please fill out all required offer information.';
     return false;
+  }
+
+  if (newOffer.value.title.length < 2 || newOffer.value.title.length > 100) {
+    errors.offerInfo = 'Title must be between 2 and 100 characters.';
+    return false;
+  }
+
+  if (newOffer.value.description.length < 30 || newOffer.value.description.length > 300) {
+    errors.offerInfo = 'Description must be between 30 and 300 characters.';
+    return false;
+  }
+
+  if (isOfferTypeAccommodation.value) {
+    if (newAccommodation.value.numberOfRooms === ''
+        || newAccommodation.value.accommodationType === ''
+        || newAccommodation.value.accommodationType === null
+        || newAccommodation.value.pricePerDay === '') {
+      errors.offerInfo = 'Please fill out all required accommodation information.';
+      return false;
+    }
+  }
+
+  if (isAccommodationTypeWithSelectableRooms.value) {
+    let roomValues = newRoom.value
+    if (
+        (roomValues.number === '' ||
+        roomValues.name === '' ||
+        roomValues.description === '' ||
+        roomValues.capacity === '' ||
+        roomValues.area === '') && rooms.value.length === 0
+    ) {
+      errors.offerInfo = 'Fill all room information';
+      return false;
+    }
+    if (rooms.value.length === 0) {
+      errors.offerInfo = 'Add at least one room';
+      return false;
+    }
   }
 
   const now = new Date();
 
   if (isOfferTypeActivity.value) {
-    if (newActivity.value.skillLevel === '' || newActivity.value.price === '' || newActivity.value.activityType === '' || newActivity.value.dateRange.length === 0) {
+    if (newActivity.value.skillLevel === '' ||
+        newActivity.value.skillLevel === null ||
+        newActivity.value.price === '' ||
+        newActivity.value.activityType === '' ||
+        newActivity.value.activityType === null ||
+        newActivity.value.dateRange.length === 0) {
       errors.offerInfo = 'Please fill out all required activity information.';
       return false;
     }
@@ -308,7 +345,12 @@ function checkIfOfferInfoIsFilled() {
   }
 
   if (isOfferTypeEvent.value) {
-    if (newEvent.value.dateFrom === '' || newEvent.value.dateTo === '' || newEvent.value.price === '' || newEvent.value.eventType === '') {
+    if (newEvent.value.dateFrom === '' ||
+        newEvent.value.dateTo === '' ||
+        newEvent.value.price === '' ||
+        newEvent.value.eventType === '' ||
+        newEvent.value.eventType === null
+    ) {
       errors.offerInfo = 'Please fill out all required event information.';
       return false;
     }
@@ -331,8 +373,13 @@ function checkIfRoomInfoIsFilled() {
   let accommodationValues = newAccommodation.value
   let roomValues = newRoom.value
   if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
-    return
+    return true;
   }
+
+  if (rooms.value.length >= Number(newAccommodation.value.numberOfRooms)) {
+    return false;
+  }
+
   if (
       roomValues.number === '' ||
       roomValues.name === '' ||
@@ -342,7 +389,6 @@ function checkIfRoomInfoIsFilled() {
   ) {
     return false;
   } else {
-    errors.offerInfo = '';
     return true;
   }
 }
@@ -386,8 +432,14 @@ function dataURLsToFiles(dataURLs, fileNameBase) {
 }
 
 onMounted(async () => {
-  const response = await fetchWrapper.get('/api/country/get/all')
-  countries.value = response.data.map(country => country.CountryName)
+  const countryData = await fetchWrapper.get('/api/country/get/all')
+  countries.value = countryData.data.map(country => country.CountryName)
+  const generalFacilitiesData = await fetchWrapper.get('/api/general_facility/get')
+  generalFacilities.value = generalFacilitiesData.data.map(facility => facility.Name)
+  const roomFacilitiesData = await fetchWrapper.get('/api/room_facility/get')
+  roomFacilities.value = roomFacilitiesData.data.map(facility => facility.Name)
+  const equipmentData = await fetchWrapper.get('/api/equipment/get')
+  equipmentList.value = equipmentData.data.map(equipment => equipment.Name)
 })
 </script>
 
@@ -412,10 +464,9 @@ onMounted(async () => {
         <v-textarea v-model="newOffer.description" label="Description"
                     :rules="[
                         value=> !!value,
-                        value => value.length > 30 || 'Description to short',
+                        value => value.length > 30 || 'Description too short',
                         value => value.length < 300 || 'Description too long'
          ]"
-                    clearable
                     class="w-100"
                     counter
         >
@@ -435,21 +486,38 @@ onMounted(async () => {
                            placeholder="Facilities" :items="generalFacilities"/>
           <div v-if="isAccommodationTypeWithSelectableRooms" class="w-100 room-info-container">
             <p class="new_offer_text">Add rooms to your accommodation</p>
-            <v-text-field v-model="newRoom.number" label="Room number" clearable placeholder="Number" class="w-100"
-                          type="number"/>
-            <v-text-field v-model="newRoom.name" label="Room name" clearable placeholder="Name" class="w-100"/>
-            <v-textarea v-model="newRoom.description" label="Room description" clearable placeholder="Description"
-                        class="w-100"/>
-            <v-text-field v-model="newRoom.capacity" label="Room capacity" clearable placeholder="Capacity"
-                          class="w-100" type="number"/>
-            <v-text-field v-model="newRoom.area" label="Room area in m2" clearable placeholder="Area"
-                          class="w-100" type="number"/>
+            <v-text-field v-model="newRoom.number" label="Room number" placeholder="Number" class="w-100"
+                          :rules="[
+                        value=> !!value]" type="number"/>
+            <v-text-field v-model="newRoom.name" label="Room name" placeholder="Name" class="w-100"
+                          :rules="[
+                        value=> !!value,
+                        value => value.length > 3 || 'Name too short',
+                        value => value.length < 300 || 'Name too long'
+         ]"/>
+            <v-textarea v-model="newRoom.description" label="Room description" placeholder="Description"
+                        class="w-100" :rules="[
+                        value=> !!value,
+                        value => value.length > 10 || 'Description too short',
+                        value => value.length < 300 || 'Description too long'
+         ]"/>
+            <v-text-field v-model="newRoom.capacity" label="Room capacity" placeholder="Capacity"
+                          class="w-100" type="number" :rules="[
+                        value=> !!value]"/>
+            <v-text-field v-model="newRoom.area" label="Room area in m2" placeholder="Area"
+                          class="w-100" type="number" :rules="[
+                        value=> !!value]"/>
             <v-select v-model="newRoom.roomFacilities" label="Select room facilities"
                       class="w-100" clearable chips multiple :items="roomFacilities"/>
-            <button :disabled="!isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }"
-                    @click="onAddRoom">
-              Add room
-            </button>
+            <div class="d-flex flex-column align-center justify-center">
+              <v-btn :disabled="rooms.length >= Number(newAccommodation.numberOfRooms)"
+                     @click="onAddRoom">
+                Add room
+              </v-btn>
+              <div class="mt-1" v-if="rooms.length >= Number(newAccommodation.numberOfRooms)">
+                You have reached the maximum number of rooms!
+              </div>
+            </div>
           </div>
         </div>
         <div v-if="isOfferTypeActivity" class="w-100">
@@ -499,6 +567,7 @@ onMounted(async () => {
         <div class="errors" v-if="errors.apiError">{{ errors.apiError }}</div>
         <div class="errors" v-if="errors.offerType">{{ errors.offerType }}</div>
         <div class="errors" v-if="errors.offerInfo">{{ errors.offerInfo }}</div>
+        <div class="errors" v-if="errors.offerInfo">{{ errors.roomInfo }}</div>
         <div class="errors" v-if="errors.country">{{ errors.country }}</div>
         <div class="errors" v-if="errors.image">{{ errors.image }}</div>
         <div class="errors" v-if="errors.dateRange">{{ errors.dateRange }}</div>

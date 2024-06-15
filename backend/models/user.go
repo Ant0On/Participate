@@ -25,16 +25,17 @@ type User struct {
 	ImagePath                 string `gorm:"default:images/users/default_image.png" form:"image_path" binding:"omitempty,url"`
 	Password                  string `gorm:"size:100;not null" form:"password" binding:"required,min=8"`
 	PasswordConfirmation      string `gorm:"-" form:"password_confirmation" binding:"required,eqfield=Password"`
-	Role                      string `gorm:"size:20;not null;default:'customer'" form:"-" validate:"required,oneof=customer host"`
+	Role                      string `gorm:"size:20;not null;default:'customer'" form:"-" binding:"required,oneof=customer host"`
 	Description               string `gorm:"not null;" form:"description"`
-	PhoneNumber               string `gorm:"size:12;not null" form:"phone_number"`
-	BankAccount               string `gorm:"size:31;not null" form:"bank_account"`
+	PhoneNumber               string `gorm:"size:12;not null;unique" form:"phone_number"`
+	BankAccount               string `gorm:"size:31;not null;unique" form:"bank_account"`
 	Accommodations            []Accommodation
 	Activities                []Activity
 	Events                    []Event
 	ReservationsAccommodation []ReservationAccommodation
 	ReservationsActivity      []ReservationActivity
 	ReservationsEvent         []ReservationEvent
+	ReservationsRoom          []ReservationRoom
 }
 
 func (*User) TableName() string {
@@ -46,9 +47,9 @@ func GetUserByEmail(email string) (*User, error) {
 
 	if err := DB.Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("user not found: %w", err)
+			return nil, fmt.Errorf("user with email %s not found", email)
 		}
-		return nil, fmt.Errorf("DB.Model.Where.Scan: %w", err)
+		return nil, fmt.Errorf("failed to get user by email")
 	}
 
 	return &u, nil
@@ -58,31 +59,30 @@ func GetUserById(id string) (*User, error) {
 	var u User
 	if err := DB.Model(&User{}).Where("id = ?", id).Scan(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("user not found: %w", err)
+			return nil, fmt.Errorf("user with ID %s not found: %w", id, err)
 		}
-		return nil, fmt.Errorf("DB.Model.Where.Scan: %w", err)
+		return nil, fmt.Errorf("failed to get user by ID: %w", err)
 	}
 	return &u, nil
 }
 
 func (u *User) Save() error {
 	if err := DB.Create(&u).Error; err != nil {
-		return fmt.Errorf("DB.Create: %w", err)
+		return fmt.Errorf("failed to save user: %w", err)
 	}
-
 	return nil
 }
 
 func (u *User) Update() error {
 	if err := DB.Save(&u).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to update user: %w", err)
 	}
 	return nil
 }
 
 func (u *User) Delete() error {
 	if err := DB.Delete(&u).Error; err != nil {
-		return err
+		return fmt.Errorf("failed to delete user: %w", err)
 	}
 	return nil
 }
@@ -90,16 +90,16 @@ func (u *User) Delete() error {
 func LoginCheck(email, password string) (string, *User, error) {
 	user, err := GetUserByEmail(email)
 	if err != nil {
-		return "", nil, fmt.Errorf("GetUserByEmail: %w", err)
+		return "", nil, fmt.Errorf("user with given email does not exist")
 	}
 
 	if err := passHelper.VerifyPassword(password, user.Password); err != nil {
-		return "", nil, fmt.Errorf("VerifyPassword: wrong password")
+		return "", nil, fmt.Errorf("wrong password")
 	}
 
 	t, err := token.GenerateToken(user.ID, email, user.Role)
 	if err != nil {
-		return "", nil, fmt.Errorf("token.GenerateToken: %w", err)
+		return "", nil, fmt.Errorf("failed to generate token")
 	}
 
 	return t, user, nil
@@ -108,7 +108,7 @@ func LoginCheck(email, password string) (string, *User, error) {
 func (u *User) HashPassword() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
+		return fmt.Errorf("failed to hash password")
 	}
 	u.Password = string(hashedPassword)
 
