@@ -373,12 +373,10 @@ function checkIfRoomInfoIsFilled() {
   let accommodationValues = newAccommodation.value
   let roomValues = newRoom.value
   if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
-    return
+    return true;
   }
 
   if (rooms.value.length >= Number(newAccommodation.value.numberOfRooms)) {
-    // TODO make it log, the error doesn't appear anywhere
-    errors.roomInfo = 'You have reached the maximum number of rooms';
     return false;
   }
 
@@ -511,10 +509,15 @@ onMounted(async () => {
                         value=> !!value]"/>
             <v-select v-model="newRoom.roomFacilities" label="Select room facilities"
                       class="w-100" clearable chips multiple :items="roomFacilities"/>
-            <button :disabled="!isRoomInfoFilled" class="button_basic" :class="{ 'disabled': !isRoomInfoFilled }"
-                    @click="onAddRoom">
-              Add room
-            </button>
+            <div class="d-flex flex-column align-center justify-center">
+              <v-btn :disabled="rooms.length >= Number(newAccommodation.numberOfRooms)"
+                     @click="onAddRoom">
+                Add room
+              </v-btn>
+              <div class="mt-1" v-if="rooms.length >= Number(newAccommodation.numberOfRooms)">
+                You have reached the maximum number of rooms!
+              </div>
+            </div>
           </div>
         </div>
         <div v-if="isOfferTypeActivity" class="w-100">
