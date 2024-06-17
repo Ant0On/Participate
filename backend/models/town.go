@@ -8,7 +8,7 @@ import (
 
 type Town struct {
 	gorm.Model
-	Name           string `gorm:"size:50;not null" json:"name" binding:"required,min=2,max=50"`
+	Name           string `gorm:"not null" json:"name" binding:"required,min=2,max=50"`
 	Accommodations []Accommodation
 	Activities     []Activity
 	Events         []Event

@@ -19,8 +19,8 @@ type OfferOperations interface {
 }
 
 type Offer struct {
-	Title       string  `gorm:"size:100;not null" form:"title" binding:"required,min=2,max=100"`
-	Description string  `gorm:"size:300;not null" form:"description" binding:"required,min=30,max=3000"`
+	Title       string  `gorm:"not null" form:"title" binding:"required,min=2,max=100"`
+	Description string  `gorm:"not null" form:"description" binding:"required,min=30,max=3000"`
 	Capacity    int     `gorm:"not null" form:"capacity" binding:"required,gt=0"`
 	Discount    float64 `gorm:"not null;default: 0.00" form:"discount"`
 	TownID      uint    `gorm:"not null" form:"town_id"`
