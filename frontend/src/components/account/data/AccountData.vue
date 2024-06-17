@@ -226,7 +226,7 @@ function dataURLtoFile(dataURL, fileName) {
           ></v-text-field>
         </div>
         <div class="host_fields" v-if="user.Role === 'host'">
-          <v-text-field label="Description"
+          <v-textarea label="Description"
                         :disabled="!isSubmitMode"
                         :rules="[
                             (value) => !!value || 'Description is required!',
@@ -235,7 +235,7 @@ function dataURLtoFile(dataURL, fileName) {
                         clearable
                         class="w-100"
                         counter
-          ></v-text-field>
+          ></v-textarea>
           <v-text-field label="Phone number"
                         :disabled="!isSubmitMode"
                         :rules="[
