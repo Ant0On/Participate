@@ -281,8 +281,8 @@ function checkIfOfferInfoIsFilled() {
     return false;
   }
 
-  if (newOffer.value.description.length < 30 || newOffer.value.description.length > 300) {
-    errors.offerInfo = 'Description must be between 30 and 300 characters.';
+  if (newOffer.value.description.length < 30 || newOffer.value.description.length > 3000) {
+    errors.offerInfo = 'Description must be between 30 and 3000 characters.';
     return false;
   }
 
@@ -465,7 +465,7 @@ onMounted(async () => {
                     :rules="[
                         value=> !!value,
                         value => value.length > 30 || 'Description too short',
-                        value => value.length < 300 || 'Description too long'
+                        value => value.length < 3000 || 'Description too long'
          ]"
                     class="w-100"
                     counter
@@ -499,7 +499,7 @@ onMounted(async () => {
                         class="w-100" :rules="[
                         value=> !!value,
                         value => value.length > 10 || 'Description too short',
-                        value => value.length < 300 || 'Description too long'
+                        value => value.length < 3000 || 'Description too long'
          ]"/>
             <v-text-field v-model="newRoom.capacity" label="Room capacity" placeholder="Capacity"
                           class="w-100" type="number" :rules="[

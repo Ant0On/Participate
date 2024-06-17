@@ -443,7 +443,8 @@ const eventTypes = ['Conference', 'Concert', 'Festival', 'Sports event']
                         density="compact"
                         label="Description"
                         v-model="offerChange.description"
-                        :rules="[(values) => values.length > 30 || 'Description must be longer than 30!']"
+                        :rules="[(values) => values.length > 30 || 'Description must be longer than 30 characters!',
+                        (values) => values.length < 3000 || 'Description must be shorter than 3000 characters!',]"
             ></v-textarea>
           </v-card-text>
           <v-card-text v-else-if="cardPage === 'info'">
