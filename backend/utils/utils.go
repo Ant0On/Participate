@@ -29,7 +29,7 @@ type ChangePriceReq struct {
 }
 
 func HistoryWhereCondition(userID string) string {
-	return fmt.Sprintf("app_user.id = '%s' AND reservation_state in ('finished', 'accepted', 'rejected')", userID)
+	return fmt.Sprintf("app_user.id = '%s' AND reservation_state in ('finished', 'pending', 'accepted', 'rejected')", userID)
 }
 
 func CurrentWhereCondition(userID string) string {

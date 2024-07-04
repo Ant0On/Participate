@@ -77,7 +77,6 @@ const isAccommodationTypeWithSelectableRooms = computed(() =>
 const isOfferTypeActivity = computed(() => newOffer.value.offerType === 'Activity')
 const isOfferTypeEvent = computed(() => newOffer.value.offerType === 'Event')
 const isOfferInfoFilled = computed(() => checkIfOfferInfoIsFilled())
-const isRoomInfoFilled = computed(() => checkIfRoomInfoIsFilled())
 const isOfferCountryFilled = computed(() => newOffer.value.country !== '' && newOffer.value.city !== '' && newOffer.value.city.length > 1)
 const isOfferImageFilled = computed(() => newOffer.value.images.length !== 0)
 const isAddingNewOffer = ref(false)
@@ -272,7 +271,9 @@ function checkIfOfferInfoIsFilled() {
       newOffer.value.capacity === '' ||
       newOffer.value.offerType === '' ||
       newOffer.value.offerType === null) {
-    errors.offerInfo = 'Please fill out all required offer information.';
+    if (!addedNewOffer.value) {
+      errors.offerInfo = 'Please fill out all required offer information.';
+    }
     return false;
   }
 
@@ -322,7 +323,7 @@ function checkIfOfferInfoIsFilled() {
         newActivity.value.price === '' ||
         newActivity.value.activityType === '' ||
         newActivity.value.activityType === null ||
-        newActivity.value.dateRange.length === 0) {
+        ((newActivity.value.dateRange === null) || (newActivity.value.dateRange.length === 0) )) {
       errors.offerInfo = 'Please fill out all required activity information.';
       return false;
     }
@@ -367,30 +368,6 @@ function checkIfOfferInfoIsFilled() {
   }
 
   return true;
-}
-
-function checkIfRoomInfoIsFilled() {
-  let accommodationValues = newAccommodation.value
-  let roomValues = newRoom.value
-  if (accommodationValues.accommodationType === 'Villa' || accommodationValues.accommodationType === 'Apartment') {
-    return true;
-  }
-
-  if (rooms.value.length >= Number(newAccommodation.value.numberOfRooms)) {
-    return false;
-  }
-
-  if (
-      roomValues.number === '' ||
-      roomValues.name === '' ||
-      roomValues.description === '' ||
-      roomValues.capacity === '' ||
-      roomValues.area === ''
-  ) {
-    return false;
-  } else {
-    return true;
-  }
 }
 
 async function uploadImage(imageInput) {
